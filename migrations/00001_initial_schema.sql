@@ -43,12 +43,13 @@ create table public.tech_stacks (
   updated_at timestamptz default current_timestamp,
   deleted_at timestamptz default null
 );
--- +goose StatementEnd
 
 create trigger update_tech_stacks_updated_at before
 update on public.tech_stacks for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.roles (
   id uuid primary key default gen_random_uuid (),
   name text not null unique,
@@ -61,7 +62,9 @@ create table public.roles (
 create trigger update_roles_updated_at before
 update on public.roles for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.user_tech_stacks (
   user_id uuid references public.users (id),
   tech_stack_id uuid references public.tech_stacks (id),
@@ -74,7 +77,9 @@ create table public.user_tech_stacks (
 create trigger update_user_tech_stacks_updated_at before
 update on public.user_tech_stacks for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.user_roles (
   user_id uuid references public.users (id),
   role_id uuid references public.roles (id),
@@ -87,7 +92,9 @@ create table public.user_roles (
 create trigger update_user_roles_updated_at before
 update on public.user_roles for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.applications (
   id uuid primary key default gen_random_uuid (),
   app_name text not null unique,
@@ -102,7 +109,9 @@ create table public.applications (
 create trigger update_applications_updated_at before
 update on public.applications for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.traces (
   id uuid primary key default gen_random_uuid (),
   user_id uuid references public.users (id),
@@ -117,7 +126,9 @@ create table public.traces (
 create trigger update_traces_updated_at before
 update on public.traces for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.gateways (
   id uuid primary key default gen_random_uuid (),
   gateway_name text not null unique,
@@ -136,7 +147,9 @@ create table public.gateways (
 create trigger update_gateways_updated_at before
 update on public.gateways for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.environments (
   id uuid primary key default gen_random_uuid (),
   name text not null unique,
@@ -148,7 +161,9 @@ create table public.environments (
 create trigger update_environments_updated_at before
 update on public.environments for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.application_environments (
   application_id uuid references public.applications (id),
   environment_id uuid references public.environments (id),
@@ -161,7 +176,9 @@ create table public.application_environments (
 create trigger update_application_environments_updated_at before
 update on public.application_environments for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.refresh_tokens (
   id uuid primary key default gen_random_uuid (),
   user_id uuid references public.users (id),
@@ -175,7 +192,9 @@ create table public.refresh_tokens (
 create trigger update_refresh_tokens_updated_at before
 update on public.refresh_tokens for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.application_stats (
   id uuid primary key default gen_random_uuid (),
   application_id uuid references public.applications (id),
@@ -193,7 +212,9 @@ create table public.application_stats (
 create trigger update_application_stats_updated_at before
 update on public.application_stats for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.visitor_info (
   id uuid primary key default gen_random_uuid (),
   ip_address text not null,
@@ -207,7 +228,9 @@ create table public.visitor_info (
 create trigger update_visitor_info_updated_at before
 update on public.visitor_info for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.visitor_trace (
   id uuid primary key default gen_random_uuid (),
   visitor_id uuid references public.visitor_info (id),
@@ -223,7 +246,9 @@ create table public.visitor_trace (
 create trigger update_visitor_trace_updated_at before
 update on public.visitor_trace for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 create table public.user_oauth (
   id uuid primary key default gen_random_uuid (),
   user_id uuid references public.users (id),
@@ -238,97 +263,9 @@ create table public.user_oauth (
 create trigger update_user_oauth_updated_at before
 update on public.user_oauth for each row
 execute function update_updated_at_column ();
+-- +goose StatementEnd
 
-drop trigger if exists update_users_updated_at on public.users;
-
-drop trigger if exists update_tech_stacks_updated_at on public.tech_stacks;
-
-drop trigger if exists update_roles_updated_at on public.roles;
-
-drop trigger if exists update_user_tech_stacks_updated_at on public.user_tech_stacks;
-
-drop trigger if exists update_user_roles_updated_at on public.user_roles;
-
-drop trigger if exists update_applications_updated_at on public.applications;
-
-drop trigger if exists update_traces_updated_at on public.traces;
-
-drop trigger if exists update_gateways_updated_at on public.gateways;
-
-drop trigger if exists update_environments_updated_at on public.environments;
-
-drop trigger if exists update_application_environments_updated_at on public.application_environments;
-
-drop trigger if exists update_refresh_tokens_updated_at on public.refresh_tokens;
-
-drop trigger if exists update_application_stats_updated_at on public.application_stats;
-
-drop trigger if exists update_visitor_info_updated_at on public.visitor_info;
-
-drop trigger if exists update_visitor_trace_updated_at on public.visitor_trace;
-
-drop trigger if exists update_user_oauth_updated_at on public.user_oauth;
-
-create trigger update_users_updated_at before
-update on public.users for each row
-execute function update_updated_at_column ();
-
-create trigger update_tech_stacks_updated_at before
-update on public.tech_stacks for each row
-execute function update_updated_at_column ();
-
-create trigger update_roles_updated_at before
-update on public.roles for each row
-execute function update_updated_at_column ();
-
-create trigger update_user_tech_stacks_updated_at before
-update on public.user_tech_stacks for each row
-execute function update_updated_at_column ();
-
-create trigger update_user_roles_updated_at before
-update on public.user_roles for each row
-execute function update_updated_at_column ();
-
-create trigger update_applications_updated_at before
-update on public.applications for each row
-execute function update_updated_at_column ();
-
-create trigger update_traces_updated_at before
-update on public.traces for each row
-execute function update_updated_at_column ();
-
-create trigger update_gateways_updated_at before
-update on public.gateways for each row
-execute function update_updated_at_column ();
-
-create trigger update_environments_updated_at before
-update on public.environments for each row
-execute function update_updated_at_column ();
-
-create trigger update_application_environments_updated_at before
-update on public.application_environments for each row
-execute function update_updated_at_column ();
-
-create trigger update_refresh_tokens_updated_at before
-update on public.refresh_tokens for each row
-execute function update_updated_at_column ();
-
-create trigger update_application_stats_updated_at before
-update on public.application_stats for each row
-execute function update_updated_at_column ();
-
-create trigger update_visitor_info_updated_at before
-update on public.visitor_info for each row
-execute function update_updated_at_column ();
-
-create trigger update_visitor_trace_updated_at before
-update on public.visitor_trace for each row
-execute function update_updated_at_column ();
-
-create trigger update_user_oauth_updated_at before
-update on public.user_oauth for each row
-execute function update_updated_at_column ();
-
+-- +goose StatementBegin
 create index idx_user_tech_stacks_user_id on public.user_tech_stacks using btree (user_id);
 
 create index idx_user_tech_stacks_tech_stack_id on public.user_tech_stacks using btree (tech_stack_id);
@@ -356,7 +293,9 @@ create index idx_visitor_trace_visitor_id on public.visitor_trace using btree (v
 create index idx_visitor_trace_application_id on public.visitor_trace using btree (application_id);
 
 create index idx_user_oauth_user_id on public.user_oauth using btree (user_id);
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 alter table public.users
 add constraint unique_phone unique (phone);
 
@@ -372,8 +311,23 @@ alter column address type jsonb using address::jsonb;
 alter table public.applications
 alter column tech_stack_id
 set not null;
+-- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+drop table public.user_oauth cascade;
+drop table public.visitor_trace cascade;
+drop table public.visitor_info cascade;
+drop table public.application_stats cascade;
+drop table public.refresh_tokens cascade;
+drop table public.application_environments cascade;
+drop table public.environments cascade;
+drop table public.gateways cascade;
+drop table public.traces cascade;
+drop table public.applications cascade;
+drop table public.user_roles cascade;
+drop table public.user_tech_stacks cascade;
+drop table public.roles cascade;
+drop table public.tech_stacks cascade;
+drop table public.users cascade;
 -- +goose StatementEnd
