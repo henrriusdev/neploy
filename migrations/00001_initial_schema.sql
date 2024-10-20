@@ -99,6 +99,7 @@ create table public.applications (
   id uuid primary key default gen_random_uuid (),
   app_name text not null unique,
   storage_location text not null,
+  deploy_location text not null,
   tech_stack_id uuid references public.tech_stacks (id),
   description text,
   created_at timestamptz default current_timestamp,
@@ -118,6 +119,7 @@ create table public.traces (
   action text not null,
   action_timestamp timestamptz default current_timestamp,
   sql_statement text,
+  type text not null,
   created_at timestamptz default current_timestamp,
   updated_at timestamptz default current_timestamp,
   deleted_at timestamptz default null
@@ -131,7 +133,7 @@ execute function update_updated_at_column ();
 -- +goose StatementBegin
 create table public.gateways (
   id uuid primary key default gen_random_uuid (),
-  gateway_name text not null unique,
+  name text not null unique,
   endpoint_url text not null,
   endpoint_type text,
   stage text,
@@ -198,11 +200,12 @@ execute function update_updated_at_column ();
 create table public.application_stats (
   id uuid primary key default gen_random_uuid (),
   application_id uuid references public.applications (id),
+  environment_id uuid references public.environments (id),
   date date not null,
   requests bigint default 0,
   errors bigint default 0,
   average_response_time numeric default 0,
-  data_transferred numeric default 0,
+  data_transfered numeric default 0,
   unique_visitors bigint default 0,
   created_at timestamptz default current_timestamp,
   updated_at timestamptz default current_timestamp,
@@ -219,7 +222,7 @@ create table public.visitor_info (
   id uuid primary key default gen_random_uuid (),
   ip_address text not null,
   location text,
-  visit_timestamp timestamptz default current_timestamp,
+  visited_at timestamptz default current_timestamp,
   created_at timestamptz default current_timestamp,
   updated_at timestamptz default current_timestamp,
   deleted_at timestamptz default null
@@ -231,7 +234,7 @@ execute function update_updated_at_column ();
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-create table public.visitor_trace (
+create table public.visitor_traces (
   id uuid primary key default gen_random_uuid (),
   visitor_id uuid references public.visitor_info (id),
   page_visited text not null,
