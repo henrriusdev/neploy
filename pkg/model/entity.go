@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 type BaseEntity struct {
 	ID        string `json:"id" db:"id"`
 	CreatedAt string `json:"created_at" db:"created_at"`
@@ -134,8 +132,4 @@ type UserOAuth struct {
 	Provider    string `json:"provider" db:"provider"`
 	OAuthID     string `json:"oauth_id" db:"oauth_id"`
 	AccessToken string `json:"access_token" db:"access_token"`
-}
-
-type Date struct {
-	time.Time
 }
