@@ -18,6 +18,7 @@ type EnvVar struct {
 	DBPass    string `env:"DB_PASS" envDefault:"Reyshell"`
 	DBHost    string `env:"DB_HOST" envDefault:"localhost"`
 	DBPort    string `env:"DB_PORT" envDefault:"5432"`
+	DBSSLMode string `env:"DB_SSL_MODE" envDefault:"disable"`
 	JWTSecret string `env:"JWT_SECRET" envDefault:"secret"`
 }
 
