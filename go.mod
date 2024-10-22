@@ -13,6 +13,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/caarlos0/env/v6 v6.10.1 // indirect
+	github.com/doug-martin/goqu/v9 v9.19.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
