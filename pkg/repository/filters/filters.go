@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/doug-martin/goqu/v9"
+	"neploy.dev/pkg/common"
+	"neploy.dev/pkg/model"
 )
 
 // SelectFilterBuilder defines a function signature for filters
@@ -28,15 +30,15 @@ func GenericColumnSelectFilter[T comparable](column string, value T, zeroValue T
 }
 
 // DateRangeFilter creates a date range filter
-// func DateRangeSelectFilter(startDate, endDate *model.Date, column string) SelectFilterBuilder {
-// 	return func(q *goqu.SelectDataset) *goqu.SelectDataset {
-// 		if startDate != nil && endDate != nil {
-// 			dateRange := common.FormatDateRange(startDate.Time, endDate.Time)
-// 			return q.Where(goqu.I(column).Gte(dateRange.StartDateStr), goqu.I(column).Lte(dateRange.EndDateStr))
-// 		}
-// 		return q
-// 	}
-// }
+func DateRangeSelectFilter(startDate, endDate *model.Date, column string) SelectFilterBuilder {
+	return func(q *goqu.SelectDataset) *goqu.SelectDataset {
+		if startDate != nil && endDate != nil {
+			dateRange := common.FormatDateRange(startDate.Time, endDate.Time)
+			return q.Where(goqu.I(column).Gte(dateRange.StartDate), goqu.I(column).Lte(dateRange.EndDate))
+		}
+		return q
+	}
+}
 
 // TimeFilter filters based on start and/or end time
 func TimeSelectFilter(startDate, endDate *time.Time, column string) SelectFilterBuilder {
@@ -185,15 +187,15 @@ func GenericColumnUpdateFilter[T comparable](column string, value T, zeroValue T
 }
 
 // DateRangeUpdateFilter creates a date range filter
-// func DateRangeUpdateFilter(startDate, endDate *model.Date, column string) UpdateFilterBuilder {
-// 	return func(q *goqu.UpdateDataset) *goqu.UpdateDataset {
-// 		if startDate != nil && endDate != nil {
-// 			dateRange := common.FormatDateRange(startDate.Time, endDate.Time)
-// 			return q.Where(goqu.I(column).Gte(dateRange.StartDateStr), goqu.I(column).Lte(dateRange.EndDateStr))
-// 		}
-// 		return q
-// 	}
-// }
+func DateRangeUpdateFilter(startDate, endDate *model.Date, column string) UpdateFilterBuilder {
+	return func(q *goqu.UpdateDataset) *goqu.UpdateDataset {
+		if startDate != nil && endDate != nil {
+			dateRange := common.FormatDateRange(startDate.Time, endDate.Time)
+			return q.Where(goqu.I(column).Gte(dateRange.StartDate), goqu.I(column).Lte(dateRange.EndDate))
+		}
+		return q
+	}
+}
 
 // TimeUpdateFilter filters based on start and/or end time
 func TimeUpdateFilter(startDate, endDate *time.Time, column string) UpdateFilterBuilder {
