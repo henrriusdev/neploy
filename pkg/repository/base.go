@@ -14,7 +14,9 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type Repositories struct{}
+type Repositories struct {
+	User User
+}
 
 var (
 	ErrNotFound = errors.New("not found")

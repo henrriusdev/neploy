@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"neploy.dev/pkg/model"
+	"neploy.dev/pkg/store"
 )
 
 type User interface {
@@ -17,4 +18,8 @@ type User interface {
 
 type user[T any] struct {
 	Base[T]
+}
+
+func NewUser(db store.Queryable) User {
+	return &user[model.User]{Base: Base[model.User]{Store: db, Table: "users"}}
 }
