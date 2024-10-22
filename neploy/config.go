@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
+	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
 )
 
@@ -25,7 +26,7 @@ func Start(npy Neploy) {
 
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
 
-	NewServices(npy)
+	services := NewServices(npy)
 	NewRepositories(npy)
 	NewHandlers(npy, i, app)
 
@@ -44,8 +45,11 @@ func Start(npy Neploy) {
 	app.Listen(":3000")
 }
 
-func NewServices(npy Neploy) {
-	// ...
+func NewServices(npy Neploy) service.Services {
+	user := service.NewUser()
+	return service.Services{
+		User: user,
+	}
 }
 
 func NewRepositories(npy Neploy) {

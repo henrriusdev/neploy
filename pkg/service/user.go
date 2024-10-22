@@ -16,3 +16,7 @@ type User interface {
 }
 
 type user struct{}
+
+func NewUser() User {
+	return &user{}
+}
