@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
+	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
 )
@@ -27,7 +28,7 @@ func Start(npy Neploy) {
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
 
 	services := NewServices(npy)
-	NewRepositories(npy)
+	repos := NewRepositories(npy)
 	NewHandlers(npy, i, app)
 
 	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
@@ -52,8 +53,11 @@ func NewServices(npy Neploy) service.Services {
 	}
 }
 
-func NewRepositories(npy Neploy) {
-	// ...
+func NewRepositories(npy Neploy) repository.Repositories {
+	userRepo := repository.NewUser(npy.DB)
+	return repository.Repositories{
+		User: userRepo,
+	}
 }
 
 func NewHandlers(npy Neploy, i *gonertia.Inertia, app *fiber.App) {
