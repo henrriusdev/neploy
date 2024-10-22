@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",
-        "jsx": "react",
-        "paths": {
-            "@/*": [
-                "resources/js/*"
-            ]
-        }
-    },
-    "exclude": [
-        "node_modules",
-        "public/build"
-    ]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["resources/js/*"]
+    }
+  },
+  "exclude": ["node_modules", "public/build"]
 }
