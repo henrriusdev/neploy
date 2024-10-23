@@ -1,7 +1,6 @@
 package neploy
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,13 +12,14 @@ import (
 )
 
 type Neploy struct {
-	DB   store.Queryable
-	Port string
+	DB           store.Queryable
+	Port         string
+	Services     service.Services
+	Repositories repository.Repositories
 }
 
 func Start(npy Neploy) {
 	i := initInertia()
-	fmt.Println(i == nil)
 
 	app := fiber.New(fiber.Config{
 		Concurrency: 10,
@@ -29,6 +29,9 @@ func Start(npy Neploy) {
 
 	services := NewServices(npy)
 	repos := NewRepositories(npy)
+
+	npy.Services = services
+	npy.Repositories = repos
 	NewHandlers(npy, i, app)
 
 	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
@@ -47,7 +50,7 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	user := service.NewUser()
+	user := service.NewUser(npy.Repositories.User)
 	return service.Services{
 		User: user,
 	}

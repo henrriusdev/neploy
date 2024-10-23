@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./resources/js/*"]
-    }
+    },
+    "jsx": "react-jsx"
   },
   "exclude": ["./node_modules", "./public/build"]
 }

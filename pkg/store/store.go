@@ -6,6 +6,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 	"neploy.dev/config"
+
+	_ "github.com/lib/pq"
 )
 
 func NewConnection(cfg config.EnvVar) (Queryable, error) {
