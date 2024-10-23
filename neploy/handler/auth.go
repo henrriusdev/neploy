@@ -7,12 +7,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	inertia "github.com/romsar/gonertia"
+	"neploy.dev/pkg/service"
 )
 
-type Auth struct{}
+type Auth struct {
+	user service.User
+}
 
-func NewAuth() *Auth {
-	return &Auth{}
+func NewAuth(user service.User) *Auth {
+	return &Auth{user}
 }
 
 func (a *Auth) RegisterRoutes(r fiber.Router, i *inertia.Inertia) {

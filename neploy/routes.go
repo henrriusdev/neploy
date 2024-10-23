@@ -7,7 +7,7 @@ import (
 	inertia "github.com/romsar/gonertia"
 )
 
-func loginRoutes(app *fiber.App, i *inertia.Inertia) {
-	auth := handler.NewAuth()
+func loginRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+	auth := handler.NewAuth(npy.Services.User)
 	auth.RegisterRoutes(app.Group(""), i)
 }

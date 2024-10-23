@@ -64,5 +64,5 @@ func NewRepositories(npy Neploy) repository.Repositories {
 }
 
 func NewHandlers(npy Neploy, i *gonertia.Inertia, app *fiber.App) {
-	loginRoutes(app, i)
+	loginRoutes(app, i, npy)
 }
