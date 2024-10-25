@@ -19,8 +19,15 @@ type onboard struct {
 }
 
 func NewOnboard(userService User, roleService Role) Onboard {
-	return &onboard{
-		userService: userService,
-		roleService: roleService,
+	return &onboard{userService, roleService}
+}
+
+func (o *onboard) Done(ctx context.Context) error {
+	users, err := o.userService.List(ctx, 100, 0)
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
 	}
 }

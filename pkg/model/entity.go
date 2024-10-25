@@ -51,6 +51,8 @@ type UserRoles struct {
 	BaseRelation
 	UserID string `json:"user_id" db:"user_id"`
 	RoleID string `json:"role_id" db:"role_id"`
+	User   *User  `json:"user" db:"user"`
+	Role   *Role  `json:"role" db:"role"`
 }
 
 type UserTechStack struct {
