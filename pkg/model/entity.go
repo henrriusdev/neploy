@@ -20,7 +20,7 @@ type User struct {
 	Email     string `json:"email" db:"email"`
 	FirstName string `json:"first_name" db:"first_name"`
 	LastName  string `json:"last_name" db:"last_name"`
-	DOB       string `json:"dob" db:"dob"`
+	DOB       Date   `json:"dob" db:"dob"`
 	Address   string `json:"address" db:"address"`
 	Phone     string `json:"phone" db:"phone"`
 }
@@ -29,6 +29,8 @@ type Role struct {
 	BaseEntity
 	Name        string `json:"name" db:"name"`
 	Description string `json:"description" db:"description"`
+	Icon        string `json:"icon" db:"icon"`
+	Color       string `json:"color" db:"color"`
 }
 
 type Application struct {
