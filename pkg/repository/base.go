@@ -15,8 +15,9 @@ import (
 )
 
 type Repositories struct {
-	User User
-	Role Role
+	User     User
+	Role     Role
+	UserRole UserRole
 }
 
 var (

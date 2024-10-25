@@ -50,7 +50,7 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	user := service.NewUser(npy.Repositories.User)
+	user := service.NewUser(npy.Repositories.User, npy.Repositories.UserRole)
 	return service.Services{
 		User: user,
 	}

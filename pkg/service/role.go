@@ -14,14 +14,16 @@ type Role interface {
 	GetRoles(context.Context) ([]model.Role, error)
 	UpdateRole(context.Context, string, model.CreateRoleRequest) error
 	DeleteRole(context.Context, string) error
+	GetUserRoles(context.Context, string) ([]model.UserRoles, error)
 }
 
 type role struct {
-	roleRepo repository.Role
+	roleRepo     repository.Role
+	userRoleRepo repository.UserRole
 }
 
-func NewRole(roleRepo repository.Role) Role {
-	return &role{roleRepo}
+func NewRole(roleRepo repository.Role, userRoleRepo repository.UserRole) Role {
+	return &role{roleRepo, userRoleRepo}
 }
 
 func (r *role) CreateRole(ctx context.Context, req model.CreateRoleRequest) error {
@@ -58,4 +60,8 @@ func (r *role) UpdateRole(ctx context.Context, id string, req model.CreateRoleRe
 
 func (r *role) DeleteRole(ctx context.Context, id string) error {
 	return r.roleRepo.DeleteRole(ctx, id)
+}
+
+func (r *role) GetUserRoles(ctx context.Context, userID string) ([]model.UserRoles, error) {
+	return r.userRoleRepo.GetByUserID(ctx, userID)
 }
