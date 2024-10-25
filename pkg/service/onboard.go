@@ -17,3 +17,10 @@ type onboard struct {
 	userService User
 	roleService Role
 }
+
+func NewOnboard(userService User, roleService Role) Onboard {
+	return &onboard{
+		userService: userService,
+		roleService: roleService,
+	}
+}
