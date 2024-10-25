@@ -67,3 +67,7 @@ func (o *onboard) CreateAdminUser(ctx context.Context, req model.CreateUserReque
 
 	return o.userService.Create(ctx, req)
 }
+
+func (o *onboard) CreateRole(ctx context.Context, req model.CreateRoleRequest) error {
+	return o.roleService.CreateRole(ctx, req)
+}
