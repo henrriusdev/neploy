@@ -3,7 +3,9 @@ package service
 import "errors"
 
 type Services struct {
-	User User
+	User    User
+	Role    Role
+	Onboard Onboard
 }
 
 func NotFound(entity string) error {
