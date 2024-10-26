@@ -2,15 +2,15 @@ package model
 
 type BaseEntity struct {
 	ID        string `json:"id" db:"id"`
-	CreatedAt string `json:"created_at" db:"created_at"`
-	UpdatedAt string `json:"updated_at" db:"updated_at"`
-	DeletedAt string `json:"deleted_at" db:"deleted_at"`
+	CreatedAt Date   `json:"created_at" db:"created_at"`
+	UpdatedAt Date   `json:"updated_at" db:"updated_at"`
+	DeletedAt Date   `json:"deleted_at" db:"deleted_at"`
 }
 
 type BaseRelation struct {
-	CreatedAt string `json:"created_at" db:"created_at"`
-	UpdatedAt string `json:"updated_at" db:"updated_at"`
-	DeletedAt string `json:"deleted_at" db:"deleted_at"`
+	CreatedAt Date `json:"created_at" db:"created_at"`
+	UpdatedAt Date `json:"updated_at" db:"updated_at"`
+	DeletedAt Date `json:"deleted_at" db:"deleted_at"`
 }
 
 type User struct {
@@ -20,7 +20,7 @@ type User struct {
 	Email     string `json:"email" db:"email"`
 	FirstName string `json:"first_name" db:"first_name"`
 	LastName  string `json:"last_name" db:"last_name"`
-	DOB       string `json:"dob" db:"dob"`
+	DOB       Date   `json:"dob" db:"dob"`
 	Address   string `json:"address" db:"address"`
 	Phone     string `json:"phone" db:"phone"`
 }
@@ -29,6 +29,8 @@ type Role struct {
 	BaseEntity
 	Name        string `json:"name" db:"name"`
 	Description string `json:"description" db:"description"`
+	Icon        string `json:"icon" db:"icon"`
+	Color       string `json:"color" db:"color"`
 }
 
 type Application struct {
@@ -49,6 +51,8 @@ type UserRoles struct {
 	BaseRelation
 	UserID string `json:"user_id" db:"user_id"`
 	RoleID string `json:"role_id" db:"role_id"`
+	User   *User  `json:"user" db:"user"`
+	Role   *Role  `json:"role" db:"role"`
 }
 
 type UserTechStack struct {

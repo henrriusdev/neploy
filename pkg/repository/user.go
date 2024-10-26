@@ -10,7 +10,7 @@ import (
 )
 
 type User interface {
-	Create(ctx context.Context, user model.User) error
+	Create(ctx context.Context, user model.User) (model.User, error)
 	Get(ctx context.Context, id string) (model.User, error)
 	Update(ctx context.Context, user model.User) error
 	Delete(ctx context.Context, id string) error
@@ -26,21 +26,22 @@ func NewUser(db store.Queryable) User {
 	return &user[model.User]{Base: Base[model.User]{Store: db, Table: "users"}}
 }
 
-func (u *user[T]) Create(ctx context.Context, user model.User) error {
+func (u *user[T]) Create(ctx context.Context, user model.User) (model.User, error) {
 	query := u.BaseQueryInsert().
 		Rows(user).
-		Returning("id")
+		Returning("*")
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		return err
+		return model.User{}, err
 	}
 
-	if _, err := u.Store.ExecContext(ctx, q, args...); err != nil {
-		return err
+	var newUser model.User
+	if err := u.Store.QueryRowxContext(ctx, q, args...).StructScan(&newUser); err != nil {
+		return model.User{}, err
 	}
 
-	return nil
+	return newUser, nil
 }
 
 func (u *user[T]) Get(ctx context.Context, id string) (model.User, error) {

@@ -1,34 +1,40 @@
 package neploy
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
+	"neploy.dev/neploy/middleware"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
 )
 
 type Neploy struct {
-	DB   store.Queryable
-	Port string
+	DB           store.Queryable
+	Port         string
+	Services     service.Services
+	Repositories repository.Repositories
 }
 
 func Start(npy Neploy) {
 	i := initInertia()
-	fmt.Println(i == nil)
 
 	app := fiber.New(fiber.Config{
 		Concurrency: 10,
 	})
 
-	app.Use(adaptor.HTTPMiddleware(i.Middleware))
+	repos := NewRepositories(npy)
+	npy.Repositories = repos
 
 	services := NewServices(npy)
-	repos := NewRepositories(npy)
+	npy.Services = services
+
+	app.Use(adaptor.HTTPMiddleware(i.Middleware))
+	app.Use(middleware.OnboardingMiddleware(services.Onboard))
+
 	NewHandlers(npy, i, app)
 
 	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
@@ -47,19 +53,29 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	user := service.NewUser()
+	user := service.NewUser(npy.Repositories.User, npy.Repositories.UserRole)
+	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
+	onboard := service.NewOnboard(user, role)
+
 	return service.Services{
-		User: user,
+		User:    user,
+		Role:    role,
+		Onboard: onboard,
 	}
 }
 
 func NewRepositories(npy Neploy) repository.Repositories {
-	userRepo := repository.NewUser(npy.DB)
+	user := repository.NewUser(npy.DB)
+	role := repository.NewRole(npy.DB)
+	userRole := repository.NewUserRole(npy.DB)
+
 	return repository.Repositories{
-		User: userRepo,
+		User:     user,
+		Role:     role,
+		UserRole: userRole,
 	}
 }
 
 func NewHandlers(npy Neploy, i *gonertia.Inertia, app *fiber.App) {
-	loginRoutes(app, i)
+	loginRoutes(app, i, npy)
 }

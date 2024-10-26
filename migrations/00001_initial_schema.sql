@@ -247,7 +247,7 @@ create table public.visitor_traces (
 );
 
 create trigger update_visitor_trace_updated_at before
-update on public.visitor_trace for each row
+update on public.visitor_traces for each row
 execute function update_updated_at_column ();
 -- +goose StatementEnd
 
@@ -291,9 +291,9 @@ create index idx_refresh_tokens_user_id on public.refresh_tokens using btree (us
 
 create index idx_application_stats_application_id on public.application_stats using btree (application_id);
 
-create index idx_visitor_trace_visitor_id on public.visitor_trace using btree (visitor_id);
+create index idx_visitor_trace_visitor_id on public.visitor_traces using btree (visitor_id);
 
-create index idx_visitor_trace_application_id on public.visitor_trace using btree (application_id);
+create index idx_visitor_trace_application_id on public.visitor_traces using btree (application_id);
 
 create index idx_user_oauth_user_id on public.user_oauth using btree (user_id);
 -- +goose StatementEnd
@@ -319,7 +319,7 @@ set not null;
 -- +goose Down
 -- +goose StatementBegin
 drop table public.user_oauth cascade;
-drop table public.visitor_trace cascade;
+drop table public.visitor_traces cascade;
 drop table public.visitor_info cascade;
 drop table public.application_stats cascade;
 drop table public.refresh_tokens cascade;
