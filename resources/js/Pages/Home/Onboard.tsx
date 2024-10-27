@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,12 +11,12 @@ import {
   Github,
   GitBranch,
   Check,
+  ChevronsUpDown,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -27,7 +28,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -47,6 +47,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ColorPicker } from "@/components/ColorPicker";
+import { AutoComplete, Option } from "@/components/autocompletion";
+import { InputAutoComplete } from "@/components/InputAutoComplete";
+import { icons } from "@/lib/arrays";
+import { withMask } from "use-mask-input";
 
 const adminSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -84,6 +89,12 @@ export default function Onboarding() {
   const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
   const [serviceData, setServiceData] = useState(null);
+  const totalSteps = 5;
+
+  const iconNames: Option[] = icons.map((icon) => ({
+    value: icon,
+    label: icon,
+  }));
 
   const adminForm = useForm<z.infer<typeof adminSchema>>({
     resolver: zodResolver(adminSchema),
@@ -102,8 +113,8 @@ export default function Onboarding() {
     defaultValues: {
       name: "",
       description: "",
-      icon: "",
-      color: "",
+      icon: "ChevronLeft",
+      color: "#000000",
     },
   });
 
@@ -122,18 +133,20 @@ export default function Onboarding() {
     defaultValues: {
       teamName: "",
       logo: "",
-      primaryColor: "",
-      secondaryColor: "",
+      primaryColor: "#000000",
+      secondaryColor: "#ffffff",
     },
   });
 
   const onAdminSubmit = (data: z.infer<typeof adminSchema>) => {
     setAdminData(data);
     setStep(2);
+    adminForm.reset();
   };
 
   const onRoleSubmit = (data: z.infer<typeof roleSchema>) => {
     setRoles([...roles, data]);
+    console.log("Role data", roles, data);
     roleForm.reset();
   };
 
@@ -155,32 +168,46 @@ export default function Onboarding() {
   const steps = [1, 2, 3, 4, 5];
 
   const renderStepIndicators = () => (
-    <div className="flex justify-center space-x-2 mb-6">
+    <div className="flex justify-center mb-8">
       {steps.map((_, index) => (
-        <div
-          key={index}
-          className={`w-8 h-2 rounded-full ${
-            step > index
-              ? "bg-primary"
-              : index === step - 1
-              ? "bg-primary-light"
-              : "bg-muted"
-          }`}
-        />
+        <div key={index} className="flex items-center">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              step > index + 1
+                ? "bg-lime-700 text-white"
+                : step === index + 1
+                  ? "bg-primary text-white"
+                  : "bg-gray-200"
+            }`}
+          >
+            {step > index + 1 ? <Check className="w-4 h-4" /> : index + 1}
+          </div>
+          {index < totalSteps - 1 && (
+            <div
+              className={`w-6 sm:w-8 md:w-10 lg:w-12 h-1 ${
+                step - 1 === index + 1
+                  ? "bg-gradient-to-r from-lime-700 to-primary from-40% to-90%"
+                  : step > index + 1
+                    ? "bg-lime-700"
+                    : "bg-gray-200"
+              }`}
+            />
+          )}
+        </div>
       ))}
     </div>
   );
 
   const renderSidebar = () => (
     <div className="hidden w-1/4 bg-primary text-primary-foreground p-6 h-screen fixed left-0 top-0 overflow-y-auto lg:flex flex-col justify-center">
-      <h2 className="text-2xl font-bold mb-4">Welcome to Our Service</h2>
+      <h2 className="text-2xl font-bold mb-4">Welcome to Neploy</h2>
       <p className="mb-4">
         We're excited to have you join us! This onboarding process will guide
         you through setting up your account and organization.
       </p>
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Need Help?</h3>
-        <p>Email: support@ourservice.com</p>
+        <p>Email: support@neploy.dev</p>
         <p>Phone: (123) 456-7890</p>
       </div>
       <div>
@@ -195,7 +222,7 @@ export default function Onboarding() {
     switch (step) {
       case 1:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Create Administrator User</CardTitle>
               <CardDescription>Set up the Super Dev account</CardDescription>
@@ -203,7 +230,7 @@ export default function Onboarding() {
             <Form {...adminForm}>
               <form onSubmit={adminForm.handleSubmit(onAdminSubmit)}>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={adminForm.control}
                       name="firstName"
@@ -231,7 +258,7 @@ export default function Onboarding() {
                       )}
                     />
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={adminForm.control}
                       name="dob"
@@ -245,8 +272,9 @@ export default function Onboarding() {
                                   variant={"outline"}
                                   className={cn(
                                     "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}>
+                                    !field.value && "text-muted-foreground",
+                                  )}
+                                >
                                   {field.value ? (
                                     format(field.value, "PPP")
                                   ) : (
@@ -258,7 +286,8 @@ export default function Onboarding() {
                             </PopoverTrigger>
                             <PopoverContent
                               className="w-auto p-0"
-                              align="start">
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
                                 selected={field.value}
@@ -279,9 +308,9 @@ export default function Onboarding() {
                       control={adminForm.control}
                       name="phone"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Phone</FormLabel>
-                          <FormControl>
+                          <FormControl ref={withMask("(9999) 999-99-99")}>
                             <Input {...field} />
                           </FormControl>
                           <FormMessage />
@@ -321,14 +350,16 @@ export default function Onboarding() {
                     <Button
                       variant="outline"
                       type="button"
-                      onClick={() => handleAuthProvider("GitHub")}>
+                      onClick={() => handleAuthProvider("GitHub")}
+                    >
                       <Github className="mr-2 h-4 w-4" />
                       GitHub
                     </Button>
                     <Button
                       variant="outline"
                       type="button"
-                      onClick={() => handleAuthProvider("GitLab")}>
+                      onClick={() => handleAuthProvider("GitLab")}
+                    >
                       <GitBranch className="mr-2 h-4 w-4" />
                       GitLab
                     </Button>
@@ -343,7 +374,7 @@ export default function Onboarding() {
         );
       case 2:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Create Roles</CardTitle>
               <CardDescription>
@@ -386,7 +417,11 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Icon</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          {/* when the field value changes, always it would filter the iconNames and get the first 50 items */}
+                          <InputAutoComplete
+                            field={field}
+                            OPTIONS={iconNames}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -399,7 +434,7 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Color</FormLabel>
                         <FormControl>
-                          <Input type="color" {...field} />
+                          <ColorPicker field={field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -418,7 +453,7 @@ export default function Onboarding() {
         );
       case 3:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Create Users</CardTitle>
               <CardDescription>Add users to your organization</CardDescription>
@@ -473,7 +508,8 @@ export default function Onboarding() {
                         <FormLabel>Role</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}>
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a role" />
@@ -504,7 +540,7 @@ export default function Onboarding() {
         );
       case 4:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Service Metadata</CardTitle>
               <CardDescription>Set up your team information</CardDescription>
@@ -545,7 +581,7 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Primary Color</FormLabel>
                         <FormControl>
-                          <Input type="color" {...field} />
+                          <ColorPicker {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -558,7 +594,7 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Secondary Color</FormLabel>
                         <FormControl>
-                          <Input type="color" {...field} />
+                          <ColorPicker {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -574,7 +610,7 @@ export default function Onboarding() {
         );
       case 5:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Overview</CardTitle>
               <CardDescription>Review all registered data</CardDescription>
@@ -654,7 +690,8 @@ export default function Onboarding() {
               <Button
                 onClick={() =>
                   console.log("Redirect to dashboard or home page")
-                }>
+                }
+              >
                 Go to Dashboard
               </Button>
             </CardFooter>
@@ -666,9 +703,9 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex min-h-[900px] h-screen">
+    <div className="flex min-h-[900px] h-screen w-full">
       {renderSidebar()}
-      <div className="flex-1 ml-[25%] p-10">
+      <div className="flex-1 lg:ml-[25%] p-3 lg:p-10">
         <h1 className="text-3xl font-bold mb-6">Onboarding</h1>
         {renderStepIndicators()}
         {renderStep()}

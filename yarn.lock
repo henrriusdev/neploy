@@ -4691,6 +4691,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"use-mask-input@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "use-mask-input@npm:3.4.0"
+  peerDependencies:
+    react: ">=16.4 || 17 || 18 || 20"
+    react-dom: ">=16.4 || 17 || 18 || 20"
+  checksum: 10c0/cb51399330bc184d7e69034425bb96a18ef259955480ef1042e54a4b960f3f37fa8a2063377796cf5d45e8e7e3aa011b1ea46a882144ee6cf5c0ab10f8ed17e4
+  languageName: node
+  linkType: hard
+
 "use-sidecar@npm:^1.1.2":
   version: 1.1.2
   resolution: "use-sidecar@npm:1.1.2"
@@ -4845,6 +4855,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tailwindcss: "npm:^3.2.1"
     tailwindcss-animate: "npm:^1.0.7"
+    use-mask-input: "npm:^3.4.0"
     vaul: "npm:^1.1.0"
     vite: "npm:^5.0"
     zod: "npm:^3.23.8"
