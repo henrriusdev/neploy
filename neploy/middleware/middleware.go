@@ -60,3 +60,28 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 		return c.Next()
 	}
 }
+
+// JWTMiddleware is a middleware that checks if the user is authenticated
+func JWTMiddleware() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Skip middleware for non-GET requests
+		if c.Method() != fiber.MethodGet {
+			return c.Next()
+		}
+
+		if strings.HasPrefix(c.Path(), "/build/assets/") {
+			return c.Next()
+		}
+
+		// Check if the user is authenticated
+		if c.Locals("user") == nil {
+			if c.Get("X-Inertia") == "true" {
+				c.Set("X-Inertia-Location", "/login")
+				return c.SendStatus(fiber.StatusUnauthorized)
+			}
+			return c.Redirect("/login")
+		}
+
+		return c.Next()
+	}
+}
