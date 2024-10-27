@@ -38,6 +38,9 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid credentials"})
 	}
 
+	// put the token in the session
+	// c.Session.Set("token", res.Token)
+
 	return c.JSON(fiber.Map{"token": res.Token})
 }
 
