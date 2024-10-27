@@ -51,6 +51,7 @@ import { ColorPicker } from "@/components/ColorPicker";
 import { AutoComplete, Option } from "@/components/autocompletion";
 import { InputAutoComplete } from "@/components/InputAutoComplete";
 import { icons } from "@/lib/arrays";
+import { withMask } from "use-mask-input";
 
 const adminSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -90,7 +91,10 @@ export default function Onboarding() {
   const [serviceData, setServiceData] = useState(null);
   const totalSteps = 5;
 
-  const iconNames: Option[] = icons.map((icon) => ({ value: icon, label: icon }));
+  const iconNames: Option[] = icons.map((icon) => ({
+    value: icon,
+    label: icon,
+  }));
 
   const adminForm = useForm<z.infer<typeof adminSchema>>({
     resolver: zodResolver(adminSchema),
@@ -179,7 +183,7 @@ export default function Onboarding() {
           </div>
           {index < totalSteps - 1 && (
             <div
-              className={`w-12 h-1 ${
+              className={`w-6 sm:w-8 md:w-10 lg:w-12 h-1 ${
                 step - 1 === index + 1
                   ? "bg-gradient-to-r from-lime-700 to-primary from-40% to-90%"
                   : step > index + 1
@@ -217,7 +221,7 @@ export default function Onboarding() {
     switch (step) {
       case 1:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Create Administrator User</CardTitle>
               <CardDescription>Set up the Super Dev account</CardDescription>
@@ -225,7 +229,7 @@ export default function Onboarding() {
             <Form {...adminForm}>
               <form onSubmit={adminForm.handleSubmit(onAdminSubmit)}>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={adminForm.control}
                       name="firstName"
@@ -253,7 +257,7 @@ export default function Onboarding() {
                       )}
                     />
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={adminForm.control}
                       name="dob"
@@ -303,9 +307,9 @@ export default function Onboarding() {
                       control={adminForm.control}
                       name="phone"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Phone</FormLabel>
-                          <FormControl>
+                          <FormControl ref={withMask("(9999) 999-99-99")}>
                             <Input {...field} />
                           </FormControl>
                           <FormMessage />
@@ -369,7 +373,7 @@ export default function Onboarding() {
         );
       case 2:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Create Roles</CardTitle>
               <CardDescription>
@@ -379,20 +383,54 @@ export default function Onboarding() {
             <Form {...roleForm}>
               <form onSubmit={roleForm.handleSubmit(onRoleSubmit)}>
                 <CardContent className="space-y-4">
-                  <FormField
-                    control={roleForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role Name</FormLabel>
-
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-11/12">
+                    <FormField
+                      control={roleForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Role Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="col-span-3 md:col-span-1"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={roleForm.control}
+                      name="icon"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Icon</FormLabel>
+                          <FormControl>
+                            {/* when the field value changes, always it would filter the iconNames and get the first 50 items */}
+                            <InputAutoComplete
+                              field={field}
+                              OPTIONS={iconNames}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={roleForm.control}
+                      name="color"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Color</FormLabel>
+                          <FormControl>
+                            <ColorPicker {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={roleForm.control}
                     name="description"
@@ -401,33 +439,6 @@ export default function Onboarding() {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={roleForm.control}
-                    name="icon"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon</FormLabel>
-                        <FormControl>
-{/* when the field value changes, always it would filter the iconNames and get the first 50 items */}
-                          <InputAutoComplete field={field} OPTIONS={iconNames} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={roleForm.control}
-                    name="color"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color</FormLabel>
-                        <FormControl>
-                          <ColorPicker {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -446,7 +457,7 @@ export default function Onboarding() {
         );
       case 3:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Create Users</CardTitle>
               <CardDescription>Add users to your organization</CardDescription>
@@ -533,7 +544,7 @@ export default function Onboarding() {
         );
       case 4:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Service Metadata</CardTitle>
               <CardDescription>Set up your team information</CardDescription>
@@ -603,7 +614,7 @@ export default function Onboarding() {
         );
       case 5:
         return (
-          <Card>
+          <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>Overview</CardTitle>
               <CardDescription>Review all registered data</CardDescription>
@@ -696,9 +707,9 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex min-h-[900px] h-screen">
+    <div className="flex min-h-[900px] h-screen w-full">
       {renderSidebar()}
-      <div className="flex-1 ml-[25%] p-10">
+      <div className="flex-1 lg:ml-[25%] p-3 lg:p-10">
         <h1 className="text-3xl font-bold mb-6">Onboarding</h1>
         {renderStepIndicators()}
         {renderStep()}

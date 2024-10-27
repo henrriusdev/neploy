@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
 export interface ColorPickerProps
@@ -34,13 +33,13 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
     };
 
     return (
-      <div className="grid gap-2">
+      <div className="grid gap-2 w-full max-w-full">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button
               variant={"outline"}
               className={cn(
-                "w-[280px] justify-start text-left font-normal",
+                "w-full justify-start text-left font-normal",
                 !color && "text-muted-foreground",
                 className,
               )}
