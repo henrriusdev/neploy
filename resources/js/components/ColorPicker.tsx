@@ -11,20 +11,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ControllerRenderProps } from "react-hook-form";
 
 export interface ColorPickerProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
+  field: ControllerRenderProps<any>;
 }
 
 const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, field, ...props }: ColorPickerProps, ref) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const [isOpen, setIsOpen] = React.useState(false);
-    const [color, setColor] = React.useState(props.value || "#000000");
-
     const handleColorChange = (newColor: string) => {
-      setColor(newColor);
+      field.onChange?.(newColor);
+      field.value = newColor;
       if (inputRef.current) {
         inputRef.current.value = newColor;
         const event = new Event("input", { bubbles: true });
@@ -40,19 +41,19 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
               variant={"outline"}
               className={cn(
                 "w-full justify-start text-left font-normal",
-                !color && "text-muted-foreground",
+                !field.value && "text-muted-foreground",
                 className,
               )}
             >
               <div className="w-full flex items-center gap-2">
-                {color && (
+                {field.value && (
                   <div
                     className="h-4 w-4 rounded !bg-center !bg-cover transition-all border"
-                    style={{ backgroundColor: color }}
+                    style={{ backgroundColor: field.value }}
                   ></div>
                 )}
                 <div className="truncate flex-1">
-                  {color ? color.toUpperCase() : "Pick a color"}
+                  {field.value ? field.value.toUpperCase() : "Pick a field.value"}
                 </div>
               </div>
             </Button>
@@ -121,7 +122,7 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                   <div
                     className="w-[200px] h-4 rounded !bg-center !bg-cover transition-all border"
                     style={{
-                      backgroundColor: color,
+                      backgroundColor: field.value,
                     }}
                   />
                 </div>
@@ -129,7 +130,7 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                   <Input
                     ref={inputRef}
                     type="text"
-                    value={color}
+                    value={field.value}
                     className="w-[200px]"
                     onChange={(e) => handleColorChange(e.target.value)}
                   />
@@ -142,7 +143,7 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
           type="hidden"
           ref={ref}
           {...props}
-          value={color}
+          value={field.value}
           className={cn("", className)}
         />
       </div>

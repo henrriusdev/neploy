@@ -146,6 +146,7 @@ export default function Onboarding() {
 
   const onRoleSubmit = (data: z.infer<typeof roleSchema>) => {
     setRoles([...roles, data]);
+    console.log("Role data", roles, data);
     roleForm.reset();
   };
 
@@ -383,54 +384,19 @@ export default function Onboarding() {
             <Form {...roleForm}>
               <form onSubmit={roleForm.handleSubmit(onRoleSubmit)}>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-11/12">
-                    <FormField
-                      control={roleForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Role Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              className="col-span-3 md:col-span-1"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={roleForm.control}
-                      name="icon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Icon</FormLabel>
-                          <FormControl>
-                            {/* when the field value changes, always it would filter the iconNames and get the first 50 items */}
-                            <InputAutoComplete
-                              field={field}
-                              OPTIONS={iconNames}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={roleForm.control}
-                      name="color"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Color</FormLabel>
-                          <FormControl>
-                            <ColorPicker {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={roleForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={roleForm.control}
                     name="description"
@@ -439,6 +405,36 @@ export default function Onboarding() {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={roleForm.control}
+                    name="icon"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Icon</FormLabel>
+                        <FormControl>
+                          {/* when the field value changes, always it would filter the iconNames and get the first 50 items */}
+                          <InputAutoComplete
+                            field={field}
+                            OPTIONS={iconNames}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={roleForm.control}
+                    name="color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Color</FormLabel>
+                        <FormControl>
+                          <ColorPicker field={field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
