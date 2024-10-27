@@ -5,7 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
+
+type JWTClaims struct {
+	Email      string   `json:"email"`
+	Roles      []string `json:"roles"`
+	RoleIDs    []string `json:"rolesId"`
+	RolesLower []string `json:"rolesLower"`
+	Name       string   `json:"name"`
+	Username   string   `json:"username"`
+	jwt.RegisteredClaims
+}
 
 type Date struct {
 	time.Time

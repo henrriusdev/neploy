@@ -2,8 +2,12 @@ package service
 
 import (
 	"context"
+	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"neploy.dev/config"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
 )
@@ -15,6 +19,7 @@ type User interface {
 	Delete(ctx context.Context, id string) error
 	List(ctx context.Context, limit, offset uint) ([]model.User, error)
 	GetByEmail(ctx context.Context, email string) (model.User, error)
+	Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error)
 }
 
 type user struct {
@@ -77,4 +82,53 @@ func (u *user) List(ctx context.Context, limit, offset uint) ([]model.User, erro
 
 func (u *user) GetByEmail(ctx context.Context, email string) (model.User, error) {
 	return u.repo.GetByEmail(ctx, email)
+}
+
+func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error) {
+	user, err := u.GetByEmail(ctx, req.Email)
+	if err != nil {
+		return model.LoginResponse{}, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return model.LoginResponse{}, err
+	}
+
+	roles, err := u.userRoleRepo.GetByUserID(ctx, user.ID)
+	if err != nil {
+		return model.LoginResponse{}, err
+	}
+
+	roleNames := make([]string, len(roles))
+	roleIDs := make([]string, len(roles))
+	roleNamesLower := make([]string, len(roles))
+	for i, role := range roles {
+		roleNames[i] = role.Role.Name
+		roleIDs[i] = role.Role.ID
+		roleNamesLower[i] = strings.ToLower(role.Role.Name)
+	}
+
+	// create the JWT access token here and return it
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
+		Email:      user.Email,
+		Roles:      roleNames,
+		RoleIDs:    roleIDs,
+		RolesLower: roleNamesLower,
+		Name:       user.FirstName + " " + user.LastName,
+		Username:   user.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 5)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	})
+
+	t, err := token.SignedString([]byte(config.Env.JWTSecret))
+	if err != nil {
+		return model.LoginResponse{}, err
+	}
+
+	return model.LoginResponse{
+		Token: t,
+		User:  user,
+	}, nil
 }
