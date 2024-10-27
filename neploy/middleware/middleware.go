@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -8,7 +9,7 @@ import (
 )
 
 func OnboardingMiddleware(service service.Onboard) fiber.Handler {
-	const onboardPath = "/onboard" // Change this to match your onboarding path
+	onboardPath := "/onboard" // Change this to match your onboarding path
 
 	return func(c *fiber.Ctx) error {
 		// Skip middleware for non-GET requests
@@ -26,7 +27,7 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 		}
 
 		// Check if onboarding is completed
-		isDone, err := service.Done(c.Context())
+		isDone, step, err := service.Done(c.Context())
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to check onboarding status",
@@ -41,7 +42,8 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 				c.Set("X-Inertia-Location", onboardPath)
 				return c.SendStatus(fiber.StatusConflict)
 			}
-			// For regular requests, do a normal redirect
+
+			onboardPath = fmt.Sprintf("%s?step=%d", onboardPath, step)
 			return c.Redirect(onboardPath)
 		}
 
