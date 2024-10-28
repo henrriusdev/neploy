@@ -55,6 +55,8 @@ import { withMask } from "use-mask-input";
 import { RoleIcon } from "@/components/RoleIcon";
 import { RenderStepIndicators } from "@/components/RenderIndicators";
 import { RenderFormItem } from "@/components/RenderFormItem";
+import axios from "axios";
+import { CreateRoleRequest, CreateUserRequest, MetadataRequest } from "@/lib/types";
 
 const adminSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -88,10 +90,10 @@ const serviceSchema = z.object({
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
-  const [adminData, setAdminData] = useState(null);
-  const [roles, setRoles] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [serviceData, setServiceData] = useState(null);
+  const [adminData, setAdminData] = useState<CreateUserRequest | null>(null);
+  const [roles, setRoles] = useState<CreateRoleRequest[]>([]);
+  const [users, setUsers] = useState<CreateUserRequest[]>([]);
+  const [serviceData, setServiceData] = useState<MetadataRequest | null>(null);
   const totalSteps = 5;
 
   const iconNames: Option[] = icons.map((icon) => ({
@@ -159,7 +161,15 @@ export default function Onboarding() {
 
   const onServiceSubmit = (data: z.infer<typeof serviceSchema>) => {
     setServiceData(data);
-    setStep(5);
+
+    const payload = {
+      adminUser: adminData,
+      roles: roles,
+      users: users,
+      metadata: serviceData
+    }
+    
+    const response = axios.post('/onboard', payload)
   };
 
   const handleAuthProvider = (provider: string) => {
