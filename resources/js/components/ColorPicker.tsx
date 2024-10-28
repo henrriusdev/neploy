@@ -88,7 +88,6 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                 </Button>
                 {[
                   "#000000",
-                  "#ffffff",
                   "#f44336",
                   "#e91e63",
                   "#9c27b0",
@@ -100,8 +99,6 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                   "#009688",
                   "#4caf50",
                   "#8bc34a",
-                  "#cddc39",
-                  "#ffeb3b",
                   "#ffc107",
                   "#ff9800",
                   "#ff5722",

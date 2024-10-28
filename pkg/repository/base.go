@@ -18,6 +18,7 @@ type Repositories struct {
 	User     User
 	Role     Role
 	UserRole UserRole
+	Metadata Metadata
 }
 
 var (

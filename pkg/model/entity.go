@@ -2,15 +2,15 @@ package model
 
 type BaseEntity struct {
 	ID        string `json:"id" db:"id"`
-	CreatedAt Date   `json:"created_at" db:"created_at"`
-	UpdatedAt Date   `json:"updated_at" db:"updated_at"`
-	DeletedAt Date   `json:"deleted_at" db:"deleted_at"`
+	CreatedAt Date   `json:"createdAt" db:"created_at"`
+	UpdatedAt Date   `json:"updatedAt" db:"updated_at"`
+	DeletedAt Date   `json:"deletedAt" db:"deleted_at"`
 }
 
 type BaseRelation struct {
-	CreatedAt Date `json:"created_at" db:"created_at"`
-	UpdatedAt Date `json:"updated_at" db:"updated_at"`
-	DeletedAt Date `json:"deleted_at" db:"deleted_at"`
+	CreatedAt Date `json:"createdAt" db:"created_at"`
+	UpdatedAt Date `json:"updatedAt" db:"updated_at"`
+	DeletedAt Date `json:"deletedAt" db:"deleted_at"`
 }
 
 type User struct {
@@ -18,8 +18,8 @@ type User struct {
 	Username  string `json:"username" db:"username"`
 	Password  string `json:"password" db:"password"`
 	Email     string `json:"email" db:"email"`
-	FirstName string `json:"first_name" db:"first_name"`
-	LastName  string `json:"last_name" db:"last_name"`
+	FirstName string `json:"firstName" db:"first_name"`
+	LastName  string `json:"lastName" db:"last_name"`
 	DOB       Date   `json:"dob" db:"dob"`
 	Address   string `json:"address" db:"address"`
 	Phone     string `json:"phone" db:"phone"`
@@ -35,10 +35,10 @@ type Role struct {
 
 type Application struct {
 	BaseEntity
-	AppName         string `json:"app_name" db:"app_name"`
-	StorageLocation string `json:"storage_location" db:"storage_location"`
-	DeployLocation  string `json:"deploy_location" db:"deploy_location"`
-	TechStackID     string `json:"tech_stack_id" db:"tech_stack_id"`
+	AppName         string `json:"appName" db:"app_name"`
+	StorageLocation string `json:"storageLocation" db:"storage_location"`
+	DeployLocation  string `json:"deployLocation" db:"deploy_location"`
+	TechStackID     string `json:"techStackId" db:"tech_stack_id"`
 }
 
 type TechStack struct {
@@ -49,37 +49,37 @@ type TechStack struct {
 
 type UserRoles struct {
 	BaseRelation
-	UserID string `json:"user_id" db:"user_id"`
-	RoleID string `json:"role_id" db:"role_id"`
+	UserID string `json:"userId" db:"user_id"`
+	RoleID string `json:"roleId" db:"role_id"`
 	User   *User  `json:"user" db:"user"`
 	Role   *Role  `json:"role" db:"role"`
 }
 
 type UserTechStack struct {
 	BaseRelation
-	UserID      string `json:"user_id" db:"user_id"`
-	TechStackID string `json:"tech_stack_id" db:"tech_stack_id"`
+	UserID      string `json:"userId" db:"user_id"`
+	TechStackID string `json:"techStackId" db:"tech_stack_id"`
 }
 
 type Traces struct {
 	BaseEntity
-	UserID          string `json:"user_id" db:"user_id"`
+	UserID          string `json:"userId" db:"user_id"`
 	Type            string `json:"type" db:"type"`
 	Action          string `json:"action" db:"action"`
-	ActionTimestamp Date   `json:"action_timestamp" db:"action_timestamp"`
-	SqlStatement    string `json:"sql_statement" db:"sql_statement"`
+	ActionTimestamp Date   `json:"actionTimestamp" db:"action_timestamp"`
+	SqlStatement    string `json:"sqlStatement" db:"sql_statement"`
 }
 
 type Gateway struct {
 	BaseEntity
 	Name            string `json:"name" db:"name"`
-	EndpointURL     string `json:"endpoint_url" db:"endpoint_url"`
-	EndpointType    string `json:"endpoint_type" db:"endpoint_type"`
+	EndpointURL     string `json:"endpointUrl" db:"endpoint_url"`
+	EndpointType    string `json:"endpointType" db:"endpoint_type"`
 	Stage           string `json:"stage" db:"stage"`
-	HttpMethod      string `json:"http_method" db:"http_method"`
-	IntegrationType string `json:"integration_type" db:"integration_type"`
-	LoggingLevel    string `json:"logging_level" db:"logging_level"`
-	ApplicationID   string `json:"application_id" db:"application_id"`
+	HttpMethod      string `json:"httpMethod" db:"http_method"`
+	IntegrationType string `json:"integrationType" db:"integration_type"`
+	LoggingLevel    string `json:"loggingLevel" db:"logging_level"`
+	ApplicationID   string `json:"applicationId" db:"application_id"`
 }
 
 type Environment struct {
@@ -136,4 +136,12 @@ type UserOAuth struct {
 	Provider    string `json:"provider" db:"provider"`
 	OAuthID     string `json:"oauth_id" db:"oauth_id"`
 	AccessToken string `json:"access_token" db:"access_token"`
+}
+
+type Metadata struct {
+	BaseEntity
+	TeamName       string `json:"team_name" db:"team_name"`
+	LogoURL        string `json:"logo_url" db:"logo_url"`
+	PrimaryColor   string `json:"primary_color" db:"primary_color"`
+	SecondaryColor string `json:"secondary_color" db:"secondary_color"`
 }

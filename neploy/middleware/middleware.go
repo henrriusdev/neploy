@@ -21,17 +21,16 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 			return c.Next()
 		}
 
-		// Skip middleware for the onboarding path itself
-		if c.Path() == onboardPath {
-			return c.Next()
-		}
-
 		// Check if onboarding is completed
 		isDone, step, err := service.Done(c.Context())
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to check onboarding status",
 			})
+		}
+
+		if strings.Contains(c.OriginalURL(), onboardPath) || strings.Contains(c.OriginalURL(), fmt.Sprintf("?step=%d", step)) {
+			return c.Next()
 		}
 
 		// If onboarding is not done, handle the redirect
@@ -43,7 +42,10 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 				return c.SendStatus(fiber.StatusConflict)
 			}
 
-			onboardPath = fmt.Sprintf("%s?step=%d", onboardPath, step)
+			// Only append the step query param if it's not already present
+			if !strings.Contains(c.OriginalURL(), fmt.Sprintf("step=%d", step)) {
+				onboardPath = fmt.Sprintf("%s?step=%d", onboardPath, step)
+			}
 			return c.Redirect(onboardPath)
 		}
 

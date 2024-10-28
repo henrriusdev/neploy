@@ -26,6 +26,7 @@ export function InputAutoComplete({
   const handleValueChange = (option: Option) => {
     field.onChange(option.value);
     setSelectedOption(option);
+    field.value = option.value;
   };
 
   return (
@@ -36,9 +37,8 @@ export function InputAutoComplete({
         placeholder="Find something"
         isLoading={isLoading}
         disabled={isDisabled}
-        value={selectedOption}
+        value={field.value}
         onValueChange={handleValueChange}
-        field={field}
       />
     </div>
   );
