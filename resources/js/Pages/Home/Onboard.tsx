@@ -53,6 +53,8 @@ import { InputAutoComplete } from "@/components/InputAutoComplete";
 import { icons } from "@/lib/icons";
 import { withMask } from "use-mask-input";
 import { RoleIcon } from "@/components/RoleIcon";
+import { RenderStepIndicators } from "@/components/RenderIndicators";
+import { RenderFormItem } from "@/components/RenderFormItem";
 
 const adminSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -148,8 +150,6 @@ export default function Onboarding() {
   const onRoleSubmit = (data: z.infer<typeof roleSchema>) => {
     setRoles([...roles, data]);
     roleForm.reset();
-    roleForm.setValue("color", "#000000");
-    roleForm.setValue("icon", "ArrowDown");
   };
 
   const onUserSubmit = (data: z.infer<typeof userSchema>) => {
@@ -169,36 +169,7 @@ export default function Onboarding() {
 
   const steps = [1, 2, 3, 4, 5];
 
-  const renderStepIndicators = () => (
-    <div className="flex justify-center mb-8">
-      {steps.map((_, index) => (
-        <div key={index} className="flex items-center">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              step > index + 1
-                ? "bg-lime-700 text-white"
-                : step === index + 1
-                  ? "bg-primary text-white"
-                  : "bg-gray-200"
-            }`}
-          >
-            {step > index + 1 ? <Check className="w-4 h-4" /> : index + 1}
-          </div>
-          {index < totalSteps - 1 && (
-            <div
-              className={`w-6 sm:w-8 md:w-10 lg:w-12 h-1 ${
-                step - 1 === index + 1
-                  ? "bg-gradient-to-r from-lime-700 to-primary from-40% to-90%"
-                  : step > index + 1
-                    ? "bg-lime-700"
-                    : "bg-gray-200"
-              }`}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
+ 
 
   const renderSidebar = () => (
     <div className="hidden w-1/4 bg-primary text-primary-foreground p-6 h-screen fixed left-0 top-0 overflow-y-auto lg:flex flex-col justify-center">
@@ -237,26 +208,18 @@ export default function Onboarding() {
                       control={adminForm.control}
                       name="firstName"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <RenderFormItem label="First Name">
+                          <Input {...field} />
+                        </RenderFormItem>
                       )}
                     />
                     <FormField
                       control={adminForm.control}
                       name="lastName"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <RenderFormItem label="Last Name">
+                          <Input {...field} />
+                        </RenderFormItem>
                       )}
                     />
                   </div>
@@ -265,8 +228,7 @@ export default function Onboarding() {
                       control={adminForm.control}
                       name="dob"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Date of birth</FormLabel>
+                        <RenderFormItem label="Date of Birth">
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -302,8 +264,7 @@ export default function Onboarding() {
                               />
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
-                        </FormItem>
+                        </RenderFormItem>
                       )}
                     />
                     <FormField
@@ -324,26 +285,18 @@ export default function Onboarding() {
                     control={adminForm.control}
                     name="address"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Address">
                           <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={adminForm.control}
                     name="password"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Password">
                           <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                 </CardContent>
@@ -390,35 +343,25 @@ export default function Onboarding() {
                     control={roleForm.control}
                     name="name"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role Name</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Role Name">
                           <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={roleForm.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Description">
                           <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={roleForm.control}
                     name="icon"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Icon">
                           <Controller
                             control={roleForm.control}
                             name="icon"
@@ -429,18 +372,14 @@ export default function Onboarding() {
                               />
                             )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={roleForm.control}
                     name="color"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Color">
                           <Controller
                             control={roleForm.control}
                             name="color"
@@ -448,9 +387,7 @@ export default function Onboarding() {
                               <ColorPicker field={field} />
                             )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   {/* show the icon preview */}
@@ -517,39 +454,27 @@ export default function Onboarding() {
                     control={userForm.control}
                     name="firstName"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="First Name">
                           <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={userForm.control}
                     name="lastName"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Last Name">
                           <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={userForm.control}
                     name="email"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
+                      <RenderFormItem label="Email">
                           <Input type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+</                        RenderFormItem>
                     )}
                   />
                   <FormField
@@ -632,64 +557,44 @@ export default function Onboarding() {
                     control={serviceForm.control}
                     name="teamName"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Team Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      <RenderFormItem label="Team Name">
+                        <Input {...field} />
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={serviceForm.control}
                     name="logo"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Logo URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      <RenderFormItem label="Logo URL">
+                        <Input {...field} />
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={serviceForm.control}
                     name="primaryColor"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Primary Color</FormLabel>
-                        <FormControl>
-                          <Controller
-                            control={serviceForm.control}
-                            name="primaryColor"
-                            render={({ field }) => (
-                              <ColorPicker field={field} />
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      <RenderFormItem label="Primary Color">
+                        <Controller
+                          control={serviceForm.control}
+                          name="primaryColor"
+                          render={({ field }) => <ColorPicker field={field} />}
+                        />
+                      </RenderFormItem>
                     )}
                   />
                   <FormField
                     control={serviceForm.control}
                     name="secondaryColor"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Secondary Color</FormLabel>
-                        <FormControl>
-                          <Controller
-                            control={serviceForm.control}
-                            name="secondaryColor"
-                            render={({ field }) => (
-                              <ColorPicker field={field} />
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                      <RenderFormItem label="Secondary Color">
+                        <Controller
+                          control={serviceForm.control}
+                          name="secondaryColor"
+                          render={({ field }) => <ColorPicker field={field} />}
+                        />
+                      </RenderFormItem>
                     )}
                   />
                 </CardContent>
@@ -701,66 +606,6 @@ export default function Onboarding() {
           </Card>
         );
       case 5:
-        return (
-          <Card className="w-full max-w-screen-md mx-auto">
-            <CardHeader>
-              <CardTitle>Overview</CardTitle>
-              <CardDescription>Review all registered data</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {adminData && (
-                <div>
-                  <h3 className="font-semibold">Administrator</h3>
-                  <p>
-                    Name: {adminData.firstName} {adminData.lastName}
-                  </p>
-                  <p>
-                    Date of Birth:{" "}
-                    {adminData.dob
-                      ? format(adminData.dob, "PPP")
-                      : "Not provided"}
-                  </p>
-                  <p>Address: {adminData.address}</p>
-                  <p>Phone: {adminData.phone}</p>
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold">Roles</h3>
-                <ul>
-                  {roles.map((role, index) => (
-                    <li key={index}>
-                      {role.name} - {role.description}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold">Users</h3>
-                <ul>
-                  {users.map((user, index) => (
-                    <li key={index}>
-                      {user.firstName} {user.lastName} - {user.email} (
-                      {user.role})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {serviceData && (
-                <div>
-                  <h3 className="font-semibold">Service Metadata</h3>
-                  <p>Team Name: {serviceData.teamName}</p>
-                  <p>Logo URL: {serviceData.logo}</p>
-                  <p>Primary Color: {serviceData.primaryColor}</p>
-                  <p>Secondary Color: {serviceData.secondaryColor}</p>
-                </div>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button onClick={() => setStep(6)}>Complete</Button>
-            </CardFooter>
-          </Card>
-        );
-      case 6:
         return (
           <Card>
             <CardHeader>
@@ -799,7 +644,7 @@ export default function Onboarding() {
       {renderSidebar()}
       <div className="flex-1 lg:ml-[25%] p-3 lg:p-10">
         <h1 className="text-3xl font-bold mb-6">Onboarding</h1>
-        {renderStepIndicators()}
+        <RenderStepIndicators step={step} totalSteps={totalSteps} steps={steps} />
         {renderStep()}
       </div>
     </div>
