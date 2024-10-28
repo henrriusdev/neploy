@@ -13,12 +13,13 @@ type Onboard interface {
 }
 
 type onboard struct {
-	userService User
-	roleService Role
+	userService     User
+	roleService     Role
+	metadataService Metadata
 }
 
-func NewOnboard(userService User, roleService Role) Onboard {
-	return &onboard{userService, roleService}
+func NewOnboard(userService User, roleService Role, metadataService Metadata) Onboard {
+	return &onboard{userService, roleService, metadataService}
 }
 
 func (o *onboard) Done(ctx context.Context) (bool, int, error) {
@@ -55,9 +56,13 @@ func (o *onboard) Done(ctx context.Context) (bool, int, error) {
 		step = 3
 	}
 
-	// todo: check if the metadata is created
+	if _, err := o.metadataService.Get(ctx); err != nil {
+		step = 4
+		return false, step, err
+	}
 
-	return step != 0, step, nil
+	step = 5
+	return step != 5, step, nil
 }
 
 func (o *onboard) hasAdminRole(roles []model.UserRoles) bool {
@@ -89,7 +94,10 @@ func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error 
 		}
 	}
 
-	// todo: create the metadata
+	// create the metadata
+	if err := o.metadataService.Create(ctx, req.Metadata); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -661,7 +661,13 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Primary Color</FormLabel>
                         <FormControl>
-                          <ColorPicker {...field} />
+                          <Controller
+                            control={serviceForm.control}
+                            name="primaryColor"
+                            render={({ field }) => (
+                              <ColorPicker field={field} />
+                            )}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -674,7 +680,13 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Secondary Color</FormLabel>
                         <FormControl>
-                          <ColorPicker {...field} />
+                          <Controller
+                            control={serviceForm.control}
+                            name="secondaryColor"
+                            render={({ field }) => (
+                              <ColorPicker field={field} />
+                            )}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -55,7 +55,8 @@ func Start(npy Neploy) {
 func NewServices(npy Neploy) service.Services {
 	user := service.NewUser(npy.Repositories.User, npy.Repositories.UserRole)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
-	onboard := service.NewOnboard(user, role)
+	metadata := service.NewMetadata(npy.Repositories.Metadata)
+	onboard := service.NewOnboard(user, role, metadata)
 
 	return service.Services{
 		User:    user,
@@ -68,11 +69,13 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	user := repository.NewUser(npy.DB)
 	role := repository.NewRole(npy.DB)
 	userRole := repository.NewUserRole(npy.DB)
+	metadata := repository.NewMetadata(npy.DB)
 
 	return repository.Repositories{
 		User:     user,
 		Role:     role,
 		UserRole: userRole,
+		Metadata: metadata,
 	}
 }
 
