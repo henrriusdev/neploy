@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
@@ -11,9 +11,9 @@ import {
   Github,
   GitBranch,
   Check,
-  ChevronsUpDown,
+  Trash,
+  Trash2,
 } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,10 +48,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ColorPicker } from "@/components/ColorPicker";
-import { AutoComplete, Option } from "@/components/autocompletion";
+import { Option } from "@/components/autocompletion";
 import { InputAutoComplete } from "@/components/InputAutoComplete";
-import { icons } from "@/lib/arrays";
+import { icons } from "@/lib/icons";
 import { withMask } from "use-mask-input";
+import { RoleIcon } from "@/components/RoleIcon";
 
 const adminSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -113,7 +114,7 @@ export default function Onboarding() {
     defaultValues: {
       name: "",
       description: "",
-      icon: "ChevronLeft",
+      icon: "",
       color: "#000000",
     },
   });
@@ -146,8 +147,9 @@ export default function Onboarding() {
 
   const onRoleSubmit = (data: z.infer<typeof roleSchema>) => {
     setRoles([...roles, data]);
-    console.log("Role data", roles, data);
     roleForm.reset();
+    roleForm.setValue("color", "#000000");
+    roleForm.setValue("icon", "ArrowDown");
   };
 
   const onUserSubmit = (data: z.infer<typeof userSchema>) => {
@@ -417,10 +419,15 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Icon</FormLabel>
                         <FormControl>
-                          {/* when the field value changes, always it would filter the iconNames and get the first 50 items */}
-                          <InputAutoComplete
-                            field={field}
-                            OPTIONS={iconNames}
+                          <Controller
+                            control={roleForm.control}
+                            name="icon"
+                            render={({ field }) => (
+                              <InputAutoComplete
+                                field={field}
+                                OPTIONS={iconNames}
+                              />
+                            )}
                           />
                         </FormControl>
                         <FormMessage />
@@ -434,12 +441,57 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Color</FormLabel>
                         <FormControl>
-                          <ColorPicker field={field} />
+                          <Controller
+                            control={roleForm.control}
+                            name="color"
+                            render={({ field }) => (
+                              <ColorPicker field={field} />
+                            )}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  {/* show the icon preview */}
+                  <div className="flex items-start flex-col space-y-2">
+                    <h2 className="font-semibold text-lg">Icon Preview</h2>
+                    <RoleIcon
+                      icon={roleForm.watch("icon")}
+                      color={roleForm.watch("color")}
+                    />
+                  </div>
+
+                  {roles.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-xl">Roles Selected</h3>
+                      <ul>
+                        {roles.map((role, index) => (
+                          <li
+                            key={index}
+                            className="flex justify-between items-center space-x-2 my-1">
+                            <div className="flex items-center space-x-2 space-y-2">
+                              <RoleIcon icon={role.icon} color={role.color} />
+                              <div>
+                                <p className="font-semibold">{role.name}</p>
+                                <p>{role.description}</p>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="w-12 h-12"
+                              onClick={() => {
+                                setRoles(roles.filter((r, i) => i !== index));
+                              }}>
+                              <Trash2 className="!w-7 !h-7" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   <Button type="submit">Add Role</Button>
@@ -527,6 +579,34 @@ export default function Onboarding() {
                       </FormItem>
                     )}
                   />
+                  {users.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-xl">Users Selected</h3>
+                      <ul>
+                        {users.map((user, index) => (
+                          <li key={index} className="flex justify-between">
+                            <div>
+                              <p>
+                                {user.firstName} {user.lastName} - {user.email} (
+                                {user.role})
+                              </p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="w-14 h-12"
+                              onClick={() => {
+                                setUsers(users.filter((u, i) => i !== index));
+                              }}
+                            >
+                              <Trash className="!w-8 !h-8" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   <Button type="submit">Add User</Button>
