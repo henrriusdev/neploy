@@ -169,7 +169,12 @@ export default function Onboarding() {
       metadata: serviceData
     }
     
-    const response = axios.post('/onboard', payload)
+    const response = axios.post('/onboard', payload).then((response) => {
+      console.log(response.data);
+    }).catch((error) => {
+      console.error(error);
+    });
+
   };
 
   const handleAuthProvider = (provider: string) => {
