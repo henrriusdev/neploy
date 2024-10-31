@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { useFormContext, ControllerRenderProps } from "react-hook-form";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { FormControl } from "@/components/ui/form";
 
 export type DatePickerProps = {
   className?: string;
@@ -34,6 +36,7 @@ export type DatePickerProps = {
   isRangePicker?: boolean;
   minYear?: number;
   maxYear?: number;
+  field?: ControllerRenderProps<any, any>;
 };
 
 export function DatePicker({
@@ -43,18 +46,26 @@ export function DatePicker({
   isRangePicker = false,
   minYear = 1900,
   maxYear = 2100,
+  field,
 }: DatePickerProps) {
+  const formContext = useFormContext();
+  const isFormContext = !!formContext && !!field;
+
   const [selectedDate, setSelectedDate] = React.useState<
     Date | DateRange | undefined
-  >(date);
+  >(isFormContext ? field.value : date);
   const [isRange, setIsRange] = React.useState<boolean>(isRangePicker);
   const [month, setMonth] = React.useState<Date>(
-    selectedDate instanceof Date ? selectedDate : new Date()
+    selectedDate instanceof Date
+      ? selectedDate
+      : selectedDate && "from" in selectedDate
+      ? selectedDate.from
+      : new Date()
   );
 
   React.useEffect(() => {
-    setSelectedDate(date);
-  }, [date]);
+    setSelectedDate(isFormContext ? field.value : date);
+  }, [isFormContext, field?.value, date]);
 
   React.useEffect(() => {
     setIsRange(isRangePicker);
@@ -62,7 +73,11 @@ export function DatePicker({
 
   const handleDateSelect = (newDate: Date | DateRange | undefined) => {
     setSelectedDate(newDate);
-    onDateChange?.(newDate);
+    if (isFormContext) {
+      field.onChange(newDate);
+    } else {
+      onDateChange?.(newDate);
+    }
   };
 
   const formatDate = (date: Date | DateRange | undefined) => {
@@ -79,20 +94,25 @@ export function DatePicker({
     return "Pick a date range";
   };
 
+  const buttonProps = isFormContext ? field : {};
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
         <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}>
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {formatDate(selectedDate)}
-          </Button>
+          <FormControl>
+            <Button
+              id={isFormContext ? field.name : undefined}
+              variant={"outline"}
+              className={cn(
+                "w-[300px] justify-start text-left font-normal",
+                !selectedDate && "text-muted-foreground"
+              )}
+              {...buttonProps}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {formatDate(selectedDate)}
+            </Button>
+          </FormControl>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <div className="w-[350px] p-3 space-y-3">
