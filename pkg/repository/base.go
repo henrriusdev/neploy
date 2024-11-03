@@ -15,10 +15,11 @@ import (
 )
 
 type Repositories struct {
-	User     User
-	Role     Role
-	UserRole UserRole
-	Metadata Metadata
+	Metadata  Metadata
+	Role      Role
+	User      User
+	UserOauth UserOauth
+	UserRole  UserRole
 }
 
 var (
