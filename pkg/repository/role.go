@@ -11,12 +11,12 @@ import (
 )
 
 type Role interface {
-	CreateRole(context.Context, model.Role) error
-	GetRoleByID(context.Context, string) (model.Role, error)
-	GetRoleByName(context.Context, string) (model.Role, error)
-	GetRoles(context.Context) ([]model.Role, error)
-	UpdateRole(context.Context, string, model.Role) error
-	DeleteRole(context.Context, string) error
+	Insert(context.Context, model.Role) error
+	GetByID(context.Context, string) (model.Role, error)
+	GetByName(context.Context, string) (model.Role, error)
+	Get(context.Context) ([]model.Role, error)
+	Update(context.Context, string, model.Role) error
+	Delete(context.Context, string) error
 }
 
 type role[T any] struct {
@@ -27,7 +27,7 @@ func NewRole(db store.Queryable) Role {
 	return &role[model.Role]{Base[model.Role]{Store: db, Table: "roles"}}
 }
 
-func (r *role[T]) CreateRole(ctx context.Context, role model.Role) error {
+func (r *role[T]) Insert(ctx context.Context, role model.Role) error {
 	q := r.BaseQueryInsert().Rows(role)
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -41,7 +41,7 @@ func (r *role[T]) CreateRole(ctx context.Context, role model.Role) error {
 	return nil
 }
 
-func (r *role[T]) GetRoleByID(ctx context.Context, id string) (model.Role, error) {
+func (r *role[T]) GetByID(ctx context.Context, id string) (model.Role, error) {
 	var role model.Role
 	q := filters.ApplyFilters(r.baseQuery(), filters.IsSelectFilter("id", id))
 	query, args, err := q.ToSQL()
@@ -56,7 +56,7 @@ func (r *role[T]) GetRoleByID(ctx context.Context, id string) (model.Role, error
 	return role, nil
 }
 
-func (r *role[T]) GetRoleByName(ctx context.Context, name string) (model.Role, error) {
+func (r *role[T]) GetByName(ctx context.Context, name string) (model.Role, error) {
 	var role model.Role
 	q := filters.ApplyFilters(r.baseQuery(), filters.IsSelectFilter("name", name))
 	query, args, err := q.ToSQL()
@@ -71,7 +71,7 @@ func (r *role[T]) GetRoleByName(ctx context.Context, name string) (model.Role, e
 	return role, nil
 }
 
-func (r *role[T]) GetRoles(ctx context.Context) ([]model.Role, error) {
+func (r *role[T]) Get(ctx context.Context) ([]model.Role, error) {
 	var roles []model.Role
 	q := r.baseQuery()
 	query, args, err := q.ToSQL()
@@ -86,7 +86,7 @@ func (r *role[T]) GetRoles(ctx context.Context) ([]model.Role, error) {
 	return roles, nil
 }
 
-func (r *role[T]) UpdateRole(ctx context.Context, id string, role model.Role) error {
+func (r *role[T]) Update(ctx context.Context, id string, role model.Role) error {
 	q := r.BaseQueryUpdate().Set(role).Where(goqu.Ex{"id": id})
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -100,12 +100,12 @@ func (r *role[T]) UpdateRole(ctx context.Context, id string, role model.Role) er
 	return nil
 }
 
-func (r *role[T]) DeleteRole(ctx context.Context, id string) error {
-	role, err := r.GetRoleByID(ctx, id)
+func (r *role[T]) Delete(ctx context.Context, id string) error {
+	role, err := r.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
 
 	role.DeletedAt = &model.Date{Time: time.Now()}
-	return r.UpdateRole(ctx, id, role)
+	return r.Update(ctx, id, role)
 }

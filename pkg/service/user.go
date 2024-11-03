@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 	"neploy.dev/config"
 	"neploy.dev/pkg/model"
@@ -23,12 +24,11 @@ type User interface {
 }
 
 type user struct {
-	repo         repository.User
-	userRoleRepo repository.UserRole
+	repos repository.Repositories
 }
 
-func NewUser(repo repository.User, userRoleRepo repository.UserRole) User {
-	return &user{repo, userRoleRepo}
+func NewUser(repos repository.Repositories) User {
+	return &user{repos}
 }
 
 func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
@@ -46,17 +46,24 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
 		Phone:     req.Phone,
 	}
 
-	user, err = u.repo.Create(ctx, user)
+	user, err = u.repos.User.Create(ctx, user)
 	if err != nil {
 		return err
 	}
 
-	for _, roleID := range req.Roles {
+	for _, roleName := range req.Roles {
+		role, err := u.repos.Role.GetByName(ctx, roleName)
+		if err != nil {
+			log.Err(err).Msg("error getting role")
+			return err
+		}
+
+		roleID := role.ID
 		userRole := model.UserRoles{
 			UserID: user.ID,
 			RoleID: roleID,
 		}
-		if _, err := u.userRoleRepo.Insert(ctx, userRole); err != nil {
+		if _, err := u.repos.UserRole.Insert(ctx, userRole); err != nil {
 			return err
 		}
 	}
@@ -65,23 +72,23 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
 }
 
 func (u *user) Get(ctx context.Context, id string) (model.User, error) {
-	return u.repo.Get(ctx, id)
+	return u.repos.User.Get(ctx, id)
 }
 
 func (u *user) Update(ctx context.Context, user model.User) error {
-	return u.repo.Update(ctx, user)
+	return u.repos.User.Update(ctx, user)
 }
 
 func (u *user) Delete(ctx context.Context, id string) error {
-	return u.repo.Delete(ctx, id)
+	return u.repos.User.Delete(ctx, id)
 }
 
 func (u *user) List(ctx context.Context, limit, offset uint) ([]model.User, error) {
-	return u.repo.List(ctx, limit, offset)
+	return u.repos.User.List(ctx, limit, offset)
 }
 
 func (u *user) GetByEmail(ctx context.Context, email string) (model.User, error) {
-	return u.repo.GetByEmail(ctx, email)
+	return u.repos.User.GetByEmail(ctx, email)
 }
 
 func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error) {
@@ -94,7 +101,7 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 		return model.LoginResponse{}, err
 	}
 
-	roles, err := u.userRoleRepo.GetByUserID(ctx, user.ID)
+	roles, err := u.repos.UserRole.GetByUserID(ctx, user.ID)
 	if err != nil {
 		return model.LoginResponse{}, err
 	}

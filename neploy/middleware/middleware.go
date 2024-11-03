@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,17 +21,13 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 		}
 
 		// Check if onboarding is completed
-		isDone, step, err := service.Done(c.Context())
+		isDone, err := service.Done(c.Context())
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to check onboarding status",
-				"data":  err.Error(),
 			})
 		}
-
-		if strings.Contains(c.OriginalURL(), onboardPath) || strings.Contains(c.OriginalURL(), fmt.Sprintf("?step=%d", step)) {
-			return c.Next()
-		}
+		println(isDone)
 
 		// If onboarding is not done, handle the redirect
 		if !isDone {
@@ -42,16 +37,14 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 				c.Set("X-Inertia-Location", onboardPath)
 				return c.SendStatus(fiber.StatusConflict)
 			}
-
-			// Only append the step query param if it's not already present
-			if !strings.Contains(c.OriginalURL(), fmt.Sprintf("step=%d", step)) {
-				onboardPath = fmt.Sprintf("%s?step=%d", onboardPath, step)
-			}
+			// For regular requests, do a normal redirect
 			return c.Redirect(onboardPath)
 		}
 
 		// If onboarding is done and user tries to access onboard page,
 		// handle the redirect to home (optional)
+
+		println(isDone, c.Path(), onboardPath, c.Path() == onboardPath)
 		if isDone && c.Path() == onboardPath {
 			if c.Get("X-Inertia") == "true" {
 				c.Set("X-Inertia-Location", "/")

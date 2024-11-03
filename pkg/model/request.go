@@ -31,8 +31,8 @@ type OnboardRequest struct {
 }
 
 type MetadataRequest struct {
-	Name           string `json:"name" db:"name"`
-	LogoURL        string `json:"logoURL" db:"logo_url"`
+	Name           string `json:"teamName" db:"name"`
+	LogoURL        string `json:"logo" db:"logo_url"`
 	PrimaryColor   string `json:"primaryColor" db:"primary_color"`
 	SecondaryColor string `json:"secondaryColor" db:"secondary_color"`
 }

@@ -134,12 +134,13 @@ export default function Onboarding() {
     const response = axios
       .post("/onboard", payload)
       .then((response) => {
-        console.log(response.data);
+        if (response.status === 200) {
+          setStep(4);
+        }
       })
       .catch((error) => {
         console.error(error);
       });
-    console.log(response);
   };
 
   const handleAuthProvider = (provider: string) => {
@@ -484,9 +485,9 @@ export default function Onboarding() {
             <CardFooter>
               <Button
                 onClick={() =>
-                  console.log("Redirect to dashboard or home page")
+                  window.location.replace("/")
                 }>
-                Go to Dashboard
+                Go to Login
               </Button>
             </CardFooter>
           </Card>

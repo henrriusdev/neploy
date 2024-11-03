@@ -11,7 +11,7 @@ import (
 
 type Onboard interface {
 	// Onboard the admin user and create the default roles and permissions for the application and also create the users
-	Done(context.Context) (bool, int, error)
+	Done(context.Context) (bool, error)
 	Initiate(context.Context, model.OnboardRequest) error
 }
 
@@ -25,47 +25,28 @@ func NewOnboard(userService User, roleService Role, metadataService Metadata) On
 	return &onboard{userService, roleService, metadataService}
 }
 
-func (o *onboard) Done(ctx context.Context) (bool, int, error) {
-	users, err := o.userService.List(ctx, 100, 0)
+func (o *onboard) Done(ctx context.Context) (bool, error) {
+	users, err := o.userService.List(ctx, 1, 0)
 	if err != nil {
-		return false, 0, err
+		log.Err(err).Msg("error getting users")
+		return false, err
 	}
 
-	step := 0
 	switch len(users) {
-	case 0:
-		return false, 0, nil
+	default:
+		return false, nil
 	case 1:
 		userRoles, err := o.roleService.GetUserRoles(ctx, users[0].ID)
 		if err != nil {
-			return false, 0, err
+			log.Err(err).Msg("error getting user roles")
+			return false, err
 		}
 
 		if o.hasAdminRole(userRoles) {
-			step = 1
+			return true, nil
 		}
-
-		roles, err := o.roleService.Get(ctx)
-		if err != nil {
-			return false, step, err
-		}
-
-		if len(roles) == 0 {
-			return false, step, nil
-		}
-
-		step = 2
-	default:
-		step = 3
 	}
-
-	if _, err := o.metadataService.Get(ctx); err != nil {
-		step = 4
-		return false, step, err
-	}
-
-	step = 5
-	return step != 5, step, nil
+	return false, nil
 }
 
 func (o *onboard) hasAdminRole(roles []model.UserRoles) bool {
@@ -78,7 +59,7 @@ func (o *onboard) hasAdminRole(roles []model.UserRoles) bool {
 }
 
 func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error {
-	if _, err := o.roleService.GetByName(ctx, "Administrator"); err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if _, err := o.roleService.GetByName(ctx, "Administrator"); err != nil && errors.Is(err, sql.ErrNoRows) {
 		role := model.CreateRoleRequest{
 			Name:        "Administrator",
 			Description: "Administrator of the system",
