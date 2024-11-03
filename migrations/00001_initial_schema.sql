@@ -10,7 +10,7 @@ $$ language plpgsql;
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE EXTENSION pgcrypto;
+CREATE EXTENSION if not exists pgcrypto;
 -- +goose StatementEnd
 
 -- +goose StatementBegin

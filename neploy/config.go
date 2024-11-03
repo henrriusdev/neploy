@@ -66,16 +66,18 @@ func NewServices(npy Neploy) service.Services {
 }
 
 func NewRepositories(npy Neploy) repository.Repositories {
-	user := repository.NewUser(npy.DB)
-	role := repository.NewRole(npy.DB)
-	userRole := repository.NewUserRole(npy.DB)
 	metadata := repository.NewMetadata(npy.DB)
+	role := repository.NewRole(npy.DB)
+	user := repository.NewUser(npy.DB)
+	userOauth := repository.NewUserOauth(npy.DB)
+	userRole := repository.NewUserRole(npy.DB)
 
 	return repository.Repositories{
-		User:     user,
-		Role:     role,
-		UserRole: userRole,
-		Metadata: metadata,
+		Metadata:  metadata,
+		Role:      role,
+		User:      user,
+		UserOauth: userOauth,
+		UserRole:  userRole,
 	}
 }
 

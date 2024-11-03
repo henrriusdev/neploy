@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
@@ -26,6 +28,14 @@ func (o *Onboard) Initiate(c *fiber.Ctx) error {
 		log.Err(err).Msg("error")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
+
+	oauthID := c.Cookies("oauth_id")
+	if oauthID == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+
+	oauth, _ := strconv.Atoi(oauthID)
+	req.OauthID = oauth
 
 	if err := o.service.Initiate(c.Context(), req); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

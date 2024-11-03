@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"neploy.dev/pkg/common"
 	"neploy.dev/pkg/service"
 )
 
@@ -16,7 +17,7 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 			return c.Next()
 		}
 
-		if strings.HasPrefix(c.Path(), "/build/assets/") {
+		if common.AcceptedRoutesForOnboarding(c.Path()) {
 			return c.Next()
 		}
 
@@ -27,10 +28,12 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 				"error": "Failed to check onboarding status",
 			})
 		}
-		println(isDone)
 
 		// If onboarding is not done, handle the redirect
 		if !isDone {
+			if c.Path() == onboardPath {
+				return c.Next()
+			}
 			// Check if it's an Inertia request
 			if c.Get("X-Inertia") == "true" {
 				// For Inertia requests, return a 409 Conflict with the redirect location
@@ -44,7 +47,6 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 		// If onboarding is done and user tries to access onboard page,
 		// handle the redirect to home (optional)
 
-		println(isDone, c.Path(), onboardPath, c.Path() == onboardPath)
 		if isDone && c.Path() == onboardPath {
 			if c.Get("X-Inertia") == "true" {
 				c.Set("X-Inertia-Location", "/")

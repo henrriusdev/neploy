@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 )
 
 type User interface {
-	Create(ctx context.Context, user model.CreateUserRequest) error
+	Create(ctx context.Context, user model.CreateUserRequest, oauthID int) error
 	Get(ctx context.Context, id string) (model.User, error)
 	Update(ctx context.Context, user model.User) error
 	Delete(ctx context.Context, id string) error
@@ -31,7 +32,7 @@ func NewUser(repos repository.Repositories) User {
 	return &user{repos}
 }
 
-func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
+func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID int) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -66,6 +67,16 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
 		if _, err := u.repos.UserRole.Insert(ctx, userRole); err != nil {
 			return err
 		}
+	}
+
+	oauth := model.UserOAuth{
+		UserID:   user.ID,
+		Provider: model.Provider(req.Provider),
+		OAuthID:  strconv.Itoa(oauthID),
+	}
+
+	if err := u.repos.UserOauth.Insert(ctx, oauth); err != nil {
+		return err
 	}
 
 	return nil
