@@ -9,6 +9,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type (
+	Provider string
+)
+
+const (
+	Github Provider = "github"
+	Gitlab Provider = "gitlab"
+)
+
 type JWTClaims struct {
 	Email      string   `json:"email"`
 	Roles      []string `json:"roles"`
