@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/romsar/gonertia"
+	"github.com/rs/zerolog/log"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -16,12 +17,13 @@ func NewOnboard(service service.Onboard) *Onboard {
 }
 
 func (o *Onboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
-	r.Post("/onboard", o.Initiate)
+	r.Post("", o.Initiate)
 }
 
 func (o *Onboard) Initiate(c *fiber.Ctx) error {
 	var req model.OnboardRequest
 	if err := c.BodyParser(&req); err != nil {
+		log.Err(err).Msg("error")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
 
