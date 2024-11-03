@@ -11,3 +11,8 @@ func loginRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 	auth := handler.NewAuth(npy.Services.User)
 	auth.RegisterRoutes(app.Group(""), i)
 }
+
+func onboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+	onboard := handler.NewOnboard(npy.Services.Onboard)
+	onboard.RegisterRoutes(app.Group("/onboard"), i)
+}

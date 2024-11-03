@@ -1,29 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import * as React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { format } from "date-fns";
-import {
-  Calendar as CalendarIcon,
-  Github,
-  GitBranch,
-  Check,
-  Trash,
-  Trash2,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Option } from "@/components/autocompletion";
+import { ColorPicker } from "@/components/ColorPicker";
+import { DatePicker } from "@/components/DatePicker";
+import { InputAutoComplete } from "@/components/InputAutoComplete";
+import { RenderFormItem } from "@/components/RenderFormItem";
+import { RenderStepIndicators } from "@/components/RenderIndicators";
+import { RoleIcon } from "@/components/RoleIcon";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Form,
@@ -33,28 +24,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ColorPicker } from "@/components/ColorPicker";
-import { Option } from "@/components/autocompletion";
-import { InputAutoComplete } from "@/components/InputAutoComplete";
 import { icons } from "@/lib/icons";
+import {
+  CreateRoleRequest,
+  CreateUserRequest,
+  MetadataRequest,
+} from "@/lib/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import {
+  Check,
+  GitBranch,
+  Github,
+  Trash2
+} from "lucide-react";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { withMask } from "use-mask-input";
-import { RoleIcon } from "@/components/RoleIcon";
-import { RenderStepIndicators } from "@/components/RenderIndicators";
-import { RenderFormItem } from "@/components/RenderFormItem";
+import * as z from "zod";
 
 const adminSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -72,13 +61,6 @@ const roleSchema = z.object({
   color: z.string().min(4, "Color must be a valid hex code"),
 });
 
-const userSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  role: z.string().min(1, "Role is required"),
-});
-
 const serviceSchema = z.object({
   teamName: z.string().min(2, "Team name must be at least 2 characters"),
   logo: z.string().min(1, "Logo URL is required"),
@@ -88,11 +70,10 @@ const serviceSchema = z.object({
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
-  const [adminData, setAdminData] = useState(null);
-  const [roles, setRoles] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [serviceData, setServiceData] = useState(null);
-  const totalSteps = 5;
+  const [adminData, setAdminData] = useState<CreateUserRequest | null>(null);
+  const [roles, setRoles] = useState<CreateRoleRequest[]>([]);
+  const [serviceData, setServiceData] = useState<MetadataRequest | null>(null);
+  const totalSteps = 4;
 
   const iconNames: Option[] = icons.map((icon) => ({
     value: icon,
@@ -121,16 +102,6 @@ export default function Onboarding() {
     },
   });
 
-  const userForm = useForm<z.infer<typeof userSchema>>({
-    resolver: zodResolver(userSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      role: "",
-    },
-  });
-
   const serviceForm = useForm<z.infer<typeof serviceSchema>>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
@@ -151,15 +122,25 @@ export default function Onboarding() {
     setRoles([...roles, data]);
     roleForm.reset();
   };
-
-  const onUserSubmit = (data: z.infer<typeof userSchema>) => {
-    setUsers([...users, data]);
-    userForm.reset();
-  };
-
   const onServiceSubmit = (data: z.infer<typeof serviceSchema>) => {
     setServiceData(data);
-    setStep(5);
+
+    const payload = {
+      adminUser: adminData,
+      roles: roles,
+      metadata: serviceData,
+    };
+
+    const response = axios
+      .post("/onboard", payload)
+      .then((response) => {
+        if (response.status === 200) {
+          setStep(4);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const handleAuthProvider = (provider: string) => {
@@ -167,9 +148,7 @@ export default function Onboarding() {
     // In a real application, you would handle the authentication process here
   };
 
-  const steps = [1, 2, 3, 4, 5];
-
- 
+  const steps = [1, 2, 3, 4];
 
   const renderSidebar = () => (
     <div className="hidden w-1/4 bg-primary text-primary-foreground p-6 h-screen fixed left-0 top-0 overflow-y-auto lg:flex flex-col justify-center">
@@ -228,42 +207,21 @@ export default function Onboarding() {
                       control={adminForm.control}
                       name="dob"
                       render={({ field }) => (
-                        <RenderFormItem label="Date of Birth">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground",
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) =>
-                                  date > new Date() ||
-                                  date < new Date("1900-01-01")
-                                }
-                                initialFocus
+                        <RenderFormItem
+                          label="Date of Birth"
+                          className="flex flex-col">
+                          <Controller
+                            control={adminForm.control}
+                            name="dob"
+                            render={({ field }) => (
+                              <DatePicker
+                                field={field}
+                                maxYear={new Date().getFullYear() - 18}
+                                {...field}
+                                minYear={new Date().getFullYear() - 90}
                               />
-                            </PopoverContent>
-                          </Popover>
+                            )}
+                          />
                         </RenderFormItem>
                       )}
                     />
@@ -286,7 +244,7 @@ export default function Onboarding() {
                     name="address"
                     render={({ field }) => (
                       <RenderFormItem label="Address">
-                          <Input {...field} />
+                        <Input {...field} />
                       </RenderFormItem>
                     )}
                   />
@@ -295,7 +253,7 @@ export default function Onboarding() {
                     name="password"
                     render={({ field }) => (
                       <RenderFormItem label="Password">
-                          <Input type="password" {...field} />
+                        <Input type="password" {...field} />
                       </RenderFormItem>
                     )}
                   />
@@ -305,16 +263,14 @@ export default function Onboarding() {
                     <Button
                       variant="outline"
                       type="button"
-                      onClick={() => handleAuthProvider("GitHub")}
-                    >
+                      onClick={() => handleAuthProvider("GitHub")}>
                       <Github className="mr-2 h-4 w-4" />
                       GitHub
                     </Button>
                     <Button
                       variant="outline"
                       type="button"
-                      onClick={() => handleAuthProvider("GitLab")}
-                    >
+                      onClick={() => handleAuthProvider("GitLab")}>
                       <GitBranch className="mr-2 h-4 w-4" />
                       GitLab
                     </Button>
@@ -344,7 +300,7 @@ export default function Onboarding() {
                     name="name"
                     render={({ field }) => (
                       <RenderFormItem label="Role Name">
-                          <Input {...field} />
+                        <Input {...field} />
                       </RenderFormItem>
                     )}
                   />
@@ -353,7 +309,7 @@ export default function Onboarding() {
                     name="description"
                     render={({ field }) => (
                       <RenderFormItem label="Description">
-                          <Textarea {...field} />
+                        <Textarea {...field} />
                       </RenderFormItem>
                     )}
                   />
@@ -362,16 +318,16 @@ export default function Onboarding() {
                     name="icon"
                     render={({ field }) => (
                       <RenderFormItem label="Icon">
-                          <Controller
-                            control={roleForm.control}
-                            name="icon"
-                            render={({ field }) => (
-                              <InputAutoComplete
-                                field={field}
-                                OPTIONS={iconNames}
-                              />
-                            )}
-                          />
+                        <Controller
+                          control={roleForm.control}
+                          name="icon"
+                          render={({ field }) => (
+                            <InputAutoComplete
+                              field={field}
+                              OPTIONS={iconNames}
+                            />
+                          )}
+                        />
                       </RenderFormItem>
                     )}
                   />
@@ -380,13 +336,11 @@ export default function Onboarding() {
                     name="color"
                     render={({ field }) => (
                       <RenderFormItem label="Color">
-                          <Controller
-                            control={roleForm.control}
-                            name="color"
-                            render={({ field }) => (
-                              <ColorPicker field={field} />
-                            )}
-                          />
+                        <Controller
+                          control={roleForm.control}
+                          name="color"
+                          render={({ field }) => <ColorPicker field={field} />}
+                        />
                       </RenderFormItem>
                     )}
                   />
@@ -444,109 +398,6 @@ export default function Onboarding() {
         return (
           <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
-              <CardTitle>Create Users</CardTitle>
-              <CardDescription>Add users to your organization</CardDescription>
-            </CardHeader>
-            <Form {...userForm}>
-              <form onSubmit={userForm.handleSubmit(onUserSubmit)}>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={userForm.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <RenderFormItem label="First Name">
-                          <Input {...field} />
-                      </RenderFormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <RenderFormItem label="Last Name">
-                          <Input {...field} />
-                      </RenderFormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <RenderFormItem label="Email">
-                          <Input type="email" {...field} />
-</                        RenderFormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {roles.map((role, index) => (
-                              <SelectItem key={index} value={role.name}>
-                                {role.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {users.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-xl">Users Selected</h3>
-                      <ul>
-                        {users.map((user, index) => (
-                          <li key={index} className="flex justify-between">
-                            <div>
-                              <p>
-                                {user.firstName} {user.lastName} - {user.email} (
-                                {user.role})
-                              </p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="w-14 h-12"
-                              onClick={() => {
-                                setUsers(users.filter((u, i) => i !== index));
-                              }}
-                            >
-                              <Trash className="!w-8 !h-8" />
-                            </Button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button type="submit">Add User</Button>
-                  <Button type="button" onClick={() => setStep(4)}>
-                    Next
-                  </Button>
-                </CardFooter>
-              </form>
-            </Form>
-          </Card>
-        );
-      case 4:
-        return (
-          <Card className="w-full max-w-screen-md mx-auto">
-            <CardHeader>
               <CardTitle>Service Metadata</CardTitle>
               <CardDescription>Set up your team information</CardDescription>
             </CardHeader>
@@ -558,7 +409,11 @@ export default function Onboarding() {
                     name="teamName"
                     render={({ field }) => (
                       <RenderFormItem label="Team Name">
-                        <Input {...field} />
+                        <Controller
+                          control={serviceForm.control}
+                          name="teamName"
+                          render={({ field }) => <Input {...field} />}
+                        />
                       </RenderFormItem>
                     )}
                   />
@@ -567,7 +422,11 @@ export default function Onboarding() {
                     name="logo"
                     render={({ field }) => (
                       <RenderFormItem label="Logo URL">
-                        <Input {...field} />
+                        <Controller
+                          control={serviceForm.control}
+                          name="logo"
+                          render={({ field }) => <Input {...field} />}
+                        />
                       </RenderFormItem>
                     )}
                   />
@@ -605,7 +464,7 @@ export default function Onboarding() {
             </Form>
           </Card>
         );
-      case 5:
+      case 4:
         return (
           <Card>
             <CardHeader>
@@ -626,10 +485,9 @@ export default function Onboarding() {
             <CardFooter>
               <Button
                 onClick={() =>
-                  console.log("Redirect to dashboard or home page")
-                }
-              >
-                Go to Dashboard
+                  window.location.replace("/")
+                }>
+                Go to Login
               </Button>
             </CardFooter>
           </Card>
@@ -644,7 +502,11 @@ export default function Onboarding() {
       {renderSidebar()}
       <div className="flex-1 lg:ml-[25%] p-3 lg:p-10">
         <h1 className="text-3xl font-bold mb-6">Onboarding</h1>
-        <RenderStepIndicators step={step} totalSteps={totalSteps} steps={steps} />
+        <RenderStepIndicators
+          step={step}
+          totalSteps={totalSteps}
+          steps={steps}
+        />
         {renderStep()}
       </div>
     </div>

@@ -53,7 +53,7 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	user := service.NewUser(npy.Repositories.User, npy.Repositories.UserRole)
+	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
 	onboard := service.NewOnboard(user, role, metadata)
@@ -81,4 +81,5 @@ func NewRepositories(npy Neploy) repository.Repositories {
 
 func NewHandlers(npy Neploy, i *gonertia.Inertia, app *fiber.App) {
 	loginRoutes(app, i, npy)
+	onboardRoutes(app, i, npy)
 }

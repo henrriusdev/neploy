@@ -19,7 +19,7 @@ type metadata[T any] struct {
 }
 
 func NewMetadata(db store.Queryable) Metadata {
-	return &metadata[model.Metadata]{Base[model.Metadata]{DB: db, Table: "metadata"}}
+	return &metadata[model.Metadata]{Base[model.Metadata]{Store: db, Table: "metadata"}}
 }
 
 func (m *metadata[T]) Create(ctx context.Context, metadata model.Metadata) error {

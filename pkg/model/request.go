@@ -26,14 +26,13 @@ type CreateRoleRequest struct {
 
 type OnboardRequest struct {
 	AdminUser CreateUserRequest   `json:"adminUser" validate:"required"`
-	Users     []CreateUserRequest `json:"users" validate:"required"`
 	Roles     []CreateRoleRequest `json:"roles" validate:"required"`
 	Metadata  MetadataRequest     `json:"metadata" validate:"required"`
 }
 
 type MetadataRequest struct {
-	Name           string `json:"name" db:"name"`
-	LogoURL        string `json:"logoURL" db:"logo_url"`
+	Name           string `json:"teamName" db:"name"`
+	LogoURL        string `json:"logo" db:"logo_url"`
 	PrimaryColor   string `json:"primaryColor" db:"primary_color"`
 	SecondaryColor string `json:"secondaryColor" db:"secondary_color"`
 }

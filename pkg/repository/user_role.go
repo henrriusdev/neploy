@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/rs/zerolog/log"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/store"
 )
@@ -19,7 +20,7 @@ type userRole[T any] struct {
 }
 
 func NewUserRole(db store.Queryable) UserRole {
-	return &userRole[model.UserRoles]{Base[model.UserRoles]{DB: db, Table: "user_roles"}}
+	return &userRole[model.UserRoles]{Base[model.UserRoles]{Store: db, Table: "user_roles"}}
 }
 
 func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.UserRoles, error) {
@@ -27,23 +28,32 @@ func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.U
 		Select(
 			goqu.I("ur.*"),
 			goqu.L(`"u"."id" AS "user.id"`),
-			goqu.L(`"u"."name" AS "user.name"`),
+			goqu.L(`"u"."first_name" AS "user.first_name"`),
+			goqu.L(`"u"."last_name" AS "user.last_name"`),
 			goqu.L(`"u"."email" AS "user.email"`),
-			goqu.L(`"r"."id" AS "r.id"`),
-			goqu.L(`"r"."name" AS "r.name"`),
-			goqu.L(`"r"."description" AS "user.description"`),
+			goqu.L(`"r"."id" AS "role.id"`),
+			goqu.L(`"r"."name" AS "role.name"`),
+			goqu.L(`"r"."description" AS "role.description"`),
 		).
-		LeftJoin(goqu.T("users").As("u"), goqu.On(goqu.I("u.id"), goqu.I("ur.user_id"))).
-		LeftJoin(goqu.T("roles").As("r"), goqu.On(goqu.I("r.id"), goqu.I("ur.role_id"))).
+		LeftJoin(
+			goqu.T("users").As("u"),
+			goqu.On(goqu.I("u.id").Eq(goqu.I("ur.user_id"))),
+		).
+		LeftJoin(
+			goqu.T("roles").As("r"),
+			goqu.On(goqu.I("r.id").Eq(goqu.I("ur.role_id"))),
+		).
 		Where(goqu.I("u.id").Eq(userID))
 
 	query, args, err := q.ToSQL()
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to get user roles")
 		return nil, err
 	}
 
 	var userRoles []model.UserRoles
 	if err := u.Store.SelectContext(ctx, &userRoles, query, args...); err != nil {
+		log.Error().Err(err).Msg("Failed to get user roles")
 		return nil, err
 	}
 
@@ -55,23 +65,26 @@ func (u *userRole[T]) GetByRoleID(ctx context.Context, roleID string) ([]model.U
 		Select(
 			goqu.I("ur.*"),
 			goqu.L(`"u"."id" AS "user.id"`),
-			goqu.L(`"u"."name" AS "user.name"`),
+			goqu.L(`"u"."first_name" AS "user.first_name"`),
+			goqu.L(`"u"."last_name" AS "user.last_name"`),
 			goqu.L(`"u"."email" AS "user.email"`),
-			goqu.L(`"r"."id" AS "r.id"`),
-			goqu.L(`"r"."name" AS "r.name"`),
-			goqu.L(`"r"."description" AS "user.description"`),
+			goqu.L(`"r"."id" AS "role.id"`),
+			goqu.L(`"r"."name" AS "role.name"`),
+			goqu.L(`"r"."description" AS "role.description"`),
 		).
-		LeftJoin(goqu.T("users").As("u"), goqu.On(goqu.I("u.id"), goqu.I("ur.user_id"))).
-		LeftJoin(goqu.T("roles").As("r"), goqu.On(goqu.I("r.id"), goqu.I("ur.role_id"))).
+		LeftJoin(goqu.T("users").As("u"), goqu.On(goqu.I("u.id").Eq(goqu.I("ur.user_id")))).
+		LeftJoin(goqu.T("roles").As("r"), goqu.On(goqu.I("r.id").Eq(goqu.I("ur.role_id")))).
 		Where(goqu.I("r.id").Eq(roleID))
 
 	query, args, err := q.ToSQL()
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to get user roles")
 		return nil, err
 	}
 
 	var userRoles []model.UserRoles
 	if err := u.Store.SelectContext(ctx, &userRoles, query, args...); err != nil {
+		log.Error().Err(err).Msg("Failed to get user roles")
 		return nil, err
 	}
 
@@ -85,10 +98,12 @@ func (u *userRole[T]) Insert(ctx context.Context, userRole model.UserRoles) (mod
 
 	query, args, err := q.ToSQL()
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to create inser query user role")
 		return model.UserRoles{}, err
 	}
 
 	if _, err := u.Store.ExecContext(ctx, query, args...); err != nil {
+		log.Error().Err(err).Msg("Failed to insert user role")
 		return model.UserRoles{}, err
 	}
 

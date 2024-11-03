@@ -33,19 +33,19 @@ func (r *role) Create(ctx context.Context, req model.CreateRoleRequest) error {
 		Icon:        req.Icon,
 		Color:       req.Color,
 	}
-	return r.roleRepo.CreateRole(ctx, role)
+	return r.roleRepo.Insert(ctx, role)
 }
 
 func (r *role) GetByID(ctx context.Context, id string) (model.Role, error) {
-	return r.roleRepo.GetRoleByID(ctx, id)
+	return r.roleRepo.GetByID(ctx, id)
 }
 
 func (r *role) GetByName(ctx context.Context, name string) (model.Role, error) {
-	return r.roleRepo.GetRoleByName(ctx, name)
+	return r.roleRepo.GetByName(ctx, name)
 }
 
 func (r *role) Get(ctx context.Context) ([]model.Role, error) {
-	return r.roleRepo.GetRoles(ctx)
+	return r.roleRepo.Get(ctx)
 }
 
 func (r *role) Update(ctx context.Context, id string, req model.CreateRoleRequest) error {
@@ -55,11 +55,11 @@ func (r *role) Update(ctx context.Context, id string, req model.CreateRoleReques
 		Icon:        req.Icon,
 		Color:       req.Color,
 	}
-	return r.roleRepo.UpdateRole(ctx, id, role)
+	return r.roleRepo.Update(ctx, id, role)
 }
 
 func (r *role) Delete(ctx context.Context, id string) error {
-	return r.roleRepo.DeleteRole(ctx, id)
+	return r.roleRepo.Delete(ctx, id)
 }
 
 func (r *role) GetUserRoles(ctx context.Context, userID string) ([]model.UserRoles, error) {
