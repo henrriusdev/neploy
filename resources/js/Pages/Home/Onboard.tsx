@@ -19,7 +19,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Check, GitBranch, Github, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { withMask } from "use-mask-input";
 import * as z from "zod";
 
@@ -68,6 +68,7 @@ export default function Onboarding() {
   const [roles, setRoles] = useState<CreateRoleRequest[]>([]);
   const [serviceData, setServiceData] = useState<MetadataRequest | null>(null);
   const totalSteps = 5;
+  let adminProvider: "github" | "gitlab" | "" = "";
 
   const iconNames: Option[] = icons.map((icon) => ({
     value: icon,
@@ -118,13 +119,14 @@ export default function Onboarding() {
     if (provider && username && email) {
       adminForm.setValue("username", username);
       adminForm.setValue("email", email);
+      adminProvider = provider as "github" | "gitlab";
       setStep(2);
     }
   }, []);
 
   const onAdminSubmit = (data: z.infer<typeof adminSchema>) => {
     setAdminData(data);
-    setStep(2);
+    setStep(3);
     adminForm.reset();
   };
 
@@ -136,7 +138,7 @@ export default function Onboarding() {
     setServiceData(data);
 
     const payload = {
-      adminUser: adminData,
+      adminUser: { ...adminData, provider: adminProvider },
       roles: roles,
       metadata: serviceData,
     };
@@ -145,7 +147,7 @@ export default function Onboarding() {
       .post("/onboard", payload)
       .then((response) => {
         if (response.status === 200) {
-          setStep(4);
+          setStep(5);
         }
       })
       .catch((error) => {
@@ -215,7 +217,7 @@ export default function Onboarding() {
               <CardDescription>Set up the Super Dev account</CardDescription>
             </CardHeader>
             <Form {...adminForm}>
-              <form onSubmit={onAdminSubmit}>
+              <form onSubmit={adminForm.handleSubmit(onAdminSubmit)}>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
@@ -300,7 +302,10 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input {...field} readOnly={!!adminForm.watch("email")} />
+                          <Input
+                            {...field}
+                            readOnly={!!adminForm.watch("email")}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -313,7 +318,10 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input {...field} readOnly={!!adminForm.watch("username")} />
+                          <Input
+                            {...field}
+                            readOnly={!!adminForm.watch("username")}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -352,7 +360,7 @@ export default function Onboarding() {
               </CardDescription>
             </CardHeader>
             <Form {...roleForm}>
-              <form onSubmit={onRoleSubmit}>
+              <form onSubmit={roleForm.handleSubmit(onRoleSubmit)}>
                 <CardContent className="space-y-4">
                   <FormField
                     control={roleForm.control}
@@ -387,10 +395,15 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Icon</FormLabel>
                         <FormControl>
-                          <InputAutoComplete
-                            field={field}
-                            OPTIONS={iconNames}
-                          />
+                          <Controller
+                            control={roleForm.control}
+                            name="icon"
+                            render={({ field }) => (
+                              <InputAutoComplete
+                                field={field}
+                                OPTIONS={iconNames}
+                              />
+                            )} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -403,7 +416,12 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Color</FormLabel>
                         <FormControl>
-                          <ColorPicker field={field} />
+                          <Controller
+                            control={roleForm.control}
+                            name="color"
+                            render={({ field }) => (
+                              <ColorPicker field={field} />
+                            )} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -467,7 +485,7 @@ export default function Onboarding() {
               <CardDescription>Set up your team information</CardDescription>
             </CardHeader>
             <Form {...serviceForm}>
-              <form onSubmit={onServiceSubmit}>
+              <form onSubmit={serviceForm.handleSubmit(onServiceSubmit)}>
                 <CardContent className="space-y-4">
                   <FormField
                     control={serviceForm.control}
@@ -476,7 +494,12 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Team Name</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Controller
+                            control={serviceForm.control}
+                            name="teamName"
+                            render={({ field }) => (
+                              <Input {...field} />
+                            )} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -489,7 +512,12 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Logo URL</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Controller
+                            control={serviceForm.control}
+                            name="logo"
+                            render={({ field }) => (
+                              <Input {...field} />
+                            )} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -502,7 +530,12 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Primary Color</FormLabel>
                         <FormControl>
-                          <ColorPicker field={field} />
+                          <Controller
+                            control={serviceForm.control}
+                            name="primaryColor"
+                            render={({ field }) => (
+                              <ColorPicker field={field} />
+                            )} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -515,7 +548,12 @@ export default function Onboarding() {
                       <FormItem>
                         <FormLabel>Secondary Color</FormLabel>
                         <FormControl>
-                          <ColorPicker field={field} />
+                          <Controller
+                            control={serviceForm.control}
+                            name="secondaryColor"
+                            render={({ field }) => (
+                              <ColorPicker field={field} />
+                            )} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -548,7 +586,9 @@ export default function Onboarding() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={() => window.location.replace("/")}>Go to Login</Button>
+              <Button onClick={() => window.location.replace("/")}>
+                Go to Login
+              </Button>
             </CardFooter>
           </Card>
         );

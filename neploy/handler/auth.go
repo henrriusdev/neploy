@@ -118,6 +118,7 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 	defer resp.Body.Close()
 
 	var user struct {
+		ID    int    `json:"id"`
 		Login string `json:"login"`
 		Email string `json:"email"`
 	}
@@ -125,6 +126,12 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to parse user info")
 	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "oauth_id",
+		Value:    fmt.Sprintf("%d", user.ID),
+		HTTPOnly: true,
+	})
 
 	if user.Email == "" {
 		resp, err = client.Get("https://api.github.com/user/emails")

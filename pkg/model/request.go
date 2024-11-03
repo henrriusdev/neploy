@@ -14,6 +14,7 @@ type CreateUserRequest struct {
 	DOB       Date     `json:"dob" validate:"required"`
 	Address   string   `json:"address" validate:"required,min=2,max=128"`
 	Phone     string   `json:"phone" validate:"required,min=10,max=10"`
+	Provider  string   `json:"provider" validate:"required,min=2,max=64"`
 	Roles     []string `json:"roles,omitempty"`
 }
 
@@ -28,6 +29,7 @@ type OnboardRequest struct {
 	AdminUser CreateUserRequest   `json:"adminUser" validate:"required"`
 	Roles     []CreateRoleRequest `json:"roles" validate:"required"`
 	Metadata  MetadataRequest     `json:"metadata" validate:"required"`
+	OauthID   int                 `json:"-"`
 }
 
 type MetadataRequest struct {

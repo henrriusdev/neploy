@@ -132,10 +132,9 @@ type VisitorTrace struct {
 
 type UserOAuth struct {
 	BaseEntity
-	UserID      string `json:"user_id" db:"user_id"`
-	Provider    string `json:"provider" db:"provider"`
-	OAuthID     string `json:"oauth_id" db:"oauth_id"`
-	AccessToken string `json:"access_token" db:"access_token"`
+	UserID   string   `json:"user_id" db:"user_id"`
+	Provider Provider `json:"provider" db:"provider"`
+	OAuthID  string   `json:"oauth_id" db:"oauth_id"`
 }
 
 type Metadata struct {
