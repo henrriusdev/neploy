@@ -26,6 +26,7 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to check onboarding status",
+				"data":  err.Error(),
 			})
 		}
 

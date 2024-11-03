@@ -19,7 +19,7 @@ type userRole[T any] struct {
 }
 
 func NewUserRole(db store.Queryable) UserRole {
-	return &userRole[model.UserRoles]{Base[model.UserRoles]{DB: db, Table: "user_roles"}}
+	return &userRole[model.UserRoles]{Base[model.UserRoles]{Store: db, Table: "user_roles"}}
 }
 
 func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.UserRoles, error) {

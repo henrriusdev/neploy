@@ -26,7 +26,6 @@ type CreateRoleRequest struct {
 
 type OnboardRequest struct {
 	AdminUser CreateUserRequest   `json:"adminUser" validate:"required"`
-	Users     []CreateUserRequest `json:"users" validate:"required"`
 	Roles     []CreateRoleRequest `json:"roles" validate:"required"`
 	Metadata  MetadataRequest     `json:"metadata" validate:"required"`
 }

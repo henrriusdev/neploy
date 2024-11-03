@@ -2,7 +2,10 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
+	"github.com/rs/zerolog/log"
 	"neploy.dev/pkg/model"
 )
 
@@ -75,27 +78,37 @@ func (o *onboard) hasAdminRole(roles []model.UserRoles) bool {
 }
 
 func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error {
+	if _, err := o.roleService.GetByName(ctx, "Administrator"); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		role := model.CreateRoleRequest{
+			Name:        "Administrator",
+			Description: "Administrator of the system",
+			Icon:        "User",
+			Color:       "#ff0000",
+		}
+		if err := o.roleService.Create(ctx, role); err != nil {
+			log.Err(err).Msg("error creating default role")
+		}
+	}
 	// create the admin user
+
+	req.AdminUser.Roles = []string{"Administrator"}
+
 	if err := o.userService.Create(ctx, req.AdminUser); err != nil {
+		log.Err(err).Msg("error users")
 		return err
 	}
 
 	// create the roles
 	for _, role := range req.Roles {
 		if err := o.roleService.Create(ctx, role); err != nil {
-			return err
-		}
-	}
-
-	// create the users
-	for _, user := range req.Users {
-		if err := o.userService.Create(ctx, user); err != nil {
+			log.Err(err).Msg("error roles")
 			return err
 		}
 	}
 
 	// create the metadata
 	if err := o.metadataService.Create(ctx, req.Metadata); err != nil {
+		log.Err(err).Msg("error meta")
 		return err
 	}
 

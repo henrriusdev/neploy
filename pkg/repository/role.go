@@ -24,7 +24,7 @@ type role[T any] struct {
 }
 
 func NewRole(db store.Queryable) Role {
-	return &role[model.Role]{Base[model.Role]{DB: db, Table: "roles"}}
+	return &role[model.Role]{Base[model.Role]{Store: db, Table: "roles"}}
 }
 
 func (r *role[T]) CreateRole(ctx context.Context, role model.Role) error {
@@ -106,6 +106,6 @@ func (r *role[T]) DeleteRole(ctx context.Context, id string) error {
 		return err
 	}
 
-	role.DeletedAt = model.Date{Time: time.Now()}
+	role.DeletedAt = &model.Date{Time: time.Now()}
 	return r.UpdateRole(ctx, id, role)
 }

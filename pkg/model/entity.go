@@ -1,10 +1,10 @@
 package model
 
 type BaseEntity struct {
-	ID        string `json:"id" db:"id"`
-	CreatedAt Date   `json:"createdAt" db:"created_at"`
-	UpdatedAt Date   `json:"updatedAt" db:"updated_at"`
-	DeletedAt Date   `json:"deletedAt" db:"deleted_at"`
+	ID        string `json:"id" db:"id" goqu:"skipinsert,skipupdate"`
+	CreatedAt Date   `json:"createdAt" db:"created_at" goqu:"skipinsert,skipupdate"`
+	UpdatedAt Date   `json:"updatedAt" db:"updated_at" goqu:"skipinsert,skipupdate,omitzero"`
+	DeletedAt *Date  `json:"deletedAt" db:"deleted_at" goqu:"skipinsert,skipupdate,omitnil"`
 }
 
 type BaseRelation struct {
