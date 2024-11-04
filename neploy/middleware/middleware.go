@@ -1,12 +1,15 @@
 package middleware
 
 import (
-	"strings"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"neploy.dev/pkg/common"
 	"neploy.dev/pkg/service"
 )
+
+type AuthConfig struct {
+	SessionStore *session.Store
+}
 
 func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 	onboardPath := "/onboard" // Change this to match your onboarding path
@@ -34,12 +37,6 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 			if c.Path() == onboardPath {
 				return c.Next()
 			}
-			// Check if it's an Inertia request
-			if c.Get("X-Inertia") == "true" {
-				// For Inertia requests, return a 409 Conflict with the redirect location
-				c.Set("X-Inertia-Location", onboardPath)
-				return c.SendStatus(fiber.StatusConflict)
-			}
 			// For regular requests, do a normal redirect
 			return c.Redirect(onboardPath)
 		}
@@ -48,10 +45,6 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 		// handle the redirect to home (optional)
 
 		if isDone && c.Path() == onboardPath {
-			if c.Get("X-Inertia") == "true" {
-				c.Set("X-Inertia-Location", "/")
-				return c.SendStatus(fiber.StatusConflict)
-			}
 			return c.Redirect("/")
 		}
 
@@ -60,23 +53,28 @@ func OnboardingMiddleware(service service.Onboard) fiber.Handler {
 }
 
 // JWTMiddleware is a middleware that checks if the user is authenticated
-func JWTMiddleware() fiber.Handler {
+func SessionMiddleware(store *session.Store) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// Skip middleware for non-GET requests
-		if c.Method() != fiber.MethodGet {
+		sess, err := store.Get(c)
+		if err != nil {
 			return c.Next()
 		}
 
-		if strings.HasPrefix(c.Path(), "/build/assets/") {
-			return c.Next()
+		// Store session in locals for easy access
+		c.Locals("session", sess)
+		return c.Next()
+	}
+}
+
+func AuthMiddleware(config AuthConfig) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		sess, err := config.SessionStore.Get(c)
+		if err != nil {
+			return c.Redirect("/login")
 		}
 
-		// Check if the user is authenticated
-		if c.Locals("user") == nil {
-			if c.Get("X-Inertia") == "true" {
-				c.Set("X-Inertia-Location", "/login")
-				return c.SendStatus(fiber.StatusUnauthorized)
-			}
+		auth := sess.Get("authenticated")
+		if auth == nil || !auth.(bool) {
 			return c.Redirect("/login")
 		}
 
