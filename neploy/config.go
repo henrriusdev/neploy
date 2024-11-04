@@ -2,11 +2,15 @@ package neploy
 
 import (
 	"strings"
+	"time"
+
+	"github.com/gofiber/fiber/v2/middleware/session"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
 	"neploy.dev/neploy/middleware"
+	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
@@ -17,12 +21,43 @@ type Neploy struct {
 	Port         string
 	Services     service.Services
 	Repositories repository.Repositories
+	Validator    validation.XValidator
+	SessionStore *session.Store // Add session store to Neploy struct
+}
+
+// Create a new config struct for session settings
+type SessionConfig struct {
+	Expiration     time.Duration
+	CookieName     string
+	CookieSecure   bool
+	CookieHTTPOnly bool
+}
+
+// Initialize session store with default config
+func NewSessionStore() *session.Store {
+	return session.New(session.Config{
+		Expiration:     24 * time.Hour,
+		KeyLookup:      "cookie:session",
+		CookieSecure:   true,
+		CookieHTTPOnly: true,
+		CookieSameSite: "Lax",
+	})
 }
 
 func Start(npy Neploy) {
+	// Initialize session store
+	sessionStore := NewSessionStore()
+	npy.SessionStore = sessionStore
+
 	i := initInertia()
 
 	app := fiber.New(fiber.Config{
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusBadRequest).JSON(validation.GlobalErrorHandlerResp{
+				Success: false,
+				Message: err.Error(),
+			})
+		},
 		Concurrency: 10,
 	})
 
@@ -34,6 +69,12 @@ func Start(npy Neploy) {
 
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
 	app.Use(middleware.OnboardingMiddleware(services.Onboard))
+	app.Use(middleware.SessionMiddleware(npy.SessionStore))
+
+	myValidator := &validation.XValidator{
+		Validator: validation.Validate,
+	}
+	npy.Validator = *myValidator
 
 	NewHandlers(npy, i, app)
 
