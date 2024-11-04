@@ -3,6 +3,8 @@ package handler
 import (
 	"strconv"
 
+	"neploy.dev/neploy/validation"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
@@ -11,11 +13,15 @@ import (
 )
 
 type Onboard struct {
-	service service.Onboard
+	validator validation.XValidator
+	service   service.Onboard
 }
 
-func NewOnboard(service service.Onboard) *Onboard {
-	return &Onboard{service}
+func NewOnboard(validator validation.XValidator, service service.Onboard) *Onboard {
+	return &Onboard{
+		validator: validator,
+		service:   service,
+	}
 }
 
 func (o *Onboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {

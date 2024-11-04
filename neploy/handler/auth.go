@@ -4,25 +4,33 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	inertia "github.com/romsar/gonertia"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/gitlab"
 	"neploy.dev/config"
+	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
+	"net/http"
+	"strings"
 )
 
 type Auth struct {
-	user service.User
+	validator validation.XValidator
+	user      service.User
+	sessions  *session.Store
 }
 
-func NewAuth(user service.User) *Auth {
-	return &Auth{user}
+func NewAuth(validator validation.XValidator, user service.User, session *session.Store) *Auth {
+	return &Auth{
+		validator: validator,
+		user:      user,
+		sessions:  session,
+	}
 }
 
 func GetConfig(provider model.Provider) *oauth2.Config {
@@ -50,7 +58,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 
 func (a *Auth) RegisterRoutes(r fiber.Router, i *inertia.Inertia) {
 	r.Post("/login", a.Login)
-	r.Get("/logout", adaptor.HTTPHandler(a.Logout(i)))
+	r.Get("/logout", a.Logout)
 	r.Get("", adaptor.HTTPHandler(a.Index(i)))
 	r.Get("/onboard", adaptor.HTTPHandler(a.Onboard(i)))
 	r.Get("/auth/github", a.GithubOAuth)
@@ -62,26 +70,88 @@ func (a *Auth) RegisterRoutes(r fiber.Router, i *inertia.Inertia) {
 func (a *Auth) Login(c *fiber.Ctx) error {
 	var req model.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request",
+		})
 	}
 
-	// todo: validate the request
+	if errs := a.validator.Validate(req); len(errs) > 0 && errs[0].Error {
+		errMsgs := make([]string, 0)
 
+		for _, err := range errs {
+			errMsgs = append(errMsgs, fmt.Sprintf(
+				"[%s]: '%v' | Needs to implement '%s'",
+				err.FailedField,
+				err.Value,
+				err.Tag,
+			))
+		}
+
+		return &fiber.Error{
+			Code:    fiber.ErrBadRequest.Code,
+			Message: strings.Join(errMsgs, " and "),
+		}
+	}
+
+	// Validate and authenticate user
 	res, err := a.user.Login(c.Context(), req)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid credentials"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid credentials",
+		})
 	}
 
-	// put the token in the session
-	// c.Session.Set("token", res.Token)
+	// Get session from store
+	sess, err := a.sessions.Get(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Session error",
+		})
+	}
 
-	return c.JSON(fiber.Map{"token": res.Token})
+	// Set session values
+	sess.Set("authenticated", true)
+	sess.Set("user_id", res.User.ID)
+	sess.Set("username", res.User.Username)
+	sess.Set("email", res.User.Email)
+	sess.Set("name", res.User.FirstName+" "+res.User.LastName)
+	sess.Set("token", res.Token)
+
+	if err := sess.Save(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to save session",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"token": res.Token,
+	})
 }
 
-func (a *Auth) Logout(i *inertia.Inertia) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// logout logic here
+func (h *Auth) Logout(c *fiber.Ctx) error {
+	// Get the session
+	sess, err := h.sessions.Get(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Session error",
+		})
 	}
+
+	// Clear all session data
+	if err := sess.Destroy(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to logout",
+		})
+	}
+
+	// Optional: Clear the cookie explicitly
+	c.ClearCookie("session")
+
+	// Redirect to login page or return success response
+	return c.JSON(fiber.Map{
+		"status":  "success",
+		"message": "Successfully logged out",
+	})
 }
 
 func (a *Auth) Index(i *inertia.Inertia) http.HandlerFunc {
@@ -157,11 +227,6 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 				break
 			}
 		}
-	}
-
-	// Si el correo aún es vacío, maneja el caso de no poder obtener un correo electrónico
-	if user.Email == "" {
-		return c.Status(fiber.StatusBadRequest).SendString("No email available for this user")
 	}
 
 	oauthResponse := model.OAuthResponse{
