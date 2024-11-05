@@ -1,5 +1,21 @@
 "use client";
 
+import {
+  AudioWaveform,
+  BadgeCheck,
+  Bell,
+  ChevronsUpDown,
+  Command,
+  CreditCard,
+  Folder,
+  Frame,
+  GalleryVerticalEnd,
+  LogOut,
+  PieChart as PieChartIcon,
+  Plus,
+  Settings2,
+  Sparkles
+} from "lucide-react";
 import * as React from "react";
 import {
   Bar,
@@ -13,45 +29,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  AudioWaveform,
-  BadgeCheck,
-  Bell,
-  BookOpen,
-  Bot,
-  ChevronRight,
-  ChevronsUpDown,
-  Command,
-  CreditCard,
-  Folder,
-  Forward,
-  Frame,
-  GalleryVerticalEnd,
-  LogOut,
-  Map,
-  MoreHorizontal,
-  PieChart as PieChartIcon,
-  Plus,
-  Settings2,
-  Sparkles,
-  SquareTerminal,
-  Trash2,
-} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,7 +47,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -72,15 +56,11 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
-  SidebarTrigger,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 
 // This is sample data.

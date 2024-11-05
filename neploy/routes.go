@@ -16,3 +16,8 @@ func onboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 	onboard := handler.NewOnboard(npy.Validator, npy.Services.Onboard)
 	onboard.RegisterRoutes(app.Group("/onboard"), i)
 }
+
+func dashboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+	dashboard := handler.NewDashboard(npy.Services.Metadata)
+	dashboard.RegisterRoutes(app.Group("/dashboard"), i)
+}
