@@ -144,3 +144,9 @@ type Metadata struct {
 	PrimaryColor   string `json:"primary_color" db:"primary_color"`
 	SecondaryColor string `json:"secondary_color" db:"secondary_color"`
 }
+
+type ApplicationUser struct {
+	BaseRelation
+	ApplicationID string `json:"application_id" db:"application_id"`
+	UserID        string `json:"user_id" db:"user_id"`
+}
