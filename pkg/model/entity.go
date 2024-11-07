@@ -99,7 +99,7 @@ type RefreshToken struct {
 	Token  string `json:"token" db:"token"`
 }
 
-type ApplicationStats struct {
+type ApplicationStat struct {
 	BaseEntity
 	ApplicationID       string `json:"application_id" db:"application_id"`
 	EnvironmentID       string `json:"environment_id" db:"environment_id"`

@@ -12,6 +12,10 @@ type Metadata interface {
 	Create(ctx context.Context, metadata model.Metadata) error
 	Update(ctx context.Context, metadata model.Metadata) error
 	Get(ctx context.Context) (model.Metadata, error)
+	GetPrimaryColor(ctx context.Context) (string, error)
+	GetSecondaryColor(ctx context.Context) (string, error)
+	GetTeamName(ctx context.Context) (string, error)
+	GetTeamLogo(ctx context.Context) (string, error)
 }
 
 type metadata[T any] struct {
@@ -63,4 +67,64 @@ func (m *metadata[T]) Get(ctx context.Context) (model.Metadata, error) {
 	}
 
 	return metadata, nil
+}
+
+func (m *metadata[T]) GetPrimaryColor(ctx context.Context) (string, error) {
+	q := m.baseQuery().Select("primary_color").Limit(1)
+	query, args, err := q.ToSQL()
+	if err != nil {
+		return "", err
+	}
+
+	var primaryColor string
+	if err = m.Store.GetContext(ctx, &primaryColor, query, args...); err != nil {
+		return "", err
+	}
+
+	return primaryColor, nil
+}
+
+func (m *metadata[T]) GetSecondaryColor(ctx context.Context) (string, error) {
+	q := m.baseQuery().Select("secondary_color").Limit(1)
+	query, args, err := q.ToSQL()
+	if err != nil {
+		return "", err
+	}
+
+	var secondaryColor string
+	if err = m.Store.GetContext(ctx, &secondaryColor, query, args...); err != nil {
+		return "", err
+	}
+
+	return secondaryColor, nil
+}
+
+func (m *metadata[T]) GetTeamName(ctx context.Context) (string, error) {
+	q := m.baseQuery().Select("team_name").Limit(1)
+	query, args, err := q.ToSQL()
+	if err != nil {
+		return "", err
+	}
+
+	var teamName string
+	if err = m.Store.GetContext(ctx, &teamName, query, args...); err != nil {
+		return "", err
+	}
+
+	return teamName, nil
+}
+
+func (m *metadata[T]) GetTeamLogo(ctx context.Context) (string, error) {
+	q := m.baseQuery().Select("team_logo").Limit(1)
+	query, args, err := q.ToSQL()
+	if err != nil {
+		return "", err
+	}
+
+	var teamLogo string
+	if err = m.Store.GetContext(ctx, &teamLogo, query, args...); err != nil {
+		return "", err
+	}
+
+	return teamLogo, nil
 }
