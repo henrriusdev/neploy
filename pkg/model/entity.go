@@ -61,7 +61,7 @@ type UserTechStack struct {
 	TechStackID string `json:"techStackId" db:"tech_stack_id"`
 }
 
-type Traces struct {
+type Trace struct {
 	BaseEntity
 	UserID          string `json:"userId" db:"user_id"`
 	Type            string `json:"type" db:"type"`

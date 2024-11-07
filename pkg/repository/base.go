@@ -15,11 +15,18 @@ import (
 )
 
 type Repositories struct {
-	Metadata  Metadata
-	Role      Role
-	User      User
-	UserOauth UserOauth
-	UserRole  UserRole
+	ApplicationUser ApplicationUser
+	Application     Application
+	Gateway         Gateway
+	Metadata        Metadata
+	Role            Role
+	TechStack       TechStack
+	Trace           Trace
+	User            User
+	UserOauth       UserOauth
+	UserRole        UserRole
+	VisitorInfo     VisitorInfo
+	VisitorTrace    VisitorTrace
 }
 
 var (
