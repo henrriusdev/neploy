@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AudioWaveform,
   BadgeCheck,
   Bell,
   ChevronsUpDown,
@@ -9,12 +8,10 @@ import {
   CreditCard,
   Folder,
   Frame,
-  GalleryVerticalEnd,
   LogOut,
   PieChart as PieChartIcon,
-  Plus,
   Settings2,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import * as React from "react";
 import {
@@ -26,17 +23,13 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +37,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -60,59 +52,39 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+const defaultNavMain = [
+  {
+    title: "Dashboard",
+    url: "#",
+    icon: PieChartIcon,
+    isActive: true,
   },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: PieChartIcon,
-      isActive: true,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: Folder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-    },
-  ],
-};
+  {
+    title: "Projects",
+    url: "#",
+    icon: Folder,
+  },
+  {
+    title: "Team",
+    url: "#",
+    icon: Frame,
+  },
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings2,
+  },
+];
 
-const requestsData = [
+const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
   { name: "03:00", successful: 140, errors: 3 },
   { name: "06:00", successful: 180, errors: 8 },
@@ -123,7 +95,7 @@ const requestsData = [
   { name: "21:00", successful: 200, errors: 7 },
 ];
 
-const visitorsData = [
+const defaultVisitorsData = [
   { name: "Mon", visitors: 2400 },
   { name: "Tue", visitors: 1398 },
   { name: "Wed", visitors: 9800 },
@@ -133,81 +105,65 @@ const visitorsData = [
   { name: "Sun", visitors: 4300 },
 ];
 
-const techStackData = [
+const defaultTechStackData = [
   { name: "React", value: 400 },
   { name: "Vue", value: 300 },
   { name: "Angular", value: 300 },
   { name: "Svelte", value: 200 },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+const defaultUser = {
+  name: "shadcn",
+  email: "m@example.com",
+  avatar: "/avatars/shadcn.jpg",
+};
 
 export default function Dashboard({
-  teamName = "Acme Inc",
+  navMain = defaultNavMain,
+  requestData = defaultRequestsData,
+  techStack = defaultTechStackData,
+  user = defaultUser,
+  primaryColor = "#8884d8",
+  secondaryColor = "#82ca9d",
+  visitorData = defaultVisitorsData,
 }: {
-  teamName?: string;
+  navMain?: Array<{
+    title: string;
+    url: string;
+    icon: React.ElementType;
+    isActive?: boolean;
+  }>;
+  requestData?: Array<{ name: string; successful: number; errors: number }>;
+  techStack?: Array<{ name: string; value: number }>;
+  user?: { name: string; email: string; avatar: string };
+  primaryColor?: string;
+  secondaryColor?: string;
+  visitorData?: Array<{ name: string; visitors: number }>;
 }) {
-  const [activeTeam, setActiveTeam] = React.useState(data.teams[0]);
-
   return (
-    <SidebarProvider className="!min-h-[90vh] !h-[90vh]">
+    <SidebarProvider
+      className="!min-h-[90vh] !h-[90vh]"
+      style={{
+        "--primary-color": primaryColor,
+        "--secondary-color": secondaryColor,
+      }}>
       <div className="flex h-screen !w-full">
-        <Sidebar collapsible="icon">
+        <Sidebar
+          collapsible="icon"
+          className="bg-primary text-primary-foreground">
           <SidebarHeader>
             <SidebarMenu>
               <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton
-                      size="lg"
-                      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-                      <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                        <activeTeam.logo className="size-4" />
-                      </div>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">
-                          {teamName}
-                        </span>
-                        <span className="truncate text-xs">
-                          {activeTeam.plan}
-                        </span>
-                      </div>
-                      <ChevronsUpDown className="ml-auto" />
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                    align="start"
-                    side="bottom"
-                    sideOffset={4}>
-                    <DropdownMenuLabel className="text-xs text-muted-foreground">
-                      Teams
-                    </DropdownMenuLabel>
-                    {data.teams.map((team, index) => (
-                      <DropdownMenuItem
-                        key={team.name}
-                        onClick={() => setActiveTeam(team)}
-                        className="gap-2 p-2">
-                        <div className="flex size-6 items-center justify-center rounded-sm border">
-                          <team.logo className="size-4 shrink-0" />
-                        </div>
-                        {team.name}
-                        <DropdownMenuShortcut>
-                          ⌘{index + 1}
-                        </DropdownMenuShortcut>
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="gap-2 p-2">
-                      <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                        <Plus className="size-4" />
-                      </div>
-                      <div className="font-medium text-muted-foreground">
-                        Add team
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <Command className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Dashboard</span>
+                  </div>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarHeader>
@@ -215,7 +171,7 @@ export default function Dashboard({
             <SidebarGroup>
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarMenu>
-                {data.navMain.map((item) => (
+                {navMain.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       tooltip={item.title}
@@ -237,21 +193,16 @@ export default function Dashboard({
                       size="lg"
                       className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                       <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage
-                          src={data.user.avatar}
-                          alt={data.user.name}
-                        />
+                        <AvatarImage src={user.avatar} alt={user.name} />
                         <AvatarFallback className="rounded-lg">
-                          CN
+                          {user.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-semibold">
-                          {data.user.name}
+                          {user.name}
                         </span>
-                        <span className="truncate text-xs">
-                          {data.user.email}
-                        </span>
+                        <span className="truncate text-xs">{user.email}</span>
                       </div>
                       <ChevronsUpDown className="ml-auto size-4" />
                     </SidebarMenuButton>
@@ -264,21 +215,16 @@ export default function Dashboard({
                     <DropdownMenuLabel className="p-0 font-normal">
                       <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                         <Avatar className="h-8 w-8 rounded-lg">
-                          <AvatarImage
-                            src={data.user.avatar}
-                            alt={data.user.name}
-                          />
+                          <AvatarImage src={user.avatar} alt={user.name} />
                           <AvatarFallback className="rounded-lg">
-                            CN
+                            {user.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="grid flex-1 text-left text-sm leading-tight">
                           <span className="truncate font-semibold">
-                            {data.user.name}
+                            {user.name}
                           </span>
-                          <span className="truncate text-xs">
-                            {data.user.email}
-                          </span>
+                          <span className="truncate text-xs">{user.email}</span>
                         </div>
                       </div>
                     </DropdownMenuLabel>
@@ -316,14 +262,14 @@ export default function Dashboard({
           </SidebarFooter>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="flex-1 h-screen overflow-auto">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
+        <SidebarInset className="flex-1 h-screen overflow-auto bg-secondary/10">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-primary/20 px-6 bg-secondary/5">
             <SidebarTrigger className="-ml-2" />
-            <h1 className="text-lg font-semibold">{teamName} Dashboard</h1>
+            <h1 className="text-lg font-semibold">Dashboard</h1>
           </header>
           <main className="container mx-auto py-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+              <Card className="border-primary/10">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Health Apps
@@ -347,7 +293,7 @@ export default function Dashboard({
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border-primary/10">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Total Requests
@@ -371,7 +317,7 @@ export default function Dashboard({
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border-primary/10">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Total Visitors
@@ -397,7 +343,7 @@ export default function Dashboard({
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border-primary/10">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     Total Errors
@@ -423,56 +369,94 @@ export default function Dashboard({
               </Card>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-full">
+              <Card className="col-span-full border-primary/10">
                 <CardHeader>
                   <CardTitle>Requests by Time</CardTitle>
                 </CardHeader>
                 <CardContent className="pl-2">
-                  <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={requestsData}>
+                  <ChartContainer
+                    config={{
+                      successful: {
+                        label: "Successful",
+                        color: "var(--primary-color)",
+                      },
+                      errors: {
+                        label: "Errors",
+                        color: "var(--secondary-color)",
+                      },
+                    }}
+                    className="h-[350px]">
+                    <BarChart data={requestData}>
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Bar dataKey="successful" stackId="a" fill="#8884d8" />
-                      <Bar dataKey="errors" stackId="a" fill="#82ca9d" />
+                      <Bar
+                        dataKey="successful"
+                        stackId="a"
+                        fill="var(--primary-color)"
+                      />
+                      <Bar
+                        dataKey="errors"
+                        stackId="a"
+                        fill="var(--secondary-color)"
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
                     </BarChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </CardContent>
               </Card>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4 lg:col-span-4">
+              <Card className="col-span-4 lg:col-span-4 border-primary/10">
                 <CardHeader>
                   <CardTitle>Tech Stacks Most Used by Apps</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={350}>
+                  <ChartContainer
+                    config={techStack.reduce(
+                      (acc, { name }) => ({
+                        ...acc,
+                        [name]: {
+                          label: name,
+                          color: "var(--primary-color)",
+                        },
+                      }),
+                      {}
+                    )}
+                    className="h-[350px]">
                     <PieChart>
                       <Pie
-                        data={techStackData}
+                        data={techStack}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
                         outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value">
-                        {techStackData.map((entry, index) => (
+                        fill="var(--primary-color)"
+                        dataKey="value"
+                        nameKey="name">
+                        {techStack.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
+                            fill={
+                              index % 2 === 0
+                                ? "var(--primary-color)"
+                                : "var(--secondary-color)"
+                            }
                           />
                         ))}
                       </Pie>
+                      <ChartTooltip content={<ChartTooltipContent />} />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                   <div className="mt-4 flex justify-center">
-                    {techStackData.map((entry, index) => (
+                    {techStack.map((entry, index) => (
                       <div
                         key={`legend-${index}`}
                         className="mx-2 flex items-center">
                         <div
                           className="mr-2 h-3 w-3"
                           style={{
-                            backgroundColor: COLORS[index % COLORS.length],
+                            backgroundColor:
+                              index % 2 === 0 ? primaryColor : secondaryColor,
                           }}
                         />
                         <span>{entry.name}</span>
@@ -481,23 +465,31 @@ export default function Dashboard({
                   </div>
                 </CardContent>
               </Card>
-              <Card className="col-span-3 lg:col-span-3">
+              <Card className="col-span-3 lg:col-span-3 border-primary/10">
                 <CardHeader>
                   <CardTitle>Visitor Count by Time</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={350}>
-                    <LineChart data={visitorsData}>
+                  <ChartContainer
+                    config={{
+                      visitors: {
+                        label: "Visitors",
+                        color: "var(--primary-color)",
+                      },
+                    }}
+                    className="h-[350px]">
+                    <LineChart data={visitorData}>
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Line
                         type="monotone"
                         dataKey="visitors"
-                        stroke="#8884d8"
+                        stroke="var(--primary-color)"
                         strokeWidth={2}
                       />
+                      <ChartTooltip content={<ChartTooltipContent />} />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </CardContent>
               </Card>
             </div>
