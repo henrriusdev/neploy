@@ -150,8 +150,8 @@ export default function Dashboard({
   const [activeTeam, setActiveTeam] = React.useState(data.teams[0]);
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen">
+    <SidebarProvider className="!min-h-[90vh] !h-[90vh]">
+      <div className="flex h-screen !w-full">
         <Sidebar collapsible="icon">
           <SidebarHeader>
             <SidebarMenu>
@@ -316,7 +316,7 @@ export default function Dashboard({
           </SidebarFooter>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="flex-1 overflow-auto">
+        <SidebarInset className="flex-1 h-screen overflow-auto">
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
             <SidebarTrigger className="-ml-2" />
             <h1 className="text-lg font-semibold">{teamName} Dashboard</h1>

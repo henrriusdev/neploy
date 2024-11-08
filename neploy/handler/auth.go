@@ -125,6 +125,12 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 		HTTPOnly: true,
 	})
 
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    res.Token,
+		HTTPOnly: true,
+	})
+
 	if err := sess.Save(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to save session",
