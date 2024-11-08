@@ -100,9 +100,10 @@ func NewServices(npy Neploy) service.Services {
 	onboard := service.NewOnboard(user, role, metadata)
 
 	return service.Services{
-		User:    user,
-		Role:    role,
-		Onboard: onboard,
+		User:     user,
+		Role:     role,
+		Metadata: metadata,
+		Onboard:  onboard,
 	}
 }
 

@@ -40,6 +40,9 @@ func (o *Onboard) Initiate(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 
+	// delete oauth_id cookie
+	c.ClearCookie("oauth_id")
+
 	oauth, _ := strconv.Atoi(oauthID)
 	req.OauthID = oauth
 
