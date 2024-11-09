@@ -34,32 +34,28 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 		cookie, err := r.Cookie("token")
 		if err != nil {
 			log.Err(err).Msg("error getting token")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 
 		// parse the jwt token
-		claims := jwt.MapClaims{}
+		claims := &model.JWTClaims{}
 		token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.Env.JWTSecret), nil
-		}, nil)
+		})
 		if err != nil {
 			log.Err(err).Msg("error parsing token")
 			return
 		}
 
-		// check if the token is valid
 		if !token.Valid {
-			log.Err(err).Msg("token is invalid")
+			log.Error().Msg("token is invalid")
 			return
 		}
 
-		// get the role from the token
-		role := token.Claims.(model.JWTClaims).Email
+		role := claims.Email
 
-		admin := true
-		if role != "henrrybrgt@gmail.com" {
-			admin = false
-		}
+		admin := role == "henrrybrgt@gmail.com"
 
 		teamName, err := d.service.GetTeamName(context.Background())
 		if err != nil {

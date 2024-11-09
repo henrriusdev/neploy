@@ -59,6 +59,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { techStackColors } from "@/lib/colors";
 
 const defaultNavMain = [
   {
@@ -86,13 +87,30 @@ const defaultNavMain = [
 
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
+  { name: "01:00", successful: 120, errors: 4 },
+  { name: "02:00", successful: 100, errors: 3 },
   { name: "03:00", successful: 140, errors: 3 },
+  { name: "04:00", successful: 160, errors: 4 },
+  { name: "05:00", successful: 170, errors: 6 },
   { name: "06:00", successful: 180, errors: 8 },
+  { name: "07:00", successful: 200, errors: 10 },
+  { name: "08:00", successful: 210, errors: 11 },
   { name: "09:00", successful: 220, errors: 12 },
+  { name: "10:00", successful: 230, errors: 13 },
+  { name: "11:00", successful: 240, errors: 14 },
   { name: "12:00", successful: 250, errors: 15 },
+  { name: "13:00", successful: 260, errors: 16 },
+  { name: "14:00", successful: 270, errors: 17 },
   { name: "15:00", successful: 280, errors: 18 },
+  { name: "16:00", successful: 290, errors: 19 },
+  { name: "17:00", successful: 250, errors: 8 },
   { name: "18:00", successful: 240, errors: 10 },
+  { name: "19:00", successful: 230, errors: 9 },
+  { name: "20:00", successful: 210, errors: 8 },
   { name: "21:00", successful: 200, errors: 7 },
+  { name: "22:00", successful: 190, errors: 6 },
+  { name: "23:00", successful: 180, errors: 5 },
+  { name: "24:00", successful: 165, errors: 5 },
 ];
 
 const defaultVisitorsData = [
@@ -385,19 +403,19 @@ export default function Dashboard({
                         color: "var(--secondary-color)",
                       },
                     }}
-                    className="h-[350px]">
+                    className="h-[350px] w-full">
                     <BarChart data={requestData}>
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Bar
                         dataKey="successful"
                         stackId="a"
-                        fill="var(--primary-color)"
+                        fill="#4faa4d"
                       />
                       <Bar
                         dataKey="errors"
                         stackId="a"
-                        fill="var(--secondary-color)"
+                        fill="#c00"
                       />
                       <ChartTooltip content={<ChartTooltipContent />} />
                     </BarChart>
@@ -406,41 +424,36 @@ export default function Dashboard({
               </Card>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4 lg:col-span-4 border-primary/10">
+              <Card className="col-span-3 lg:col-span-3 border-primary/10">
                 <CardHeader>
                   <CardTitle>Tech Stacks Most Used by Apps</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
                     config={techStack.reduce(
-                      (acc, { name }) => ({
+                      (acc, { name }, i) => ({
                         ...acc,
                         [name]: {
                           label: name,
-                          color: "var(--primary-color)",
+                          color: techStackColors[i % techStackColors.length],
                         },
                       }),
                       {}
                     )}
-                    className="h-[350px]">
+                    className="h-[350px] flex justify-center items-center w-full">
                     <PieChart>
                       <Pie
                         data={techStack}
                         cx="50%"
                         cy="50%"
-                        labelLine={false}
+                        labelLine={true}
                         outerRadius={80}
-                        fill="var(--primary-color)"
                         dataKey="value"
                         nameKey="name">
                         {techStack.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={
-                              index % 2 === 0
-                                ? "var(--primary-color)"
-                                : "var(--secondary-color)"
-                            }
+                            fill={techStackColors[index % techStackColors.length]}
                           />
                         ))}
                       </Pie>
@@ -456,7 +469,7 @@ export default function Dashboard({
                           className="mr-2 h-3 w-3"
                           style={{
                             backgroundColor:
-                              index % 2 === 0 ? primaryColor : secondaryColor,
+                              techStackColors[index % techStackColors.length],
                           }}
                         />
                         <span>{entry.name}</span>
@@ -465,7 +478,7 @@ export default function Dashboard({
                   </div>
                 </CardContent>
               </Card>
-              <Card className="col-span-3 lg:col-span-3 border-primary/10">
+              <Card className="col-span-3 lg:col-span-4 border-primary/10">
                 <CardHeader>
                   <CardTitle>Visitor Count by Time</CardTitle>
                 </CardHeader>
