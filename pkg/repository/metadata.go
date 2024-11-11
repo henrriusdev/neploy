@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
+	"github.com/rs/zerolog/log"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/store"
 )
@@ -108,6 +109,7 @@ func (m *metadata[T]) GetTeamName(ctx context.Context) (string, error) {
 
 	var teamName string
 	if err = m.Store.GetContext(ctx, &teamName, query, args...); err != nil {
+		log.Err(err).Msg("error getting teamname")
 		return "", err
 	}
 
@@ -115,7 +117,7 @@ func (m *metadata[T]) GetTeamName(ctx context.Context) (string, error) {
 }
 
 func (m *metadata[T]) GetTeamLogo(ctx context.Context) (string, error) {
-	q := m.baseQuery().Select("team_logo").Limit(1)
+	q := m.baseQuery().Select("logo_url").Limit(1)
 	query, args, err := q.ToSQL()
 	if err != nil {
 		return "", err

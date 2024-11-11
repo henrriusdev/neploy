@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -15,8 +18,6 @@ import (
 	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
-	"net/http"
-	"strings"
 )
 
 type Auth struct {
@@ -116,6 +117,19 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 	sess.Set("email", res.User.Email)
 	sess.Set("name", res.User.FirstName+" "+res.User.LastName)
 	sess.Set("token", res.Token)
+
+	// put a cookie with token and user_id
+	c.Cookie(&fiber.Cookie{
+		Name:     "session",
+		Value:    sess.ID(),
+		HTTPOnly: true,
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    res.Token,
+		HTTPOnly: true,
+	})
 
 	if err := sess.Save(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

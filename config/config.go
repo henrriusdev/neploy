@@ -38,6 +38,7 @@ func LoadEnv() {
 	if err := godotenv.Load(getEnvPath()); err != nil {
 		log.Println("No .env file found")
 	}
+
 	if err := env.Parse(&Env); err != nil {
 		log.Fatalf("Failed to parse env: %v", err)
 	}
