@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,8 +22,8 @@ type Dashboard struct {
 	sessions *session.Store
 }
 
-func NewDashboard(metadata service.Metadata, session *session.Store) *Dashboard {
-	return &Dashboard{metadata, session}
+func NewDashboard(metadata service.Metadata, app service.Application, sessions *session.Store) *Dashboard {
+	return &Dashboard{metadata, app, sessions}
 }
 
 func (d *Dashboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
@@ -41,16 +42,11 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 
 		// parse the jwt token
 		claims := &model.JWTClaims{}
-		token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.Env.JWTSecret), nil
 		})
 		if err != nil {
 			log.Err(err).Msg("error parsing token")
-			return
-		}
-
-		if !token.Valid {
-			log.Error().Msg("token is invalid")
 			return
 		}
 
@@ -81,12 +77,19 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
+		healthyApps, total, err := d.app.GetHealthy(context.Background())
+		if err != nil {
+			log.Err(err).Msg("error getting healthy apps")
+			return
+		}
+
 		i.Render(w, r, "Dashboard/Index", gonertia.Props{
 			"teamName":       teamName,
 			"primaryColor":   primaryColor,
 			"secondaryColor": secondaryColor,
 			"logoUrl":        logoUrl,
 			"admin":          admin,
+			"health":         fmt.Sprintf("%d/%d", healthyApps, total),
 		})
 	}
 }
