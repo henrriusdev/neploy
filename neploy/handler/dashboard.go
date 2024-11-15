@@ -77,7 +77,7 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
-		healthyApps, total, err := d.app.GetHealthy(context.Background())
+		healthyApps, _, err := d.app.GetHealthy(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting healthy apps")
 			return
@@ -89,7 +89,7 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 			"secondaryColor": secondaryColor,
 			"logoUrl":        logoUrl,
 			"admin":          admin,
-			"health":         fmt.Sprintf("%d/%d", healthyApps, total),
+			"health":         fmt.Sprintf("%d/%d", healthyApps, 4),
 		})
 	}
 }

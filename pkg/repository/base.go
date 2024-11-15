@@ -17,6 +17,7 @@ import (
 type Repositories struct {
 	ApplicationUser ApplicationUser
 	Application     Application
+	ApplicationStat ApplicationStat
 	Gateway         Gateway
 	Metadata        Metadata
 	Role            Role

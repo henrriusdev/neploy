@@ -144,6 +144,7 @@ export default function Dashboard({
   primaryColor = "#8884d8",
   secondaryColor = "#82ca9d",
   visitorData = defaultVisitorsData,
+    health = "4/10"
 }: {
   navMain?: Array<{
     title: string;
@@ -157,7 +158,9 @@ export default function Dashboard({
   primaryColor?: string;
   secondaryColor?: string;
   visitorData?: Array<{ name: string; visitors: number }>;
+    health?: string;
 }) {
+  const healthPercentage = (parseInt(health?.split('/')[0]) / parseInt(health?.split('/')[1])) * 100
   return (
     <SidebarProvider
       className="!min-h-[90vh] !h-[90vh]"
@@ -305,9 +308,9 @@ export default function Dashboard({
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">7/10</div>
+                  <div className="text-2xl font-bold">{health}</div>
                   <p className="text-xs text-muted-foreground">
-                    70% of apps are healthy
+                    {healthPercentage}% are fully healthy
                   </p>
                 </CardContent>
               </Card>

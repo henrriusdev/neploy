@@ -94,16 +94,18 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
+	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat)
+	metadata := service.NewMetadata(npy.Repositories.Metadata)
 	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
-	metadata := service.NewMetadata(npy.Repositories.Metadata)
 	onboard := service.NewOnboard(user, role, metadata)
 
 	return service.Services{
-		User:     user,
-		Role:     role,
-		Metadata: metadata,
-		Onboard:  onboard,
+		Application: application,
+		User:        user,
+		Role:        role,
+		Metadata:    metadata,
+		Onboard:     onboard,
 	}
 }
 
@@ -113,13 +115,17 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	user := repository.NewUser(npy.DB)
 	userOauth := repository.NewUserOauth(npy.DB)
 	userRole := repository.NewUserRole(npy.DB)
+	application := repository.NewApplication(npy.DB)
+	applicationStat := repository.NewApplicationStat(npy.DB)
 
 	return repository.Repositories{
-		Metadata:  metadata,
-		Role:      role,
-		User:      user,
-		UserOauth: userOauth,
-		UserRole:  userRole,
+		Metadata:        metadata,
+		Role:            role,
+		User:            user,
+		UserOauth:       userOauth,
+		UserRole:        userRole,
+		Application:     application,
+		ApplicationStat: applicationStat,
 	}
 }
 

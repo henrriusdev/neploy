@@ -18,6 +18,6 @@ func onboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 }
 
 func dashboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
-	dashboard := handler.NewDashboard(npy.Services.Metadata, npy.SessionStore)
+	dashboard := handler.NewDashboard(npy.Services.Metadata, npy.Services.Application, npy.SessionStore)
 	dashboard.RegisterRoutes(app.Group("/dashboard"), i)
 }
