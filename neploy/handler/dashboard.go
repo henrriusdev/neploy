@@ -58,24 +58,24 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 
 		admin := role == "henrrybrgt@gmail.com"
 
-		teamName, err := d.service.GetTeamName(context.Background())
+		teamName, err := d.metadata.GetTeamName(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting teamname")
 			return
 		}
 
-		primaryColor, err := d.service.GetPrimaryColor(context.Background())
+		primaryColor, err := d.metadata.GetPrimaryColor(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting primary color")
 			return
 		}
 
-		secondaryColor, err := d.service.GetSecondaryColor(context.Background())
+		secondaryColor, err := d.metadata.GetSecondaryColor(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting secondary color")
 		}
 
-		logoUrl, err := d.service.GetTeamLogo(context.Background())
+		logoUrl, err := d.metadata.GetTeamLogo(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting logo")
 			return
