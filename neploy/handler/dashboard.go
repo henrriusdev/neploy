@@ -16,7 +16,8 @@ import (
 )
 
 type Dashboard struct {
-	service  service.Metadata
+	metadata service.Metadata
+	app      service.Application
 	sessions *session.Store
 }
 
