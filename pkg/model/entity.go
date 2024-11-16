@@ -109,6 +109,7 @@ type ApplicationStat struct {
 	AverageResponseTime int    `json:"average_response_time" db:"average_response_time"`
 	DataTransfered      int    `json:"data_transfered" db:"data_transfered"`
 	UniqueVisitors      int    `json:"unique_visitors" db:"unique_visitors"`
+	Healthy             bool   `json:"healthy" db:"healthy"`
 }
 
 type VisitorInfo struct {

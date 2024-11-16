@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,12 +17,19 @@ import (
 )
 
 type Dashboard struct {
-	service  service.Metadata
+	metadata service.Metadata
+	app      service.Application
+	user     service.User
 	sessions *session.Store
 }
 
-func NewDashboard(metadata service.Metadata, session *session.Store) *Dashboard {
-	return &Dashboard{metadata, session}
+func NewDashboard(metadata service.Metadata, app service.Application, user service.User, sessions *session.Store) *Dashboard {
+	return &Dashboard{
+		metadata: metadata,
+		app:      app,
+		user:     user,
+		sessions: sessions,
+	}
 }
 
 func (d *Dashboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
@@ -40,16 +48,12 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 
 		// parse the jwt token
 		claims := &model.JWTClaims{}
-		token, err := jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.Env.JWTSecret), nil
 		})
 		if err != nil {
 			log.Err(err).Msg("error parsing token")
-			return
-		}
-
-		if !token.Valid {
-			log.Error().Msg("token is invalid")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 
@@ -57,35 +61,39 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 
 		admin := role == "henrrybrgt@gmail.com"
 
-		teamName, err := d.service.GetTeamName(context.Background())
+		metadata, err := d.metadata.Get(context.Background())
 		if err != nil {
-			log.Err(err).Msg("error getting teamname")
+			log.Err(err).Msg("error getting metadata")
 			return
 		}
 
-		primaryColor, err := d.service.GetPrimaryColor(context.Background())
+		healthyApps, _, err := d.app.GetHealthy(context.Background())
 		if err != nil {
-			log.Err(err).Msg("error getting primary color")
+			log.Err(err).Msg("error getting healthy apps")
 			return
 		}
 
-		secondaryColor, err := d.service.GetSecondaryColor(context.Background())
+		provider, err := d.user.GetProvider(context.Background(), claims.ID)
 		if err != nil {
-			log.Err(err).Msg("error getting secondary color")
+			log.Err(err).Msg("error getting provider")
+			return
 		}
 
-		logoUrl, err := d.service.GetTeamLogo(context.Background())
-		if err != nil {
-			log.Err(err).Msg("error getting logo")
-			return
+		user := model.UserResponse{
+			Email:    claims.Email,
+			Username: claims.Username,
+			Name:     claims.Name,
+			Provider: provider,
 		}
 
 		i.Render(w, r, "Dashboard/Index", gonertia.Props{
-			"teamName":       teamName,
-			"primaryColor":   primaryColor,
-			"secondaryColor": secondaryColor,
-			"logoUrl":        logoUrl,
+			"teamName":       metadata.TeamName,
+			"primaryColor":   metadata.PrimaryColor,
+			"secondaryColor": metadata.SecondaryColor,
+			"logoUrl":        metadata.LogoURL,
 			"admin":          admin,
+			"health":         fmt.Sprintf("%d/%d", healthyApps, 4),
+			"user":           user,
 		})
 	}
 }

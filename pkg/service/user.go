@@ -22,6 +22,7 @@ type User interface {
 	List(ctx context.Context, limit, offset uint) ([]model.User, error)
 	GetByEmail(ctx context.Context, email string) (model.User, error)
 	Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error)
+	GetProvider(ctx context.Context, userID string) (string, error)
 }
 
 type user struct {
@@ -149,4 +150,13 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 		Token: t,
 		User:  user,
 	}, nil
+}
+
+func (u *user) GetProvider(ctx context.Context, userID string) (string, error) {
+	oauth, err := u.repos.UserOauth.GetByUserID(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+
+	return string(oauth.Provider), nil
 }
