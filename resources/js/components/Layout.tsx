@@ -52,10 +52,14 @@ export default function SidebarLayout({ navItems, user, logoUrl, teamName, child
         <SidebarProvider>
             <div className="flex !h-screen w-full">
                 <Sidebar collapsible="icon">
-                    <SidebarHeader className="flex items-center justify-between px-4 py-2">
-                        <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
-                      <img src={logoUrl} alt={teamName} className="h-auto w-10/12 mx-auto" />
-                    </span>
+                    <SidebarHeader className="flex items-center justify-center">
+                        <img
+                            src={logoUrl}
+                            alt={teamName}
+                            className="h-full w-auto transition-all duration-300 ease-in-out
+                                       group-data-[collapsible=icon]:w-10/12 group-data-[collapsible=icon]:h-full
+                                       group-data-[state=expanded]:w-10/12 group-data-[state=expanded]:mx-auto"
+                        />
                     </SidebarHeader>
                     <SidebarContent>
                         <SidebarMenu>

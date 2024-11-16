@@ -40,7 +40,12 @@ const defaultNavMain = [
 
 const defaultRequestsData = [
     {name: "00:00", successful: 165, errors: 5},
+    {name: "04:00", successful: 193, errors: 5},
+    {name: "08:00", successful: 165, errors: 5},
+    {name: "20:00", successful: 369, errors: 1},
     {name: "12:00", successful: 250, errors: 15},
+    {name: "16:00", successful: 402, errors: 15},
+    {name: "20:00", successful: 958, errors: 203},
     {name: "24:00", successful: 165, errors: 5},
 ]
 
@@ -52,7 +57,7 @@ const defaultVisitorsData = [
 
 const defaultTechStackData = [
     {name: "React", value: 400},
-    {name: "Vue", value: 300},
+    {name: "Vue", value: 250},
     {name: "Angular", value: 300},
     {name: "Svelte", value: 200},
 ]
@@ -206,11 +211,11 @@ export default function Dashboard({
                             config={{
                                 successful: {
                                     label: "Successful",
-                                    color: "var(--primary-color)",
+                                    color: "#4faa4d",
                                 },
                                 errors: {
                                     label: "Errors",
-                                    color: "var(--secondary-color)",
+                                    color: "#c00",
                                 },
                             }}
                             className="h-[350px] w-full">
@@ -224,7 +229,7 @@ export default function Dashboard({
                                 />
                                 <Bar
                                     dataKey="errors"
-                                    stackId="a"
+                                    stackId="b"
                                     fill="#c00"
                                 />
                                 <ChartTooltip content={<ChartTooltipContent/>}/>
