@@ -329,7 +329,7 @@ export default function Dashboard({
   return (
       <SidebarLayout navItems={navMain} user={user} teamName={teamName}>
         <div
-            className="!min-h-[85vh] !h-[85vh]"
+            className="!h-screen"
             style={{
               "--primary-color": primaryColor,
               "--secondary-color": secondaryColor,
