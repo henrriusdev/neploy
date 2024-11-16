@@ -229,7 +229,7 @@ export default function Dashboard({
                                 />
                                 <Bar
                                     dataKey="errors"
-                                    stackId="b"
+                                    stackId="B"
                                     fill="#c00"
                                 />
                                 <ChartTooltip content={<ChartTooltipContent/>}/>
