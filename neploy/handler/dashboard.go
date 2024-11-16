@@ -53,6 +53,7 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 		})
 		if err != nil {
 			log.Err(err).Msg("error parsing token")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 

@@ -1,341 +1,334 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Bar,
-  BarChart,
-  Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import { PieChartIcon, Folder, Frame, Settings2 } from 'lucide-react'
+import {Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, XAxis, YAxis,} from 'recharts'
+import {AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2} from 'lucide-react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {ChartContainer, ChartTooltip, ChartTooltipContent,} from '@/components/ui/chart'
 import SidebarLayout from "@/components/Layout";
-import { techStackColors } from '@/lib/colors'
+import {techStackColors} from '@/lib/colors'
 
 const defaultNavMain = [
-  {
-    title: "Dashboard",
-    url: "#",
-    icon: PieChartIcon,
-    isActive: true,
-  },
-  {
-    title: "Projects",
-    url: "#",
-    icon: Folder,
-  },
-  {
-    title: "Team",
-    url: "#",
-    icon: Frame,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings2,
-  },
+    {
+        title: "Dashboard",
+        url: "#",
+        icon: PieChartIcon,
+        isActive: true,
+    },
+    {
+        title: "Applications",
+        url: "#",
+        icon: AppWindowMac,
+    },
+    {
+      "title": "Gateways",
+        "url": "#",
+        "icon": DoorOpen
+    },
+    {
+        title: "Team",
+        url: "#",
+        icon: Frame,
+    },
+    {
+        title: "Settings",
+        url: "#",
+        icon: Settings2,
+    },
 ]
 
 const defaultRequestsData = [
-  { name: "00:00", successful: 165, errors: 5 },
-  { name: "12:00", successful: 250, errors: 15 },
-  { name: "24:00", successful: 165, errors: 5 },
+    {name: "00:00", successful: 165, errors: 5},
+    {name: "12:00", successful: 250, errors: 15},
+    {name: "24:00", successful: 165, errors: 5},
 ]
 
 const defaultVisitorsData = [
-  { name: "Mon", visitors: 2400 },
-  { name: "Wed", visitors: 9800 },
-  { name: "Sun", visitors: 4300 },
+    {name: "Mon", visitors: 2400},
+    {name: "Wed", visitors: 9800},
+    {name: "Sun", visitors: 4300},
 ]
 
 const defaultTechStackData = [
-  { name: "React", value: 400 },
-  { name: "Vue", value: 300 },
-  { name: "Angular", value: 300 },
-  { name: "Svelte", value: 200 },
+    {name: "React", value: 400},
+    {name: "Vue", value: 300},
+    {name: "Angular", value: 300},
+    {name: "Svelte", value: 200},
 ]
 
 const defaultUser = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "https://unavatar.io/github/shadcn",
-  provider: "github",
-  username: "shadcn",
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "https://unavatar.io/github/shadcn",
+    provider: "github",
+    username: "shadcn",
 }
 
 interface DashboardProps {
-  teamName?: string;
-  navMain?: typeof defaultNavMain
-  requestData?: typeof defaultRequestsData
-  techStack?: typeof defaultTechStackData
-  user?: typeof defaultUser
-  primaryColor?: string
-  secondaryColor?: string
-  visitorData?: typeof defaultVisitorsData
-  health?: string
+    teamName?: string;
+    navMain?: typeof defaultNavMain
+    requestData?: typeof defaultRequestsData
+    techStack?: typeof defaultTechStackData
+    user?: typeof defaultUser
+    primaryColor?: string
+    secondaryColor?: string
+    visitorData?: typeof defaultVisitorsData
+    health?: string
+    logoUrl?: string
 }
 
 export default function Dashboard({
-                                    navMain = defaultNavMain,
-                                    requestData = defaultRequestsData,
-                                    techStack = defaultTechStackData,
-                                    user = defaultUser,
-                                    primaryColor = "#8884d8",
-                                    secondaryColor = "#82ca9d",
-                                    visitorData = defaultVisitorsData,
-    teamName = "Acme",
-                                    health = "4/10"
+                                      navMain = defaultNavMain,
+                                      requestData = defaultRequestsData,
+                                      techStack = defaultTechStackData,
+                                      user = defaultUser,
+                                      primaryColor = "#8884d8",
+                                      secondaryColor = "#82ca9d",
+                                      visitorData = defaultVisitorsData,
+                                      teamName = "Acme",
+                                      logoUrl = "https://unavatar.io/github/shadcn",
+                                      health = "4/10"
                                   }: DashboardProps) {
-  const healthPercentage = (parseInt(health?.split('/')[0]) / parseInt(health?.split('/')[1])) * 100
-  console.log(user);
-  user.avatar = `https://unavatar.io/${user?.provider ?? 'github'}/${user.username}`;
+    const healthPercentage = (parseInt(health?.split('/')[0]) / parseInt(health?.split('/')[1])) * 100
+    user.avatar = `https://unavatar.io/${user?.provider ?? 'github'}/${user.username}`;
 
-  const dashboardContent = (
-      <>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Health Apps
-              </CardTitle>
-              <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{health}</div>
-              <p className="text-xs text-muted-foreground">
-                {healthPercentage}% are fully healthy
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Requests
-              </CardTitle>
-              <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">1,675,234</div>
-              <p className="text-xs text-muted-foreground">
-                +18% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Visitors
-              </CardTitle>
-              <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4  w-4 text-muted-foreground">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">573,281</div>
-              <p className="text-xs text-muted-foreground">
-                +201 since last hour
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Errors
-              </CardTitle>
-              <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">78</div>
-              <p className="text-xs text-muted-foreground">
-                -5% from last hour
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-full border-primary/10">
-            <CardHeader>
-              <CardTitle>Requests by Time</CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <ChartContainer
-                  config={{
-                    successful: {
-                      label: "Successful",
-                      color: "var(--primary-color)",
-                    },
-                    errors: {
-                      label: "Errors",
-                      color: "var(--secondary-color)",
-                    },
-                  }}
-                  className="h-[350px] w-full">
-                <BarChart data={requestData}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Bar
-                      dataKey="successful"
-                      stackId="a"
-                      fill="#4faa4d"
-                  />
-                  <Bar
-                      dataKey="errors"
-                      stackId="a"
-                      fill="#c00"
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-3 lg:col-span-3 border-primary/10">
-            <CardHeader>
-              <CardTitle>Tech Stacks Most Used by Apps</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                  config={techStack.reduce(
-                      (acc, { name }, i) => ({
-                        ...acc,
-                        [name]: {
-                          label: name,
-                          color: techStackColors[i % techStackColors.length],
-                        },
-                      }),
-                      {}
-                  )}
-                  className="h-[350px] flex justify-center items-center w-full">
-                <PieChart>
-                  <Pie
-                      data={techStack}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      outerRadius={80}
-                      dataKey="value"
-                      nameKey="name">
-                    {techStack.map((entry, index) => (
-                        <Cell
-                            key={`cell-${index}`}
-                            fill={techStackColors[index % techStackColors.length]}
-                        />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ChartContainer>
-              <div className="mt-4 flex justify-center">
-                {techStack.map((entry, index) => (
-                    <div
-                        key={`legend-${index}`}
-                        className="mx-2 flex items-center">
-                      <div
-                          className="mr-2 h-3 w-3"
-                          style={{
-                            backgroundColor:
-                                techStackColors[index % techStackColors.length],
-                          }}
-                      />
-                      <span>{entry.name}</span>
-                    </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="col-span-3 lg:col-span-4 border-primary/10">
-            <CardHeader>
-              <CardTitle>Visitor Count by Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                  config={{
-                    visitors: {
-                      label: "Visitors",
-                      color: "var(--primary-color)",
-                    },
-                  }}
-                  className="h-[350px]">
-                <LineChart data={visitorData}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Line
-                      type="monotone"
-                      dataKey="visitors"
-                      stroke="var(--primary-color)"
-                      strokeWidth={2}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </div>
-      </>
-  )
+    const dashboardContent = (
+        <>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="border-primary/10">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Health Apps
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4 w-4 text-muted-foreground">
+                            <path
+                                d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{health}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {healthPercentage}% are fully healthy
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card className="border-primary/10">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Total Requests
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4 w-4 text-muted-foreground">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">1,675,234</div>
+                        <p className="text-xs text-muted-foreground">
+                            +18% from last month
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card className="border-primary/10">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Total Visitors
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4  w-4 text-muted-foreground">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">573,281</div>
+                        <p className="text-xs text-muted-foreground">
+                            +201 since last hour
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card className="border-primary/10">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Total Errors
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4 w-4 text-muted-foreground">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">78</div>
+                        <p className="text-xs text-muted-foreground">
+                            -5% from last hour
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-full border-primary/10">
+                    <CardHeader>
+                        <CardTitle>Requests by Time</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <ChartContainer
+                            config={{
+                                successful: {
+                                    label: "Successful",
+                                    color: "var(--primary-color)",
+                                },
+                                errors: {
+                                    label: "Errors",
+                                    color: "var(--secondary-color)",
+                                },
+                            }}
+                            className="h-[350px] w-full">
+                            <BarChart data={requestData}>
+                                <XAxis dataKey="name"/>
+                                <YAxis/>
+                                <Bar
+                                    dataKey="successful"
+                                    stackId="a"
+                                    fill="#4faa4d"
+                                />
+                                <Bar
+                                    dataKey="errors"
+                                    stackId="a"
+                                    fill="#c00"
+                                />
+                                <ChartTooltip content={<ChartTooltipContent/>}/>
+                            </BarChart>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="col-span-3 lg:col-span-3 border-primary/10">
+                    <CardHeader>
+                        <CardTitle>Tech Stacks Most Used by Apps</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartContainer
+                            config={techStack.reduce(
+                                (acc, {name}, i) => ({
+                                    ...acc,
+                                    [name]: {
+                                        label: name,
+                                        color: techStackColors[i % techStackColors.length],
+                                    },
+                                }),
+                                {}
+                            )}
+                            className="h-[350px] flex justify-center items-center w-full">
+                            <PieChart>
+                                <Pie
+                                    data={techStack}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={true}
+                                    outerRadius={80}
+                                    dataKey="value"
+                                    nameKey="name">
+                                    {techStack.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={techStackColors[index % techStackColors.length]}
+                                        />
+                                    ))}
+                                </Pie>
+                                <ChartTooltip content={<ChartTooltipContent/>}/>
+                            </PieChart>
+                        </ChartContainer>
+                        <div className="mt-4 flex justify-center">
+                            {techStack.map((entry, index) => (
+                                <div
+                                    key={`legend-${index}`}
+                                    className="mx-2 flex items-center">
+                                    <div
+                                        className="mr-2 h-3 w-3"
+                                        style={{
+                                            backgroundColor:
+                                                techStackColors[index % techStackColors.length],
+                                        }}
+                                    />
+                                    <span>{entry.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="col-span-3 lg:col-span-4 border-primary/10">
+                    <CardHeader>
+                        <CardTitle>Visitor Count by Time</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartContainer
+                            config={{
+                                visitors: {
+                                    label: "Visitors",
+                                    color: "var(--primary-color)",
+                                },
+                            }}
+                            className="h-[350px]">
+                            <LineChart data={visitorData}>
+                                <XAxis dataKey="name"/>
+                                <YAxis/>
+                                <Line
+                                    type="monotone"
+                                    dataKey="visitors"
+                                    stroke="var(--primary-color)"
+                                    strokeWidth={2}
+                                />
+                                <ChartTooltip content={<ChartTooltipContent/>}/>
+                            </LineChart>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
+    )
 
-  return (
-      <SidebarLayout navItems={navMain} user={user} teamName={teamName}>
-        <div
-            className="!h-screen"
-            style={{
-              "--primary-color": primaryColor,
-              "--secondary-color": secondaryColor,
-            } as React.CSSProperties}>
-          {dashboardContent}
-        </div>
-      </SidebarLayout>
-  )
+    return (
+        <SidebarLayout navItems={navMain} user={user} teamName={teamName} logoUrl={logoUrl}>
+            <div
+                className="!h-screen"
+                style={{
+                    "--primary-color": primaryColor,
+                    "--secondary-color": secondaryColor,
+                } as React.CSSProperties}>
+                {dashboardContent}
+            </div>
+        </SidebarLayout>
+    )
 }

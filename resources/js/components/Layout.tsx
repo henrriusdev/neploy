@@ -43,17 +43,18 @@ interface SidebarLayoutProps {
     navItems: NavItem[]
     user: User
     teamName: string
+    logoUrl: string
     children: React.ReactNode
 }
 
-export default function SidebarLayout({ navItems, user, teamName, children }: SidebarLayoutProps) {
+export default function SidebarLayout({ navItems, user, logoUrl, teamName, children }: SidebarLayoutProps) {
     return (
         <SidebarProvider>
             <div className="flex !h-screen w-full">
                 <Sidebar collapsible="icon">
                     <SidebarHeader className="flex items-center justify-between px-4 py-2">
                         <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
-                      {teamName}
+                      <img src={logoUrl} alt={teamName} className="h-auto w-10/12 mx-auto" />
                     </span>
                     </SidebarHeader>
                     <SidebarContent>
@@ -105,8 +106,11 @@ export default function SidebarLayout({ navItems, user, teamName, children }: Si
                 <main className="flex-1 !w-full overflow-auto">
                     <div className="h-screen">
                         <div className="!w-full py-6">
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center justify-start gap-x-4 mb-4 pl-3">
                                 <SidebarTrigger />
+                                {teamName && (
+                                <span className="text-base lg:text-xl font-semibold">{teamName} Dashboard</span>
+                                )}
                             </div>
                             {children}
                         </div>
