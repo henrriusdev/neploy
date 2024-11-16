@@ -1,31 +1,29 @@
 'use client'
+
 import * as React from 'react'
-import { BadgeCheck, Bell, ChevronsUpDown, Command, CreditCard, LogOut, Sparkles } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ChevronsUpDown, LogOut } from 'lucide-react'
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu'
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarGroup,
-    SidebarGroupLabel,
     SidebarHeader,
-    SidebarInset,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarProvider,
-    SidebarRail,
     SidebarTrigger,
-} from '@/components/ui/sidebar';
+} from '@/components/ui/sidebar'
 
 interface NavItem {
     title: string
@@ -49,105 +47,69 @@ interface SidebarLayoutProps {
 
 export default function SidebarLayout({ navItems, user, teamName, children }: SidebarLayoutProps) {
     return (
-        <SidebarProvider className="min-h-screen">
-            <div className="flex h-screen w-full">
-                <Sidebar collapsible="icon" className="bg-primary text-primary-foreground">
+        <SidebarProvider>
+            <div className="flex h-screen">
+                <Sidebar>
                     <SidebarHeader>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    size="lg"
-                                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                                >
-                                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                        <Command className="size-4" />
-                                    </div>
-                                    <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-semibold">{teamName}</span>
-                                    </div>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarHeader>
-                    <SidebarContent>
-                        <SidebarGroup>
-                            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-                            <SidebarMenu>
-                                {navItems.map((item) => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton tooltip={item.title} isActive={item.isActive}>
-                                            {item.icon && <item.icon />}
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroup>
-                    </SidebarContent>
-                    <SidebarFooter>
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <SidebarMenuButton
                                             size="lg"
-                                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                                            className="w-full justify-between data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                                         >
-                                            <Avatar className="h-8 w-8 rounded-lg">
-                                                <AvatarImage src={user.avatar} alt={user.name} />
-                                                <AvatarFallback className="rounded-lg">
-                                                    {user.name.slice(0, 2).toUpperCase()}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                                <span className="truncate font-semibold">{user.name}</span>
-                                                <span className="truncate text-xs">{user.email}</span>
-                                            </div>
-                                            <ChevronsUpDown className="ml-auto size-4" />
+                                            {teamName}
+                                            <ChevronsUpDown className="ml-auto h-4 w-4" />
                                         </SidebarMenuButton>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                                        side="bottom"
-                                        align="end"
-                                        sideOffset={4}
-                                    >
-                                        <DropdownMenuLabel className="p-0 font-normal">
-                                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                                <Avatar className="h-8 w-8 rounded-lg">
-                                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                                    <AvatarFallback className="rounded-lg">
-                                                        {user.name.slice(0, 2).toUpperCase()}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="grid flex-1 text-left text-sm leading-tight">
-                                                    <span className="truncate font-semibold">{user.name}</span>
-                                                    <span className="truncate text-xs">{user.email}</span>
-                                                </div>
+                                    <DropdownMenuContent className="w-56" align="start" alignOffset={-8} forceMount>
+                                        <DropdownMenuItem>
+                                            <span>Switch Team</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                            <span>Create New Team</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarMenu>
+                            {navItems.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton asChild isActive={item.isActive}>
+                                        <a href={item.url} className="flex items-center">
+                                            <item.icon className="mr-2 h-4 w-4" />
+                                            <span>{item.title}</span>
+                                        </a>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarContent>
+                    <SidebarFooter>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <SidebarMenuButton size="lg" className="w-full justify-start gap-2">
+                                            <Avatar className="h-6 w-6">
+                                                <AvatarImage src={user.avatar} alt={user.name} />
+                                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex flex-col items-start text-left">
+                                                <span className="text-xs font-medium">{user.name}</span>
+                                                <span className="text-xs text-sidebar-foreground/60">{user.email}</span>
                                             </div>
-                                        </DropdownMenuLabel>
+                                        </SidebarMenuButton>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56" align="start" alignOffset={-8} forceMount>
+                                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuGroup>
-                                            <DropdownMenuItem>
-                                                <Sparkles className="mr-2 h-4 w-4" />
-                                                <span>Upgrade to Pro</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuGroup>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuGroup>
-                                            <DropdownMenuItem>
-                                                <BadgeCheck className="mr-2 h-4 w-4" />
-                                                <span>Account</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                <CreditCard className="mr-2 h-4 w-4" />
-                                                <span>Billing</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                <Bell className="mr-2 h-4 w-4" />
-                                                <span>Notifications</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuGroup>
+                                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                                        <DropdownMenuItem>Settings</DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem>
                                             <LogOut className="mr-2 h-4 w-4" />
@@ -158,15 +120,13 @@ export default function SidebarLayout({ navItems, user, teamName, children }: Si
                             </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarFooter>
-                    <SidebarRail />
                 </Sidebar>
-                <SidebarInset className="flex-1 h-screen overflow-auto bg-secondary/10">
-                    <header className="flex h-16 shrink-0 items-center gap-2 border-b border-primary/20 px-6 bg-secondary/5">
-                        <SidebarTrigger className="-ml-2" />
-                        <h1 className="text-lg font-semibold">{teamName}</h1>
-                    </header>
-                    <main className="container mx-auto py-6">{children}</main>
-                </SidebarInset>
+                <main className="flex-1 overflow-auto">
+                    <div className="container mx-auto py-6">
+                        <SidebarTrigger />
+                        {children}
+                    </div>
+                </main>
             </div>
         </SidebarProvider>
     )

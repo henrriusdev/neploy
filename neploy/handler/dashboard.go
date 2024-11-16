@@ -19,11 +19,17 @@ import (
 type Dashboard struct {
 	metadata service.Metadata
 	app      service.Application
+	user     service.User
 	sessions *session.Store
 }
 
-func NewDashboard(metadata service.Metadata, app service.Application, sessions *session.Store) *Dashboard {
-	return &Dashboard{metadata, app, sessions}
+func NewDashboard(metadata service.Metadata, app service.Application, user service.User, sessions *session.Store) *Dashboard {
+	return &Dashboard{
+		metadata: metadata,
+		app:      app,
+		user:     user,
+		sessions: sessions,
+	}
 }
 
 func (d *Dashboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
@@ -54,26 +60,9 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 
 		admin := role == "henrrybrgt@gmail.com"
 
-		teamName, err := d.metadata.GetTeamName(context.Background())
+		metadata, err := d.metadata.Get(context.Background())
 		if err != nil {
-			log.Err(err).Msg("error getting teamname")
-			return
-		}
-
-		primaryColor, err := d.metadata.GetPrimaryColor(context.Background())
-		if err != nil {
-			log.Err(err).Msg("error getting primary color")
-			return
-		}
-
-		secondaryColor, err := d.metadata.GetSecondaryColor(context.Background())
-		if err != nil {
-			log.Err(err).Msg("error getting secondary color")
-		}
-
-		logoUrl, err := d.metadata.GetTeamLogo(context.Background())
-		if err != nil {
-			log.Err(err).Msg("error getting logo")
+			log.Err(err).Msg("error getting metadata")
 			return
 		}
 
@@ -83,13 +72,27 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
+		provider, err := d.user.GetProvider(context.Background(), claims.ID)
+		if err != nil {
+			log.Err(err).Msg("error getting provider")
+			return
+		}
+
+		user := model.UserResponse{
+			Email:    claims.Email,
+			Username: claims.Username,
+			Name:     claims.Name,
+			Provider: provider,
+		}
+
 		i.Render(w, r, "Dashboard/Index", gonertia.Props{
-			"teamName":       teamName,
-			"primaryColor":   primaryColor,
-			"secondaryColor": secondaryColor,
-			"logoUrl":        logoUrl,
+			"teamName":       metadata.TeamName,
+			"primaryColor":   metadata.PrimaryColor,
+			"secondaryColor": metadata.SecondaryColor,
+			"logoUrl":        metadata.LogoURL,
 			"admin":          admin,
 			"health":         fmt.Sprintf("%d/%d", healthyApps, 4),
+			"user":           user,
 		})
 	}
 }

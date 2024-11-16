@@ -69,7 +69,9 @@ const defaultTechStackData = [
 const defaultUser = {
   name: "shadcn",
   email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
+  avatar: "https://unavatar.io/github/shadcn",
+  provider: "github",
+  username: "shadcn",
 }
 
 interface DashboardProps {
@@ -96,6 +98,8 @@ export default function Dashboard({
                                     health = "4/10"
                                   }: DashboardProps) {
   const healthPercentage = (parseInt(health?.split('/')[0]) / parseInt(health?.split('/')[1])) * 100
+  console.log(user);
+  user.avatar = `https://unavatar.io/${user?.provider ?? 'github'}/${user.username}`;
 
   const dashboardContent = (
       <>
@@ -325,7 +329,7 @@ export default function Dashboard({
   return (
       <SidebarLayout navItems={navMain} user={user} teamName={teamName}>
         <div
-            className="!min-h-[90vh] !h-[90vh]"
+            className="!min-h-[85vh] !h-[85vh]"
             style={{
               "--primary-color": primaryColor,
               "--secondary-color": secondaryColor,

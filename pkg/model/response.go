@@ -10,3 +10,10 @@ type OAuthResponse struct {
 	Username string   `json:"username"`
 	Email    string   `json:"email"`
 }
+
+type UserResponse struct {
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Provider string `json:"provider"`
+}
