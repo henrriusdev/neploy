@@ -6,13 +6,13 @@ import {AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2} from 'lucide-rea
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {ChartContainer, ChartTooltip, ChartTooltipContent,} from '@/components/ui/chart'
-import SidebarLayout from "@/components/Layout";
+import DashboardLayout from "@/components/Layouts/DashboardLayout"
 import {techStackColors} from '@/lib/colors'
 
 const defaultNavMain = [
     {
         title: "Dashboard",
-        url: "#",
+        url: "/dashboard",
         icon: PieChartIcon,
         isActive: true,
     },
@@ -28,7 +28,7 @@ const defaultNavMain = [
     },
     {
         title: "Team",
-        url: "#",
+        url: "/dashboard/team",
         icon: Frame,
     },
     {
@@ -83,18 +83,17 @@ interface DashboardProps {
     logoUrl?: string
 }
 
-export default function Dashboard({
-                                      navMain = defaultNavMain,
-                                      requestData = defaultRequestsData,
-                                      techStack = defaultTechStackData,
-                                      user = defaultUser,
-                                      primaryColor = "#8884d8",
-                                      secondaryColor = "#82ca9d",
-                                      visitorData = defaultVisitorsData,
-                                      teamName = "Acme",
-                                      logoUrl = "https://unavatar.io/github/shadcn",
-                                      health = "4/10"
-                                  }: DashboardProps) {
+function Dashboard({
+    requestData = defaultRequestsData,
+    techStack = defaultTechStackData,
+    user,
+    primaryColor = "#8884d8",
+    secondaryColor = "#82ca9d",
+    visitorData = defaultVisitorsData,
+    teamName,
+    logoUrl,
+    health = "4/10"
+}: DashboardProps) {
     const healthPercentage = (parseInt(health?.split('/')[0]) / parseInt(health?.split('/')[1])) * 100
     user.avatar = `https://unavatar.io/${user?.provider ?? 'github'}/${user.username}`;
 
@@ -229,7 +228,7 @@ export default function Dashboard({
                                 />
                                 <Bar
                                     dataKey="errors"
-                                    stackId="B"
+                                    stackId="a"
                                     fill="#c00"
                                 />
                                 <ChartTooltip content={<ChartTooltipContent/>}/>
@@ -325,15 +324,16 @@ export default function Dashboard({
     )
 
     return (
-        <SidebarLayout navItems={navMain} user={user} teamName={teamName} logoUrl={logoUrl}>
-            <div
-                className="!h-screen"
-                style={{
-                    "--primary-color": primaryColor,
-                    "--secondary-color": secondaryColor,
-                } as React.CSSProperties}>
-                {dashboardContent}
-            </div>
-        </SidebarLayout>
+        <div className="flex-1 space-y-4 p-8 pt-6">
+            {dashboardContent}
+        </div>
     )
 }
+
+Dashboard.layout = (page: React.ReactNode, props: DashboardProps) => (
+    <DashboardLayout {...props}>
+        {page}
+    </DashboardLayout>
+)
+
+export default Dashboard
