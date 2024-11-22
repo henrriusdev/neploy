@@ -138,12 +138,17 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
+		team, err := d.user.List(context.Background(), 15, 0)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		i.Render(w, r, "Dashboard/Team", map[string]interface{}{
 			"user":     user,
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,
-			// Add team data when you implement it
-			// "team": team,
+			"team":     team,
 		})
 	}
 }
