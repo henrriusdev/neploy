@@ -117,6 +117,9 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	userRole := repository.NewUserRole(npy.DB)
 	application := repository.NewApplication(npy.DB)
 	applicationStat := repository.NewApplicationStat(npy.DB)
+	userTechStack := repository.NewUserTechStack(npy.DB)
+	visitorInfo := repository.NewVisitor(npy.DB)
+	visitorTrace := repository.NewVisitorTrace(npy.DB)
 
 	return repository.Repositories{
 		Metadata:        metadata,
@@ -126,6 +129,9 @@ func NewRepositories(npy Neploy) repository.Repositories {
 		UserRole:        userRole,
 		Application:     application,
 		ApplicationStat: applicationStat,
+		UserTechStack:   userTechStack,
+		VisitorInfo:     visitorInfo,
+		VisitorTrace:    visitorTrace,
 	}
 }
 
