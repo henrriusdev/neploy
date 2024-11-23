@@ -88,13 +88,11 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 		}
 
 		i.Render(w, r, "Dashboard/Index", gonertia.Props{
-			"teamName":       metadata.TeamName,
-			"primaryColor":   metadata.PrimaryColor,
-			"secondaryColor": metadata.SecondaryColor,
-			"logoUrl":        metadata.LogoURL,
-			"admin":          admin,
-			"health":         fmt.Sprintf("%d/%d", healthyApps, 4),
-			"user":           user,
+			"teamName": metadata.TeamName,
+			"logoUrl":  metadata.LogoURL,
+			"admin":    admin,
+			"health":   fmt.Sprintf("%d/%d", healthyApps, 4),
+			"user":     user,
 		})
 	}
 }

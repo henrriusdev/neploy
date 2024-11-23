@@ -27,6 +27,4 @@ export interface OnboardRequest {
 export interface MetadataRequest {
   name: string;
   logoURL: string;
-  primaryColor: string;
-  secondaryColor: string;
 }

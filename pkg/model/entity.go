@@ -140,10 +140,8 @@ type UserOAuth struct {
 
 type Metadata struct {
 	BaseEntity
-	TeamName       string `json:"team_name" db:"team_name"`
-	LogoURL        string `json:"logo_url" db:"logo_url"`
-	PrimaryColor   string `json:"primary_color" db:"primary_color"`
-	SecondaryColor string `json:"secondary_color" db:"secondary_color"`
+	TeamName string `json:"team_name" db:"team_name"`
+	LogoURL  string `json:"logo_url" db:"logo_url"`
 }
 
 type ApplicationUser struct {
