@@ -3471,12 +3471,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.453.0":
-  version: 0.453.0
-  resolution: "lucide-react@npm:0.453.0"
+"lucide-react@npm:^0.461.0":
+  version: 0.461.0
+  resolution: "lucide-react@npm:0.461.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
-  checksum: 10c0/eec257049609eff958329943da6e129c8db1969aa789c6e922f59418d7b6f6913c22e971ac7885efc80eeb3e41e180c48afdee92738a63a31ef5a39836037b7e
+  checksum: 10c0/d7a2a89ecd6820955e6cec1dc72161bc189c8f5c5c48c7966a819f97d04ce240c6675ddfa6152a192bef16c2adec6baecf88e43eb7ee459d004f058ee2c8dc4d
   languageName: node
   linkType: hard
 
@@ -4170,9 +4170,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^2.13.0":
-  version: 2.13.0
-  resolution: "recharts@npm:2.13.0"
+"recharts@npm:^2.13.3":
+  version: 2.13.3
+  resolution: "recharts@npm:2.13.3"
   dependencies:
     clsx: "npm:^2.0.0"
     eventemitter3: "npm:^4.0.1"
@@ -4185,7 +4185,7 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 10c0/40fd9dbacdbb8f0828029f0daaca8a846eada7e017bfdae2790910b38a8ee0f3a9e235f84927d0554da0f0ed46f1f167e84b59f6dc5831113dac0a7763f7d057
+  checksum: 10c0/67c516cd142da0e5968cf9b723c1bc08c2324ff4c41952d623dfce06e8c13751e1ef885b2e39aaeb5e32595566c8d91633328850adee70ad53bc8685adff456d
   languageName: node
   linkType: hard
 
@@ -4856,14 +4856,14 @@ __metadata:
     cmdk: "npm:1.0.0"
     date-fns: "npm:^4.1.0"
     laravel-vite-plugin: "npm:^1.0"
-    lucide-react: "npm:^0.453.0"
+    lucide-react: "npm:^0.461.0"
     postcss: "npm:^8.4.31"
     react: "npm:^18.3.1"
     react-day-picker: "npm:8.10.1"
     react-dom: "npm:^18.3.1"
     react-hook-form: "npm:^7.53.1"
     react-resizable-panels: "npm:^2.1.4"
-    recharts: "npm:^2.13.0"
+    recharts: "npm:^2.13.3"
     tailwind-merge: "npm:^2.5.4"
     tailwindcss: "npm:^3.2.1"
     tailwindcss-animate: "npm:^1.0.7"

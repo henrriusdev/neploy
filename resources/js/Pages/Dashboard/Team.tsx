@@ -112,7 +112,7 @@ function Team({
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {team.map((member) => (
+                            {defaultTeam.map((member) => (
                                 <TableRow key={member.id}>
                                     <TableCell>
                                         <div className="flex items-center space-x-4">
@@ -147,7 +147,7 @@ function Team({
                                     <TableCell>
                                         <div className="flex flex-wrap gap-2">
                                             {member.techStacks.map((tech) => (
-                                                <Badge key={tech.name} variant="outline">
+                                                <Badge key={tech.name} variant="outline" className="text-foreground">
                                                     {tech.name}
                                                 </Badge>
                                             ))}
@@ -155,7 +155,7 @@ function Team({
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex space-x-2">
-                                            <Button variant="outline" size="sm">Edit</Button>
+                                            <Button variant="secondary" size="sm" className="text-black">Edit</Button>
                                             <Button variant="destructive" size="sm">Remove</Button>
                                         </div>
                                     </TableCell>
