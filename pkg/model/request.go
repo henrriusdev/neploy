@@ -33,6 +33,6 @@ type OnboardRequest struct {
 }
 
 type MetadataRequest struct {
-	TeamName string `json:"teamName" db:"team_name"`
-	LogoURL  string `json:"logoUrl" db:"logo_url"`
+	Name    string `json:"teamName" db:"team_name"`
+	LogoURL string `json:"logoUrl" db:"logo_url"`
 }

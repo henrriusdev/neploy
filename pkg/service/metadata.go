@@ -27,21 +27,17 @@ func NewMetadata(repo repository.Metadata) Metadata {
 
 func (m *metadata) Create(ctx context.Context, req model.MetadataRequest) error {
 	metadata := model.Metadata{
-		TeamName:       req.Name,
-		LogoURL:        req.LogoURL,
-		PrimaryColor:   req.PrimaryColor,
-		SecondaryColor: req.SecondaryColor,
+		TeamName: req.Name,
+		LogoURL:  req.LogoURL,
 	}
 	return m.repo.Create(ctx, metadata)
 }
 
 func (m *metadata) Update(ctx context.Context, req model.MetadataRequest, id string) error {
 	metadata := model.Metadata{
-		TeamName:       req.Name,
-		LogoURL:        req.LogoURL,
-		PrimaryColor:   req.PrimaryColor,
-		SecondaryColor: req.SecondaryColor,
-		BaseEntity:     model.BaseEntity{ID: id},
+		TeamName:   req.Name,
+		LogoURL:    req.LogoURL,
+		BaseEntity: model.BaseEntity{ID: id},
 	}
 
 	return m.repo.Update(ctx, metadata)
