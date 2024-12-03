@@ -6,7 +6,7 @@ import {AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2} from 'lucide-rea
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {ChartContainer, ChartTooltip, ChartTooltipContent,} from '@/components/ui/chart'
-import SidebarLayout from "@/components/Layout";
+import {SidebarLayout} from "@/components/Layout";
 import {techStackColors} from '@/lib/colors'
 
 const defaultNavMain = [

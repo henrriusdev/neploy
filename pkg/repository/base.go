@@ -2,14 +2,13 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"time"
+
+	"github.com/doug-martin/goqu/v9/exp"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jmoiron/sqlx"
-	"github.com/rs/zerolog/log"
+
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
 )
@@ -107,141 +106,180 @@ func (b *Base[T]) BaseQueryInsert() *goqu.InsertDataset {
 	return dialect.Insert(b.Table)
 }
 
-// List retrieves a list of records with pagination and soft delete filtering
-func (b Base[T]) List(ctx context.Context, limit int, offset int) (list []T, err error) {
-	if limit == 0 {
-		limit = 1000 // Default limit
+func (b *Base[T]) GetAll(ctx context.Context, queryFilters ...filters.SelectFilterBuilder) ([]T, error) {
+	query := filters.ApplyFilters(b.baseQuery(), queryFilters...)
+	q, args, err := query.ToSQL()
+	var results []T
+	if err = b.Store.SelectContext(ctx, &results, q, args...); err != nil {
+		return results, err
 	}
-
-	query := b.baseQuery()
-	query = filters.ApplyFilters(query,
-		filters.LimitOffsetFilter(uint(limit), uint(offset)), // Pagination filter
-	)
-
-	sq, args, err := query.ToSQL()
-	if err != nil {
-		return list, err
-	}
-
-	err = b.Store.SelectContext(ctx, &list, sq, args...)
-	if err == sql.ErrNoRows {
-		return list, nil
-	}
-	return list, err
+	return results, nil
 }
 
-// GetByID retrieves a record by its ID and applies soft delete filtering
-func (b Base[T]) GetByID(ctx context.Context, id string) (m T, err error) {
-	query := b.baseQuery()
-	query = filters.ApplyFilters(query,
-		filters.GenericColumnSelectFilter("id", id, ""), // Filter by ID
-		filters.LimitOffsetFilter(1, 0),                 // Limit 1
+func (b *Base[T]) GetOne(ctx context.Context, filter ...filters.SelectFilterBuilder) (T, error) {
+	query := filters.ApplyFilters(
+		b.baseQuery(),
+		filter...,
 	)
 
-	sq, args, err := query.ToSQL()
+	q, args, err := query.ToSQL()
 	if err != nil {
-		return m, err
+		return *new(T), err
 	}
 
-	err = b.Store.GetContext(ctx, &m, sq, args...)
-	if err == sql.ErrNoRows {
-		return m, ErrNotFound
+	var result T
+	if err := b.Store.GetContext(ctx, &result, q, args...); err != nil {
+		return *new(T), err
 	}
-	return m, err
+
+	return result, nil
 }
 
-// GetByUserID retrieves a record by user ID with soft delete filtering
-func (b Base[T]) GetByUserID(ctx context.Context, userID string) (m T, err error) {
-	query := b.baseQuery()
-	query = filters.ApplyFilters(query,
-		filters.GenericColumnSelectFilter("user_id", userID, ""), // Filter by user_id
-		filters.LimitOffsetFilter(1, 0),                          // Limit 1
+func (b *Base[T]) GetOneById(ctx context.Context, id string) (T, error) {
+	query := filters.ApplyFilters(
+		b.baseQuery(),
+		filters.IsSelectFilter("id", id),
 	)
 
-	sq, args, err := query.ToSQL()
+	q, args, err := query.ToSQL()
 	if err != nil {
-		return m, err
+		return *new(T), err
 	}
 
-	err = b.Store.GetContext(ctx, &m, sq, args...)
-	if err == sql.ErrNoRows {
-		return m, ErrNotFound
+	var result T
+	if err := b.Store.GetContext(ctx, &result, q, args...); err != nil {
+		return *new(T), err
 	}
-	return m, err
+
+	return result, nil
 }
 
-// ListByUserID retrieves a paginated list of records for a specific user ID
-func (b Base[T]) ListByUserID(ctx context.Context, userID string, limit int, offset int) ([]T, error) {
-	if limit == 0 {
-		limit = 1000
-	}
+func (b *Base[T]) UpdateOneById(ctx context.Context, id string, model T, updateFilters ...filters.UpdateFilterBuilder) (T, error) {
+	query := b.BaseQueryUpdate().
+		Set(model).
+		Where(goqu.Ex{"id": id})
 
-	query := b.baseQuery()
-	query = filters.ApplyFilters(query,
-		filters.GenericColumnSelectFilter("user_id", userID, ""), // Filter by user ID
-		filters.LimitOffsetFilter(uint(limit), uint(offset)),     // Pagination
-	)
+	query = filters.ApplyUpdateFilters(query, updateFilters...)
+	query = query.Returning("*")
 
-	sq, args, err := query.ToSQL()
+	q, args, err := query.ToSQL()
 	if err != nil {
-		return nil, err
+		return *new(T), err
 	}
 
-	var list []T
-	err = b.Store.SelectContext(ctx, &list, sq, args...)
-	if err == sql.ErrNoRows {
-		return list, nil
+	var updated T
+	if err := b.Store.QueryRowxContext(ctx, q, args...).StructScan(&updated); err != nil {
+		return *new(T), err
 	}
-	return list, err
+
+	return updated, nil
 }
 
-// SoftDelete marks a record as deleted by setting the deleted_at timestamp
-func (b Base[T]) SoftDelete(ctx context.Context, id string) error {
-	now := time.Now()
+func (b *Base[T]) UpdateOne(ctx context.Context, model T, updateFilters ...filters.UpdateFilterBuilder) (T, error) {
+	query := b.BaseQueryUpdate().Set(model)
 
-	query := goqu.Update(b.Table).
-		Set(goqu.Record{"deleted_at": now}).
-		Where(goqu.C("id").Eq(id), goqu.C("deleted_at").IsNull())
+	query = filters.ApplyUpdateFilters(query, updateFilters...)
+	query = query.Returning("*")
 
-	sql, args, err := query.ToSQL()
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return *new(T), err
+	}
+
+	var updated T
+	if err := b.Store.QueryRowxContext(ctx, q, args...).StructScan(&updated); err != nil {
+		return *new(T), err
+	}
+
+	return updated, nil
+}
+
+func (b *Base[T]) UpsertOneDoUpdate(ctx context.Context, model T, conflictColumns ...string) (T, error) {
+	query := b.BaseQueryInsert().Rows(model)
+	if len(conflictColumns) > 0 {
+		query = query.OnConflict(
+			goqu.DoUpdate(conflictColumns[0],
+				model,
+			),
+		)
+	}
+
+	query = query.Returning("*")
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return *new(T), err
+	}
+
+	var upserted T
+	if err := b.Store.QueryRowxContext(ctx, q, args...).StructScan(&upserted); err != nil {
+		return *new(T), err
+	}
+
+	return upserted, nil
+}
+
+func (b *Base[T]) UpsertOneDoNothing(ctx context.Context, model T, conflictColumns ...string) (T, error) {
+	query := b.BaseQueryInsert().Rows(model)
+	if len(conflictColumns) > 0 {
+		query = query.OnConflict(
+			goqu.DoNothing(),
+		)
+	}
+
+	query = query.Returning("*")
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return *new(T), err
+	}
+
+	var upserted T
+	if err := b.Store.QueryRowxContext(ctx, q, args...).StructScan(&upserted); err != nil {
+		return *new(T), err
+	}
+
+	return upserted, nil
+}
+
+func (b *Base[T]) Update(ctx context.Context, model T, updateFilters ...filters.UpdateFilterBuilder) error {
+	query := b.BaseQueryUpdate().Set(model)
+	query = filters.ApplyUpdateFilters(query, updateFilters...)
+
+	q, args, err := query.ToSQL()
 	if err != nil {
 		return err
 	}
 
-	_, err = b.Store.ExecContext(ctx, sql, args...)
-	return err
+	if _, err := b.Store.ExecContext(ctx, q, args...); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// IsDeleted checks if a record is soft-deleted
-func (b Base[T]) IsDeleted(ctx context.Context, id string) (bool, error) {
-	query := goqu.From(b.Table).
-		Select(goqu.COUNT("*")).
-		Where(goqu.C("id").Eq(id), goqu.C("deleted_at").IsNotNull())
-
-	sql, args, err := query.ToSQL()
+func (b *Base[T]) InsertOne(ctx context.Context, model T, filters ...filters.SelectFilterBuilder) (T, error) {
+	insert := b.BaseQueryInsert().Rows(model).Returning("*")
+	sql, args, err := insert.ToSQL()
 	if err != nil {
-		return false, err
+		return *new(T), err
 	}
 
-	var count int
-	err = b.Store.GetContext(ctx, &count, sql, args...)
+	err = b.Store.QueryRowxContext(ctx, sql, args...).StructScan(&model)
 	if err != nil {
-		return false, err
+		return *new(T), err
 	}
-
-	return count > 0, nil
+	return model, nil
 }
 
-// Rebind is used to rebind query placeholders (for databases like Postgres)
-func (b *Base[T]) Rebind(query string) string {
-	db, ok := b.Store.(*sqlx.DB)
-	if !ok {
-		tx, ok := b.Store.(*sqlx.Tx)
-		if !ok {
-			log.Error().Msg("Store is not a *sqlx.DB or *sqlx.Tx")
-			return ""
-		}
-		return tx.Rebind(query)
+func (b *Base[T]) InsertMany(ctx context.Context, models []T, filters ...filters.SelectFilterBuilder) ([]T, error) {
+	insert := b.BaseQueryInsert().Rows(models).Returning("*")
+	sql, args, err := insert.ToSQL()
+	if err != nil {
+		return *new([]T), err
 	}
-	return db.Rebind(query)
+	var results []T
+	err = b.Store.QueryRowxContext(ctx, sql, args...).StructScan(results)
+	if err != nil {
+		return *new([]T), err
+	}
+	return results, nil
 }

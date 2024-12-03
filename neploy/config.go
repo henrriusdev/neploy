@@ -90,7 +90,7 @@ func Start(npy Neploy) {
 		return c.SendFile("./public/build/assets/" + filename)
 	})
 
-	app.Listen(":3000")
+	app.Listen(":" + npy.Port)
 }
 
 func NewServices(npy Neploy) service.Services {
