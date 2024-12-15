@@ -149,3 +149,14 @@ type ApplicationUser struct {
 	ApplicationID string `json:"application_id" db:"application_id"`
 	UserID        string `json:"user_id" db:"user_id"`
 }
+
+type Invitation struct {
+	ID         string `json:"id" db:"id"`
+	Email      string `json:"email" db:"email"`
+	TeamID     string `json:"team_id" db:"team_id"`
+	Role       string `json:"role" db:"role"`
+	Token      string `json:"token" db:"token"`
+	ExpiresAt  Date   `json:"expires_at" db:"expires_at"`
+	CreatedAt  Date   `json:"created_at" db:"created_at"`
+	AcceptedAt *Date  `json:"accepted_at,omitempty" db:"accepted_at"`
+}
