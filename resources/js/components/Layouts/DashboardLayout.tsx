@@ -42,7 +42,7 @@ interface DashboardLayoutProps {
     logoUrl?: string
 }
 
-export default function DashboardLayout({ 
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     children,
     user = {
         name: "John Doe",
@@ -51,7 +51,7 @@ export default function DashboardLayout({
     },
     teamName = "Acme",
     logoUrl = "https://unavatar.io/github/shadcn",
-}: DashboardLayoutProps) {
+}) => {
     return (
         <SidebarLayout
             navItems={defaultNavMain}
@@ -63,3 +63,5 @@ export default function DashboardLayout({
         </SidebarLayout>
     )
 }
+
+export default DashboardLayout;

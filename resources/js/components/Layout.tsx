@@ -47,7 +47,13 @@ interface SidebarLayoutProps {
     children: React.ReactNode
 }
 
-export default function SidebarLayout({ navItems, user, logoUrl, teamName, children }: SidebarLayoutProps) {
+export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
+    navItems,
+    user,
+    logoUrl,
+    teamName,
+    children,
+}: SidebarLayoutProps) => {
     return (
         <SidebarProvider>
             <div className="flex !h-screen w-full">
@@ -124,3 +130,5 @@ export default function SidebarLayout({ navItems, user, logoUrl, teamName, child
         </SidebarProvider>
     )
 }
+
+export default SidebarLayout;
