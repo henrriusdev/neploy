@@ -16,6 +16,9 @@ type User interface {
 	Delete(ctx context.Context, id string) error
 	List(ctx context.Context, limit, offset uint) ([]model.User, error)
 	GetByEmail(ctx context.Context, email string) (model.User, error)
+	CreateInvitation(ctx context.Context, invitation model.Invitation) error
+	GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error)
+	UpdateInvitation(ctx context.Context, invitation model.Invitation) error
 }
 
 type user[T any] struct {
@@ -126,4 +129,46 @@ func (u *user[T]) GetByEmail(ctx context.Context, email string) (model.User, err
 	}
 
 	return user, nil
+}
+
+func (u *user[T]) CreateInvitation(ctx context.Context, invitation model.Invitation) error {
+	query := goqu.Insert("invitations").Rows(invitation)
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return err
+	}
+
+	_, err = u.Store.ExecContext(ctx, q, args...)
+	return err
+}
+
+func (u *user[T]) GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error) {
+	query := goqu.From("invitations").Where(goqu.Ex{"token": token})
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return model.Invitation{}, err
+	}
+
+	var invitation model.Invitation
+	if err := u.Store.QueryRowxContext(ctx, q, args...).StructScan(&invitation); err != nil {
+		return model.Invitation{}, err
+	}
+
+	return invitation, nil
+}
+
+func (u *user[T]) UpdateInvitation(ctx context.Context, invitation model.Invitation) error {
+	query := goqu.Update("invitations").
+		Set(invitation).
+		Where(goqu.Ex{"id": invitation.ID})
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return err
+	}
+
+	_, err = u.Store.ExecContext(ctx, q, args...)
+	return err
 }

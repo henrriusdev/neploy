@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
+	"neploy.dev/config"
 	"neploy.dev/neploy/middleware"
 	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/repository"
@@ -61,23 +62,29 @@ func Start(npy Neploy) {
 		Concurrency: 10,
 	})
 
+	// Initialize repositories
 	repos := NewRepositories(npy)
 	npy.Repositories = repos
 
+	// Initialize services
 	services := NewServices(npy)
 	npy.Services = services
 
+	// Middleware
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
 	app.Use(middleware.OnboardingMiddleware(services.Onboard))
 	app.Use(middleware.SessionMiddleware(npy.SessionStore))
 
+	// Validator
 	myValidator := &validation.XValidator{
 		Validator: validation.Validate,
 	}
 	npy.Validator = *myValidator
 
+	// Routes
 	NewHandlers(npy, i, app)
 
+	// Static files
 	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
 		filename := c.Params("filename")
 
@@ -90,7 +97,8 @@ func Start(npy Neploy) {
 		return c.SendFile("./public/build/assets/" + filename)
 	})
 
-	app.Listen(":3000")
+	// Start server
+	app.Listen(":" + config.Env.Port)
 }
 
 func NewServices(npy Neploy) service.Services {
