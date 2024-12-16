@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -24,6 +27,7 @@ type User interface {
 	Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error)
 	GetProvider(ctx context.Context, userID string) (string, error)
 	InviteUser(ctx context.Context, req model.InviteUserRequest) error
+	AcceptInvitation(ctx context.Context, token string) error
 }
 
 type user struct {
@@ -205,8 +209,40 @@ func (u *user) InviteUser(ctx context.Context, req model.InviteUserRequest) erro
 	return nil
 }
 
+func (u *user) AcceptInvitation(ctx context.Context, token string) error {
+	// Obtener la invitación por token
+	invitation, err := u.repos.User.GetInvitationByToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	// Verificar si la invitación ha expirado
+	if time.Now().After(invitation.ExpiresAt.Time) {
+		return fmt.Errorf("invitation has expired")
+	}
+
+	// Verificar si ya fue aceptada
+	if invitation.AcceptedAt != nil {
+		return fmt.Errorf("invitation has already been accepted")
+	}
+
+	// Marcar la invitación como aceptada
+	now := model.Date{Time: time.Now()}
+	invitation.AcceptedAt = &now
+	if err := u.repos.User.UpdateInvitation(ctx, invitation); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func generateInviteToken() string {
-	// Generate a random token
-	// In production, use a proper UUID or secure token generator
-	return strconv.FormatInt(time.Now().UnixNano(), 36)
+	// Generar 32 bytes de datos aleatorios
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		// En caso de error, usar un fallback menos seguro
+		return strconv.FormatInt(time.Now().UnixNano(), 36)
+	}
+	// Convertir a base64URL (seguro para URLs y sin caracteres especiales)
+	return base64.URLEncoding.EncodeToString(b)
 }

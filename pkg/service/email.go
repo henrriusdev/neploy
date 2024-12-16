@@ -16,8 +16,8 @@ type email struct {
 	client *resend.Client
 }
 
-func NewEmail(apiKey string) Email {
-	client := resend.NewClient(apiKey)
+func NewEmail() Email {
+	client := resend.NewClient(config.Env.ResendAPIKey)
 	return &email{client: client}
 }
 
