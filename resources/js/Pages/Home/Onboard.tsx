@@ -10,6 +10,7 @@ import ServiceStep from './Steps/ServiceStep'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
+import { OnboardingSidebar } from '@/components/OnboardingSidebar'
 
 interface Props {
     email?: string;
@@ -179,8 +180,9 @@ export default function Onboard({ email, username }: Props) {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="w-full">
+        <div className="flex min-h-screen">
+            <OnboardingSidebar currentStep={step} />
+            <div className="flex-1 p-6">
                 <h1 className="text-3xl font-bold mb-6 text-center">Setup Your Account</h1>
                 {renderStep()}
             </div>
