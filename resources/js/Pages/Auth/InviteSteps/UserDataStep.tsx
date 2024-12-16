@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { DatePicker } from '@/components/ui/date-picker'
-import { withMask } from '@/lib/utils'
+import { DatePicker } from '@/components/DatePicker'
+import { withMask } from 'use-mask-input'
 
 const formSchema = z.object({
     firstName: z.string().min(2).max(50),
