@@ -61,23 +61,29 @@ func Start(npy Neploy) {
 		Concurrency: 10,
 	})
 
+	// Initialize repositories
 	repos := NewRepositories(npy)
 	npy.Repositories = repos
 
+	// Initialize services
 	services := NewServices(npy)
 	npy.Services = services
 
+	// Middleware
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
 	app.Use(middleware.OnboardingMiddleware(services.Onboard))
 	app.Use(middleware.SessionMiddleware(npy.SessionStore))
 
+	// Validator
 	myValidator := &validation.XValidator{
 		Validator: validation.Validate,
 	}
 	npy.Validator = *myValidator
 
+	// Routes
 	NewHandlers(npy, i, app)
 
+	// Static files
 	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
 		filename := c.Params("filename")
 
@@ -117,6 +123,9 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	userRole := repository.NewUserRole(npy.DB)
 	application := repository.NewApplication(npy.DB)
 	applicationStat := repository.NewApplicationStat(npy.DB)
+	userTechStack := repository.NewUserTechStack(npy.DB)
+	visitorInfo := repository.NewVisitor(npy.DB)
+	visitorTrace := repository.NewVisitorTrace(npy.DB)
 
 	return repository.Repositories{
 		Metadata:        metadata,
@@ -126,6 +135,9 @@ func NewRepositories(npy Neploy) repository.Repositories {
 		UserRole:        userRole,
 		Application:     application,
 		ApplicationStat: applicationStat,
+		UserTechStack:   userTechStack,
+		VisitorInfo:     visitorInfo,
+		VisitorTrace:    visitorTrace,
 	}
 }
 

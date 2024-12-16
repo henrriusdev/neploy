@@ -25,6 +25,7 @@ type Repositories struct {
 	User            User
 	UserOauth       UserOauth
 	UserRole        UserRole
+	UserTechStack   UserTechStack
 	VisitorInfo     VisitorInfo
 	VisitorTrace    VisitorTrace
 }

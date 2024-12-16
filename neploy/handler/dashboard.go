@@ -34,6 +34,7 @@ func NewDashboard(metadata service.Metadata, app service.Application, user servi
 
 func (d *Dashboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
 	r.Get("", adaptor.HTTPHandler(d.Index(i)))
+	r.Get("/team", adaptor.HTTPHandler(d.Team(i)))
 }
 
 func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
@@ -87,13 +88,65 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 		}
 
 		i.Render(w, r, "Dashboard/Index", gonertia.Props{
-			"teamName":       metadata.TeamName,
-			"primaryColor":   metadata.PrimaryColor,
-			"secondaryColor": metadata.SecondaryColor,
-			"logoUrl":        metadata.LogoURL,
-			"admin":          admin,
-			"health":         fmt.Sprintf("%d/%d", healthyApps, 4),
-			"user":           user,
+			"teamName": metadata.TeamName,
+			"logoUrl":  metadata.LogoURL,
+			"admin":    admin,
+			"health":   fmt.Sprintf("%d/%d", healthyApps, 4),
+			"user":     user,
+		})
+	}
+}
+
+func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// get the token from the cookies
+		token, err := r.Cookie("token")
+		if err != nil {
+			http.Redirect(w, r, "/auth/login", http.StatusFound)
+			return
+		}
+
+		// get user data
+		claims := &model.JWTClaims{}
+		_, err = jwt.ParseWithClaims(token.Value, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.Env.JWTSecret), nil
+		})
+		if err != nil {
+			http.Redirect(w, r, "/auth/login", http.StatusFound)
+			return
+		}
+
+		provider, err := d.user.GetProvider(context.Background(), claims.ID)
+		if err != nil {
+			http.Redirect(w, r, "/auth/login", http.StatusFound)
+			return
+		}
+
+		user := model.UserResponse{
+			Email:    claims.Email,
+			Username: claims.Username,
+			Name:     claims.Name,
+			Provider: provider,
+		}
+
+		// get metadata
+		metadata, err := d.metadata.Get(context.Background())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		team, err := d.user.List(context.Background(), 15, 0)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		i.Render(w, r, "Dashboard/Team", map[string]interface{}{
+			"user":     user,
+			"teamName": metadata.TeamName,
+			"logoUrl":  metadata.LogoURL,
+			"team":     team,
 		})
 	}
 }

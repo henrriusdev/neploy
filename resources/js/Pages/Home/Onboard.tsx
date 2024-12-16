@@ -58,8 +58,6 @@ const roleSchema = z.object({
 const serviceSchema = z.object({
   teamName: z.string().min(2, "Team name must be at least 2 characters"),
   logo: z.string().min(1, "Logo URL is required"),
-  primaryColor: z.string().min(4, "Primary color must be a valid hex code"),
-  secondaryColor: z.string().min(4, "Secondary color must be a valid hex code"),
 });
 
 export default function Onboarding() {
@@ -104,8 +102,6 @@ export default function Onboarding() {
     defaultValues: {
       teamName: "",
       logo: "",
-      primaryColor: "#000000",
-      secondaryColor: "#ffffff",
     },
   });
 
@@ -517,42 +513,6 @@ export default function Onboarding() {
                             name="logo"
                             render={({ field }) => (
                               <Input {...field} />
-                            )} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={serviceForm.control}
-                    name="primaryColor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Primary Color</FormLabel>
-                        <FormControl>
-                          <Controller
-                            control={serviceForm.control}
-                            name="primaryColor"
-                            render={({ field }) => (
-                              <ColorPicker field={field} />
-                            )} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={serviceForm.control}
-                    name="secondaryColor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Secondary Color</FormLabel>
-                        <FormControl>
-                          <Controller
-                            control={serviceForm.control}
-                            name="secondaryColor"
-                            render={({ field }) => (
-                              <ColorPicker field={field} />
                             )} />
                         </FormControl>
                         <FormMessage />

@@ -43,11 +43,12 @@ func initInertia() *inertia.Inertia {
 			inertia.WithSSR(),
 		)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln("Error al cargar el archivo root.html:", err)
 		}
 		i.ShareTemplateFunc("vite", func(entry string) (string, error) {
 			content, err := os.ReadFile(viteHotFile)
 			if err != nil {
+				log.Println("Error al leer el archivo hot:", err)
 				return "", err
 			}
 			url := strings.TrimSpace(string(content))
@@ -59,8 +60,10 @@ func initInertia() *inertia.Inertia {
 			if entry != "" && !strings.HasPrefix(entry, "/") {
 				entry = "/" + entry
 			}
+
 			return url + entry, nil
 		})
+
 		return i
 	}
 
@@ -71,7 +74,7 @@ func initInertia() *inertia.Inertia {
 		inertia.WithSSR(),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Error al cargar el archivo manifest.json:", err)
 	}
 
 	i.ShareTemplateFunc("vite", vite(manifestPath, "/build/"))

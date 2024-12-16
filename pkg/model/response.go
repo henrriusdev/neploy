@@ -17,3 +17,8 @@ type UserResponse struct {
 	Name     string `json:"name"`
 	Provider string `json:"provider"`
 }
+
+type TeamResponse struct {
+	UserRoles     []UserRoles     `json:"userRoles"`
+	UserTechStack []UserTechStack `json:"userTechStack"`
+}

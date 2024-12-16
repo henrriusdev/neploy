@@ -23,14 +23,16 @@ type User interface {
 	GetByEmail(ctx context.Context, email string) (model.User, error)
 	Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error)
 	GetProvider(ctx context.Context, userID string) (string, error)
+	InviteUser(ctx context.Context, req model.InviteUserRequest) error
 }
 
 type user struct {
 	repos repository.Repositories
+	email Email
 }
 
-func NewUser(repos repository.Repositories) User {
-	return &user{repos}
+func NewUser(repos repository.Repositories, email Email) User {
+	return &user{repos: repos, email: email}
 }
 
 func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID int) error {
@@ -159,4 +161,52 @@ func (u *user) GetProvider(ctx context.Context, userID string) (string, error) {
 	}
 
 	return string(oauth.Provider), nil
+}
+
+func (u *user) InviteUser(ctx context.Context, req model.InviteUserRequest) error {
+	// Check if user already exists
+	_, err := u.GetByEmail(ctx, req.Email)
+	if err == nil {
+		return err
+	}
+
+	// Generate invitation token
+	token := generateInviteToken()
+
+	// Create invitation record
+	invitation := model.Invitation{
+		Email:     req.Email,
+		TeamID:    req.TeamID,
+		Role:      req.Role,
+		Token:     token,
+		ExpiresAt: model.Date{Time: time.Now().Add(7 * 24 * time.Hour)}, // 7 days
+	}
+
+	// Save invitation
+	if err := u.repos.User.CreateInvitation(ctx, invitation); err != nil {
+		return err
+	}
+
+	teamName, err := u.repos.Metadata.GetTeamName(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Send invitation email
+	inviteLink := config.Env.BaseURL + "/invite/" + token
+	if err := u.email.SendInvitation(ctx, req.Email, teamName, req.Role, inviteLink); err != nil {
+		// Log the error but don't fail the invitation creation
+		log.Error().Err(err).
+			Str("email", req.Email).
+			Str("role", req.Role).
+			Msg("Failed to send invitation email")
+	}
+
+	return nil
+}
+
+func generateInviteToken() string {
+	// Generate a random token
+	// In production, use a proper UUID or secure token generator
+	return strconv.FormatInt(time.Now().UnixNano(), 36)
 }

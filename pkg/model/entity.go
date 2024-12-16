@@ -140,14 +140,23 @@ type UserOAuth struct {
 
 type Metadata struct {
 	BaseEntity
-	TeamName       string `json:"team_name" db:"team_name"`
-	LogoURL        string `json:"logo_url" db:"logo_url"`
-	PrimaryColor   string `json:"primary_color" db:"primary_color"`
-	SecondaryColor string `json:"secondary_color" db:"secondary_color"`
+	TeamName string `json:"team_name" db:"team_name"`
+	LogoURL  string `json:"logo_url" db:"logo_url"`
 }
 
 type ApplicationUser struct {
 	BaseRelation
 	ApplicationID string `json:"application_id" db:"application_id"`
 	UserID        string `json:"user_id" db:"user_id"`
+}
+
+type Invitation struct {
+	ID         string `json:"id" db:"id"`
+	Email      string `json:"email" db:"email"`
+	TeamID     string `json:"team_id" db:"team_id"`
+	Role       string `json:"role" db:"role"`
+	Token      string `json:"token" db:"token"`
+	ExpiresAt  Date   `json:"expires_at" db:"expires_at"`
+	CreatedAt  Date   `json:"created_at" db:"created_at"`
+	AcceptedAt *Date  `json:"accepted_at,omitempty" db:"accepted_at"`
 }
