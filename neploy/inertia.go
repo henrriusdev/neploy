@@ -35,11 +35,9 @@ func initInertia() *inertia.Inertia {
 			return nil
 		}
 
-		log.Println("Archivo manifest.json movido exitosamente desde .vite")
 	}
 
 	if isDevMode {
-		log.Println("Modo de desarrollo activo (vite hot reloading)")
 		i, err := inertia.NewFromFile(
 			rootViewFile,
 			inertia.WithSSR(),
@@ -98,11 +96,6 @@ func vite(manifestPath, buildDir string) func(path string) (string, error) {
 	err = json.NewDecoder(f).Decode(&viteAssets)
 	if err != nil {
 		log.Fatalf("Error al decodificar el archivo manifest: %s", err)
-	}
-
-	// Imprimir contenido del manifest para depuración
-	for k, v := range viteAssets {
-		log.Printf("Asset encontrado: %s -> %s\n", k, v.File)
 	}
 
 	return func(p string) (string, error) {

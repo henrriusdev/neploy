@@ -9,7 +9,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
-	"neploy.dev/config"
 	"neploy.dev/neploy/middleware"
 	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/repository"
@@ -97,8 +96,7 @@ func Start(npy Neploy) {
 		return c.SendFile("./public/build/assets/" + filename)
 	})
 
-	// Start server
-	app.Listen(":" + config.Env.Port)
+	app.Listen(":" + npy.Port)
 }
 
 func NewServices(npy Neploy) service.Services {
