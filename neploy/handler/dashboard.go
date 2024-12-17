@@ -17,17 +17,13 @@ import (
 )
 
 type Dashboard struct {
-	metadata service.Metadata
-	app      service.Application
-	user     service.User
+	services service.Services
 	sessions *session.Store
 }
 
-func NewDashboard(metadata service.Metadata, app service.Application, user service.User, sessions *session.Store) *Dashboard {
+func NewDashboard(services service.Services, sessions *session.Store) *Dashboard {
 	return &Dashboard{
-		metadata: metadata,
-		app:      app,
-		user:     user,
+		services: services,
 		sessions: sessions,
 	}
 }
@@ -62,19 +58,19 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 
 		admin := role == "henrrybrgt@gmail.com"
 
-		metadata, err := d.metadata.Get(context.Background())
+		metadata, err := d.services.Metadata.Get(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting metadata")
 			return
 		}
 
-		healthyApps, _, err := d.app.GetHealthy(context.Background())
+		healthyApps, _, err := d.services.Application.GetHealthy(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting healthy apps")
 			return
 		}
 
-		provider, err := d.user.GetProvider(context.Background(), claims.ID)
+		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 		if err != nil {
 			log.Err(err).Msg("error getting provider")
 			return
@@ -116,7 +112,7 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
-		provider, err := d.user.GetProvider(context.Background(), claims.ID)
+		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 		if err != nil {
 			http.Redirect(w, r, "/auth/login", http.StatusFound)
 			return
@@ -129,14 +125,20 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			Provider: provider,
 		}
 
-		// get metadata
-		metadata, err := d.metadata.Get(context.Background())
+		roles, err := d.services.Role.Get(context.Background())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		team, err := d.user.List(context.Background(), 15, 0)
+		// get metadata
+		metadata, err := d.services.Metadata.Get(context.Background())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		team, err := d.services.User.List(context.Background(), 15, 0)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -147,6 +149,7 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,
 			"team":     team,
+			"roles":    roles,
 		})
 	}
 }

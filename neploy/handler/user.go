@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"context"
+	"net/http"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
-	"time"
 )
 
 type User struct {
@@ -18,36 +22,7 @@ func NewUser(user service.User) *User {
 
 func (u *User) RegisterRoutes(app *fiber.App, i *gonertia.Inertia) {
 	app.Post("/invite", u.InviteUser)
-	app.Get("/invite/:token", func(c *fiber.Ctx) error {
-		token := c.Params("token")
-		
-		// Obtener la invitación
-		invitation, err := u.user.GetInvitationByToken(c.Context(), token)
-		if err != nil {
-			return fiber.NewError(fiber.StatusNotFound, "Invitation not found")
-		}
-
-		// Verificar estado
-		if time.Now().After(invitation.ExpiresAt.Time) {
-			return i.Render(c, "Auth/AcceptInvite", fiber.Map{
-				"token": token,
-				"expired": true,
-			})
-		}
-
-		if invitation.AcceptedAt != nil {
-			return i.Render(c, "Auth/AcceptInvite", fiber.Map{
-				"token": token,
-				"alreadyAccepted": true,
-			})
-		}
-
-		// Redirigir al flujo de completar invitación
-		return i.Render(c, "Auth/CompleteInvite", fiber.Map{
-			"token": token,
-			"email": invitation.Email,
-		})
-	})
+	app.Get("/invite/:token", adaptor.HTTPHandlerFunc(u.AcceptInvite(i)))
 	app.Post("/users/complete-invite", u.CompleteInvite)
 }
 
@@ -77,7 +52,7 @@ func (h *User) InviteUser(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to send invitation")
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(gonertia.Props{
 		"message": "Invitation sent successfully",
 	})
 }
@@ -120,26 +95,45 @@ func (u *User) CompleteInvite(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(gonertia.Props{
 		"message": "User created successfully",
 	})
 }
 
-// AcceptInvite maneja la aceptación de una invitación
-func (h *User) AcceptInvite(c *fiber.Ctx) error {
-	var req struct {
-		Token string `json:"token"`
+func (u *User) AcceptInvite(i *gonertia.Inertia) http.HandlerFunc {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		token := r.URL.Query().Get("token")
+
+		// Obtener la invitación
+		invitation, err := u.user.GetInvitationByToken(context.Background(), token)
+		if err != nil {
+			i.Render(w, r, "Auth/AcceptInvite", gonertia.Props{
+				"token":   token,
+				"expired": true,
+			})
+		}
+
+		// Verificar estado
+		if time.Now().After(invitation.ExpiresAt.Time) {
+			i.Render(w, r, "Auth/AcceptInvite", gonertia.Props{
+				"token":   token,
+				"expired": true,
+			})
+		}
+
+		if invitation.AcceptedAt != nil {
+			i.Render(w, r, "Auth/AcceptInvite", gonertia.Props{
+				"token":           token,
+				"alreadyAccepted": true,
+			})
+		}
+
+		// Redirigir al flujo de completar invitación
+		i.Render(w, r, "Auth/CompleteInvite", gonertia.Props{
+			"token": token,
+			"email": invitation.Email,
+		})
 	}
 
-	if err := c.BodyParser(&req); err != nil {
-		return err
-	}
-
-	if err := h.user.AcceptInvitation(c.Context(), req.Token); err != nil {
-		return err
-	}
-
-	return c.JSON(fiber.Map{
-		"message": "Invitation accepted successfully",
-	})
+	return fn
 }

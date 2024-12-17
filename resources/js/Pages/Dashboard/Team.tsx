@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select"
 import axios from 'axios'
 import { useToast } from '@/hooks/use-toast';
+import { RoleIcon } from '@/components/RoleIcon'
 
 interface TeamMember {
     id: string
@@ -89,7 +90,13 @@ interface TeamProps {
     }
     teamName?: string
     logoUrl?: string
-    team?: TeamMember[]
+    team?: TeamMember[],
+    roles?: Array<{
+        name: string
+        description: string
+        icon: string
+        color: string
+    }>
 }
 
 interface InviteMemberData {
@@ -102,6 +109,7 @@ function Team({
     teamName,
     logoUrl,
     team = defaultTeam,
+    roles
 }: TeamProps) {
     const [open, setOpen] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(false)
@@ -179,9 +187,12 @@ function Team({
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                        <SelectItem value="member">Member</SelectItem>
-                                        <SelectItem value="viewer">Viewer</SelectItem>
+                                        {roles?.map((role) => (
+                                            <SelectItem key={role.name} value={role.name}>
+                                                <RoleIcon icon={role.icon} color={role.color} />
+                                                {role.name}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
