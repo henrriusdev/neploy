@@ -28,6 +28,7 @@ type User interface {
 	GetProvider(ctx context.Context, userID string) (string, error)
 	InviteUser(ctx context.Context, req model.InviteUserRequest) error
 	AcceptInvitation(ctx context.Context, token string) error
+	GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error)
 }
 
 type user struct {
@@ -245,4 +246,8 @@ func generateInviteToken() string {
 	}
 	// Convertir a base64URL (seguro para URLs y sin caracteres especiales)
 	return base64.URLEncoding.EncodeToString(b)
+}
+
+func (u *user) GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error) {
+	return u.repos.User.GetInvitationByToken(ctx, token)
 }

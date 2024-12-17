@@ -144,7 +144,7 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
-		i.Render(w, r, "Dashboard/Team", map[string]interface{}{
+		i.Render(w, r, "Dashboard/Team", gonertia.Props{
 			"user":     user,
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,

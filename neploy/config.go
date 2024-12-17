@@ -102,7 +102,8 @@ func Start(npy Neploy) {
 func NewServices(npy Neploy) service.Services {
 	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
-	user := service.NewUser(npy.Repositories)
+	email := service.NewEmail()
+	user := service.NewUser(npy.Repositories, email)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
 
