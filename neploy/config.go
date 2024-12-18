@@ -8,9 +8,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	"github.com/romsar/gonertia"
+	flogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"neploy.dev/neploy/middleware"
 	"neploy.dev/neploy/validation"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
@@ -61,6 +62,8 @@ func Start(npy Neploy) {
 		Concurrency: 10,
 	})
 
+	// Set the global logger
+
 	// Initialize repositories
 	repos := NewRepositories(npy)
 	npy.Repositories = repos
@@ -70,9 +73,14 @@ func Start(npy Neploy) {
 	npy.Services = services
 
 	// Middleware
+	app.Use(flogger.New(flogger.Config{
+		Format:     "[${ip}]:${port} ${status} - ${method} ${path} ${latency}\n",
+		TimeFormat: "2006-01-02 15:04:05",
+	}))
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
 	app.Use(middleware.OnboardingMiddleware(services.Onboard))
 	app.Use(middleware.SessionMiddleware(npy.SessionStore))
+	logger.SetLogger()
 
 	// Validator
 	myValidator := &validation.XValidator{
@@ -81,7 +89,7 @@ func Start(npy Neploy) {
 	npy.Validator = *myValidator
 
 	// Routes
-	NewHandlers(npy, i, app)
+	RegisterRoutes(app, i, npy)
 
 	// Static files
 	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
@@ -96,13 +104,18 @@ func Start(npy Neploy) {
 		return c.SendFile("./public/build/assets/" + filename)
 	})
 
+	// print all routes
+	app.Get("/routes", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"routes": app.GetRoutes()})
+	})
 	app.Listen(":" + npy.Port)
 }
 
 func NewServices(npy Neploy) service.Services {
 	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
-	user := service.NewUser(npy.Repositories)
+	email := service.NewEmail()
+	user := service.NewUser(npy.Repositories, email)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
 
@@ -139,10 +152,4 @@ func NewRepositories(npy Neploy) repository.Repositories {
 		VisitorInfo:     visitorInfo,
 		VisitorTrace:    visitorTrace,
 	}
-}
-
-func NewHandlers(npy Neploy, i *gonertia.Inertia, app *fiber.App) {
-	loginRoutes(app, i, npy)
-	onboardRoutes(app, i, npy)
-	dashboardRoutes(app, i, npy)
 }

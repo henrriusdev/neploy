@@ -19,6 +19,7 @@ const (
 )
 
 type JWTClaims struct {
+	ID         string   `json:"id"`
 	Email      string   `json:"email"`
 	Roles      []string `json:"roles"`
 	RoleIDs    []string `json:"rolesId"`

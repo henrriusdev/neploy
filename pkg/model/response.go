@@ -18,6 +18,17 @@ type UserResponse struct {
 	Provider string `json:"provider"`
 }
 
+type TeamMemberResponse struct {
+	ID         string      `json:"id"`
+	Username   string      `json:"username"`
+	Email      string      `json:"email"`
+	FirstName  string      `json:"firstName"`
+	LastName   string      `json:"lastName"`
+	Provider   string      `json:"provider"`
+	Roles      []Role      `json:"roles"`
+	TechStacks []TechStack `json:"techStacks"`
+}
+
 type TeamResponse struct {
 	UserRoles     []UserRoles     `json:"userRoles"`
 	UserTechStack []UserTechStack `json:"userTechStack"`

@@ -24,6 +24,7 @@ type EnvVar struct {
 	GithubClientSecret  string `env:"GITHUB_CLIENT_SECRET"`
 	GitlabApplicationID string `env:"GITLAB_APPLICATION_ID"`
 	GitlabSecret        string `env:"GITLAB_SECRET"`
+	ResendAPIKey        string `env:"RESEND_API_KEY"`
 }
 
 var Env EnvVar

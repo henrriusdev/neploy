@@ -32,23 +32,19 @@ const defaultNavMain = [
 ]
 
 interface DashboardLayoutProps {
-    children: React.ReactNode
-    user?: {
-        name: string
-        email: string
-        avatar: string
-    }
-    teamName?: string
-    logoUrl?: string
+  children: React.ReactNode;
+  user?: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  teamName?: string;
+  logoUrl?: string;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     children,
-    user = {
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://unavatar.io/github/shadcn",
-    },
+    user,
     teamName = "Acme",
     logoUrl = "https://unavatar.io/github/shadcn",
 }) => {

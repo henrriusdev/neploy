@@ -16,6 +16,7 @@ import (
 	"golang.org/x/oauth2/gitlab"
 	"neploy.dev/config"
 	"neploy.dev/neploy/validation"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -182,21 +183,27 @@ func (a *Auth) Onboard(i *inertia.Inertia) http.HandlerFunc {
 
 func (a *Auth) GithubOAuth(c *fiber.Ctx) error {
 	githubConfig := GetConfig(model.Github)
-	url := githubConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+	state := c.Query("state") // Get state parameter (invitation token)
+	logger.Info("Starting GitHub OAuth with state: %s", state)
+	url := githubConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	return c.Redirect(url, http.StatusTemporaryRedirect)
 }
 
 func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 	code := c.Query("code")
+	state := c.Query("state")
+	logger.Info("GitHub OAuth callback received with state: %s", state)
 	githubConfig := GetConfig(model.Github)
 	token, err := githubConfig.Exchange(context.Background(), code)
 	if err != nil {
+		logger.Error("Failed to exchange token: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to exchange token")
 	}
 
 	client := githubConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {
+		logger.Error("Failed to get user info: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get user info")
 	}
 	defer resp.Body.Close()
@@ -214,7 +221,12 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
 		Name:     "oauth_id",
 		Value:    fmt.Sprintf("%d", user.ID),
+		Path:     "/",
 		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Lax",
+		MaxAge:   24 * 60 * 60,
+		Domain:   c.Hostname(),
 	})
 
 	if user.Email == "" {
@@ -249,26 +261,44 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 		Username: user.Login,
 	}
 
-	return c.Redirect(fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s", oauthResponse.Username, oauthResponse.Email, oauthResponse.Provider))
+	if state != "" {
+		// If we have an invitation token, redirect to the invite completion
+		return c.Redirect(fmt.Sprintf("/users/invite/%s?username=%s&email=%s&provider=%s",
+			state,
+			oauthResponse.Username,
+			oauthResponse.Email,
+			oauthResponse.Provider))
+	}
+
+	return c.Redirect(fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s",
+		oauthResponse.Username,
+		oauthResponse.Email,
+		oauthResponse.Provider))
 }
 
 func (a *Auth) GitlabOAuth(c *fiber.Ctx) error {
 	gitlabConfig := GetConfig(model.Gitlab)
-	url := gitlabConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+	state := c.Query("state") // Get state parameter (invitation token)
+	logger.Info("Starting GitLab OAuth with state: %s", state)
+	url := gitlabConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	return c.Redirect(url, http.StatusTemporaryRedirect)
 }
 
 func (a *Auth) GitlabOAuthCallback(c *fiber.Ctx) error {
 	code := c.Query("code")
+	state := c.Query("state")
+	logger.Info("GitLab OAuth callback received with state: %s", state)
 	gitlabConfig := GetConfig(model.Gitlab)
 	token, err := gitlabConfig.Exchange(context.Background(), code)
 	if err != nil {
+		logger.Error("Failed to exchange token: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to exchange token")
 	}
 
 	client := gitlabConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://gitlab.com/api/v4/user")
 	if err != nil {
+		logger.Error("Failed to get user info: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get user info")
 	}
 	defer resp.Body.Close()
@@ -281,11 +311,35 @@ func (a *Auth) GitlabOAuthCallback(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to parse user info")
 	}
 
+	// Set oauth_id cookie with the access token
+	c.Cookie(&fiber.Cookie{
+		Name:     "oauth_id",
+		Value:    token.AccessToken,
+		Path:     "/",
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Lax",
+		MaxAge:   24 * 60 * 60,
+		Domain:   c.Hostname(),
+	})
+
 	oauthResponse := model.OAuthResponse{
-		Provider: model.Gitlab,
-		Email:    user.Email,
 		Username: user.Username,
+		Email:    user.Email,
+		Provider: model.Gitlab,
 	}
 
-	return c.Redirect(fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s", oauthResponse.Username, oauthResponse.Email, oauthResponse.Provider))
+	if state != "" {
+		// If we have an invitation token, redirect to the invite completion
+		return c.Redirect(fmt.Sprintf("/users/invite/%s?username=%s&email=%s&provider=%s",
+			state,
+			oauthResponse.Username,
+			oauthResponse.Email,
+			oauthResponse.Provider))
+	}
+
+	return c.Redirect(fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s",
+		oauthResponse.Username,
+		oauthResponse.Email,
+		oauthResponse.Provider))
 }
