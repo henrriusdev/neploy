@@ -23,7 +23,7 @@ type User interface {
 	Get(ctx context.Context, id string) (model.User, error)
 	Update(ctx context.Context, user model.User) error
 	Delete(ctx context.Context, id string) error
-	List(ctx context.Context, limit, offset uint) ([]model.User, error)
+	List(ctx context.Context, limit, offset uint) ([]model.TeamMemberResponse, error)
 	GetByEmail(ctx context.Context, email string) (model.User, error)
 	Login(ctx context.Context, req model.LoginRequest) (model.LoginResponse, error)
 	GetProvider(ctx context.Context, userID string) (string, error)
@@ -109,8 +109,76 @@ func (u *user) Delete(ctx context.Context, id string) error {
 	return u.repos.User.Delete(ctx, id)
 }
 
-func (u *user) List(ctx context.Context, limit, offset uint) ([]model.User, error) {
-	return u.repos.User.List(ctx, limit, offset)
+func (u *user) List(ctx context.Context, limit, offset uint) ([]model.TeamMemberResponse, error) {
+	users, err := u.repos.User.List(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	var teamMembers []model.TeamMemberResponse
+
+	// Convert each user to TeamMemberResponse
+	for _, user := range users {
+		// Get provider
+		provider, err := u.GetProvider(ctx, user.ID)
+		if err != nil {
+			logger.Error("failed to get provider for user: user_id=%s, error=%v", user.ID, err)
+			continue
+		}
+
+		// Get roles
+		userRoles, err := u.repos.UserRole.GetByUserID(ctx, user.ID)
+		if err != nil {
+			logger.Error("failed to get roles for user: user_id=%s, error=%v", user.ID, err)
+			continue
+		}
+
+		// Get tech stacks
+		userTechStacks, err := u.repos.UserTechStack.GetByUserID(ctx, user.ID)
+		if err != nil {
+			logger.Error("failed to get tech stacks for user: user_id=%s, error=%v", user.ID, err)
+			continue
+		}
+
+		var roles []model.Role
+
+		for _, userRole := range userRoles {
+			role, err := u.repos.Role.GetByID(ctx, userRole.RoleID)
+			if err != nil {
+				logger.Error("failed to get role: role_id=%s, error=%v", userRole.RoleID, err)
+				continue
+			}
+
+			roles = append(roles, role)
+		}
+
+		var techStacks []model.TechStack
+
+		for _, userTechStack := range userTechStacks {
+			techStack, err := u.repos.TechStack.GetByID(ctx, userTechStack.TechStackID)
+			if err != nil {
+				logger.Error("failed to get tech stack: tech_stack_id=%s, error=%v", userTechStack.TechStackID, err)
+				continue
+			}
+
+			techStacks = append(techStacks, techStack)
+		}
+
+		member := model.TeamMemberResponse{
+			ID:         user.ID,
+			Username:   user.Username,
+			Email:      user.Email,
+			FirstName:  user.FirstName,
+			LastName:   user.LastName,
+			Provider:   provider,
+			Roles:      roles,
+			TechStacks: techStacks,
+		}
+
+		teamMembers = append(teamMembers, member)
+	}
+
+	return teamMembers, nil
 }
 
 func (u *user) GetByEmail(ctx context.Context, email string) (model.User, error) {
@@ -170,6 +238,7 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 func (u *user) GetProvider(ctx context.Context, userID string) (string, error) {
 	oauth, err := u.repos.UserOauth.GetByUserID(ctx, userID)
 	if err != nil {
+		logger.Error("failed to get user oauth: user_id=%s, error=%v", userID, err)
 		return "", err
 	}
 

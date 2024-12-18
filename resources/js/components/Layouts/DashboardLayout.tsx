@@ -32,14 +32,14 @@ const defaultNavMain = [
 ]
 
 interface DashboardLayoutProps {
-    children: React.ReactNode
-    user?: {
-        email: string
-        roles?: string[]
-        id?: string
-    }
-    teamName?: string
-    logoUrl?: string
+  children: React.ReactNode;
+  user?: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  teamName?: string;
+  logoUrl?: string;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -48,7 +48,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     teamName = "Acme",
     logoUrl = "https://unavatar.io/github/shadcn",
 }) => {
-    console.log(user)
     return (
         <SidebarLayout
             navItems={defaultNavMain}

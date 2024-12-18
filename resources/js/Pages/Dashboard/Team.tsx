@@ -46,6 +46,7 @@ interface TeamMember {
   email: string;
   firstName: string;
   lastName: string;
+  provider: string;
   roles: Array<{
     name: string;
     description: string;
@@ -65,6 +66,7 @@ const defaultTeam: TeamMember[] = [
     email: "john@example.com",
     firstName: "John",
     lastName: "Doe",
+    provider: "github",
     roles: [
       {
         name: "Admin",
@@ -237,71 +239,80 @@ function Team({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {defaultTeam.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-4">
-                      <Avatar>
-                        <AvatarImage
-                          src={`https://avatar.vercel.sh/${member.username}`}
-                        />
-                        <AvatarFallback>
-                          {member.firstName[0]}
-                          {member.lastName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">
-                          {member.firstName} {member.lastName}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {member.email}
+              {team.length > 0 ? (
+                team.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-4">
+                        <Avatar>
+                          <AvatarImage
+                            src={`https://unavatar.io/${member.provider === 'github' ? `github/${member.username}` : member.email}`}
+                            alt={`${member.firstName} ${member.lastName}`}
+                          />
+                          <AvatarFallback>
+                            {member.firstName[0]}
+                            {member.lastName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {member.firstName} {member.lastName}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {member.email}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-2">
-                      {member.roles.map((role) => (
-                        <Badge
-                          key={role.name}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {member.roles && member.roles.map((role) => (
+                          <Badge
+                            key={role.name}
+                            variant="secondary"
+                            style={{
+                              backgroundColor: role.color + "20",
+                              color: role.color,
+                            }}>
+                            {role.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        {member.techStacks && member.techStacks.map((tech) => (
+                          <Badge
+                            key={tech.name}
+                            variant="outline"
+                            className="text-foreground">
+                            {tech.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
                           variant="secondary"
-                          style={{
-                            backgroundColor: role.color + "20",
-                            color: role.color,
-                          }}>
-                          {role.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-2">
-                      {member.techStacks.map((tech) => (
-                        <Badge
-                          key={tech.name}
-                          variant="outline"
-                          className="text-foreground">
-                          {tech.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="text-black">
-                        Edit
-                      </Button>
-                      <Button variant="destructive" size="sm">
-                        Remove
-                      </Button>
-                    </div>
+                          size="sm"
+                          className="text-black">
+                          Edit
+                        </Button>
+                        <Button variant="destructive" size="sm">
+                          Remove
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    No team members found.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -310,9 +321,26 @@ function Team({
   );
 }
 
-// Add the layout property to the component
-Team.layout = (page: React.ReactNode, props: TeamProps) => (
-  <DashboardLayout {...props}>{page}</DashboardLayout>
-);
+Team.layout = (page: any) => {
+  const { user: pageUser, teamName, logoUrl } = page.props;
+  const user = {
+    name: pageUser.name,
+    email: pageUser.email,
+    avatar:
+      pageUser.provider === "github"
+        ? "https://unavatar.io/github/" + pageUser.username
+        : "https://unavatar.io/" + pageUser.email,
+  };
+  console.log(user);
+  return (
+    <DashboardLayout
+      teamName={teamName}
+      logoUrl={logoUrl}
+      user={user}
+    >
+      {page}
+    </DashboardLayout>
+  );
+};
 
 export default Team;

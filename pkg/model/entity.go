@@ -23,6 +23,7 @@ type User struct {
 	DOB       Date   `json:"dob" db:"dob"`
 	Address   string `json:"address" db:"address"`
 	Phone     string `json:"phone" db:"phone"`
+	Provider  string `json:"provider" db:"-"`
 }
 
 type Role struct {

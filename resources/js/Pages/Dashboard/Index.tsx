@@ -352,14 +352,22 @@ function Dashboard({
   return <div className="flex-1 space-y-4 p-8 pt-6">{dashboardContent}</div>;
 }
 
-Dashboard.layout = (page: any) => (
-  <DashboardLayout
-    teamName={page.props.teamName}
-    logoUrl={page.props.logoUrl}
-    user={page.props.user}
-  >
-    {page}
-  </DashboardLayout>
-);
+Dashboard.layout = (page: any) => {
+  const user = {
+    name: page.props.user.name,
+    email: page.props.user.email,
+    avatar: page.props.user.provider === "github" ? "https://unavatar.io/github/" + page.props.user.username : "https://unavatar.io/" + page.props.user.email
+  };
+  console.log(user);
+  return (
+    <DashboardLayout
+      teamName={page.props.teamName}
+      logoUrl={page.props.logoUrl}
+      user={user}
+    >
+      {page}
+    </DashboardLayout>
+  )
+};
 
 export default Dashboard;

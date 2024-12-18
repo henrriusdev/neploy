@@ -140,7 +140,7 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
-		team, err := d.services.User.List(context.Background(), 15, 0)
+		listResponse, err := d.services.User.List(context.Background(), 15, 0)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -150,7 +150,7 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			"user":     user,
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,
-			"team":     team,
+			"team":     listResponse,
 			"roles":    roles,
 		})
 	}
