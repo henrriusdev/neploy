@@ -52,7 +52,6 @@ func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.U
 	}
 
 	var userRoles []model.UserRoles
-	print(query)
 	if err := u.Store.SelectContext(ctx, &userRoles, query, args...); err != nil {
 		logger.Error("Failed to get user roles: %v", err)
 		return nil, err

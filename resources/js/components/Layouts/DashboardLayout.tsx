@@ -48,6 +48,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     teamName = "Acme",
     logoUrl = "https://unavatar.io/github/shadcn",
 }) => {
+    console.log(user)
     return (
         <SidebarLayout
             navItems={defaultNavMain}

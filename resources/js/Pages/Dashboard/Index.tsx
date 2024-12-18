@@ -103,6 +103,10 @@ interface DashboardProps {
   logoUrl?: string;
 }
 
+interface PageProps {
+  props: DashboardProps
+}
+
 function Dashboard({
   requestData = defaultRequestsData,
   techStack = defaultTechStackData,
@@ -348,17 +352,14 @@ function Dashboard({
   return <div className="flex-1 space-y-4 p-8 pt-6">{dashboardContent}</div>;
 }
 
-Dashboard.layout = (page: React.ReactNode, { teamName, logoUrl, user }: DashboardProps) => {
-  console.log(user);
-  return (
-    <DashboardLayout
-      teamName={teamName}
-      logoUrl={logoUrl}
-      user={user}
-    >
-      {page}
-    </DashboardLayout>
-  )
-};
+Dashboard.layout = (page: any) => (
+  <DashboardLayout
+    teamName={page.props.teamName}
+    logoUrl={page.props.logoUrl}
+    user={page.props.user}
+  >
+    {page}
+  </DashboardLayout>
+);
 
 export default Dashboard;
