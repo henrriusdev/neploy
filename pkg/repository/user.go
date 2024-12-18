@@ -139,6 +139,8 @@ func (u *user[T]) CreateInvitation(ctx context.Context, invitation model.Invitat
 		return err
 	}
 
+	println(q)
+
 	_, err = u.Store.ExecContext(ctx, q, args...)
 	return err
 }

@@ -348,8 +348,17 @@ function Dashboard({
   return <div className="flex-1 space-y-4 p-8 pt-6">{dashboardContent}</div>;
 }
 
-Dashboard.layout = (page: React.ReactNode, props: DashboardProps) => (
-  <DashboardLayout {...props}>{page}</DashboardLayout>
-);
+Dashboard.layout = (page: React.ReactNode, { teamName, logoUrl, user }: DashboardProps) => {
+  console.log(user);
+  return (
+    <DashboardLayout
+      teamName={teamName}
+      logoUrl={logoUrl}
+      user={user}
+    >
+      {page}
+    </DashboardLayout>
+  )
+};
 
 export default Dashboard;

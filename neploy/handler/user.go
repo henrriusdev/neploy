@@ -3,11 +3,13 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/romsar/gonertia"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -20,10 +22,10 @@ func NewUser(user service.User) *User {
 	return &User{user: user}
 }
 
-func (u *User) RegisterRoutes(app *fiber.App, i *gonertia.Inertia) {
+func (u *User) RegisterRoutes(app fiber.Router, i *gonertia.Inertia) {
 	app.Post("/invite", u.InviteUser)
 	app.Get("/invite/:token", adaptor.HTTPHandlerFunc(u.AcceptInvite(i)))
-	app.Post("/users/complete-invite", u.CompleteInvite)
+	app.Post("/complete-invite", u.CompleteInvite)
 }
 
 func (h *User) InviteUser(c *fiber.Ctx) error {
@@ -32,9 +34,11 @@ func (h *User) InviteUser(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	// Get team ID from authenticated user
-	teamID := c.Locals("team_id").(string)
-	req.TeamID = teamID
+	// Check if user already exists
+	_, err := h.user.GetByEmail(c.Context(), req.Email)
+	if err == nil {
+		return fiber.NewError(fiber.StatusConflict, "User already exists in the system")
+	}
 
 	// Validate request
 	if req.Email == "" {
@@ -46,6 +50,7 @@ func (h *User) InviteUser(c *fiber.Ctx) error {
 
 	// Send invitation
 	if err := h.user.InviteUser(c.Context(), req); err != nil {
+		logger.Error("error inviting user: %v", err)
 		if err.Error() == "user already exists" {
 			return fiber.NewError(fiber.StatusConflict, "User already exists in the system")
 		}
@@ -58,28 +63,28 @@ func (h *User) InviteUser(c *fiber.Ctx) error {
 }
 
 func (u *User) CompleteInvite(c *fiber.Ctx) error {
-	var req struct {
-		Token     string    `json:"token"`
-		FirstName string    `json:"firstName"`
-		LastName  string    `json:"lastName"`
-		DOB       time.Time `json:"dob"`
-		Phone     string    `json:"phone"`
-		Address   string    `json:"address"`
-		Email     string    `json:"email"`
-		Username  string    `json:"username"`
-		Password  string    `json:"password"`
-	}
-
+	var req model.CompleteInviteRequest
 	if err := c.BodyParser(&req); err != nil {
 		return err
 	}
 
-	// Aceptar la invitación
-	if err := u.user.AcceptInvitation(c.Context(), req.Token); err != nil {
+	// Get oauth_id from cookie
+	oauthID := c.Cookies("oauth_id")
+	if oauthID == "" {
+		oauthID = "no_oauth_id"
+	}
+
+	// delete oauth_id cookie
+	c.ClearCookie("oauth_id")
+	req.OauthID = oauthID
+
+	// Accept the invitation
+	invitation, err := u.user.AcceptInvitation(c.Context(), req.Token)
+	if err != nil {
 		return err
 	}
 
-	// Crear el usuario
+	// Create user
 	userReq := model.CreateUserRequest{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -91,48 +96,78 @@ func (u *User) CompleteInvite(c *fiber.Ctx) error {
 		Password:  req.Password,
 	}
 
-	if err := u.user.Create(c.Context(), userReq, 0); err != nil {
+	if err := u.user.Create(c.Context(), userReq, oauthID); err != nil {
 		return err
 	}
 
-	return c.JSON(gonertia.Props{
-		"message": "User created successfully",
-	})
+	// Add user to role
+	if err := u.user.AddUserRole(c.Context(), req.Email, invitation.Role); err != nil {
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func (u *User) AcceptInvite(i *gonertia.Inertia) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		token := r.URL.Query().Get("token")
+		// the token is a path variable
+		token := strings.Split(r.URL.Path, "/invite/")[1]
+
+		// Get OAuth callback data if present
+		username := r.URL.Query().Get("username")
+		email := r.URL.Query().Get("email")
+		provider := r.URL.Query().Get("provider")
+
+		// Get oauth_id from cookies
+		var oauthID string
+		for _, cookie := range r.Cookies() {
+			if cookie.Name == "oauth_id" {
+				oauthID = cookie.Value
+				// Clear the cookie
+				http.SetCookie(w, &http.Cookie{
+					Name:     "oauth_id",
+					Value:    "",
+					Path:     "/",
+					Expires:  time.Now().Add(-1 * time.Hour),
+					HttpOnly: true,
+				})
+				break
+			}
+		}
 
 		// Obtener la invitación
 		invitation, err := u.user.GetInvitationByToken(context.Background(), token)
 		if err != nil {
-			i.Render(w, r, "Auth/AcceptInvite", gonertia.Props{
-				"token":   token,
-				"expired": true,
+			logger.Error("failed to get invitation: token=%s, error=%v", token, err)
+			i.Render(w, r, "Auth/CompleteInvite", gonertia.Props{
+				"token":  token,
+				"error":  "Invalid or expired invitation",
+				"status": "invalid",
 			})
+			return
 		}
 
-		// Verificar estado
-		if time.Now().After(invitation.ExpiresAt.Time) {
-			i.Render(w, r, "Auth/AcceptInvite", gonertia.Props{
-				"token":   token,
-				"expired": true,
-			})
+		props := gonertia.Props{
+			"token":  token,
+			"email":  invitation.Email,
+			"status": "valid",
 		}
 
-		if invitation.AcceptedAt != nil {
-			i.Render(w, r, "Auth/AcceptInvite", gonertia.Props{
-				"token":           token,
-				"alreadyAccepted": true,
-			})
+		// Add OAuth data if present
+		if username != "" {
+			props["username"] = username
+		}
+		if email != "" {
+			props["email"] = email
+		}
+		if provider != "" {
+			props["provider"] = provider
+		}
+		if oauthID != "" {
+			props["oauth_id"] = oauthID
 		}
 
-		// Redirigir al flujo de completar invitación
-		i.Render(w, r, "Auth/CompleteInvite", gonertia.Props{
-			"token": token,
-			"email": invitation.Email,
-		})
+		i.Render(w, r, "Auth/CompleteInvite", props)
 	}
 
 	return fn

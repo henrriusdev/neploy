@@ -54,9 +54,11 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 			return
 		}
 
-		role := claims.Email
-
-		admin := role == "henrrybrgt@gmail.com"
+		roles, err := d.services.Role.GetUserRoles(context.Background(), claims.ID)
+		if err != nil {
+			log.Err(err).Msg("error checking admin status")
+			return
+		}
 
 		metadata, err := d.services.Metadata.Get(context.Background())
 		if err != nil {
@@ -86,7 +88,7 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 		i.Render(w, r, "Dashboard/Index", gonertia.Props{
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,
-			"admin":    admin,
+			"roles":    roles,
 			"health":   fmt.Sprintf("%d/%d", healthyApps, 4),
 			"user":     user,
 		})

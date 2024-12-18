@@ -189,7 +189,7 @@ function Team({
                   onValueChange={(value) =>
                     setFormData((prev) => ({ ...prev, role: value }))
                   }>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-20">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -198,8 +198,8 @@ function Team({
                         <div className="!flex items-center gap-2 justify-start flex-row">
                           <RoleIcon icon={role.icon} color={role.color} />
                           <div>
-                            <span className="capitalize font-bold">{role.name}</span>
-                            <span className="block text-xs text-gray-700">
+                            <span className="capitalize font-bold text-gray-100">{role.name}</span>
+                            <span className="block text-xs text-gray-200">
                               {role.description}
                             </span>
                           </div>

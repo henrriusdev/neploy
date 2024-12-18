@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=64"`
@@ -29,7 +31,7 @@ type OnboardRequest struct {
 	AdminUser CreateUserRequest   `json:"adminUser" validate:"required"`
 	Roles     []CreateRoleRequest `json:"roles" validate:"required"`
 	Metadata  MetadataRequest     `json:"metadata" validate:"required"`
-	OauthID   int                 `json:"-"`
+	OauthID   string              `json:"-"`
 }
 
 type MetadataRequest struct {
@@ -38,7 +40,19 @@ type MetadataRequest struct {
 }
 
 type InviteUserRequest struct {
-	Email  string `json:"email"`
-	Role   string `json:"role"`
-	TeamID string `json:"team_id"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+type CompleteInviteRequest struct {
+	Token     string    `json:"token" validate:"required"`
+	FirstName string    `json:"firstName" validate:"required"`
+	LastName  string    `json:"lastName" validate:"required"`
+	DOB       time.Time `json:"dob" validate:"required"`
+	Phone     string    `json:"phone" validate:"required,min=10,max=10"`
+	Address   string    `json:"address" validate:"required,min=2,max=128"`
+	Email     string    `json:"email" validate:"required,email"`
+	Username  string    `json:"username" validate:"required"`
+	Password  string    `json:"password" validate:"required,min=8,max=64"`
+	OauthID   string    `json:"-"`
 }

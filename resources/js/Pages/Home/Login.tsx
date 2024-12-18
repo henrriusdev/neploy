@@ -57,9 +57,9 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Side Content */}
-      <div className="md:w-2/5 bg-primary p-8 flex flex-col justify-center">
+      <div className="md:w-2/5 bg-accent p-8 flex flex-col justify-center">
         <div className="mb-8">
           <img
             src="/placeholder.svg?height=80&width=80"
@@ -70,7 +70,7 @@ export default function Component() {
           />
         </div>
         <h2 className="text-3xl font-bold text-white mb-4">
-          Welcome to Our Platformx
+          Welcome to Our Platform
         </h2>
         <p className="text-white mb-4">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do

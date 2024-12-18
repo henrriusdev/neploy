@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/store"
 )
@@ -47,13 +47,14 @@ func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.U
 
 	query, args, err := q.ToSQL()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get user roles")
+		logger.Error("Failed to get user roles: %v", err)
 		return nil, err
 	}
 
 	var userRoles []model.UserRoles
+	print(query)
 	if err := u.Store.SelectContext(ctx, &userRoles, query, args...); err != nil {
-		log.Error().Err(err).Msg("Failed to get user roles")
+		logger.Error("Failed to get user roles: %v", err)
 		return nil, err
 	}
 
@@ -78,13 +79,13 @@ func (u *userRole[T]) GetByRoleID(ctx context.Context, roleID string) ([]model.U
 
 	query, args, err := q.ToSQL()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get user roles")
+		logger.Error("Failed to get user roles: %v", err)
 		return nil, err
 	}
 
 	var userRoles []model.UserRoles
 	if err := u.Store.SelectContext(ctx, &userRoles, query, args...); err != nil {
-		log.Error().Err(err).Msg("Failed to get user roles")
+		logger.Error("Failed to get user roles: %v", err)
 		return nil, err
 	}
 
@@ -98,12 +99,12 @@ func (u *userRole[T]) Insert(ctx context.Context, userRole model.UserRoles) (mod
 
 	query, args, err := q.ToSQL()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to create inser query user role")
+		logger.Error("Failed to create inser query user role: %v", err)
 		return model.UserRoles{}, err
 	}
 
 	if _, err := u.Store.ExecContext(ctx, query, args...); err != nil {
-		log.Error().Err(err).Msg("Failed to insert user role")
+		logger.Error("Failed to insert user role: %v", err)
 		return model.UserRoles{}, err
 	}
 

@@ -22,15 +22,14 @@ func dashboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 	dashboard.RegisterRoutes(app.Group("/dashboard"), i)
 }
 
-func userRoutes(app *fiber.App, npy Neploy) {
-	h := handler.NewUser(npy.Services.User)
-	users := app.Group("/users")
-	users.Post("/invite", h.InviteUser)
+func userRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+	user := handler.NewUser(npy.Services.User)
+	user.RegisterRoutes(app.Group("/users"), i)
 }
 
 func RegisterRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 	loginRoutes(app, i, npy)
 	onboardRoutes(app, i, npy)
 	dashboardRoutes(app, i, npy)
-	userRoutes(app, npy)
+	userRoutes(app, i, npy)
 }

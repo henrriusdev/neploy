@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"strconv"
-
 	"neploy.dev/neploy/validation"
 
 	"github.com/gofiber/fiber/v2"
@@ -42,9 +40,7 @@ func (o *Onboard) Initiate(c *fiber.Ctx) error {
 
 	// delete oauth_id cookie
 	c.ClearCookie("oauth_id")
-
-	oauth, _ := strconv.Atoi(oauthID)
-	req.OauthID = oauth
+	req.OauthID = oauthID
 
 	if err := o.service.Initiate(c.Context(), req); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

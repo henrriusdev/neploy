@@ -18,17 +18,17 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 text-white",
         month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
+        caption: "flex justify-center pt-1 relative items-center text-white",
+        caption_label: "text-sm font-medium !text-white",
+        nav: "space-x-1 flex items-center text-white",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white"
         ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        nav_button_previous: "absolute left-1 !text-white",
+        nav_button_next: "absolute right-1 !text-red",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell:
@@ -48,7 +48,7 @@ function Calendar({
         day_range_end: "day-range-end",
         day_selected:
           "bg-slate-900 text-slate-50 hover:bg-slate-900 hover:text-slate-50 focus:bg-slate-900 focus:text-slate-50 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50 dark:hover:text-slate-900 dark:focus:bg-slate-50 dark:focus:text-slate-900",
-        day_today: "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50",
+        day_today: "!bg-secondary text-accent-foreground",
         day_outside:
           "day-outside text-slate-500 opacity-50  aria-selected:bg-slate-100/50 aria-selected:text-slate-500 aria-selected:opacity-30 dark:text-slate-400 dark:aria-selected:bg-slate-800/50 dark:aria-selected:text-slate-400",
         day_disabled: "text-slate-500 opacity-50 dark:text-slate-400",
@@ -58,8 +58,8 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeftIcon className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRightIcon className="h-4 w-4" />,
+        IconLeft: ({ ...props }) => <ChevronLeftIcon className="h-4 w-4 text-white" />,
+        IconRight: ({ ...props }) => <ChevronRightIcon className="h-4 w-4 text-white" />,
       }}
       {...props}
     />
