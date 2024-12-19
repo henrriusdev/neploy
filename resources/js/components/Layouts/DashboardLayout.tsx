@@ -11,7 +11,7 @@ const defaultNavMain = [
     },
     {
         title: "Applications",
-        url: "#",
+        url: "/dashboard/applications",
         icon: AppWindowMac,
     },
     {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/rs/zerolog/log"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
@@ -10,7 +11,7 @@ import (
 type Application interface {
 	Create(ctx context.Context, app model.Application) error
 	Get(ctx context.Context, id string) (model.Application, error)
-	GetAll(ctx context.Context) ([]model.Application, error)
+	GetAll(ctx context.Context) ([]model.FullApplication, error)
 	Update(ctx context.Context, app model.Application) error
 	GetStat(ctx context.Context, id string) (model.ApplicationStat, error)
 	CreateStat(ctx context.Context, stat model.ApplicationStat) error
@@ -35,8 +36,28 @@ func (a *application) Get(ctx context.Context, id string) (model.Application, er
 	return a.repo.GetByID(ctx, id)
 }
 
-func (a *application) GetAll(ctx context.Context) ([]model.Application, error) {
-	return a.repo.GetAll(ctx)
+func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
+	apps, err := a.repo.GetAll(ctx)
+	if err != nil {
+		log.Err(err).Msg("error getting all applications")
+		return nil, err
+	}
+
+	fullApps := make([]model.FullApplication, len(apps))
+	for i, app := range apps {
+		stats, err := a.stat.GetByApplicationID(ctx, app.ID)
+		if err != nil {
+			log.Err(err).Msg("error getting application stats")
+			return nil, err
+		}
+
+		fullApps[i] = model.FullApplication{
+			Application: app,
+			Stats:       stats,
+		}
+	}
+
+	return fullApps, nil
 }
 
 func (a *application) Update(ctx context.Context, app model.Application) error {
