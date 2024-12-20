@@ -28,14 +28,8 @@ func (a *Application) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
 	r.Delete("/:id", a.Delete)
 }
 
-type CreateApplicationRequest struct {
-	AppName     string `json:"appName"`
-	Description string `json:"description"`
-	TechStackID string `json:"techStackId"`
-}
-
 func (a *Application) Create(c *fiber.Ctx) error {
-	var req CreateApplicationRequest
+	var req model.CreateApplicationRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
@@ -53,17 +47,17 @@ func (a *Application) Create(c *fiber.Ctx) error {
 	app := model.Application{
 		AppName:     req.AppName,
 		Description: req.Description,
-		TechStackID: req.TechStackID,
 	}
 
-	if err := a.service.Create(c.Context(), app); err != nil {
+	appId, err := a.service.Create(c.Context(), app, req.TechStack)
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create application",
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"id":      app.ID,
+		"id":      appId,
 		"message": "Application created successfully",
 	})
 }

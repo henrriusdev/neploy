@@ -56,3 +56,9 @@ type CompleteInviteRequest struct {
 	Password  string    `json:"password" validate:"required,min=8,max=64"`
 	OauthID   string    `json:"-"`
 }
+
+type CreateApplicationRequest struct {
+	AppName     string `json:"appName"`
+	Description string `json:"description"`
+	TechStack   string `json:"techStack"`
+}

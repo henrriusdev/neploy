@@ -36,5 +36,6 @@ type TeamResponse struct {
 
 type FullApplication struct {
 	Application
-	Stats []ApplicationStat `json:"stat"`
+	Stats     []ApplicationStat `json:"stat"`
+	TechStack TechStack         `json:"techStack"`
 }

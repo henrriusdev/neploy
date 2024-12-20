@@ -11,7 +11,7 @@ import (
 )
 
 type Application interface {
-	Insert(ctx context.Context, application model.Application) error
+	Insert(ctx context.Context, application model.Application) (string, error)
 	Update(ctx context.Context, application model.Application) error
 	Delete(ctx context.Context, id string) error
 	GetByID(ctx context.Context, id string) (model.Application, error)
@@ -26,20 +26,21 @@ func NewApplication(db store.Queryable) Application {
 	return &application[model.Application]{Base[model.Application]{Store: db, Table: "applications"}}
 }
 
-func (a *application[T]) Insert(ctx context.Context, application model.Application) error {
-	query := a.BaseQueryInsert().Rows(application)
+func (a *application[T]) Insert(ctx context.Context, application model.Application) (string, error) {
+	var id string
+	query := a.BaseQueryInsert().Rows(application).Returning("id")
 	q, args, err := query.ToSQL()
 	if err != nil {
 		log.Err(err).Msg("error building insert query")
-		return err
+		return "", err
 	}
 
-	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
+	if err := a.Store.QueryRowxContext(ctx, q, args...).Scan(&id); err != nil {
 		log.Err(err).Msg("error executing insert query")
-		return err
+		return "", err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (a *application[T]) Update(ctx context.Context, application model.Application) error {

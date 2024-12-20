@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
 )
 
 type Application interface {
-	Create(ctx context.Context, app model.Application) error
+	Create(ctx context.Context, app model.Application, techStack string) (string, error)
 	Get(ctx context.Context, id string) (model.Application, error)
 	GetAll(ctx context.Context) ([]model.FullApplication, error)
 	Update(ctx context.Context, app model.Application) error
@@ -22,13 +22,22 @@ type Application interface {
 type application struct {
 	repo repository.Application
 	stat repository.ApplicationStat
+	tech repository.TechStack
 }
 
-func NewApplication(repo repository.Application, stat repository.ApplicationStat) Application {
-	return &application{repo, stat}
+func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
+	return &application{repo, stat, tech}
 }
 
-func (a *application) Create(ctx context.Context, app model.Application) error {
+func (a *application) Create(ctx context.Context, app model.Application, techStack string) (string, error) {
+	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	if err != nil {
+		logger.Error("error finding or creating tech stack: %v", err)
+		return "", err
+	}
+
+	app.TechStackID = tech.ID
+
 	return a.repo.Insert(ctx, app)
 }
 
@@ -39,7 +48,7 @@ func (a *application) Get(ctx context.Context, id string) (model.Application, er
 func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
 	apps, err := a.repo.GetAll(ctx)
 	if err != nil {
-		log.Err(err).Msg("error getting all applications")
+		logger.Error("error getting all applications: %v", err)
 		return nil, err
 	}
 
@@ -47,13 +56,20 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 	for i, app := range apps {
 		stats, err := a.stat.GetByApplicationID(ctx, app.ID)
 		if err != nil {
-			log.Err(err).Msg("error getting application stats")
+			logger.Error("error getting application stats: %v", err)
+			return nil, err
+		}
+
+		tech, err := a.tech.GetByID(ctx, app.TechStackID)
+		if err != nil {
+			logger.Error("error getting tech stack: %v", err)
 			return nil, err
 		}
 
 		fullApps[i] = model.FullApplication{
 			Application: app,
 			Stats:       stats,
+			TechStack:   tech,
 		}
 	}
 
@@ -79,7 +95,7 @@ func (a *application) UpdateStat(ctx context.Context, stat model.ApplicationStat
 func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 	apps, err := a.stat.GetAll(ctx)
 	if err != nil {
-		log.Err(err).Msg("error getting all application stats")
+		logger.Error("error getting all application stats: %v", err)
 		return 0, 0, err
 	}
 

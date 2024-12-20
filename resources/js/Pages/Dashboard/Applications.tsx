@@ -50,6 +50,8 @@ import * as z from "zod";
 import { useDropzone } from "react-dropzone";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { Textarea } from "@/components/ui/textarea";
+import { TechIcon } from "@/components/TechIcon";
 
 interface ApplicationStat {
   id: string;
@@ -66,6 +68,12 @@ interface ApplicationStat {
   updatedAt: string;
 }
 
+interface TechStack {
+  id: string;
+  name: string;
+  description: string;
+}
+
 interface Application {
   id: string;
   appName: string;
@@ -78,6 +86,7 @@ interface Application {
   updatedAt: string;
   deletedAt?: string;
   stats: ApplicationStat[];
+  techStack: TechStack;
 }
 
 interface ApplicationsProps {
@@ -92,6 +101,7 @@ interface ApplicationsProps {
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
+  description: z.string().optional(),
   repoUrl: z.string().url().optional(),
   language: z.string().optional(),
 });
@@ -105,15 +115,18 @@ function Applications({
   applications: initialApplications = null,
 }: ApplicationsProps) {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-  const [applications, setApplications] = React.useState<Application[] | null>(initialApplications);
+  const [applications, setApplications] = React.useState<Application[] | null>(
+    initialApplications
+  );
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
   const { toast } = useToast();
-  
+
   const form = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
     defaultValues: {
       appName: "",
+      description: "",
       repoUrl: "",
       language: undefined,
     },
@@ -122,8 +135,8 @@ function Applications({
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
-    
-    if (!file.name.endsWith('.zip')) {
+
+    if (!file.name.endsWith(".zip")) {
       toast({
         title: "Invalid file type",
         description: "Please upload a .zip file",
@@ -134,34 +147,41 @@ function Applications({
 
     // Handle file upload logic here
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     // TODO: Implement file upload API call
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/zip': ['.zip'],
+      "application/zip": [".zip"],
     },
     maxFiles: 1,
     multiple: undefined,
     onDragEnter: undefined,
     onDragOver: undefined,
-    onDragLeave: undefined
+    onDragLeave: undefined,
   });
 
   const onSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
     setIsUploading(true);
     try {
       // First, create the application record
-      const createResponse = await axios.post('/applications', {
+      const createResponse = await axios.post("/applications", {
         appName: values.appName,
-        language: values.language,
+        description:
+          values.description ||
+          (values.repoUrl
+            ? `Deployed from GitHub: ${values.repoUrl}`
+            : "Uploaded from ZIP file"),
+        techStack: values.language || "auto-detect",
       });
 
       // If application creation fails (remember that is an axios call), throw an error
       if (createResponse.status >= 400) {
-        throw new Error('Failed to create application' + createResponse.statusText);
+        throw new Error(
+          "Failed to create application" + createResponse.statusText
+        );
       }
 
       // Extract the application ID from the response
@@ -169,44 +189,55 @@ function Applications({
 
       // If GitHub URL is provided, trigger GitHub deployment
       if (values.repoUrl) {
-        const { data: deployData } = await axios.post(`/applications/${applicationId}/deploy`, {
-          repoUrl: values.repoUrl,
+        const { data: deployData } = await axios.post(
+          `/applications/${applicationId}/deploy`,
+          {
+            repoUrl: values.repoUrl,
+          }
+        );
+
+        toast({
+          title: "Success",
+          description: "GitHub repository deployment started",
         });
       }
-
-      toast({
-        title: "Success",
-        description: values.repoUrl 
-          ? "GitHub repository deployment started" 
-          : "Application created successfully. Please upload your ZIP file.",
-      });
 
       // If we have a ZIP file, upload it
-      const file = (getRootProps().getFiles()[0] as File);
+      const file = getRootProps().getFiles()[0] as File;
       if (file) {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
-        const { data: uploadData } = await axios.post(`/applications/${applicationId}/upload`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+        const { data: uploadData } = await axios.post(
+          `/applications/${applicationId}/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        toast({
+          title: "Success",
+          description: "Application file uploaded successfully",
         });
       }
 
-      toast({
-        title: "Success",
-        description: "Application file uploaded successfully",
-      });
-      setUploadDialogOpen(false);
-      
       // Refresh the applications list
-      const { data: updatedApplications } = await axios.get('/applications');
+      const { data: updatedApplications } = await axios.get("/applications");
       setApplications(updatedApplications);
+
+      // Reset form and close dialog
+      form.reset();
+      setUploadDialogOpen(false);
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to deploy application",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to deploy application",
         variant: "destructive",
       });
     } finally {
@@ -214,10 +245,13 @@ function Applications({
     }
   };
 
-  const handleApplicationAction = async (appId: string, action: 'start' | 'stop' | 'delete') => {
+  const handleApplicationAction = async (
+    appId: string,
+    action: "start" | "stop" | "delete"
+  ) => {
     try {
       const response = await fetch(`/api/applications/${appId}/${action}`, {
-        method: 'POST',
+        method: "POST",
       });
 
       if (!response.ok) {
@@ -230,15 +264,18 @@ function Applications({
       });
 
       // For delete action, remove from local state
-      if (action === 'delete') {
-        setApplications((prev) => 
-          prev ? prev.filter(app => app.id !== appId) : null
+      if (action === "delete") {
+        setApplications((prev) =>
+          prev ? prev.filter((app) => app.id !== appId) : null
         );
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${action} application`,
+        description:
+          error instanceof Error
+            ? error.message
+            : `Failed to ${action} application`,
         variant: "destructive",
       });
     }
@@ -246,19 +283,17 @@ function Applications({
 
   // WebSocket connection for real-time updates
   React.useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     const ws = new WebSocket(wsUrl);
-    
+
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'APPLICATION_UPDATE') {
+      if (data.type === "APPLICATION_UPDATE") {
         setApplications((prev) => {
           if (!prev) return prev;
           return prev.map((app) =>
-            app.id === data.applicationId
-              ? { ...app, ...data.updates }
-              : app
+            app.id === data.applicationId ? { ...app, ...data.updates } : app
           );
         });
       }
@@ -269,13 +304,18 @@ function Applications({
     };
   }, []);
 
-  const getStatusBadgeColor = (status: Application['status']) => {
+  const getStatusBadgeColor = (status: Application["status"]) => {
     switch (status) {
-      case 'Running': return 'bg-green-500';
-      case 'Building': return 'bg-yellow-500';
-      case 'Stopped': return 'bg-gray-500';
-      case 'Error': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case "Running":
+        return "bg-green-500";
+      case "Building":
+        return "bg-yellow-500";
+      case "Stopped":
+        return "bg-gray-500";
+      case "Error":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
@@ -288,7 +328,9 @@ function Applications({
             <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{applications?.length || 0}</div>
+            <div className="text-2xl font-bold">
+              {applications?.length || 0}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -297,7 +339,8 @@ function Applications({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {applications?.filter(app => app.status === 'Running').length || 0}
+              {applications?.filter((app) => app.status === "Running").length ||
+                0}
             </div>
           </CardContent>
         </Card>
@@ -307,7 +350,8 @@ function Applications({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {applications?.filter(app => app.status === 'Error').length || 0}
+              {applications?.filter((app) => app.status === "Error").length ||
+                0}
             </div>
           </CardContent>
         </Card>
@@ -326,11 +370,14 @@ function Applications({
             <DialogHeader>
               <DialogTitle>Deploy New Application</DialogTitle>
               <DialogDescription>
-                Upload a zip file or provide a GitHub repository URL to deploy your application.
+                Upload a zip file or provide a GitHub repository URL to deploy
+                your application.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4">
                 <FormField
                   control={form.control}
                   name="appName"
@@ -346,12 +393,31 @@ function Applications({
                 />
                 <FormField
                   control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter application description"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="repoUrl"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>GitHub Repository URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="https://github.com/username/repo" />
+                        <Input
+                          {...field}
+                          placeholder="https://github.com/username/repo"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -359,8 +425,7 @@ function Applications({
                 />
                 <div
                   {...getRootProps()}
-                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
-                >
+                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary">
                   <input {...getInputProps()} />
                   {isDragActive ? (
                     <p>Drop the ZIP file here...</p>
@@ -374,7 +439,9 @@ function Applications({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Programming Language</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select language" />
@@ -401,17 +468,15 @@ function Applications({
         </Dialog>
         <div className="flex items-center gap-2">
           <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            variant={viewMode === "grid" ? "default" : "outline"}
             size="icon"
-            onClick={() => setViewMode('grid')}
-          >
+            onClick={() => setViewMode("grid")}>
             <Grid className="h-4 w-4" />
           </Button>
           <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
+            variant={viewMode === "list" ? "default" : "outline"}
             size="icon"
-            onClick={() => setViewMode('list')}
-          >
+            onClick={() => setViewMode("list")}>
             <List className="h-4 w-4" />
           </Button>
         </div>
@@ -427,42 +492,53 @@ function Applications({
             <div>
               <h3 className="text-lg font-semibold">No applications found</h3>
               <p className="text-sm text-muted-foreground">
-                Get started by clicking the "New Application" button above to deploy your first application.
+                Get started by clicking the "New Application" button above to
+                deploy your first application.
               </p>
             </div>
           </div>
         </Card>
       ) : (
-        <div className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'}>
-          {applications.map((app) => (
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+              : "space-y-4"
+          }>
+          {applications.map((app: Application) => (
             <Card key={app.id}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0">
                 <div>
                   <CardTitle className="text-xl">{app.appName}</CardTitle>
-                  <CardDescription>{app.language || 'Auto-detected'}</CardDescription>
+                  <CardDescription>
+                    {app?.techStack === null ? (
+                      "Auto detected"
+                    ) : (
+                      <TechIcon name={app.techStack.name} />
+                    )}
+                  </CardDescription>
                 </div>
-                <Badge className={`${getStatusBadgeColor(app.status)} text-white`}>
+                <Badge
+                  className={`${getStatusBadgeColor(app.status)} text-white`}>
                   {app.status}
                 </Badge>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
-                  {app.status !== 'Running' && (
+                  {app.status !== "Running" && (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleApplicationAction(app.id, 'start')}
-                    >
+                      onClick={() => handleApplicationAction(app.id, "start")}>
                       <Play className="h-4 w-4 mr-1" />
                       Start
                     </Button>
                   )}
-                  {app.status === 'Running' && (
+                  {app.status === "Running" && (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleApplicationAction(app.id, 'stop')}
-                    >
+                      onClick={() => handleApplicationAction(app.id, "stop")}>
                       <Square className="h-4 w-4 mr-1" />
                       Stop
                     </Button>
@@ -470,8 +546,7 @@ function Applications({
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleApplicationAction(app.id, 'delete')}
-                  >
+                    onClick={() => handleApplicationAction(app.id, "delete")}>
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
                   </Button>

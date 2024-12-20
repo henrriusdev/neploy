@@ -112,7 +112,7 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat)
+	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.TechStack)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
 	email := service.NewEmail()
 	user := service.NewUser(npy.Repositories, email)
@@ -139,15 +139,17 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	userTechStack := repository.NewUserTechStack(npy.DB)
 	visitorInfo := repository.NewVisitor(npy.DB)
 	visitorTrace := repository.NewVisitorTrace(npy.DB)
+	techStack := repository.NewTechStack(npy.DB)
 
 	return repository.Repositories{
+		Application:     application,
+		ApplicationStat: applicationStat,
 		Metadata:        metadata,
 		Role:            role,
+		TechStack:       techStack,
 		User:            user,
 		UserOauth:       userOauth,
 		UserRole:        userRole,
-		Application:     application,
-		ApplicationStat: applicationStat,
 		UserTechStack:   userTechStack,
 		VisitorInfo:     visitorInfo,
 		VisitorTrace:    visitorTrace,

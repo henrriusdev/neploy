@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2 } from 'lucide-react'
 import SidebarLayout from "@/components/Layout"
+import { Toaster } from '@/components/ui/toaster'
 
 const defaultNavMain = [
     {
@@ -54,8 +55,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             user={user}
             teamName={teamName}
             logoUrl={logoUrl}
+            navMain={defaultNavMain}
         >
             {children}
+            <Toaster />
         </SidebarLayout>
     )
 }
