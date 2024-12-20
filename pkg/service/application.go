@@ -2,7 +2,12 @@ package service
 
 import (
 	"context"
+	"path/filepath"
+	"regexp"
+	"strings"
 
+	"github.com/go-git/go-git/v5"
+	"neploy.dev/config"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
@@ -17,6 +22,7 @@ type Application interface {
 	CreateStat(ctx context.Context, stat model.ApplicationStat) error
 	UpdateStat(ctx context.Context, stat model.ApplicationStat) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
+	Deploy(ctx context.Context, id string, repoURL string)
 }
 
 type application struct {
@@ -108,4 +114,36 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 
 	totalApps := uint(len(apps))
 	return healthy, totalApps, nil
+}
+
+func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return
+	}
+
+	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+	appName := strings.ToLower(appNameWithoutSpecialChars)
+
+	path := filepath.Join(config.Env.UploadPath, appName)
+	_, err = git.PlainCloneContext(ctx, path, false, &git.CloneOptions{
+		URL:        repoURL,
+		RemoteName: "origin",
+	})
+	if err != nil {
+		logger.Error("error cloning repo: %v", err)
+		return
+	}
+
+	logger.Info("repo cloned: %s", path)
+	app.StorageLocation = path
+
+	if err := a.repo.Update(ctx, app); err != nil {
+		logger.Error("error updating application: %v", err)
+		return
+	}
+
+	logger.Info("application updated: %s", app.AppName)
 }

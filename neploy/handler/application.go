@@ -98,12 +98,7 @@ func (a *Application) Deploy(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Implement deployment logic
-	// This should:
-	// 1. Clone the repository
-	// 2. Detect the tech stack
-	// 3. Build the application
-	// 4. Deploy it using Docker
+	a.service.Deploy(c.Context(), id, req.RepoURL)
 
 	return c.JSON(fiber.Map{
 		"message": "Deployment started",
