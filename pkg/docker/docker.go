@@ -1,0 +1,51 @@
+package docker
+
+import (
+	"context"
+	"io"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+)
+
+type Docker struct {
+	cli *client.Client
+}
+
+func NewDocker() *Docker {
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	return &Docker{cli: cli}
+}
+
+func (d *Docker) ListContainers(ctx context.Context) ([]types.Container, error) {
+	return d.cli.ContainerList(ctx, container.ListOptions{})
+}
+
+func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, hostConfig *container.HostConfig) (container.CreateResponse, error) {
+	return d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, "")
+}
+
+func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
+	return d.cli.ContainerStart(ctx, containerID, container.StartOptions{})
+}
+
+func (d *Docker) StopContainer(ctx context.Context, containerID string) error {
+	return d.cli.ContainerStop(ctx, containerID, container.StopOptions{})
+}
+
+func (d *Docker) PauseContainer(ctx context.Context, containerID string) error {
+	return d.cli.ContainerPause(ctx, containerID)
+}
+
+func (d *Docker) RemoveContainer(ctx context.Context, containerID string) error {
+	return d.cli.ContainerRemove(ctx, containerID, container.RemoveOptions{})
+}
+
+func (d *Docker) ContainerLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
+	return d.cli.ContainerLogs(ctx, containerID, container.LogsOptions{})
+}
