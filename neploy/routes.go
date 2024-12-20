@@ -27,9 +27,15 @@ func userRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 	user.RegisterRoutes(app.Group("/users"), i)
 }
 
+func applicationRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+	application := handler.NewApplication(npy.Services.Application)
+	application.RegisterRoutes(app.Group("/applications"), i)
+}
+
 func RegisterRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
 	loginRoutes(app, i, npy)
 	onboardRoutes(app, i, npy)
 	dashboardRoutes(app, i, npy)
 	userRoutes(app, i, npy)
+	applicationRoutes(app, i, npy)
 }

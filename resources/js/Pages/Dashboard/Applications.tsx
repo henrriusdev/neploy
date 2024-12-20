@@ -49,6 +49,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useDropzone } from "react-dropzone";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 interface ApplicationStat {
   id: string;
@@ -152,16 +153,60 @@ function Applications({
   const onSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
     setIsUploading(true);
     try {
-      // TODO: Implement application deployment logic
+      // First, create the application record
+      const createResponse = await axios.post('/applications', {
+        appName: values.appName,
+        language: values.language,
+      });
+
+      // If application creation fails (remember that is an axios call), throw an error
+      if (createResponse.status >= 400) {
+        throw new Error('Failed to create application' + createResponse.statusText);
+      }
+
+      // Extract the application ID from the response
+      const applicationId = createResponse.data.id;
+
+      // If GitHub URL is provided, trigger GitHub deployment
+      if (values.repoUrl) {
+        const { data: deployData } = await axios.post(`/applications/${applicationId}/deploy`, {
+          repoUrl: values.repoUrl,
+        });
+      }
+
       toast({
         title: "Success",
-        description: "Application deployment started",
+        description: values.repoUrl 
+          ? "GitHub repository deployment started" 
+          : "Application created successfully. Please upload your ZIP file.",
+      });
+
+      // If we have a ZIP file, upload it
+      const file = (getRootProps().getFiles()[0] as File);
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const { data: uploadData } = await axios.post(`/applications/${applicationId}/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      }
+
+      toast({
+        title: "Success",
+        description: "Application file uploaded successfully",
       });
       setUploadDialogOpen(false);
+      
+      // Refresh the applications list
+      const { data: updatedApplications } = await axios.get('/applications');
+      setApplications(updatedApplications);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to deploy application",
+        description: error instanceof Error ? error.message : "Failed to deploy application",
         variant: "destructive",
       });
     } finally {
@@ -169,9 +214,41 @@ function Applications({
     }
   };
 
+  const handleApplicationAction = async (appId: string, action: 'start' | 'stop' | 'delete') => {
+    try {
+      const response = await fetch(`/api/applications/${appId}/${action}`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} application`);
+      }
+
+      toast({
+        title: "Success",
+        description: `Application ${action} request sent`,
+      });
+
+      // For delete action, remove from local state
+      if (action === 'delete') {
+        setApplications((prev) => 
+          prev ? prev.filter(app => app.id !== appId) : null
+        );
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : `Failed to ${action} application`,
+        variant: "destructive",
+      });
+    }
+  };
+
   // WebSocket connection for real-time updates
   React.useEffect(() => {
-    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws');
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -191,22 +268,6 @@ function Applications({
       ws.close();
     };
   }, []);
-
-  const handleApplicationAction = async (appId: string, action: 'start' | 'stop' | 'delete') => {
-    try {
-      // TODO: Implement application action API calls
-      toast({
-        title: "Success",
-        description: `Application ${action} request sent`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: `Failed to ${action} application`,
-        variant: "destructive",
-      });
-    }
-  };
 
   const getStatusBadgeColor = (status: Application['status']) => {
     switch (status) {
