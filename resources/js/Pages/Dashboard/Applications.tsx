@@ -8,7 +8,17 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Grid, List, Upload, Settings } from "lucide-react";
+import {
+  PlusCircle,
+  Grid,
+  List,
+  Upload,
+  Settings,
+  Play,
+  Square,
+  Trash2,
+  AlertCircle,
+} from "lucide-react";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import {
   Dialog,
@@ -18,6 +28,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useDropzone } from "react-dropzone";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApplicationStat {
   id: string;
@@ -40,6 +71,8 @@ interface Application {
   storageLocation: string;
   deployLocation: string;
   techStackId: string;
+  status: "Building" | "Running" | "Stopped" | "Error";
+  language?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
@@ -56,28 +89,134 @@ interface ApplicationsProps {
   applications?: Application[] | null;
 }
 
+const uploadFormSchema = z.object({
+  appName: z.string().min(1, "Application name is required"),
+  repoUrl: z.string().url().optional(),
+  language: z.string().optional(),
+});
+
+const SUPPORTED_LANGUAGES = ["Node.js", "Go", "Python", "Java"];
+
 function Applications({
   user,
   teamName,
   logoUrl,
-  applications = null,
+  applications: initialApplications = null,
 }: ApplicationsProps) {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const [applications, setApplications] = React.useState<Application[] | null>(initialApplications);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
+  const { toast } = useToast();
+  
+  const form = useForm<z.infer<typeof uploadFormSchema>>({
+    resolver: zodResolver(uploadFormSchema),
+    defaultValues: {
+      appName: "",
+      repoUrl: "",
+      language: undefined,
+    },
+  });
 
-  // Calculate stats from all applications
-  const aggregateStats = React.useMemo(() => {
-    if (!applications) return { total: 0, healthy: 0, deployed: 0 };
+  const onDrop = React.useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
     
-    return {
-      total: applications.length,
-      healthy: applications.filter(app => 
-        app.stats.some(stat => stat.healthy)
-      ).length,
-      deployed: applications.filter(app => 
-        app.deployLocation && app.stats.length > 0
-      ).length,
+    if (!file.name.endsWith('.zip')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a .zip file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Handle file upload logic here
+    const formData = new FormData();
+    formData.append('file', file);
+    // TODO: Implement file upload API call
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/zip': ['.zip'],
+    },
+    maxFiles: 1,
+    multiple: undefined,
+    onDragEnter: undefined,
+    onDragOver: undefined,
+    onDragLeave: undefined
+  });
+
+  const onSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
+    setIsUploading(true);
+    try {
+      // TODO: Implement application deployment logic
+      toast({
+        title: "Success",
+        description: "Application deployment started",
+      });
+      setUploadDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to deploy application",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // WebSocket connection for real-time updates
+  React.useEffect(() => {
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080/ws');
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'APPLICATION_UPDATE') {
+        setApplications((prev) => {
+          if (!prev) return prev;
+          return prev.map((app) =>
+            app.id === data.applicationId
+              ? { ...app, ...data.updates }
+              : app
+          );
+        });
+      }
     };
-  }, [applications]);
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  const handleApplicationAction = async (appId: string, action: 'start' | 'stop' | 'delete') => {
+    try {
+      // TODO: Implement application action API calls
+      toast({
+        title: "Success",
+        description: `Application ${action} request sent`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${action} application`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusBadgeColor = (status: Application['status']) => {
+    switch (status) {
+      case 'Running': return 'bg-green-500';
+      case 'Building': return 'bg-yellow-500';
+      case 'Stopped': return 'bg-gray-500';
+      case 'Error': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
 
   return (
     <div className="space-y-6 p-3">
@@ -88,72 +227,137 @@ function Applications({
             <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{aggregateStats.total}</div>
+            <div className="text-2xl font-bold">{applications?.length || 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Healthy Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">Running Apps</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{aggregateStats.healthy}</div>
+            <div className="text-2xl font-bold">
+              {applications?.filter(app => app.status === 'Running').length || 0}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Deployed Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">Failed Apps</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{aggregateStats.deployed}</div>
+            <div className="text-2xl font-bold">
+              {applications?.filter(app => app.status === 'Error').length || 0}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Actions Bar */}
       <div className="flex justify-between items-center">
-        <div className="flex gap-2">
+        <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <PlusCircle className="h-4 w-4" />
+              New Application
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Deploy New Application</DialogTitle>
+              <DialogDescription>
+                Upload a zip file or provide a GitHub repository URL to deploy your application.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="appName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Application Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="repoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GitHub Repository URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://github.com/username/repo" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div
+                  {...getRootProps()}
+                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
+                >
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p>Drop the ZIP file here...</p>
+                  ) : (
+                    <p>Drag & drop a ZIP file here, or click to select</p>
+                  )}
+                </div>
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Programming Language</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SUPPORTED_LANGUAGES.map((lang) => (
+                            <SelectItem key={lang} value={lang}>
+                              {lang}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={isUploading}>
+                  {isUploading ? "Deploying..." : "Deploy Application"}
+                </Button>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+        <div className="flex items-center gap-2">
           <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
             size="icon"
-            onClick={() => setViewMode("grid")}
+            onClick={() => setViewMode('grid')}
           >
             <Grid className="h-4 w-4" />
           </Button>
           <Button
-            variant={viewMode === "list" ? "default" : "outline"}
+            variant={viewMode === 'list' ? 'default' : 'outline'}
             size="icon"
-            onClick={() => setViewMode("list")}
+            onClick={() => setViewMode('list')}
           >
             <List className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload App
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Upload New Application</DialogTitle>
-                <DialogDescription>
-                  Upload your application package or connect your repository.
-                </DialogDescription>
-              </DialogHeader>
-              {/* Add upload form here */}
-            </DialogContent>
-          </Dialog>
-          <Button variant="outline">
-            <Settings className="mr-2 h-4 w-4" />
-            Configure
           </Button>
         </div>
       </div>
 
       {/* Applications List/Grid */}
-      {applications === null || applications.length === 0 ? (
+      {!applications || applications.length === 0 ? (
         <Card className="p-12">
           <div className="flex flex-col items-center justify-center text-center space-y-4">
             <div className="p-3 bg-primary/10 rounded-full">
@@ -162,67 +366,58 @@ function Applications({
             <div>
               <h3 className="text-lg font-semibold">No applications found</h3>
               <p className="text-sm text-muted-foreground">
-                Get started by uploading your first application or connecting your repository.
+                Get started by clicking the "New Application" button above to deploy your first application.
               </p>
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload App
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Upload New Application</DialogTitle>
-                  <DialogDescription>
-                    Upload your application package or connect your repository.
-                  </DialogDescription>
-                </DialogHeader>
-                {/* Add upload form here */}
-              </DialogContent>
-            </Dialog>
           </div>
         </Card>
       ) : (
-        <div className={viewMode === "grid" ? "grid grid-cols-3 gap-4" : "space-y-4"}>
-          {applications.map((app) => {
-            const latestStat = app.stats[app.stats.length - 1];
-            return (
-              <Card key={app.id}>
-                <CardHeader>
-                  <CardTitle>{app.appName}</CardTitle>
-                  <CardDescription>{app.deployLocation}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {latestStat && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Status: </span>
-                          <Badge variant={latestStat.healthy ? "secondary" : "destructive"}>
-                            {latestStat.healthy ? "Healthy" : "Unhealthy"}
-                          </Badge>
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Requests: </span>
-                          {latestStat.requests}
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Errors: </span>
-                          {latestStat.errors}
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Response Time: </span>
-                          {latestStat.averageResponseTime}ms
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        <div className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'}>
+          {applications.map((app) => (
+            <Card key={app.id}>
+              <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                <div>
+                  <CardTitle className="text-xl">{app.appName}</CardTitle>
+                  <CardDescription>{app.language || 'Auto-detected'}</CardDescription>
+                </div>
+                <Badge className={`${getStatusBadgeColor(app.status)} text-white`}>
+                  {app.status}
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2">
+                  {app.status !== 'Running' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleApplicationAction(app.id, 'start')}
+                    >
+                      <Play className="h-4 w-4 mr-1" />
+                      Start
+                    </Button>
+                  )}
+                  {app.status === 'Running' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleApplicationAction(app.id, 'stop')}
+                    >
+                      <Square className="h-4 w-4 mr-1" />
+                      Stop
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleApplicationAction(app.id, 'delete')}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </div>
