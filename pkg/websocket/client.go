@@ -46,6 +46,16 @@ func (c *Client) SendProgress(progress float64, message string) error {
 	return c.Conn.WriteJSON(msg)
 }
 
+func (c *Client) SendJSON(v interface{}) error {
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+	return c.Conn.WriteJSON(v)
+}
+
+func (c *Client) ReadJSON(v interface{}) error {
+	return c.Conn.ReadJSON(v)
+}
+
 // UpgradeMiddleware returns a Fiber middleware that upgrades HTTP connections to WebSocket
 func UpgradeMiddleware() fiber.Handler {
 	return websocket.New(func(c *websocket.Conn) {

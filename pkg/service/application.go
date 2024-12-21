@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
 	"path/filepath"
 	"regexp"
@@ -9,10 +10,12 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
+	"neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
+	"neploy.dev/pkg/websocket"
 )
 
 type Application interface {
@@ -29,13 +32,14 @@ type Application interface {
 }
 
 type application struct {
-	repo repository.Application
-	stat repository.ApplicationStat
-	tech repository.TechStack
+	repo   repository.Application
+	stat   repository.ApplicationStat
+	tech   repository.TechStack
+	client websocket.Client
 }
 
-func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
-	return &application{repo, stat, tech}
+func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack, client websocket.Client) Application {
+	return &application{repo, stat, tech, client}
 }
 
 func (a *application) Create(ctx context.Context, app model.Application, techStack string) (string, error) {
@@ -143,11 +147,6 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	logger.Info("repo cloned: %s", path)
 	app.StorageLocation = path
 
-	if err := a.repo.Update(ctx, app); err != nil {
-		logger.Error("error updating application: %v", err)
-		return
-	}
-
 	techStack, err := filesystem.DetectStack(path)
 	if err != nil {
 		logger.Error("error detecting tech stack: %v", err)
@@ -158,6 +157,70 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	if err != nil {
 		logger.Error("error finding or creating tech stack: %v", err)
 		return
+	}
+
+	if !filesystem.HasDockerfile(path, nil).Exists {
+		// Ask user what to do via WebSocket
+		if err := a.client.SendProgress(0, "No Dockerfile found. Waiting for user action..."); err != nil {
+			logger.Error("error sending progress: %v", err)
+			return
+		}
+
+		// Send options to the user
+		question := map[string]interface{}{
+			"type":    "dockerfile_action",
+			"message": fmt.Sprintf("No Dockerfile found. What would you like to do? Your project is using %s.", techStack),
+			"options": []string{
+				fmt.Sprintf("create_default_for_%s", techStack),
+				"skip",
+			},
+		}
+
+		if err := a.client.SendJSON(question); err != nil {
+			logger.Error("error sending dockerfile question: %v", err)
+			return
+		}
+
+		// Wait for user response
+		var action struct {
+			Type   string `json:"type"`
+			Action string `json:"action"`
+		}
+		if err := a.client.ReadJSON(&action); err != nil {
+			logger.Error("error reading user response: %v", err)
+			return
+		}
+
+		expectedAction := fmt.Sprintf("create_default_for_%s", techStack)
+		if action.Action == expectedAction {
+			if err := a.client.SendProgress(50, fmt.Sprintf("Creating default Dockerfile for %s...", techStack)); err != nil {
+				logger.Error("error sending progress: %v", err)
+				return
+			}
+
+			tmpl, ok := docker.GetDefaultTemplate(techStack)
+			if !ok {
+				logger.Error("no default template for tech stack: %s", techStack)
+				if err := a.client.SendProgress(100, "Error: No default template available for "+techStack); err != nil {
+					logger.Error("error sending progress: %v", err)
+				}
+				return
+			}
+
+			dockerfilePath := filepath.Join(path, "Dockerfile")
+			if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
+				logger.Error("error writing dockerfile: %v", err)
+				if err := a.client.SendProgress(100, "Error creating Dockerfile"); err != nil {
+					logger.Error("error sending progress: %v", err)
+				}
+				return
+			}
+
+			if err := a.client.SendProgress(100, "Created default Dockerfile"); err != nil {
+				logger.Error("error sending progress: %v", err)
+				return
+			}
+		}
 	}
 
 	app.TechStackID = tech.ID
