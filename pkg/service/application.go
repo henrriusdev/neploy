@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
@@ -32,14 +33,18 @@ type Application interface {
 }
 
 type application struct {
-	repo   repository.Application
-	stat   repository.ApplicationStat
-	tech   repository.TechStack
-	client websocket.Client
+	repo repository.Application
+	stat repository.ApplicationStat
+	tech repository.TechStack
+	mu   sync.Mutex
 }
 
-func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack, client websocket.Client) Application {
-	return &application{repo, stat, tech, client}
+func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
+	return &application{
+		repo: repo,
+		stat: stat,
+		tech: tech,
+	}
 }
 
 func (a *application) Create(ctx context.Context, app model.Application, techStack string) (string, error) {
@@ -143,7 +148,6 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		logger.Error("error cloning repo: %v", err)
 		return
 	}
-
 	logger.Info("repo cloned: %s", path)
 	app.StorageLocation = path
 
@@ -160,65 +164,79 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	if !filesystem.HasDockerfile(path, nil).Exists {
-		// Ask user what to do via WebSocket
-		if err := a.client.SendProgress(0, "No Dockerfile found. Waiting for user action..."); err != nil {
-			logger.Error("error sending progress: %v", err)
-			return
-		}
+		// Get WebSocket clients from hub
+		hub := websocket.GetHub()
+		interactiveClient := hub.GetInteractiveClient()
+		notificationsClient := hub.GetNotificationsClient()
 
-		// Send options to the user
-		question := map[string]interface{}{
-			"type":    "dockerfile_action",
-			"message": fmt.Sprintf("No Dockerfile found. What would you like to do? Your project is using %s.", techStack),
-			"options": []string{
-				fmt.Sprintf("create_default_for_%s", techStack),
-				"skip",
-			},
-		}
-
-		if err := a.client.SendJSON(question); err != nil {
-			logger.Error("error sending dockerfile question: %v", err)
-			return
-		}
-
-		// Wait for user response
-		var action struct {
-			Type   string `json:"type"`
-			Action string `json:"action"`
-		}
-		if err := a.client.ReadJSON(&action); err != nil {
-			logger.Error("error reading user response: %v", err)
-			return
-		}
-
-		expectedAction := fmt.Sprintf("create_default_for_%s", techStack)
-		if action.Action == expectedAction {
-			if err := a.client.SendProgress(50, fmt.Sprintf("Creating default Dockerfile for %s...", techStack)); err != nil {
+		// Only proceed with interactive flow if we have a client
+		if interactiveClient != nil {
+			// Ask user what to do via WebSocket
+			if err := interactiveClient.SendProgress(0, "No Dockerfile found. Waiting for user action..."); err != nil {
 				logger.Error("error sending progress: %v", err)
 				return
 			}
 
-			tmpl, ok := docker.GetDefaultTemplate(techStack)
-			if !ok {
-				logger.Error("no default template for tech stack: %s", techStack)
-				if err := a.client.SendProgress(100, "Error: No default template available for "+techStack); err != nil {
-					logger.Error("error sending progress: %v", err)
-				}
+			// Send options to the user
+			question := map[string]interface{}{
+				"type":    "dockerfile_action",
+				"message": fmt.Sprintf("No Dockerfile found. What would you like to do? Your project is using %s.", techStack),
+				"options": []string{
+					fmt.Sprintf("create_default_for_%s", techStack),
+					"skip",
+				},
+			}
+
+			if err := interactiveClient.SendJSON(question); err != nil {
+				logger.Error("error sending dockerfile question: %v", err)
 				return
 			}
 
-			dockerfilePath := filepath.Join(path, "Dockerfile")
-			if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
-				logger.Error("error writing dockerfile: %v", err)
-				if err := a.client.SendProgress(100, "Error creating Dockerfile"); err != nil {
-					logger.Error("error sending progress: %v", err)
-				}
+			// Wait for user response
+			var action struct {
+				Type   string `json:"type"`
+				Action string `json:"action"`
+			}
+			if err := interactiveClient.ReadJSON(&action); err != nil {
+				logger.Error("error reading user response: %v", err)
 				return
 			}
 
-			if err := a.client.SendProgress(100, "Created default Dockerfile"); err != nil {
-				logger.Error("error sending progress: %v", err)
-				return
+			expectedAction := fmt.Sprintf("create_default_for_%s", techStack)
+			if action.Action == expectedAction {
+				if notificationsClient != nil {
+					if err := notificationsClient.SendProgress(50, fmt.Sprintf("Creating default Dockerfile for %s...", techStack)); err != nil {
+						logger.Error("error sending progress: %v", err)
+					}
+				}
+
+				tmpl, ok := docker.GetDefaultTemplate(techStack)
+				if !ok {
+					logger.Error("no default template for tech stack: %s", techStack)
+					if notificationsClient != nil {
+						if err := notificationsClient.SendProgress(100, "Error: No default template available for "+techStack); err != nil {
+							logger.Error("error sending progress: %v", err)
+						}
+					}
+					return
+				}
+
+				dockerfilePath := filepath.Join(path, "Dockerfile")
+				if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
+					logger.Error("error writing dockerfile: %v", err)
+					if notificationsClient != nil {
+						if err := notificationsClient.SendProgress(100, "Error creating Dockerfile"); err != nil {
+							logger.Error("error sending progress: %v", err)
+						}
+					}
+					return
+				}
+
+				if notificationsClient != nil {
+					if err := notificationsClient.SendProgress(100, "Created default Dockerfile"); err != nil {
+						logger.Error("error sending progress: %v", err)
+					}
+				}
 			}
 		}
 	}

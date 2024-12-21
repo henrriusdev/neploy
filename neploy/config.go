@@ -79,7 +79,11 @@ func Start(npy Neploy) {
 		TimeFormat: "2006-01-02 15:04:05",
 	}))
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
-	app.Use("/ws", websocket.UpgradeMiddleware())
+
+	// WebSocket routes with specialized handlers
+	app.Use("/ws/notifications", websocket.UpgradeProgressWS())
+	app.Use("/ws/interactive", websocket.UpgradeInteractiveWS())
+
 	app.Use(middleware.OnboardingMiddleware(services.Onboard))
 	app.Use(middleware.SessionMiddleware(npy.SessionStore))
 	logger.SetLogger()

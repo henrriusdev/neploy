@@ -56,12 +56,14 @@ func (c *Client) ReadJSON(v interface{}) error {
 	return c.Conn.ReadJSON(v)
 }
 
-// UpgradeMiddleware returns a Fiber middleware that upgrades HTTP connections to WebSocket
-func UpgradeMiddleware() fiber.Handler {
+// UpgradeProgressWS returns a Fiber middleware for progress notifications
+func UpgradeProgressWS() fiber.Handler {
 	return websocket.New(func(c *websocket.Conn) {
-		// Create a new client
 		client := NewClient(c)
 		defer c.Close()
+
+		// Register with hub
+		GetHub().SetNotificationsClient(client)
 
 		// Set connection parameters
 		c.SetReadLimit(maxMessageSize)
@@ -75,7 +77,7 @@ func UpgradeMiddleware() fiber.Handler {
 		ticker := time.NewTicker(pingPeriod)
 		defer ticker.Stop()
 
-		// Message handling loop
+		// Message handling loop - for progress, we only send updates
 		for {
 			select {
 			case <-ticker.C:
@@ -84,7 +86,53 @@ func UpgradeMiddleware() fiber.Handler {
 					return
 				}
 			default:
-				messageType, _, err := client.Conn.ReadMessage()
+				// For progress WS, we only handle connection maintenance
+				_, _, err := client.Conn.ReadMessage()
+				if err != nil {
+					if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+						log.Printf("error: %v", err)
+					}
+					return
+				}
+			}
+		}
+	}, websocket.Config{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	})
+}
+
+// UpgradeInteractiveWS returns a Fiber middleware for interactive communications
+func UpgradeInteractiveWS() fiber.Handler {
+	return websocket.New(func(c *websocket.Conn) {
+		client := NewClient(c)
+		defer c.Close()
+
+		// Register with hub
+		GetHub().SetInteractiveClient(client)
+
+		// Set connection parameters
+		c.SetReadLimit(maxMessageSize)
+		c.SetReadDeadline(time.Now().Add(pongWait))
+		c.SetPongHandler(func(string) error {
+			c.SetReadDeadline(time.Now().Add(pongWait))
+			return nil
+		})
+
+		// Start ping ticker
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+
+		// Message handling loop - for interactive, we handle both read and write
+		for {
+			select {
+			case <-ticker.C:
+				if err := client.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					log.Printf("error sending ping: %v", err)
+					return
+				}
+			default:
+				messageType, message, err := client.Conn.ReadMessage()
 				if err != nil {
 					if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 						log.Printf("error: %v", err)
@@ -92,7 +140,14 @@ func UpgradeMiddleware() fiber.Handler {
 					return
 				}
 
-				if messageType == websocket.PingMessage {
+				switch messageType {
+				case websocket.TextMessage:
+					// Handle interactive messages
+					if err := client.Conn.WriteMessage(messageType, message); err != nil {
+						log.Printf("error echo message: %v", err)
+						return
+					}
+				case websocket.PingMessage:
 					if err := client.Conn.WriteMessage(websocket.PongMessage, nil); err != nil {
 						log.Printf("error sending pong: %v", err)
 						return
