@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
@@ -33,17 +32,22 @@ type Application interface {
 }
 
 type application struct {
-	repo repository.Application
-	stat repository.ApplicationStat
-	tech repository.TechStack
-	mu   sync.Mutex
+	repo          repository.Application
+	stat          repository.ApplicationStat
+	tech          repository.TechStack
+	notifications *websocket.Client
+	interactive   *websocket.Client
 }
 
 func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
+	hub := websocket.GetHub()
+
 	return &application{
-		repo: repo,
-		stat: stat,
-		tech: tech,
+		repo:          repo,
+		stat:          stat,
+		tech:          tech,
+		notifications: hub.GetNotificationsClient(),
+		interactive:   hub.GetInteractiveClient(),
 	}
 }
 
@@ -164,15 +168,10 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	if !filesystem.HasDockerfile(path, nil).Exists {
-		// Get WebSocket clients from hub
-		hub := websocket.GetHub()
-		interactiveClient := hub.GetInteractiveClient()
-		notificationsClient := hub.GetNotificationsClient()
-
 		// Only proceed with interactive flow if we have a client
-		if interactiveClient != nil {
+		if a.interactive != nil {
 			// Ask user what to do via WebSocket
-			if err := interactiveClient.SendProgress(0, "No Dockerfile found. Waiting for user action..."); err != nil {
+			if err := a.interactive.SendProgress(0, "No Dockerfile found. Waiting for user action..."); err != nil {
 				logger.Error("error sending progress: %v", err)
 				return
 			}
@@ -187,7 +186,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 				},
 			}
 
-			if err := interactiveClient.SendJSON(question); err != nil {
+			if err := a.interactive.SendJSON(question); err != nil {
 				logger.Error("error sending dockerfile question: %v", err)
 				return
 			}
@@ -197,15 +196,15 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 				Type   string `json:"type"`
 				Action string `json:"action"`
 			}
-			if err := interactiveClient.ReadJSON(&action); err != nil {
+			if err := a.interactive.ReadJSON(&action); err != nil {
 				logger.Error("error reading user response: %v", err)
 				return
 			}
 
 			expectedAction := fmt.Sprintf("create_default_for_%s", techStack)
 			if action.Action == expectedAction {
-				if notificationsClient != nil {
-					if err := notificationsClient.SendProgress(50, fmt.Sprintf("Creating default Dockerfile for %s...", techStack)); err != nil {
+				if a.notifications != nil {
+					if err := a.notifications.SendProgress(50, fmt.Sprintf("Creating default Dockerfile for %s...", techStack)); err != nil {
 						logger.Error("error sending progress: %v", err)
 					}
 				}
@@ -213,8 +212,8 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 				tmpl, ok := docker.GetDefaultTemplate(techStack)
 				if !ok {
 					logger.Error("no default template for tech stack: %s", techStack)
-					if notificationsClient != nil {
-						if err := notificationsClient.SendProgress(100, "Error: No default template available for "+techStack); err != nil {
+					if a.notifications != nil {
+						if err := a.notifications.SendProgress(100, "Error: No default template available for "+techStack); err != nil {
 							logger.Error("error sending progress: %v", err)
 						}
 					}
@@ -224,16 +223,16 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 				dockerfilePath := filepath.Join(path, "Dockerfile")
 				if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
 					logger.Error("error writing dockerfile: %v", err)
-					if notificationsClient != nil {
-						if err := notificationsClient.SendProgress(100, "Error creating Dockerfile"); err != nil {
+					if a.notifications != nil {
+						if err := a.notifications.SendProgress(100, "Error creating Dockerfile"); err != nil {
 							logger.Error("error sending progress: %v", err)
 						}
 					}
 					return
 				}
 
-				if notificationsClient != nil {
-					if err := notificationsClient.SendProgress(100, "Created default Dockerfile"); err != nil {
+				if a.notifications != nil {
+					if err := a.notifications.SendProgress(100, "Created default Dockerfile"); err != nil {
 						logger.Error("error sending progress: %v", err)
 					}
 				}
