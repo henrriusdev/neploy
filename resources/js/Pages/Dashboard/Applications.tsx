@@ -102,7 +102,11 @@ interface ApplicationsProps {
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
   description: z.string().optional(),
-  repoUrl: z.string().url().optional(),
+  repoUrl: z
+    .string()
+    .refine((value) => value === "" || (value && typeof value === "string" && Boolean(new URL(value))),
+      { message: "Invalid URL" })
+    .optional(),
   language: z.string().optional(),
 });
 
@@ -120,6 +124,7 @@ function Applications({
   );
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
+  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof uploadFormSchema>>({
@@ -145,10 +150,7 @@ function Applications({
       return;
     }
 
-    // Handle file upload logic here
-    const formData = new FormData();
-    formData.append("file", file);
-    // TODO: Implement file upload API call
+    setUploadedFile(file);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -187,8 +189,17 @@ function Applications({
       // Extract the application ID from the response
       const applicationId = createResponse.data.id;
 
-      // If GitHub URL is provided, trigger GitHub deployment
+      // Deploy either from GitHub URL or file upload, not both
       if (values.repoUrl) {
+        if (uploadedFile) {
+          toast({
+            title: "Error",
+            description: "Please provide either a GitHub URL or a ZIP file, not both",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { data: deployData } = await axios.post(
           `/applications/${applicationId}/deploy`,
           {
@@ -200,13 +211,9 @@ function Applications({
           title: "Success",
           description: "GitHub repository deployment started",
         });
-      }
-
-      // If we have a ZIP file, upload it
-      const file = getRootProps().getFiles()[0] as File;
-      if (file) {
+      } else if (uploadedFile) {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", uploadedFile);
 
         const { data: uploadData } = await axios.post(
           `/applications/${applicationId}/upload`,
@@ -222,6 +229,13 @@ function Applications({
           title: "Success",
           description: "Application file uploaded successfully",
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "Please provide either a GitHub URL or a ZIP file",
+          variant: "destructive",
+        });
+        return;
       }
 
       // Refresh the applications list

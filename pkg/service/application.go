@@ -176,15 +176,15 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		return "", err
 	}
 
-	path, err := filesystem.UploadFile(file, app.AppName)
+	zipPath, err := filesystem.UploadFile(file, app.AppName)
 	if err != nil {
 		logger.Error("error uploading file: %v", err)
 		return "", err
 	}
 
-	app.StorageLocation = path
-	if err := a.repo.Update(ctx, app); err != nil {
-		logger.Error("error updating application: %v", err)
+	path, err := filesystem.UnzipFile(zipPath, app.AppName)
+	if err != nil {
+		logger.Error("error unzipping file: %v", err)
 		return "", err
 	}
 
@@ -200,6 +200,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		return "", err
 	}
 
+	app.StorageLocation = path
 	app.TechStackID = tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
