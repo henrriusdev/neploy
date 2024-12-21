@@ -52,6 +52,9 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import { TechIcon } from "@/components/TechIcon";
+import { useState, useEffect } from "react";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import type { ProgressMessage, ActionMessage } from "@/types/websocket";
 
 interface ApplicationStat {
   id: string;
@@ -118,14 +121,40 @@ function Applications({
   logoUrl,
   applications: initialApplications = null,
 }: ApplicationsProps) {
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-  const [applications, setApplications] = React.useState<Application[] | null>(
-    initialApplications
-  );
-  const [isUploading, setIsUploading] = React.useState(false);
-  const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false);
-  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
+  const [applications, setApplications] = useState<Application[] | null>(initialApplications);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const { onNotification, onInteractive, sendMessage } = useWebSocket();
+
+  useEffect(() => {
+    // Handle progress notifications
+    const unsubscribeNotifications = onNotification((message: ProgressMessage) => {
+      toast({
+        title: "Deployment Progress",
+        description: message.message,
+      });
+    });
+
+    // Handle interactive messages
+    const unsubscribeInteractive = onInteractive((message: ActionMessage) => {
+      // Show dialog to user with inputs from message.inputs
+      // For now, just show a basic confirm
+      const confirmed = window.confirm(
+        `${message.title}\n${message.message}`
+      );
+      
+      // Send user's response back
+      sendMessage(message.type, confirmed ? "confirm" : "cancel", {});
+    });
+
+    return () => {
+      unsubscribeNotifications();
+      unsubscribeInteractive();
+    };
+  }, [onNotification, onInteractive, sendMessage, toast]);
 
   const form = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
@@ -264,13 +293,9 @@ function Applications({
     action: "start" | "stop" | "delete"
   ) => {
     try {
-      const response = await fetch(`/api/applications/${appId}/${action}`, {
+      const { data } = action === "delete" ? await axios.delete(`/applications/${appId}`) : await axios.post(`/applications/${appId}/${action}`, {
         method: "POST",
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${action} application`);
-      }
 
       toast({
         title: "Success",

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
 	"path/filepath"
 	"regexp"
@@ -9,10 +10,12 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
+	"neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
+	"neploy.dev/pkg/websocket"
 )
 
 type Application interface {
@@ -26,16 +29,23 @@ type Application interface {
 	GetHealthy(ctx context.Context) (uint, uint, error)
 	Deploy(ctx context.Context, id string, repoURL string)
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type application struct {
 	repo repository.Application
 	stat repository.ApplicationStat
 	tech repository.TechStack
+	hub  *websocket.Hub
 }
 
 func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
-	return &application{repo, stat, tech}
+	return &application{
+		repo: repo,
+		stat: stat,
+		tech: tech,
+		hub:  websocket.GetHub(),
+	}
 }
 
 func (a *application) Create(ctx context.Context, app model.Application, techStack string) (string, error) {
@@ -139,14 +149,8 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		logger.Error("error cloning repo: %v", err)
 		return
 	}
-
 	logger.Info("repo cloned: %s", path)
 	app.StorageLocation = path
-
-	if err := a.repo.Update(ctx, app); err != nil {
-		logger.Error("error updating application: %v", err)
-		return
-	}
 
 	techStack, err := filesystem.DetectStack(path)
 	if err != nil {
@@ -160,6 +164,41 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		return
 	}
 
+	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
+
+	if !filesystem.HasDockerfile(path, a.hub.GetNotificationClient()).Exists {
+		actionInput := websocket.NewSelectInput("action", []string{
+			fmt.Sprintf("create_default_for_%s", techStack),
+			"skip",
+		})
+
+		actionMsg := websocket.NewActionMessage(
+			websocket.ActionTypeCritical,
+			"Dockerfile Required",
+			fmt.Sprintf("No Dockerfile found for %s application. Would you like to create one?", techStack),
+			[]websocket.Input{actionInput},
+		)
+
+		a.hub.BroadcastInteractive(actionMsg)
+
+		a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		tmpl, ok := docker.GetDefaultTemplate(techStack)
+		if !ok {
+			logger.Error("no default template for tech stack: %s", techStack)
+			a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			return
+		}
+
+		dockerfilePath := filepath.Join(path, "Dockerfile")
+		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
+			logger.Error("error writing dockerfile: %v", err)
+			a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			return
+		}
+
+		a.hub.BroadcastProgress(100, "Created default Dockerfile")
+	}
+
 	app.TechStackID = tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
@@ -167,6 +206,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	logger.Info("application updated: %s", app.AppName)
+	a.hub.BroadcastProgress(100, "Deployment complete!")
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
@@ -208,4 +248,8 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	}
 
 	return path, nil
+}
+
+func (a *application) Delete(ctx context.Context, id string) error {
+	return a.repo.Delete(ctx, id)
 }

@@ -151,15 +151,14 @@ func (a *Application) Delete(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Implement delete logic
-	// This should:
-	// 1. Get the application
-	// 2. Remove the Docker container and image
-	// 3. Delete the application record
-	// 4. Clean up any associated files
+	if err := a.service.Delete(c.Context(), id); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete application",
+		})
+	}
 
 	return c.JSON(fiber.Map{
-		"message": "Application deleted",
+		"message": "Application deleted successfully",
 	})
 }
 
