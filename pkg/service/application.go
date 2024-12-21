@@ -29,25 +29,22 @@ type Application interface {
 	GetHealthy(ctx context.Context) (uint, uint, error)
 	Deploy(ctx context.Context, id string, repoURL string)
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type application struct {
-	repo          repository.Application
-	stat          repository.ApplicationStat
-	tech          repository.TechStack
-	notifications *websocket.Client
-	interactive   *websocket.Client
+	repo repository.Application
+	stat repository.ApplicationStat
+	tech repository.TechStack
+	hub  *websocket.Hub
 }
 
 func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
-	hub := websocket.GetHub()
-
 	return &application{
-		repo:          repo,
-		stat:          stat,
-		tech:          tech,
-		notifications: hub.GetNotificationsClient(),
-		interactive:   hub.GetInteractiveClient(),
+		repo: repo,
+		stat: stat,
+		tech: tech,
+		hub:  websocket.GetHub(),
 	}
 }
 
@@ -167,77 +164,39 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		return
 	}
 
-	if !filesystem.HasDockerfile(path, nil).Exists {
-		// Only proceed with interactive flow if we have a client
-		if a.interactive != nil {
-			// Ask user what to do via WebSocket
-			if err := a.interactive.SendProgress(0, "No Dockerfile found. Waiting for user action..."); err != nil {
-				logger.Error("error sending progress: %v", err)
-				return
-			}
+	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
 
-			// Send options to the user
-			question := map[string]interface{}{
-				"type":    "dockerfile_action",
-				"message": fmt.Sprintf("No Dockerfile found. What would you like to do? Your project is using %s.", techStack),
-				"options": []string{
-					fmt.Sprintf("create_default_for_%s", techStack),
-					"skip",
-				},
-			}
+	if !filesystem.HasDockerfile(path, a.hub.GetNotificationClient()).Exists {
+		actionInput := websocket.NewSelectInput("action", []string{
+			fmt.Sprintf("create_default_for_%s", techStack),
+			"skip",
+		})
 
-			if err := a.interactive.SendJSON(question); err != nil {
-				logger.Error("error sending dockerfile question: %v", err)
-				return
-			}
+		actionMsg := websocket.NewActionMessage(
+			websocket.ActionTypeCritical,
+			"Dockerfile Required",
+			fmt.Sprintf("No Dockerfile found for %s application. Would you like to create one?", techStack),
+			[]websocket.Input{actionInput},
+		)
 
-			// Wait for user response
-			var action struct {
-				Type   string `json:"type"`
-				Action string `json:"action"`
-			}
-			if err := a.interactive.ReadJSON(&action); err != nil {
-				logger.Error("error reading user response: %v", err)
-				return
-			}
+		a.hub.BroadcastInteractive(actionMsg)
 
-			expectedAction := fmt.Sprintf("create_default_for_%s", techStack)
-			if action.Action == expectedAction {
-				if a.notifications != nil {
-					if err := a.notifications.SendProgress(50, fmt.Sprintf("Creating default Dockerfile for %s...", techStack)); err != nil {
-						logger.Error("error sending progress: %v", err)
-					}
-				}
-
-				tmpl, ok := docker.GetDefaultTemplate(techStack)
-				if !ok {
-					logger.Error("no default template for tech stack: %s", techStack)
-					if a.notifications != nil {
-						if err := a.notifications.SendProgress(100, "Error: No default template available for "+techStack); err != nil {
-							logger.Error("error sending progress: %v", err)
-						}
-					}
-					return
-				}
-
-				dockerfilePath := filepath.Join(path, "Dockerfile")
-				if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
-					logger.Error("error writing dockerfile: %v", err)
-					if a.notifications != nil {
-						if err := a.notifications.SendProgress(100, "Error creating Dockerfile"); err != nil {
-							logger.Error("error sending progress: %v", err)
-						}
-					}
-					return
-				}
-
-				if a.notifications != nil {
-					if err := a.notifications.SendProgress(100, "Created default Dockerfile"); err != nil {
-						logger.Error("error sending progress: %v", err)
-					}
-				}
-			}
+		a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		tmpl, ok := docker.GetDefaultTemplate(techStack)
+		if !ok {
+			logger.Error("no default template for tech stack: %s", techStack)
+			a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			return
 		}
+
+		dockerfilePath := filepath.Join(path, "Dockerfile")
+		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
+			logger.Error("error writing dockerfile: %v", err)
+			a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			return
+		}
+
+		a.hub.BroadcastProgress(100, "Created default Dockerfile")
 	}
 
 	app.TechStackID = tech.ID
@@ -247,6 +206,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	logger.Info("application updated: %s", app.AppName)
+	a.hub.BroadcastProgress(100, "Deployment complete!")
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
@@ -288,4 +248,8 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	}
 
 	return path, nil
+}
+
+func (a *application) Delete(ctx context.Context, id string) error {
+	return a.repo.Delete(ctx, id)
 }

@@ -46,7 +46,6 @@ func HasDockerfile(projectDir string, client *websocket.Client) DockerfileStatus
 
 		return nil
 	})
-
 	if err != nil {
 		client.SendProgress(100, "Error searching for Dockerfile")
 		return status
