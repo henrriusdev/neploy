@@ -148,6 +148,24 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		return
 	}
 
+	techStack, err := filesystem.DetectStack(path)
+	if err != nil {
+		logger.Error("error detecting tech stack: %v", err)
+		return
+	}
+
+	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	if err != nil {
+		logger.Error("error finding or creating tech stack: %v", err)
+		return
+	}
+
+	app.TechStackID = tech.ID
+	if err := a.repo.Update(ctx, app); err != nil {
+		logger.Error("error updating application: %v", err)
+		return
+	}
+
 	logger.Info("application updated: %s", app.AppName)
 }
 
@@ -165,6 +183,24 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	}
 
 	app.StorageLocation = path
+	if err := a.repo.Update(ctx, app); err != nil {
+		logger.Error("error updating application: %v", err)
+		return "", err
+	}
+
+	techStack, err := filesystem.DetectStack(path)
+	if err != nil {
+		logger.Error("error detecting tech stack: %v", err)
+		return "", err
+	}
+
+	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	if err != nil {
+		logger.Error("error finding or creating tech stack: %v", err)
+		return "", err
+	}
+
+	app.TechStackID = tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return "", err
