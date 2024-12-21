@@ -15,6 +15,7 @@ import (
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
+	"neploy.dev/pkg/websocket"
 )
 
 type Neploy struct {
@@ -78,6 +79,7 @@ func Start(npy Neploy) {
 		TimeFormat: "2006-01-02 15:04:05",
 	}))
 	app.Use(adaptor.HTTPMiddleware(i.Middleware))
+	app.Use("/ws", websocket.UpgradeMiddleware())
 	app.Use(middleware.OnboardingMiddleware(services.Onboard))
 	app.Use(middleware.SessionMiddleware(npy.SessionStore))
 	logger.SetLogger()
