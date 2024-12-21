@@ -13,13 +13,22 @@ import (
 func DetectStack(projectDir string) (string, error) {
 	// Map of indicators to tech stacks
 	stackIndicators := map[string]string{
-		"package.json":     "Node.js",
+		".vue":             "Vue",
+		".js":              "JavaScript",
+		".ts":              "TypeScript",
+		".jsx":             "React",
+		".tsx":             "React",
+		".svelte":          "Svelte",
+		"app.module.ts":    "Angular",
 		"requirements.txt": "Python",
 		"go.mod":           "Go",
 		"pom.xml":          "Java",
 		"build.gradle":     "Java",
 		"Cargo.toml":       "Rust",
 		"composer.json":    "PHP",
+		"server.js":        "Node.js",
+		"app.js":           "Node.js",
+		"index.js":         "Node.js",
 		".py":              "Python",
 		".go":              "Go",
 		".java":            "Java",
@@ -86,15 +95,4 @@ func DetectStack(projectDir string) (string, error) {
 	}
 
 	return mainStack, nil
-}
-
-func main() {
-	projectDir := "./uploads/project" // Replace with actual path
-
-	stack, err := DetectStack(projectDir)
-	if err != nil {
-		fmt.Println("Error detecting tech stack:", err)
-	} else {
-		fmt.Println("Detected tech stack:", stack)
-	}
 }
