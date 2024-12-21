@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"mime/multipart"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
+	"neploy.dev/pkg/filesystem"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
@@ -23,6 +25,7 @@ type Application interface {
 	UpdateStat(ctx context.Context, stat model.ApplicationStat) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
 	Deploy(ctx context.Context, id string, repoURL string)
+	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 }
 
 type application struct {
@@ -146,4 +149,26 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	logger.Info("application updated: %s", app.AppName)
+}
+
+func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return "", err
+	}
+
+	path, err := filesystem.UploadFile(file, app.AppName)
+	if err != nil {
+		logger.Error("error uploading file: %v", err)
+		return "", err
+	}
+
+	app.StorageLocation = path
+	if err := a.repo.Update(ctx, app); err != nil {
+		logger.Error("error updating application: %v", err)
+		return "", err
+	}
+
+	return path, nil
 }

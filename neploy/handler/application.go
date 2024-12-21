@@ -164,27 +164,29 @@ func (a *Application) Delete(c *fiber.Ctx) error {
 }
 
 func (a *Application) Upload(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Application ID is required",
+		})
+	}
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Failed to upload file",
+			"error": "File is required",
 		})
 	}
 
-	if filepath.Ext(file.Filename) != ".zip" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid file format (only .zip files are allowed)",
-		})
-	}
-
-	filePath := filepath.Join(config.Env.UploadPath, file.Filename)
-	if err := c.SaveFile(file, filePath); err != nil {
+	path, err := a.service.Upload(c.Context(), id, file)
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to save file",
+			"error": "Failed to upload file",
 		})
 	}
 
 	return c.JSON(fiber.Map{
 		"message": "File uploaded successfully",
+		"path":    filepath.Join(config.Env.UploadPath, path),
 	})
 }

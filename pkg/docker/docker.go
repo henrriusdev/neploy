@@ -26,19 +26,61 @@ func (d *Docker) ListContainers(ctx context.Context) ([]types.Container, error) 
 	return d.cli.ContainerList(ctx, container.ListOptions{})
 }
 
-func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, hostConfig *container.HostConfig) (container.CreateResponse, error) {
-	return d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, "")
+func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, name string) (container.CreateResponse, error) {
+	return d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, name)
 }
 
-func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
+func (d *Docker) StartContainer(ctx context.Context, containerName string) error {
+	containers, err := d.ListContainers(ctx)
+	if err != nil {
+		return err
+	}
+
+	var containerID string
+
+	for _, container := range containers {
+		if container.Names[0] == "/"+containerName {
+			containerID = container.ID
+			break
+		}
+	}
+
 	return d.cli.ContainerStart(ctx, containerID, container.StartOptions{})
 }
 
-func (d *Docker) StopContainer(ctx context.Context, containerID string) error {
+func (d *Docker) StopContainer(ctx context.Context, containerName string) error {
+	containers, err := d.ListContainers(ctx)
+	if err != nil {
+		return err
+	}
+
+	var containerID string
+
+	for _, container := range containers {
+		if container.Names[0] == "/"+containerName {
+			containerID = container.ID
+			break
+		}
+	}
+
 	return d.cli.ContainerStop(ctx, containerID, container.StopOptions{})
 }
 
-func (d *Docker) PauseContainer(ctx context.Context, containerID string) error {
+func (d *Docker) PauseContainer(ctx context.Context, containerName string) error {
+	containers, err := d.ListContainers(ctx)
+	if err != nil {
+		return err
+	}
+
+	var containerID string
+
+	for _, container := range containers {
+		if container.Names[0] == "/"+containerName {
+			containerID = container.ID
+			break
+		}
+	}
+
 	return d.cli.ContainerPause(ctx, containerID)
 }
 
@@ -48,4 +90,19 @@ func (d *Docker) RemoveContainer(ctx context.Context, containerID string) error 
 
 func (d *Docker) ContainerLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
 	return d.cli.ContainerLogs(ctx, containerID, container.LogsOptions{})
+}
+
+func (d *Docker) GetContainerID(ctx context.Context, containerName string) (string, error) {
+	containers, err := d.ListContainers(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	for _, container := range containers {
+		if container.Names[0] == "/"+containerName {
+			return container.ID, nil
+		}
+	}
+
+	return "", nil
 }
