@@ -31,6 +31,7 @@ func NewDashboard(services service.Services, sessions *session.Store) *Dashboard
 func (d *Dashboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
 	r.Get("", adaptor.HTTPHandler(d.Index(i)))
 	r.Get("/team", adaptor.HTTPHandler(d.Team(i)))
+	r.Get("/applications", adaptor.HTTPHandler(d.Applications(i)))
 }
 
 func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
@@ -153,5 +154,68 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 			"team":     listResponse,
 			"roles":    roles,
 		})
+	}
+}
+
+func (d *Dashboard) Applications(i *gonertia.Inertia) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// get the token from the cookies
+		cookie, err := r.Cookie("token")
+		if err != nil {
+			log.Err(err).Msg("error getting token")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		// parse the jwt token
+		claims := &model.JWTClaims{}
+		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.Env.JWTSecret), nil
+		})
+		if err != nil {
+			log.Err(err).Msg("error parsing token")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		// get the applications for the user
+		applications, err := d.services.Application.GetAll(r.Context())
+		if err != nil {
+			log.Err(err).Msg("error getting applications")
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		metadata, err := d.services.Metadata.Get(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
+		if err != nil {
+			log.Err(err).Msg("error getting provider")
+			return
+		}
+
+		user := model.UserResponse{
+			Email:    claims.Email,
+			Username: claims.Username,
+			Name:     claims.Name,
+			Provider: provider,
+		}
+
+		props := gonertia.Props{
+			"user":         user,
+			"teamName":     metadata.TeamName,
+			"logoUrl":      metadata.LogoURL,
+			"applications": applications,
+		}
+
+		if err := i.Render(w, r, "Dashboard/Applications", props); err != nil {
+			log.Err(err).Msg("error rendering applications page")
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 }

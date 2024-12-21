@@ -33,3 +33,9 @@ type TeamResponse struct {
 	UserRoles     []UserRoles     `json:"userRoles"`
 	UserTechStack []UserTechStack `json:"userTechStack"`
 }
+
+type FullApplication struct {
+	Application
+	Stats     []ApplicationStat `json:"stat"`
+	TechStack TechStack         `json:"techStack"`
+}
