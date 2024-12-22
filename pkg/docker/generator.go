@@ -12,11 +12,11 @@ type DockerfileTemplate struct {
 	WorkDir      string
 	Dependencies []string
 	BuildCmd     string
-	StartCmd     string
+	StartCmd     []string
 }
 
 var defaultTemplates = map[string]DockerfileTemplate{
-	"Node.js": {
+	"Node": {
 		BaseImage: "node:18-alpine",
 		WorkDir:   "/app",
 		Dependencies: []string{
@@ -24,7 +24,7 @@ var defaultTemplates = map[string]DockerfileTemplate{
 			"RUN npm install",
 		},
 		BuildCmd: "npm run build",
-		StartCmd: "npm start",
+		StartCmd: []string{"npm", "start"},
 	},
 	"Python": {
 		BaseImage: "python:3.9-slim",
@@ -34,7 +34,7 @@ var defaultTemplates = map[string]DockerfileTemplate{
 			"RUN pip install -r requirements.txt",
 		},
 		BuildCmd: "",
-		StartCmd: "python app.py",
+		StartCmd: []string{"python", "app.py"},
 	},
 	"Go": {
 		BaseImage: "golang:1.21-alpine",
@@ -44,7 +44,7 @@ var defaultTemplates = map[string]DockerfileTemplate{
 			"RUN go mod download",
 		},
 		BuildCmd: "go build -o main .",
-		StartCmd: "./main",
+		StartCmd: []string{"./main"},
 	},
 	// Add more templates for other stacks
 }
@@ -71,13 +71,19 @@ func GetDefaultTemplate(stack string) (DockerfileTemplate, bool) {
 }
 
 func WriteDockerfile(filePath string, tmpl DockerfileTemplate) error {
+	// Convert start command slice to properly formatted JSON array string
+	cmdArgs := make([]string, len(tmpl.StartCmd))
+	for i, arg := range tmpl.StartCmd {
+		cmdArgs[i] = fmt.Sprintf("%q", arg) // Properly quote each argument with double quotes
+	}
+
 	return WriteFile(filePath, []byte(fmt.Sprintf(`FROM %s
 WORKDIR %s
 %s
 COPY . .
-%s
-%s
-`, tmpl.BaseImage, tmpl.WorkDir, strings.Join(tmpl.Dependencies, "\n"), tmpl.BuildCmd, tmpl.StartCmd)))
+RUN %s
+CMD [%s]
+`, tmpl.BaseImage, tmpl.WorkDir, strings.Join(tmpl.Dependencies, "\n"), tmpl.BuildCmd, strings.Join(cmdArgs, ", "))))
 }
 
 func WriteFile(filePath string, content []byte) error {
