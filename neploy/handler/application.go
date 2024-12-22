@@ -19,8 +19,9 @@ func NewApplication(service service.Application) *Application {
 }
 
 func (a *Application) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
-	r.Post("/", a.Create)
+	r.Post("", a.Create)
 	r.Get("/:id", a.Get)
+	r.Get("", a.List)
 	r.Post("/:id/deploy", a.Deploy)
 	r.Post("/:id/upload", a.Upload)
 	r.Post("/:id/start", a.Start)
@@ -188,4 +189,15 @@ func (a *Application) Upload(c *fiber.Ctx) error {
 		"message": "File uploaded successfully",
 		"path":    filepath.Join(config.Env.UploadPath, path),
 	})
+}
+
+func (a *Application) List(c *fiber.Ctx) error {
+	apps, err := a.service.GetAll(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to list applications",
+		})
+	}
+
+	return c.JSON(apps)
 }
