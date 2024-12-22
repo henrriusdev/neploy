@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -292,6 +293,82 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		logger.Error("error finding or creating tech stack: %v", err)
 		return "", err
 	}
+
+	// Delete zip file
+	if err := os.Remove(zipPath); err != nil {
+		logger.Error("error deleting zip file: %v", err)
+		return "", err
+	}
+
+	a.hub.BroadcastProgress(0, "Checking for Docker Compose...")
+	if filesystem.HasDockerCompose(path) {
+		logger.Error("docker-compose file found, not supported")
+		a.hub.BroadcastProgress(100, "Error: Docker Compose files are not supported")
+
+		// Delete the application and notify
+		if err := a.Delete(ctx, id); err != nil {
+			logger.Error("error deleting application: %v", err)
+		}
+
+		actionMsg := websocket.NewActionMessage(
+			websocket.ActionTypeError,
+			"Docker Compose Not Supported",
+			"Docker Compose files are not supported. The application has been deleted.",
+			nil,
+		)
+		a.hub.BroadcastInteractive(actionMsg)
+		return "", err
+	}
+	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
+	dockerStatus := filesystem.HasDockerfile(path, a.hub.GetNotificationClient())
+	if !dockerStatus.Exists {
+		actionInput := websocket.NewSelectInput("action", []string{
+			"create",
+			"skip",
+		})
+
+		actionMsg := websocket.NewActionMessage(
+			websocket.ActionTypeCritical,
+			"Dockerfile Required",
+			"No Dockerfile found for application. Would you like to create one?",
+			[]websocket.Input{actionInput},
+		)
+
+		a.hub.BroadcastInteractive(actionMsg)
+
+		a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		tmpl, ok := docker.GetDefaultTemplate(techStack)
+		if !ok {
+			logger.Error("no default template for tech stack: %s", techStack)
+			a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			return "", err
+		}
+
+		dockerfilePath := filepath.Join(path, "Dockerfile")
+		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
+			logger.Error("error writing dockerfile: %v", err)
+			a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			return "", err
+		}
+
+		a.hub.BroadcastProgress(100, "Created default Dockerfile")
+	}
+
+	app.TechStackID = tech.ID
+	if err := a.repo.Update(ctx, app); err != nil {
+		logger.Error("error updating application: %v", err)
+		return "", err
+	}
+
+	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+	appName := strings.ToLower(appNameWithoutSpecialChars)
+
+	// Start container creation in a separate goroutine
+	go a.createAndStartContainer(ctx, appName)
+
+	logger.Info("application updated: %s", app.AppName)
+	a.hub.BroadcastProgress(100, "Deployment complete!")
 
 	app.StorageLocation = path
 	app.TechStackID = tech.ID
