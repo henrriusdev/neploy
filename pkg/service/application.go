@@ -33,18 +33,20 @@ type Application interface {
 }
 
 type application struct {
-	repo repository.Application
-	stat repository.ApplicationStat
-	tech repository.TechStack
-	hub  *websocket.Hub
+	repo   repository.Application
+	stat   repository.ApplicationStat
+	tech   repository.TechStack
+	hub    *websocket.Hub
+	docker *docker.Docker
 }
 
 func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
 	return &application{
-		repo: repo,
-		stat: stat,
-		tech: tech,
-		hub:  websocket.GetHub(),
+		repo:   repo,
+		stat:   stat,
+		tech:   tech,
+		hub:    websocket.GetHub(),
+		docker: docker.NewDocker(),
 	}
 }
 
@@ -176,14 +178,14 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	dockerStatus := filesystem.HasDockerfile(path, a.hub.GetNotificationClient())
 	if !dockerStatus.Exists {
 		actionInput := websocket.NewSelectInput("action", []string{
-			fmt.Sprintf("create_default_for_%s", techStack),
+			"create",
 			"skip",
 		})
 
 		actionMsg := websocket.NewActionMessage(
 			websocket.ActionTypeCritical,
 			"Dockerfile Required",
-			fmt.Sprintf("No Dockerfile found for %s application. Would you like to create one?", techStack),
+			"No Dockerfile found for application. Would you like to create one?",
 			[]websocket.Input{actionInput},
 		)
 
@@ -226,36 +228,37 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	// Start container creation in a separate goroutine
-	go func() {
-		dockerClient := docker.NewDocker()
-		config := &container.Config{
-			Image: appName,
-			Tty:   true,
-		}
-		hostConfig := &container.HostConfig{
-			AutoRemove: true,
-		}
-
-		a.hub.BroadcastProgress(0, "Creating container...")
-		resp, err := dockerClient.CreateContainer(ctx, config, hostConfig, appName)
-		if err != nil {
-			logger.Error("error creating container: %v", err)
-			a.hub.BroadcastProgress(100, "Error creating container")
-			return
-		}
-
-		a.hub.BroadcastProgress(50, "Starting container...")
-		if err := dockerClient.StartContainer(ctx, appName); err != nil {
-			logger.Error("error starting container: %v", err)
-			a.hub.BroadcastProgress(100, "Error starting container")
-			return
-		}
-
-		a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
-	}()
+	go a.createAndStartContainer(ctx, appName)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
+}
+
+func (a *application) createAndStartContainer(ctx context.Context, appName string) {
+	config := &container.Config{
+		Image: appName,
+		Tty:   true,
+	}
+	hostConfig := &container.HostConfig{
+		AutoRemove: true,
+	}
+
+	a.hub.BroadcastProgress(0, "Creating container...")
+	resp, err := a.docker.CreateContainer(ctx, config, hostConfig, appName)
+	if err != nil {
+		logger.Error("error creating container: %v", err)
+		a.hub.BroadcastProgress(100, "Error creating container")
+		return
+	}
+
+	a.hub.BroadcastProgress(50, "Starting container...")
+	if err := a.docker.StartContainer(ctx, appName); err != nil {
+		logger.Error("error starting container: %v", err)
+		a.hub.BroadcastProgress(100, "Error starting container")
+		return
+	}
+
+	a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
