@@ -1,9 +1,13 @@
 package docker
 
 import (
+	"archive/tar"
+	"bytes"
 	"context"
 	"io"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -109,17 +113,65 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 }
 
 func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {
-	// Create build context from the directory containing the Dockerfile
-	path := filepath.Dir(dockerfilePath)
+	// Get the directory containing the Dockerfile as build context
+	contextDir := filepath.Dir(dockerfilePath)
 
-	options := types.ImageBuildOptions{
-		Dockerfile: path,
-		Tags:       []string{tag},
-		Remove:     true,
+	// Create tar archive of the build context
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	defer tw.Close()
+
+	// Walk through the directory and add files to tar
+	err := filepath.Walk(contextDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Get relative path from context directory
+		relPath, err := filepath.Rel(contextDir, path)
+		if err != nil {
+			return err
+		}
+
+		// Skip if path is outside context
+		if strings.HasPrefix(relPath, "..") {
+			return nil
+		}
+
+		// Create tar header
+		header, err := tar.FileInfoHeader(info, info.Name())
+		if err != nil {
+			return err
+		}
+		header.Name = relPath
+
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			if _, err := tw.Write(data); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
-	// BuildContext is the directory where the Dockerfile is located
-	response, err := d.cli.ImageBuild(ctx, nil, options)
+	options := types.ImageBuildOptions{
+		Dockerfile: "Dockerfile", // Use relative path within context
+		Tags:       []string{tag},
+	}
+
+	// Build the image using the tar context
+	response, err := d.cli.ImageBuild(ctx, bytes.NewReader(buf.Bytes()), options)
 	if err != nil {
 		return err
 	}
