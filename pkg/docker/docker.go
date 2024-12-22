@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"io"
+	"path/filepath"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -105,4 +106,26 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 	}
 
 	return "", nil
+}
+
+func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {
+	// Create build context from the directory containing the Dockerfile
+	path := filepath.Dir(dockerfilePath)
+
+	options := types.ImageBuildOptions{
+		Dockerfile: path,
+		Tags:       []string{tag},
+		Remove:     true,
+	}
+
+	// BuildContext is the directory where the Dockerfile is located
+	response, err := d.cli.ImageBuild(ctx, nil, options)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	// Read the response to ensure the build completes
+	_, err = io.Copy(io.Discard, response.Body)
+	return err
 }

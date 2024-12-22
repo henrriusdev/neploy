@@ -230,13 +230,26 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, appName)
+	go a.createAndStartContainer(ctx, appName, path)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
 }
 
-func (a *application) createAndStartContainer(ctx context.Context, appName string) {
+func (a *application) createAndStartContainer(ctx context.Context, appName, projectPath string) {
+	// First, build the Docker image
+	a.hub.BroadcastProgress(0, "Building Docker image...")
+
+	dockerfilePath := filepath.Join(projectPath, "Dockerfile")
+	if err := a.docker.BuildImage(ctx, dockerfilePath, appName); err != nil {
+		logger.Error("error building image: %v", err)
+		a.hub.BroadcastProgress(100, "Error building Docker image")
+		return
+	}
+
+	a.hub.BroadcastProgress(50, "Docker image built successfully")
+
+	// Create and start the container
 	config := &container.Config{
 		Image: appName,
 		Tty:   true,
@@ -245,7 +258,7 @@ func (a *application) createAndStartContainer(ctx context.Context, appName strin
 		AutoRemove: true,
 	}
 
-	a.hub.BroadcastProgress(0, "Creating container...")
+	a.hub.BroadcastProgress(70, "Creating container...")
 	resp, err := a.docker.CreateContainer(ctx, config, hostConfig, appName)
 	if err != nil {
 		logger.Error("error creating container: %v", err)
@@ -253,7 +266,7 @@ func (a *application) createAndStartContainer(ctx context.Context, appName strin
 		return
 	}
 
-	a.hub.BroadcastProgress(50, "Starting container...")
+	a.hub.BroadcastProgress(90, "Starting container...")
 	if err := a.docker.StartContainer(ctx, appName); err != nil {
 		logger.Error("error starting container: %v", err)
 		a.hub.BroadcastProgress(100, "Error starting container")
@@ -365,7 +378,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	appName := strings.ToLower(appNameWithoutSpecialChars)
 
 	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, appName)
+	go a.createAndStartContainer(ctx, appName, path)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
@@ -381,5 +394,29 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 }
 
 func (a *application) Delete(ctx context.Context, id string) error {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return err
+	}
+
+	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	if err != nil {
+		logger.Error("error getting container ID: %v", err)
+		return err
+	}
+
+	// Stop and remove container
+	if err := a.docker.RemoveContainer(ctx, containerId); err != nil {
+		logger.Error("error removing container: %v", err)
+		return err
+	}
+
+	// Remove storage location
+	if err := os.RemoveAll(app.StorageLocation); err != nil {
+		logger.Error("error removing storage location: %v", err)
+		return err
+	}
+
 	return a.repo.Delete(ctx, id)
 }
