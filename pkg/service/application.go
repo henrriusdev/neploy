@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/docker/docker/api/types/container"
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
 	"neploy.dev/pkg/docker"
@@ -174,6 +175,18 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		return
 	}
 
+	techStack, err := filesystem.DetectStack(path)
+	if err != nil {
+		logger.Error("error detecting tech stack: %v", err)
+		return
+	}
+
+	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	if err != nil {
+		logger.Error("error finding or creating tech stack: %v", err)
+		return
+	}
+
 	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
 	dockerStatus := filesystem.HasDockerfile(path, a.hub.GetNotificationClient())
 	if !dockerStatus.Exists {
@@ -207,18 +220,6 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		}
 
 		a.hub.BroadcastProgress(100, "Created default Dockerfile")
-	}
-
-	techStack, err := filesystem.DetectStack(path)
-	if err != nil {
-		logger.Error("error detecting tech stack: %v", err)
-		return
-	}
-
-	tech, err := a.tech.FindOrCreate(ctx, techStack)
-	if err != nil {
-		logger.Error("error finding or creating tech stack: %v", err)
-		return
 	}
 
 	app.TechStackID = tech.ID
