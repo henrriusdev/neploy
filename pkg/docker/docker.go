@@ -2,9 +2,13 @@ package docker
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -166,18 +170,43 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 	}
 
 	options := types.ImageBuildOptions{
-		Dockerfile: "Dockerfile", // Use relative path within context
+		Dockerfile: "Dockerfile",
 		Tags:       []string{tag},
+		Remove:     true,
 	}
 
 	// Build the image using the tar context
 	response, err := d.cli.ImageBuild(ctx, bytes.NewReader(buf.Bytes()), options)
 	if err != nil {
-		return err
+		return errors.New("error building image: " + err.Error())
 	}
 	defer response.Body.Close()
 
-	// Read the response to ensure the build completes
-	_, err = io.Copy(io.Discard, response.Body)
-	return err
+	// Read the build output to check for errors
+	var lastError string
+	scanner := bufio.NewScanner(response.Body)
+	for scanner.Scan() {
+		var output map[string]interface{}
+		if err := json.Unmarshal(scanner.Bytes(), &output); err != nil {
+			continue
+		}
+
+		if errMsg, ok := output["error"]; ok {
+			lastError = errMsg.(string)
+		}
+
+		if stream, ok := output["stream"]; ok {
+			log.Print("Build: ", stream)
+		}
+	}
+
+	if lastError != "" {
+		return errors.New("build failed: " + lastError)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return errors.New("error reading build output: " + err.Error())
+	}
+
+	return nil
 }
