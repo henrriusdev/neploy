@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"neploy.dev/pkg/logger"
 )
 
 type Docker struct {
@@ -117,8 +117,9 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 }
 
 func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {
-	// Get the directory containing the Dockerfile as build context
+	// Use the directory containing the Dockerfile as build context
 	contextDir := filepath.Dir(dockerfilePath)
+	logger.Info("Building image from context: %s", contextDir)
 
 	// Create tar archive of the build context
 	var buf bytes.Buffer
@@ -141,6 +142,8 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 		if strings.HasPrefix(relPath, "..") {
 			return nil
 		}
+
+		logger.Info("Adding file to tar: %s", path)
 
 		// Create tar header
 		header, err := tar.FileInfoHeader(info, info.Name())
@@ -196,7 +199,7 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 		}
 
 		if stream, ok := output["stream"]; ok {
-			log.Print("Build: ", stream)
+			logger.Info("Build: %v", stream)
 		}
 	}
 

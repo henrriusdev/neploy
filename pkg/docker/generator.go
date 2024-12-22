@@ -23,7 +23,7 @@ var defaultTemplates = map[string]DockerfileTemplate{
 			"COPY package*.json ./",
 			"RUN npm install",
 		},
-		BuildCmd: "RUN npm run build",
+		BuildCmd: "npm run build",
 		StartCmd: []string{"npm", "start"},
 	},
 	"Python": {
@@ -40,10 +40,10 @@ var defaultTemplates = map[string]DockerfileTemplate{
 		BaseImage: "golang:1.21-alpine",
 		WorkDir:   "/app",
 		Dependencies: []string{
-			"COPY go.mod ./",
+			"COPY . .",
 			"RUN go mod download",
 		},
-		BuildCmd: "RUN go build -o main .",
+		BuildCmd: "go build -o main .",
 		StartCmd: []string{"./main"},
 	},
 	// Add more templates for other stacks
