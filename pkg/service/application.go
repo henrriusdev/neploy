@@ -152,21 +152,29 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	logger.Info("repo cloned: %s", path)
 	app.StorageLocation = path
 
-	techStack, err := filesystem.DetectStack(path)
-	if err != nil {
-		logger.Error("error detecting tech stack: %v", err)
-		return
-	}
+	a.hub.BroadcastProgress(0, "Checking for Docker Compose...")
+	if filesystem.HasDockerCompose(path) {
+		logger.Error("docker-compose file found, not supported")
+		a.hub.BroadcastProgress(100, "Error: Docker Compose files are not supported")
 
-	tech, err := a.tech.FindOrCreate(ctx, techStack)
-	if err != nil {
-		logger.Error("error finding or creating tech stack: %v", err)
+		// Delete the application and notify
+		if err := a.Delete(ctx, id); err != nil {
+			logger.Error("error deleting application: %v", err)
+		}
+
+		actionMsg := websocket.NewActionMessage(
+			websocket.ActionTypeError,
+			"Docker Compose Not Supported",
+			"Docker Compose files are not supported. The application has been deleted.",
+			nil,
+		)
+		a.hub.BroadcastInteractive(actionMsg)
 		return
 	}
 
 	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
-
-	if !filesystem.HasDockerfile(path, a.hub.GetNotificationClient()).Exists {
+	dockerStatus := filesystem.HasDockerfile(path, a.hub.GetNotificationClient())
+	if !dockerStatus.Exists {
 		actionInput := websocket.NewSelectInput("action", []string{
 			fmt.Sprintf("create_default_for_%s", techStack),
 			"skip",
@@ -199,11 +207,52 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		a.hub.BroadcastProgress(100, "Created default Dockerfile")
 	}
 
+	techStack, err := filesystem.DetectStack(path)
+	if err != nil {
+		logger.Error("error detecting tech stack: %v", err)
+		return
+	}
+
+	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	if err != nil {
+		logger.Error("error finding or creating tech stack: %v", err)
+		return
+	}
+
 	app.TechStackID = tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return
 	}
+
+	// Start container creation in a separate goroutine
+	go func() {
+		dockerClient := docker.NewDocker()
+		config := &container.Config{
+			Image: appName,
+			Tty:   true,
+		}
+		hostConfig := &container.HostConfig{
+			AutoRemove: true,
+		}
+
+		a.hub.BroadcastProgress(0, "Creating container...")
+		resp, err := dockerClient.CreateContainer(ctx, config, hostConfig, appName)
+		if err != nil {
+			logger.Error("error creating container: %v", err)
+			a.hub.BroadcastProgress(100, "Error creating container")
+			return
+		}
+
+		a.hub.BroadcastProgress(50, "Starting container...")
+		if err := dockerClient.StartContainer(ctx, appName); err != nil {
+			logger.Error("error starting container: %v", err)
+			a.hub.BroadcastProgress(100, "Error starting container")
+			return
+		}
+
+		a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
+	}()
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
