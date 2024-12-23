@@ -115,7 +115,7 @@ func (a *Application) Start(c *fiber.Ctx) error {
 		})
 	}
 
-	res, err := a.service.StartContainer(c.Context(), id)
+	err := a.service.StartContainer(c.Context(), id)
 	if err != nil {
 		logger.Error("error starting application: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -124,8 +124,7 @@ func (a *Application) Start(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"message":     "Application started",
-		"containerId": res,
+		"message": "Application started",
 	})
 }
 
@@ -137,11 +136,11 @@ func (a *Application) Stop(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Implement stop logic
-	// This should:
-	// 1. Get the application
-	// 2. Stop the Docker container
-	// 3. Update the application status
+	if err := a.service.StopContainer(c.Context(), id); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to stop application",
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"message": "Application stopped",

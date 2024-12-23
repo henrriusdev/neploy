@@ -44,21 +44,7 @@ func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
 	return d.cli.ContainerStart(ctx, containerID, container.StartOptions{})
 }
 
-func (d *Docker) StopContainer(ctx context.Context, containerName string) error {
-	containers, err := d.ListContainers(ctx)
-	if err != nil {
-		return err
-	}
-
-	var containerID string
-
-	for _, container := range containers {
-		if container.Names[0] == "/"+containerName {
-			containerID = container.ID
-			break
-		}
-	}
-
+func (d *Docker) StopContainer(ctx context.Context, containerID string) error {
 	return d.cli.ContainerStop(ctx, containerID, container.StopOptions{})
 }
 

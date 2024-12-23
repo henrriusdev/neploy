@@ -32,7 +32,8 @@ type Application interface {
 	Deploy(ctx context.Context, id string, repoURL string)
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	Delete(ctx context.Context, id string) error
-	StartContainer(ctx context.Context, id string) (interface{}, error)
+	StartContainer(ctx context.Context, id string) error
+	StopContainer(ctx context.Context, id string) error
 }
 
 type application struct {
@@ -430,18 +431,34 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	return a.repo.Delete(ctx, id)
 }
 
-func (a *application) StartContainer(ctx context.Context, id string) (interface{}, error) {
+func (a *application) StartContainer(ctx context.Context, id string) error {
 	app, err := a.repo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
-		return nil, err
+		return err
 	}
 
 	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
 	if err != nil {
 		logger.Error("error getting container ID: %v", err)
-		return nil, err
+		return err
 	}
 
-	return containerId, a.docker.StartContainer(ctx, containerId)
+	return a.docker.StartContainer(ctx, containerId)
+}
+
+func (a *application) StopContainer(ctx context.Context, id string) error {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return err
+	}
+
+	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	if err != nil {
+		logger.Error("error getting container ID: %v", err)
+		return err
+	}
+
+	return a.docker.StopContainer(ctx, containerId)
 }
