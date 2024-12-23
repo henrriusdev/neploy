@@ -32,28 +32,15 @@ func NewDocker() *Docker {
 }
 
 func (d *Docker) ListContainers(ctx context.Context) ([]types.Container, error) {
-	return d.cli.ContainerList(ctx, container.ListOptions{})
+	// List all containers (including stopped ones)
+	return d.cli.ContainerList(ctx, container.ListOptions{All: true})
 }
 
 func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, name string) (container.CreateResponse, error) {
 	return d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, name)
 }
 
-func (d *Docker) StartContainer(ctx context.Context, containerName string) error {
-	containers, err := d.ListContainers(ctx)
-	if err != nil {
-		return err
-	}
-
-	var containerID string
-
-	for _, container := range containers {
-		if container.Names[0] == "/"+containerName {
-			containerID = container.ID
-			break
-		}
-	}
-
+func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
 	return d.cli.ContainerStart(ctx, containerID, container.StartOptions{})
 }
 
@@ -107,7 +94,10 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 		return "", err
 	}
 
+	containerName = "neploy-" + containerName
+
 	for _, container := range containers {
+		logger.Info("container: %v, name: %s", container.Names, containerName)
 		if container.Names[0] == "/"+containerName {
 			return container.ID, nil
 		}

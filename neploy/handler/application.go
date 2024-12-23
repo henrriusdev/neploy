@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/romsar/gonertia"
 	"neploy.dev/config"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -114,14 +115,17 @@ func (a *Application) Start(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: Implement start logic
-	// This should:
-	// 1. Get the application
-	// 2. Start the Docker container
-	// 3. Update the application status
+	res, err := a.service.StartContainer(c.Context(), id)
+	if err != nil {
+		logger.Error("error starting application: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to start application",
+		})
+	}
 
 	return c.JSON(fiber.Map{
-		"message": "Application started",
+		"message":     "Application started",
+		"containerId": res,
 	})
 }
 

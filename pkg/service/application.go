@@ -32,6 +32,7 @@ type Application interface {
 	Deploy(ctx context.Context, id string, repoURL string)
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	Delete(ctx context.Context, id string) error
+	StartContainer(ctx context.Context, id string) (interface{}, error)
 }
 
 type application struct {
@@ -271,7 +272,7 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 	}
 
 	a.hub.BroadcastProgress(90, "Starting container...")
-	if err := a.docker.StartContainer(ctx, containerName); err != nil {
+	if err := a.docker.StartContainer(ctx, resp.ID); err != nil {
 		logger.Error("error starting container: %v", err)
 		a.hub.BroadcastProgress(100, "Error starting container")
 		return
@@ -427,4 +428,20 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	}
 
 	return a.repo.Delete(ctx, id)
+}
+
+func (a *application) StartContainer(ctx context.Context, id string) (interface{}, error) {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return nil, err
+	}
+
+	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	if err != nil {
+		logger.Error("error getting container ID: %v", err)
+		return nil, err
+	}
+
+	return containerId, a.docker.StartContainer(ctx, containerId)
 }
