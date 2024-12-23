@@ -143,7 +143,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
 	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
 	appName := strings.ToLower(appNameWithoutSpecialChars)
-	
+
 	// Create Docker image name with neploy prefix
 	imageName := fmt.Sprintf("neploy/%s", appName)
 	containerName := fmt.Sprintf("neploy-%s", appName)
@@ -415,7 +415,7 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	}
 
 	// Stop and remove container
-	if err := a.docker.RemoveContainer(ctx, containerId); err != nil {
+	if err := a.docker.RemoveContainer(ctx, containerId); err != nil && !strings.Contains(err.Error(), "not found") {
 		logger.Error("error removing container: %v", err)
 		return err
 	}

@@ -37,11 +37,13 @@ var defaultTemplates = map[string]DockerfileTemplate{
 		StartCmd: []string{"python", "app.py"},
 	},
 	"Go": {
-		BaseImage: "golang:1.21-alpine",
+		BaseImage: "golang:1.23-alpine",
 		WorkDir:   "/app",
 		Dependencies: []string{
-			"COPY . .",
+			"RUN ls -la",
+			"COPY go.mod go.sum ./",
 			"RUN go mod download",
+			"COPY . .",
 		},
 		BuildCmd: "go build -o main .",
 		StartCmd: []string{"./main"},
@@ -80,7 +82,6 @@ func WriteDockerfile(filePath string, tmpl DockerfileTemplate) error {
 	return WriteFile(filePath, []byte(fmt.Sprintf(`FROM %s
 WORKDIR %s
 %s
-COPY . .
 RUN %s
 CMD [%s]
 `, tmpl.BaseImage, tmpl.WorkDir, strings.Join(tmpl.Dependencies, "\n"), tmpl.BuildCmd, strings.Join(cmdArgs, ", "))))

@@ -129,6 +129,7 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 	// Walk through the directory and add files to tar
 	err := filepath.Walk(contextDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			logger.Error("Error walking the path: %v", err)
 			return err
 		}
 
@@ -143,14 +144,19 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 			return nil
 		}
 
-		logger.Info("Adding file to tar: %s", path)
+		// Skip .git directory
+		if info.IsDir() && (info.Name() == ".git" || info.Name() == "node_modules") {
+			return filepath.SkipDir
+		}
 
 		// Create tar header
 		header, err := tar.FileInfoHeader(info, info.Name())
 		if err != nil {
 			return err
 		}
-		header.Name = relPath
+
+		// Use relative path for the header name
+		header.Name = filepath.ToSlash(relPath)
 
 		if err := tw.WriteHeader(header); err != nil {
 			return err
@@ -176,6 +182,7 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 		Dockerfile: "Dockerfile",
 		Tags:       []string{tag},
 		Remove:     true,
+		NoCache:    true,
 	}
 
 	// Build the image using the tar context
