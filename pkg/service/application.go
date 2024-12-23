@@ -32,6 +32,8 @@ type Application interface {
 	Deploy(ctx context.Context, id string, repoURL string)
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	Delete(ctx context.Context, id string) error
+	StartContainer(ctx context.Context, id string) error
+	StopContainer(ctx context.Context, id string) error
 }
 
 type application struct {
@@ -144,6 +146,10 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
 	appName := strings.ToLower(appNameWithoutSpecialChars)
 
+	// Create Docker image name with neploy prefix
+	imageName := fmt.Sprintf("neploy/%s", appName)
+	containerName := fmt.Sprintf("neploy-%s", appName)
+
 	path := filepath.Join(config.Env.UploadPath, appName)
 	_, err = git.PlainCloneContext(ctx, path, false, &git.CloneOptions{
 		URL:        repoURL,
@@ -230,18 +236,18 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, appName, path)
+	go a.createAndStartContainer(ctx, imageName, containerName, path)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
 }
 
-func (a *application) createAndStartContainer(ctx context.Context, appName, projectPath string) {
+func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string) {
 	// First, build the Docker image
 	a.hub.BroadcastProgress(0, "Building Docker image...")
 
 	dockerfilePath := filepath.Join(projectPath, "Dockerfile")
-	if err := a.docker.BuildImage(ctx, dockerfilePath, appName); err != nil {
+	if err := a.docker.BuildImage(ctx, dockerfilePath, imageName); err != nil {
 		logger.Error("error building image: %v", err)
 		a.hub.BroadcastProgress(100, "Error building Docker image")
 		return
@@ -251,7 +257,7 @@ func (a *application) createAndStartContainer(ctx context.Context, appName, proj
 
 	// Create and start the container
 	config := &container.Config{
-		Image: appName,
+		Image: imageName,
 		Tty:   true,
 	}
 	hostConfig := &container.HostConfig{
@@ -259,7 +265,7 @@ func (a *application) createAndStartContainer(ctx context.Context, appName, proj
 	}
 
 	a.hub.BroadcastProgress(70, "Creating container...")
-	resp, err := a.docker.CreateContainer(ctx, config, hostConfig, appName)
+	resp, err := a.docker.CreateContainer(ctx, config, hostConfig, containerName)
 	if err != nil {
 		logger.Error("error creating container: %v", err)
 		a.hub.BroadcastProgress(100, "Error creating container")
@@ -267,7 +273,7 @@ func (a *application) createAndStartContainer(ctx context.Context, appName, proj
 	}
 
 	a.hub.BroadcastProgress(90, "Starting container...")
-	if err := a.docker.StartContainer(ctx, appName); err != nil {
+	if err := a.docker.StartContainer(ctx, resp.ID); err != nil {
 		logger.Error("error starting container: %v", err)
 		a.hub.BroadcastProgress(100, "Error starting container")
 		return
@@ -377,8 +383,12 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
 	appName := strings.ToLower(appNameWithoutSpecialChars)
 
+	// Create Docker image name with neploy prefix
+	imageName := fmt.Sprintf("neploy/%s", appName)
+	containerName := fmt.Sprintf("neploy-%s", appName)
+
 	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, appName, path)
+	go a.createAndStartContainer(ctx, imageName, containerName, path)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
@@ -407,7 +417,7 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	}
 
 	// Stop and remove container
-	if err := a.docker.RemoveContainer(ctx, containerId); err != nil {
+	if err := a.docker.RemoveContainer(ctx, containerId); err != nil && !strings.Contains(err.Error(), "not found") {
 		logger.Error("error removing container: %v", err)
 		return err
 	}
@@ -419,4 +429,36 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	}
 
 	return a.repo.Delete(ctx, id)
+}
+
+func (a *application) StartContainer(ctx context.Context, id string) error {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return err
+	}
+
+	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	if err != nil {
+		logger.Error("error getting container ID: %v", err)
+		return err
+	}
+
+	return a.docker.StartContainer(ctx, containerId)
+}
+
+func (a *application) StopContainer(ctx context.Context, id string) error {
+	app, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting application: %v", err)
+		return err
+	}
+
+	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	if err != nil {
+		logger.Error("error getting container ID: %v", err)
+		return err
+	}
+
+	return a.docker.StopContainer(ctx, containerId)
 }

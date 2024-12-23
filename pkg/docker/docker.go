@@ -2,8 +2,11 @@ package docker
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -12,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"neploy.dev/pkg/logger"
 )
 
 type Docker struct {
@@ -28,46 +32,19 @@ func NewDocker() *Docker {
 }
 
 func (d *Docker) ListContainers(ctx context.Context) ([]types.Container, error) {
-	return d.cli.ContainerList(ctx, container.ListOptions{})
+	// List all containers (including stopped ones)
+	return d.cli.ContainerList(ctx, container.ListOptions{All: true})
 }
 
 func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, name string) (container.CreateResponse, error) {
 	return d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, name)
 }
 
-func (d *Docker) StartContainer(ctx context.Context, containerName string) error {
-	containers, err := d.ListContainers(ctx)
-	if err != nil {
-		return err
-	}
-
-	var containerID string
-
-	for _, container := range containers {
-		if container.Names[0] == "/"+containerName {
-			containerID = container.ID
-			break
-		}
-	}
-
+func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
 	return d.cli.ContainerStart(ctx, containerID, container.StartOptions{})
 }
 
-func (d *Docker) StopContainer(ctx context.Context, containerName string) error {
-	containers, err := d.ListContainers(ctx)
-	if err != nil {
-		return err
-	}
-
-	var containerID string
-
-	for _, container := range containers {
-		if container.Names[0] == "/"+containerName {
-			containerID = container.ID
-			break
-		}
-	}
-
+func (d *Docker) StopContainer(ctx context.Context, containerID string) error {
 	return d.cli.ContainerStop(ctx, containerID, container.StopOptions{})
 }
 
@@ -103,7 +80,10 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 		return "", err
 	}
 
+	containerName = "neploy-" + containerName
+
 	for _, container := range containers {
+		logger.Info("container: %v, name: %s", container.Names, containerName)
 		if container.Names[0] == "/"+containerName {
 			return container.ID, nil
 		}
@@ -113,8 +93,9 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 }
 
 func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {
-	// Get the directory containing the Dockerfile as build context
+	// Use the directory containing the Dockerfile as build context
 	contextDir := filepath.Dir(dockerfilePath)
+	logger.Info("Building image from context: %s", contextDir)
 
 	// Create tar archive of the build context
 	var buf bytes.Buffer
@@ -124,6 +105,7 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 	// Walk through the directory and add files to tar
 	err := filepath.Walk(contextDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			logger.Error("Error walking the path: %v", err)
 			return err
 		}
 
@@ -138,12 +120,19 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 			return nil
 		}
 
+		// Skip .git directory
+		if info.IsDir() && (info.Name() == ".git" || info.Name() == "node_modules") {
+			return filepath.SkipDir
+		}
+
 		// Create tar header
 		header, err := tar.FileInfoHeader(info, info.Name())
 		if err != nil {
 			return err
 		}
-		header.Name = relPath
+
+		// Use relative path for the header name
+		header.Name = filepath.ToSlash(relPath)
 
 		if err := tw.WriteHeader(header); err != nil {
 			return err
@@ -166,18 +155,44 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 	}
 
 	options := types.ImageBuildOptions{
-		Dockerfile: "Dockerfile", // Use relative path within context
+		Dockerfile: "Dockerfile",
 		Tags:       []string{tag},
+		Remove:     true,
+		NoCache:    true,
 	}
 
 	// Build the image using the tar context
 	response, err := d.cli.ImageBuild(ctx, bytes.NewReader(buf.Bytes()), options)
 	if err != nil {
-		return err
+		return errors.New("error building image: " + err.Error())
 	}
 	defer response.Body.Close()
 
-	// Read the response to ensure the build completes
-	_, err = io.Copy(io.Discard, response.Body)
-	return err
+	// Read the build output to check for errors
+	var lastError string
+	scanner := bufio.NewScanner(response.Body)
+	for scanner.Scan() {
+		var output map[string]interface{}
+		if err := json.Unmarshal(scanner.Bytes(), &output); err != nil {
+			continue
+		}
+
+		if errMsg, ok := output["error"]; ok {
+			lastError = errMsg.(string)
+		}
+
+		if stream, ok := output["stream"]; ok {
+			logger.Info("Build: %v", stream)
+		}
+	}
+
+	if lastError != "" {
+		return errors.New("build failed: " + lastError)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return errors.New("error reading build output: " + err.Error())
+	}
+
+	return nil
 }
