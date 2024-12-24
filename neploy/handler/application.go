@@ -137,6 +137,7 @@ func (a *Application) Stop(c *fiber.Ctx) error {
 	}
 
 	if err := a.service.StopContainer(c.Context(), id); err != nil {
+		logger.Error("error stopping application: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to stop application",
 		})
