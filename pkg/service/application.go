@@ -421,7 +421,11 @@ func (a *application) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+	appName := strings.ToLower(appNameWithoutSpecialChars)
+
+	containerId, err := a.docker.GetContainerID(ctx, appName)
 	if err != nil {
 		logger.Error("error getting container ID: %v", err)
 		return err
