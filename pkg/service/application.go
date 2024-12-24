@@ -91,10 +91,21 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 			return nil, err
 		}
 
+		appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+		appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+		appName := strings.ToLower(appNameWithoutSpecialChars)
+
+		containerStatus, err := a.docker.GetContainerStatus(ctx, appName)
+		if err != nil {
+			logger.Error("error getting container status: %v", err)
+			return nil, err
+		}
+
 		fullApps[i] = model.FullApplication{
 			Application: app,
 			Stats:       stats,
 			TechStack:   tech,
+			Status:      containerStatus,
 		}
 	}
 

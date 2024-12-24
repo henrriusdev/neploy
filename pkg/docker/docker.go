@@ -83,13 +83,46 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 	containerName = "neploy-" + containerName
 
 	for _, container := range containers {
-		logger.Info("container: %v, name: %s", container.Names, containerName)
 		if container.Names[0] == "/"+containerName {
 			return container.ID, nil
 		}
 	}
 
 	return "", nil
+}
+
+func (d *Docker) GetContainerStatus(ctx context.Context, containerName string) (string, error) {
+	containers, err := d.ListContainers(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	containerName = "neploy-" + containerName
+
+	for _, container := range containers {
+		logger.Info("Container name: %s, %v", containerName, container.Names)
+		if container.Names[0] == "/"+containerName {
+			// Use Status instead of State for more detailed information
+			if strings.HasPrefix(container.Status, "Up") {
+				return "Running", nil
+			} else if strings.HasPrefix(container.Status, "Exited") {
+				return "Stopped", nil
+			} else if strings.Contains(container.Status, "Created") {
+				return "Created", nil
+			} else if strings.Contains(container.Status, "Paused") {
+				return "Paused", nil
+			} else if strings.Contains(container.Status, "Restarting") {
+				return "Restarting", nil
+			} else if strings.Contains(container.Status, "Removing") {
+				return "Removing", nil
+			} else if strings.Contains(container.Status, "Dead") {
+				return "Error", nil
+			}
+			return container.Status, nil
+		}
+	}
+
+	return "Inactive", nil
 }
 
 func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {
