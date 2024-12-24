@@ -38,4 +38,5 @@ type FullApplication struct {
 	Application
 	Stats     []ApplicationStat `json:"stat"`
 	TechStack TechStack         `json:"techStack"`
+	Status    string            `json:"status"`
 }

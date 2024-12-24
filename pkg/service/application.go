@@ -91,10 +91,21 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 			return nil, err
 		}
 
+		appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+		appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+		appName := strings.ToLower(appNameWithoutSpecialChars)
+
+		containerStatus, err := a.docker.GetContainerStatus(ctx, appName)
+		if err != nil {
+			logger.Error("error getting container status: %v", err)
+			return nil, err
+		}
+
 		fullApps[i] = model.FullApplication{
 			Application: app,
 			Stats:       stats,
 			TechStack:   tech,
+			Status:      containerStatus,
 		}
 	}
 
@@ -410,7 +421,11 @@ func (a *application) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+	appName := strings.ToLower(appNameWithoutSpecialChars)
+
+	containerId, err := a.docker.GetContainerID(ctx, appName)
 	if err != nil {
 		logger.Error("error getting container ID: %v", err)
 		return err
@@ -454,7 +469,11 @@ func (a *application) StopContainer(ctx context.Context, id string) error {
 		return err
 	}
 
-	containerId, err := a.docker.GetContainerID(ctx, app.AppName)
+	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+	appName := strings.ToLower(appNameWithoutSpecialChars)
+
+	containerId, err := a.docker.GetContainerID(ctx, appName)
 	if err != nil {
 		logger.Error("error getting container ID: %v", err)
 		return err
