@@ -39,6 +39,7 @@ import {
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { RoleIcon } from "@/components/RoleIcon";
+import { TrashIcon } from "@radix-ui/react-icons";
 
 interface TeamMember {
   id: string;
@@ -293,14 +294,8 @@ function Team({
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="text-black">
-                          Edit
-                        </Button>
-                        <Button variant="destructive" size="sm">
-                          Remove
+                        <Button variant="destructive" size="icon" className="flex items-center justify-center">
+                          <TrashIcon className="!h-7 !w-7" />
                         </Button>
                       </div>
                     </TableCell>
