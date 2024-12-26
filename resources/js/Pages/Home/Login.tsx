@@ -43,6 +43,9 @@ export default function Component() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     router.post("/login", values, {
+      onSuccess: () => {
+        setIsLoading(false);
+      },
       onError: (errors) => {
         console.error(errors);
         form.setError("root", { message: "An error occurred during login" });

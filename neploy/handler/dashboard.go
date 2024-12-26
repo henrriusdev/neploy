@@ -32,19 +32,9 @@ func (d *Dashboard) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 
 func (d *Dashboard) Index(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		cookie, err := c.Cookie("token")
-		if err != nil {
-			log.Err(err).Msg("error getting token")
-			return c.Redirect(http.StatusSeeOther, "/")
-		}
-
-		claims := &model.JWTClaims{}
-		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.Env.JWTSecret), nil
-		})
-		if err != nil {
-			log.Err(err).Msg("error parsing token")
-			return c.Redirect(http.StatusSeeOther, "/")
+		claims, ok := c.Get("claims").(model.JWTClaims)
+		if !ok {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 		}
 
 		roles, err := d.services.Role.GetUserRoles(context.Background(), claims.ID)

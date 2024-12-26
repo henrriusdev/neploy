@@ -57,7 +57,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 }
 
 func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
-	r.POST("/login", a.Login)
+	r.POST("/login", a.Login(i))
 	r.GET("/logout", a.Logout)
 	r.GET("", a.Index(i))
 	r.GET("/onboard", a.Onboard(i))
@@ -67,63 +67,63 @@ func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.GET("/auth/gitlab/callback", a.GitlabOAuthCallback)
 }
 
-func (a *Auth) Login(c echo.Context) error {
-	var req model.LoginRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request",
-		})
-	}
-
-	if errs := a.validator.Validate(req); len(errs) > 0 && errs[0].Error {
-		errMsgs := make([]string, 0)
-
-		for _, err := range errs {
-			errMsgs = append(errMsgs, fmt.Sprintf(
-				"[%s]: '%v' | Needs to implement '%s'",
-				err.FailedField,
-				err.Value,
-				err.Tag,
-			))
+func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req model.LoginRequest
+		if err := c.Bind(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+				"error": "Invalid request",
+			})
 		}
 
-		return echo.NewHTTPError(http.StatusBadRequest, strings.Join(errMsgs, " and "))
-	}
+		if errs := a.validator.Validate(req); len(errs) > 0 && errs[0].Error {
+			errMsgs := make([]string, 0)
 
-	// Validate and authenticate user
-	res, err := a.user.Login(c.Request().Context(), req)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"error": "Invalid credentials",
+			for _, err := range errs {
+				errMsgs = append(errMsgs, fmt.Sprintf(
+					"[%s]: '%v' | Needs to implement '%s'",
+					err.FailedField,
+					err.Value,
+					err.Tag,
+				))
+			}
+
+			return echo.NewHTTPError(http.StatusBadRequest, strings.Join(errMsgs, " and "))
+		}
+
+		// Validate and authenticate user
+		res, err := a.user.Login(c.Request().Context(), req)
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error": "Invalid credentials",
+			})
+		}
+
+		// Generate JWT token
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
+			ID:    res.User.ID,
+			Email: res.User.Email,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			},
 		})
+
+		tokenString, err := token.SignedString([]byte(config.Env.JWTSecret))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": "Failed to generate token",
+			})
+		}
+
+		cookie := new(http.Cookie)
+		cookie.Name = "token"
+		cookie.Value = tokenString
+		cookie.HttpOnly = true
+		cookie.Path = "/"
+		c.SetCookie(cookie)
+
+		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	}
-
-	// Generate JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
-		ID:    res.User.ID,
-		Email: res.User.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-		},
-	})
-
-	tokenString, err := token.SignedString([]byte(config.Env.JWTSecret))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to generate token",
-		})
-	}
-
-	cookie := new(http.Cookie)
-	cookie.Name = "token"
-	cookie.Value = tokenString
-	cookie.HttpOnly = true
-	cookie.Path = "/"
-	c.SetCookie(cookie)
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"token": tokenString,
-	})
 }
 
 func (h *Auth) Logout(c echo.Context) error {

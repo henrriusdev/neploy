@@ -345,3 +345,14 @@ func (u *user) AddUserRole(ctx context.Context, email, roleID string) error {
 	_, err = u.repos.UserRole.Insert(ctx, userRole)
 	return err
 }
+
+func ValidateJWT(token string) (model.JWTClaims, bool, error) {
+	claims := model.JWTClaims{}
+	t, err := jwt.ParseWithClaims(token, &claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.Env.JWTSecret), nil
+	})
+	if err != nil {
+		return model.JWTClaims{}, false, err
+	}
+	return claims, t.Valid, nil
+}
