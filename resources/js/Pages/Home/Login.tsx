@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import axios from "axios";
+import { router } from '@inertiajs/react';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -42,18 +42,15 @@ export default function Component() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    try {
-      const response = await axios.post("/login", values);
-      console.log(response);
-      if (response.status == 200) {
-        window.location.replace('/dashboard');
+    router.post("/login", values, {
+      onError: (errors) => {
+        console.error(errors);
+        form.setError("root", { message: "An error occurred during login" });
+      },
+      onFinish: () => {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-      form.setError("root", { message: "An error occurred during login" });
-    } finally {
-      setIsLoading(false);
-    }
+    });
   }
 
   return (
