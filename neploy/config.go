@@ -1,15 +1,13 @@
 package neploy
 
 import (
+	"net/http"
 	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2/middleware/session"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	flogger "github.com/gofiber/fiber/v2/middleware/logger"
-	"neploy.dev/neploy/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	neployware "neploy.dev/neploy/middleware"
 	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
@@ -24,7 +22,6 @@ type Neploy struct {
 	Services     service.Services
 	Repositories repository.Repositories
 	Validator    validation.XValidator
-	SessionStore *session.Store // Add session store to Neploy struct
 }
 
 // Create a new config struct for session settings
@@ -35,35 +32,29 @@ type SessionConfig struct {
 	CookieHTTPOnly bool
 }
 
-// Initialize session store with default config
-func NewSessionStore() *session.Store {
-	return session.New(session.Config{
-		Expiration:     24 * time.Hour,
-		KeyLookup:      "cookie:session",
-		CookieSecure:   true,
-		CookieHTTPOnly: true,
-		CookieSameSite: "Lax",
-	})
-}
-
 func Start(npy Neploy) {
-	// Initialize session store
-	sessionStore := NewSessionStore()
-	npy.SessionStore = sessionStore
-
 	i := initInertia()
 
-	app := fiber.New(fiber.Config{
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			return c.Status(fiber.StatusBadRequest).JSON(validation.GlobalErrorHandlerResp{
+	e := echo.New()
+
+	// Custom error handler
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		if he, ok := err.(*echo.HTTPError); ok {
+			if err := c.JSON(he.Code, validation.GlobalErrorHandlerResp{
+				Success: false,
+				Message: he.Message.(string),
+			}); err != nil {
+				e.Logger.Error(err)
+			}
+		} else {
+			if err := c.JSON(http.StatusBadRequest, validation.GlobalErrorHandlerResp{
 				Success: false,
 				Message: err.Error(),
-			})
-		},
-		Concurrency: 10,
-	})
-
-	// Set the global logger
+			}); err != nil {
+				e.Logger.Error(err)
+			}
+		}
+	}
 
 	// Initialize repositories
 	repos := NewRepositories(npy)
@@ -74,18 +65,17 @@ func Start(npy Neploy) {
 	npy.Services = services
 
 	// Middleware
-	app.Use(flogger.New(flogger.Config{
-		Format:     "[${ip}]:${port} ${status} - ${method} ${path} ${latency}\n",
-		TimeFormat: "2006-01-02 15:04:05",
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "[${remote_ip}]:${port} ${status} - ${method} ${path} ${latency}\n",
 	}))
-	app.Use(adaptor.HTTPMiddleware(i.Middleware))
+	e.Use(echo.WrapMiddleware(i.Middleware))
 
 	// WebSocket routes with specialized handlers
-	app.Use("/ws/notifications", websocket.UpgradeProgressWS())
-	app.Use("/ws/interactive", websocket.UpgradeInteractiveWS())
+	e.Use(websocket.EchoUpgradeProgressWS(), "/ws/notifications")
+	e.Use(websocket.EchoUpgradeInteractiveWS(), "/ws/interactive")
 
-	app.Use(middleware.OnboardingMiddleware(services.Onboard))
-	app.Use(middleware.SessionMiddleware(npy.SessionStore))
+	e.Use(neployware.EchoOnboardingMiddleware(services.Onboard))
+	e.Use(neployware.JWTMiddleware()) // Replace session middleware with JWT
 	logger.SetLogger()
 
 	// Validator
@@ -95,26 +85,22 @@ func Start(npy Neploy) {
 	npy.Validator = *myValidator
 
 	// Routes
-	RegisterRoutes(app, i, npy)
+	RegisterRoutes(e, i, npy)
 
 	// Static files
-	app.Get("/build/assets/:filename", func(c *fiber.Ctx) error {
-		filename := c.Params("filename")
+	e.GET("/build/assets/:filename", func(c echo.Context) error {
+		filename := c.Param("filename")
 
 		if strings.HasSuffix(filename, ".js") {
-			c.Set("Content-Type", "application/javascript")
+			c.Response().Header().Set("Content-Type", "application/javascript")
 		} else if strings.HasSuffix(filename, ".css") {
-			c.Set("Content-Type", "text/css")
+			c.Response().Header().Set("Content-Type", "text/css")
 		}
 
-		return c.SendFile("./public/build/assets/" + filename)
+		return c.File("./public/build/assets/" + filename)
 	})
 
-	// print all routes
-	app.Get("/routes", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"routes": app.GetRoutes()})
-	})
-	app.Listen(":" + npy.Port)
+	e.Start(":" + npy.Port)
 }
 
 func NewServices(npy Neploy) service.Services {
