@@ -55,6 +55,8 @@ import { TechIcon } from "@/components/TechIcon";
 import { useState, useEffect } from "react";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import type { ProgressMessage, ActionMessage } from "@/types/websocket";
+import { DynamicForm } from "@/components/DynamicForm";
+import type { Input as InputType } from "@/types/websocket";
 
 interface ApplicationStat {
   id: string;
@@ -126,6 +128,19 @@ function Applications({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [actionDialog, setActionDialog] = useState<{
+    show: boolean;
+    title: string;
+    description: string;
+    fields: InputType[];
+    onSubmit: (data: any) => void;
+  }>({
+    show: false,
+    title: "",
+    description: "",
+    fields: [],
+    onSubmit: () => {},
+  });
   const { toast } = useToast();
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
 
@@ -140,14 +155,17 @@ function Applications({
 
     // Handle interactive messages
     const unsubscribeInteractive = onInteractive((message: ActionMessage) => {
-      // Show dialog to user with inputs from message.inputs
-      // For now, just show a basic confirm
-      const confirmed = window.confirm(
-        `${message.title}\n${message.message}`
-      );
-      
-      // Send user's response back
-      sendMessage(message.type, confirmed ? "confirm" : "cancel", {});
+      setActionDialog({
+        show: true,
+        title: message.title,
+        description: message.message,
+        fields: message.inputs,
+        onSubmit: (data) => {
+          // Send response back through websocket
+          sendMessage(message.type, "response", data);
+          setActionDialog((prev) => ({ ...prev, show: false }));
+        },
+      });
     });
 
     return () => {
@@ -437,7 +455,8 @@ function Applications({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4">
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="appName"
@@ -485,7 +504,8 @@ function Applications({
                 />
                 <div
                   {...getRootProps()}
-                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary">
+                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
+                >
                   <input {...getInputProps()} />
                   {isDragActive ? (
                     <p>Drop the ZIP file here...</p>
@@ -501,7 +521,8 @@ function Applications({
                       <FormLabel>Programming Language</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}>
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select language" />
@@ -530,13 +551,15 @@ function Applications({
           <Button
             variant={viewMode === "grid" ? "default" : "outline"}
             size="icon"
-            onClick={() => setViewMode("grid")}>
+            onClick={() => setViewMode("grid")}
+          >
             <Grid className="h-4 w-4" />
           </Button>
           <Button
             variant={viewMode === "list" ? "default" : "outline"}
             size="icon"
-            onClick={() => setViewMode("list")}>
+            onClick={() => setViewMode("list")}
+          >
             <List className="h-4 w-4" />
           </Button>
         </div>
@@ -564,7 +587,8 @@ function Applications({
             viewMode === "grid"
               ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
               : "space-y-4"
-          }>
+          }
+        >
           {applications.map((app: Application) => (
             <Card key={app.id}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0">
@@ -579,7 +603,8 @@ function Applications({
                   </CardDescription>
                 </div>
                 <Badge
-                  className={`${getStatusBadgeColor(app.status)} text-white`}>
+                  className={`${getStatusBadgeColor(app.status)} text-white`}
+                >
                   {app.status}
                 </Badge>
               </CardHeader>
@@ -589,7 +614,8 @@ function Applications({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleApplicationAction(app.id, "start")}>
+                      onClick={() => handleApplicationAction(app.id, "start")}
+                    >
                       <Play className="h-4 w-4 mr-1" />
                       Start
                     </Button>
@@ -598,7 +624,8 @@ function Applications({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleApplicationAction(app.id, "stop")}>
+                      onClick={() => handleApplicationAction(app.id, "stop")}
+                    >
                       <Square className="h-4 w-4 mr-1" />
                       Stop
                     </Button>
@@ -606,7 +633,8 @@ function Applications({
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleApplicationAction(app.id, "delete")}>
+                    onClick={() => handleApplicationAction(app.id, "delete")}
+                  >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
                   </Button>
@@ -616,6 +644,19 @@ function Applications({
           ))}
         </div>
       )}
+      <Dialog open={actionDialog.show} onOpenChange={(open) => setActionDialog(prev => ({ ...prev, show: open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{actionDialog.title}</DialogTitle>
+            <DialogDescription>{actionDialog.description}</DialogDescription>
+          </DialogHeader>
+          <DynamicForm
+            fields={actionDialog.fields}
+            onSubmit={actionDialog.onSubmit}
+            className="mt-4"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
