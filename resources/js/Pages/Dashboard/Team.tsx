@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios";
+import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
 import { RoleIcon } from "@/components/RoleIcon";
 import { TrashIcon } from "@radix-ui/react-icons";
@@ -120,31 +120,42 @@ function Team({
     email: "",
     role: "member", // default role
   });
+  const [teamState, setTeam] = React.useState(team);
   const { toast } = useToast();
   console.log(roles);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      await axios.post("/users/invite", formData);
-      toast({
-        title: "Success",
-        description: "Invitation sent successfully",
-      });
-      setFormData({ email: "", role: "member" });
-      setOpen(false);
-    } catch (error: any) {
-      console.error("Error sending invitation:", error);
-      toast({
-        title: "Error",
-        description:
-          error.response?.data?.message || "Failed to send invitation",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    
+    router.post("/users/invite", formData, {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Invitation sent successfully",
+        });
+        setFormData({ email: "", role: "member" });
+        setOpen(false);
+        
+        // Refresh the team list
+        router.visit("/team", {
+          method: 'get',
+          onSuccess: (response) => {
+            setTeam(response.props.team);
+          },
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: error || "Failed to send invitation",
+          variant: "destructive",
+        });
+      },
+      onFinish: () => {
+        setIsLoading(false);
+      }
+    });
   };
 
   return (
@@ -240,8 +251,8 @@ function Team({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {team.length > 0 ? (
-                team.map((member) => (
+              {teamState.length > 0 ? (
+                teamState.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell>
                       <div className="flex items-center space-x-4">

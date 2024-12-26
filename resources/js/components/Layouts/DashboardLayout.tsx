@@ -2,13 +2,13 @@ import * as React from 'react'
 import { AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2 } from 'lucide-react'
 import SidebarLayout from "@/components/Layout"
 import { Toaster } from '@/components/ui/toaster'
+import { usePage, useRemember } from '@inertiajs/react'
 
 const defaultNavMain = [
     {
         title: "Dashboard",
         url: "/dashboard",
         icon: PieChartIcon,
-        isActive: true,
     },
     {
         title: "Applications",
@@ -49,13 +49,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     teamName = "Acme",
     logoUrl = "https://unavatar.io/github/shadcn",
 }) => {
+    const { url } = usePage()
+    const [layoutData] = useRemember({
+        user,
+        teamName,
+        logoUrl,
+    }, 'layout')
+
+    // Create navigation with active state based on current URL
+    const navigation = defaultNavMain.map(item => ({
+        ...item,
+        isActive: url.startsWith(item.url) && item.url !== "#"
+    }))
+
     return (
         <SidebarLayout
-            navItems={defaultNavMain}
-            user={user}
-            teamName={teamName}
-            logoUrl={logoUrl}
-            navMain={defaultNavMain}
+            user={layoutData.user}
+            teamName={layoutData.teamName}
+            logoUrl={layoutData.logoUrl}
+            navMain={navigation}
         >
             {children}
             <Toaster />

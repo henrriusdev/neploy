@@ -28,35 +28,8 @@ import {
 } from "@/components/ui/chart";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import { techStackColors } from "@/lib/colors";
+import { useRemember } from "@inertiajs/react";
 
-const defaultNavMain = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: PieChartIcon,
-    isActive: true,
-  },
-  {
-    title: "Applications",
-    url: "#",
-    icon: AppWindowMac,
-  },
-  {
-    title: "Gateways",
-    url: "#",
-    icon: DoorOpen,
-  },
-  {
-    title: "Team",
-    url: "/dashboard/team",
-    icon: Frame,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings2,
-  },
-];
 
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
@@ -118,6 +91,19 @@ function Dashboard({
   logoUrl,
   health = "4/10",
 }: DashboardProps) {
+  // Remember user data for all pages
+  const [layoutData, setLayoutData] = useRemember({
+    user: {
+      name: user?.name,
+      email: user?.email,
+      avatar: user?.provider === "github" 
+        ? `https://unavatar.io/github/${user?.username}` 
+        : `https://unavatar.io/${user?.email}`,
+    },
+    teamName,
+    logoUrl,
+  }, 'layout');
+
   const healthPercentage =
     (parseInt(health?.split("/")[0]) / parseInt(health?.split("/")[1])) * 100;
   user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${user.username}`;
@@ -358,16 +344,15 @@ Dashboard.layout = (page: any) => {
     email: page.props.user.email,
     avatar: page.props.user.provider === "github" ? "https://unavatar.io/github/" + page.props.user.username : "https://unavatar.io/" + page.props.user.email
   };
-  console.log(user);
   return (
     <DashboardLayout
+      user={user}
       teamName={page.props.teamName}
       logoUrl={page.props.logoUrl}
-      user={user}
     >
       {page}
     </DashboardLayout>
-  )
+  );
 };
 
 export default Dashboard;

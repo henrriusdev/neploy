@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import { router } from '@inertiajs/react'
 import { useToast } from '@/hooks/use-toast'
 import ProviderStep from '../Auth/InviteSteps/ProviderStep'
@@ -79,23 +78,22 @@ export default function Onboard({ email, username }: Props) {
             metadata: serviceData,
         }
 
-        axios.post('/onboard', payload)
-            .then(response => {
-                if (response.status === 200) {
-                    toast({
-                        title: "Success",
-                        description: "Your account has been set up successfully!",
-                    })
-                    router.visit('/dashboard')
-                }
-            })
-            .catch(error => {
+        router.post('/onboard', payload, {
+            onSuccess: () => {
+                toast({
+                    title: "Success",
+                    description: "Your account has been set up successfully!",
+                })
+                router.visit('/dashboard')
+            },
+            onError: (error) => {
                 toast({
                     title: "Error",
-                    description: error.response?.data?.message || "Failed to complete setup",
+                    description: error?.message || "Failed to complete setup",
                     variant: "destructive",
                 })
-            })
+            }
+        })
     }
 
     const renderStep = () => {
