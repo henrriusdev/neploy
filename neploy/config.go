@@ -75,7 +75,6 @@ func Start(npy Neploy) {
 	e.GET("/ws/interactive", websocket.UpgradeInteractiveWS())
 
 	e.Use(neployware.OnboardingMiddleware(services.Onboard))
-	e.Use(neployware.JWTMiddleware()) // Replace session middleware with JWT
 	logger.SetLogger()
 
 	// Validator

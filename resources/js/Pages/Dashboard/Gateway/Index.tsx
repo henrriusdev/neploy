@@ -122,11 +122,17 @@ export default function Index({ gateways, application }: Props) {
             </Button>
           </div>
 
+          {!gateways || gateways?.length === 0 ? (
+            <p className="text-muted-foreground">
+              No routes configured for this application.
+            </p>
+          ) : (
           <GatewayTable
             gateways={gateways}
             onEdit={setEditingGateway}
             onDelete={handleDelete}
-          />
+            />
+          )}
         </div>
       </div>
 
@@ -147,22 +153,8 @@ export default function Index({ gateways, application }: Props) {
 }
 
 Index.layout = (page: any) => {
-  const { user: pageUser, teamName, logoUrl } = page.props;
-  const user = {
-    name: pageUser.name,
-    email: pageUser.email,
-    avatar:
-      pageUser.provider === "github"
-        ? "https://unavatar.io/github/" + pageUser.username
-        : "https://unavatar.io/" + pageUser.email,
-  };
-
   return (
-    <DashboardLayout
-      teamName={teamName}
-      logoUrl={logoUrl}
-      user={user}
-    >
+    <DashboardLayout>
       {page}
     </DashboardLayout>
   );

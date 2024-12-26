@@ -3,6 +3,7 @@ package neploy
 import (
 	"github.com/labstack/echo/v4"
 	"neploy.dev/neploy/handler"
+	"neploy.dev/neploy/middleware"
 
 	inertia "github.com/romsar/gonertia"
 )
@@ -19,17 +20,17 @@ func onboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 
 func dashboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	dashboard := handler.NewDashboard(npy.Services)
-	dashboard.RegisterRoutes(e.Group("/dashboard"), i)
+	dashboard.RegisterRoutes(e.Group("/dashboard", middleware.JWTMiddleware()), i)
 }
 
 func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	user := handler.NewUser(npy.Services.User)
-	user.RegisterRoutes(e.Group("/users"), i)
+	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware()), i)
 }
 
 func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	application := handler.NewApplication(npy.Services.Application)
-	application.RegisterRoutes(e.Group("/applications"), i)
+	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware()), i)
 }
 
 func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {

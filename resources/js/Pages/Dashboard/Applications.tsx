@@ -49,7 +49,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useDropzone } from "react-dropzone";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import { router } from '@inertiajs/react'
 import { Textarea } from "@/components/ui/textarea";
 import { TechIcon } from "@/components/TechIcon";
 import { useState, useEffect } from "react";
@@ -197,8 +197,8 @@ function Applications({
   const onSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
     setIsUploading(true);
     try {
-      // First, create the application record
-      const createResponse = await axios.post("/applications", {
+      // Create the application record using Inertia
+      router.post("/applications", {
         appName: values.appName,
         description:
           values.description ||
@@ -206,74 +206,75 @@ function Applications({
             ? `Deployed from GitHub: ${values.repoUrl}`
             : "Uploaded from ZIP file"),
         techStack: values.language || "auto-detect",
-      });
+      }, {
+        onSuccess: (response) => {
+          const applicationId = response.props.id;
 
-      // If application creation fails (remember that is an axios call), throw an error
-      if (createResponse.status >= 400) {
-        throw new Error(
-          "Failed to create application" + createResponse.statusText
-        );
-      }
+          // Deploy either from GitHub URL or file upload, not both
+          if (values.repoUrl) {
+            if (uploadedFile) {
+              toast({
+                title: "Error",
+                description: "Please provide either a GitHub URL or a ZIP file, not both",
+                variant: "destructive",
+              });
+              return;
+            }
 
-      // Extract the application ID from the response
-      const applicationId = createResponse.data.id;
+            router.post(`/applications/${applicationId}/deploy`, {
+              repoUrl: values.repoUrl,
+            }, {
+              onSuccess: () => {
+                toast({
+                  title: "Success",
+                  description: "GitHub repository deployment started",
+                });
+              },
+            });
+          } else if (uploadedFile) {
+            const formData = new FormData();
+            formData.append("file", uploadedFile);
 
-      // Deploy either from GitHub URL or file upload, not both
-      if (values.repoUrl) {
-        if (uploadedFile) {
+            router.post(`/applications/${applicationId}/upload`, formData, {
+              onSuccess: () => {
+                toast({
+                  title: "Success",
+                  description: "Application file uploaded successfully",
+                });
+              },
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Please provide either a GitHub URL or a ZIP file",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          // Refresh the applications list
+          router.visit("/applications", {
+            method: 'get',
+            onSuccess: (response) => {
+              setApplications(response.props);
+            },
+          });
+
+          // Reset form and close dialog
+          form.reset();
+          setUploadDialogOpen(false);
+        },
+        onError: (error) => {
           toast({
             title: "Error",
-            description: "Please provide either a GitHub URL or a ZIP file, not both",
+            description: error.message || "Failed to create application",
             variant: "destructive",
           });
-          return;
-        }
-
-        const { data: deployData } = await axios.post(
-          `/applications/${applicationId}/deploy`,
-          {
-            repoUrl: values.repoUrl,
-          }
-        );
-
-        toast({
-          title: "Success",
-          description: "GitHub repository deployment started",
-        });
-      } else if (uploadedFile) {
-        const formData = new FormData();
-        formData.append("file", uploadedFile);
-
-        const { data: uploadData } = await axios.post(
-          `/applications/${applicationId}/upload`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        toast({
-          title: "Success",
-          description: "Application file uploaded successfully",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Please provide either a GitHub URL or a ZIP file",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Refresh the applications list
-      const { data: updatedApplications } = await axios.get("/applications");
-      setApplications(updatedApplications);
-
-      // Reset form and close dialog
-      form.reset();
-      setUploadDialogOpen(false);
+        },
+        onFinish: () => {
+          setIsUploading(false);
+        },
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -283,7 +284,6 @@ function Applications({
             : "Failed to deploy application",
         variant: "destructive",
       });
-    } finally {
       setIsUploading(false);
     }
   };
@@ -293,20 +293,41 @@ function Applications({
     action: "start" | "stop" | "delete"
   ) => {
     try {
-      const { data } = action === "delete" ? await axios.delete(`/applications/${appId}`) : await axios.post(`/applications/${appId}/${action}`, {
-        method: "POST",
-      });
-
-      toast({
-        title: "Success",
-        description: `Application ${action} request sent`,
-      });
-
-      // For delete action, remove from local state
       if (action === "delete") {
-        setApplications((prev) =>
-          prev ? prev.filter((app) => app.id !== appId) : null
-        );
+        router.delete(`/applications/${appId}`, {
+          onSuccess: () => {
+            toast({
+              title: "Success",
+              description: "Application deleted successfully",
+            });
+            setApplications((prev) =>
+              prev ? prev.filter((app) => app.id !== appId) : null
+            );
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: error.message || "Failed to delete application",
+              variant: "destructive",
+            });
+          },
+        });
+      } else {
+        router.post(`/applications/${appId}/${action}`, {}, {
+          onSuccess: () => {
+            toast({
+              title: "Success",
+              description: `Application ${action} request sent`,
+            });
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: error.message || `Failed to ${action} application`,
+              variant: "destructive",
+            });
+          },
+        });
       }
     } catch (error) {
       toast({
@@ -600,17 +621,8 @@ function Applications({
 }
 
 Applications.layout = (page: any) => {
-  const { user: pageUser, teamName, logoUrl } = page.props;
-  const user = {
-    name: pageUser.name,
-    email: pageUser.email,
-    avatar:
-      pageUser.provider === "github"
-        ? "https://unavatar.io/github/" + pageUser.username
-        : "https://unavatar.io/" + pageUser.email,
-  };
   return (
-    <DashboardLayout teamName={teamName} logoUrl={logoUrl} user={user}>
+    <DashboardLayout>
       {page}
     </DashboardLayout>
   );

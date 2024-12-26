@@ -29,35 +29,6 @@ import {
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import { techStackColors } from "@/lib/colors";
 
-const defaultNavMain = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: PieChartIcon,
-    isActive: true,
-  },
-  {
-    title: "Applications",
-    url: "#",
-    icon: AppWindowMac,
-  },
-  {
-    title: "Gateways",
-    url: "#",
-    icon: DoorOpen,
-  },
-  {
-    title: "Team",
-    url: "/dashboard/team",
-    icon: Frame,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings2,
-  },
-];
-
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
   { name: "04:00", successful: 193, errors: 5 },
@@ -353,21 +324,16 @@ function Dashboard({
 }
 
 Dashboard.layout = (page: any) => {
-  const user = {
-    name: page.props.user.name,
-    email: page.props.user.email,
-    avatar: page.props.user.provider === "github" ? "https://unavatar.io/github/" + page.props.user.username : "https://unavatar.io/" + page.props.user.email
-  };
-  console.log(user);
+  const { user, teamName, logoUrl } = page.props;
   return (
     <DashboardLayout
-      teamName={page.props.teamName}
-      logoUrl={page.props.logoUrl}
       user={user}
+      teamName={teamName}
+      logoUrl={logoUrl}
     >
       {page}
     </DashboardLayout>
-  )
+  );
 };
 
 export default Dashboard;
