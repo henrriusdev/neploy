@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"net/http"
 	"path/filepath"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/romsar/gonertia"
+	"github.com/labstack/echo/v4"
+	inertia "github.com/romsar/gonertia"
 	"neploy.dev/config"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
@@ -19,28 +20,28 @@ func NewApplication(service service.Application) *Application {
 	return &Application{service: service}
 }
 
-func (a *Application) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
-	r.Post("", a.Create)
-	r.Get("/:id", a.Get)
-	r.Get("", a.List)
-	r.Post("/:id/deploy", a.Deploy)
-	r.Post("/:id/upload", a.Upload)
-	r.Post("/:id/start", a.Start)
-	r.Post("/:id/stop", a.Stop)
-	r.Delete("/:id", a.Delete)
+func (a *Application) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
+	r.POST("", a.Create)
+	r.GET("/:id", a.Get)
+	r.GET("", a.List)
+	r.POST("/:id/deploy", a.Deploy)
+	r.POST("/:id/upload", a.Upload)
+	r.POST("/:id/start", a.Start)
+	r.POST("/:id/stop", a.Stop)
+	r.DELETE("/:id", a.Delete)
 }
 
-func (a *Application) Create(c *fiber.Ctx) error {
+func (a *Application) Create(c echo.Context) error {
 	var req model.CreateApplicationRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request body",
 		})
 	}
 
 	// Validate required fields
 	if req.AppName == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application name is required",
 		})
 	}
@@ -51,41 +52,41 @@ func (a *Application) Create(c *fiber.Ctx) error {
 		Description: req.Description,
 	}
 
-	appId, err := a.service.Create(c.Context(), app, req.TechStack)
+	appId, err := a.service.Create(c.Request().Context(), app, req.TechStack)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to create application",
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"id":      appId,
 		"message": "Application created successfully",
 	})
 }
 
-func (a *Application) Get(c *fiber.Ctx) error {
-	id := c.Params("id")
+func (a *Application) Get(c echo.Context) error {
+	id := c.Param("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application ID is required",
 		})
 	}
 
-	app, err := a.service.Get(c.Context(), id)
+	app, err := a.service.Get(c.Request().Context(), id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
 			"error": "Application not found",
 		})
 	}
 
-	return c.JSON(app)
+	return c.JSON(http.StatusOK, app)
 }
 
-func (a *Application) Deploy(c *fiber.Ctx) error {
-	id := c.Params("id")
+func (a *Application) Deploy(c echo.Context) error {
+	id := c.Param("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application ID is required",
 		})
 	}
@@ -94,114 +95,114 @@ func (a *Application) Deploy(c *fiber.Ctx) error {
 		RepoURL string `json:"repoUrl"`
 	}
 
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request body",
 		})
 	}
 
-	a.service.Deploy(c.Context(), id, req.RepoURL)
+	a.service.Deploy(c.Request().Context(), id, req.RepoURL)
 
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Deployment started",
 	})
 }
 
-func (a *Application) Start(c *fiber.Ctx) error {
-	id := c.Params("id")
+func (a *Application) Start(c echo.Context) error {
+	id := c.Param("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application ID is required",
 		})
 	}
 
-	err := a.service.StartContainer(c.Context(), id)
+	err := a.service.StartContainer(c.Request().Context(), id)
 	if err != nil {
 		logger.Error("error starting application: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to start application",
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Application started",
 	})
 }
 
-func (a *Application) Stop(c *fiber.Ctx) error {
-	id := c.Params("id")
+func (a *Application) Stop(c echo.Context) error {
+	id := c.Param("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application ID is required",
 		})
 	}
 
-	if err := a.service.StopContainer(c.Context(), id); err != nil {
+	if err := a.service.StopContainer(c.Request().Context(), id); err != nil {
 		logger.Error("error stopping application: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to stop application",
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Application stopped",
 	})
 }
 
-func (a *Application) Delete(c *fiber.Ctx) error {
-	id := c.Params("id")
+func (a *Application) Delete(c echo.Context) error {
+	id := c.Param("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application ID is required",
 		})
 	}
 
-	if err := a.service.Delete(c.Context(), id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := a.service.Delete(c.Request().Context(), id); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to delete application",
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Application deleted successfully",
 	})
 }
 
-func (a *Application) Upload(c *fiber.Ctx) error {
-	id := c.Params("id")
+func (a *Application) Upload(c echo.Context) error {
+	id := c.Param("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Application ID is required",
 		})
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "File is required",
 		})
 	}
 
-	path, err := a.service.Upload(c.Context(), id, file)
+	path, err := a.service.Upload(c.Request().Context(), id, file)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to upload file",
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "File uploaded successfully",
 		"path":    filepath.Join(config.Env.UploadPath, path),
 	})
 }
 
-func (a *Application) List(c *fiber.Ctx) error {
-	apps, err := a.service.GetAll(c.Context())
+func (a *Application) List(c echo.Context) error {
+	apps, err := a.service.GetAll(c.Request().Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to list applications",
 		})
 	}
 
-	return c.JSON(apps)
+	return c.JSON(http.StatusOK, apps)
 }

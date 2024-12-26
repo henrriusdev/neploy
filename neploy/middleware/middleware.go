@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"neploy.dev/config"
 	"neploy.dev/pkg/common"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
@@ -56,28 +57,41 @@ func OnboardingMiddleware(service service.Onboard) echo.MiddlewareFunc {
 func JWTMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// Get token from header
-			tokenString := c.Request().Header.Get("Authorization")
-			if tokenString == "" {
+			if c.Path() == "/login" {
+				return next(c)
+			}
+			// Get token from cookies
+			token, err := c.Cookie("token")
+			if err != nil {
 				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 					"error": "missing authorization token",
 				})
 			}
 
-			// Parse token
-			token, err := jwt.ParseWithClaims(tokenString[7:], &model.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-				// Replace this with your actual secret key
-				return []byte("your-secret-key"), nil
-			})
-			if err != nil {
+			// Check if token is valid
+			if token.Value == "" {
 				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-					"error": "invalid token",
+					"error": "missing authorization token",
 				})
 			}
 
-			if claims, ok := token.Claims.(*model.JWTClaims); ok && token.Valid {
+			tokenString := token.Value
+
+			// Parse token
+			jwt, err := jwt.ParseWithClaims(tokenString, &model.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+				// Replace this with your actual secret key
+				return []byte(config.Env.JWTSecret), nil
+			})
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"error":   "invalid token",
+					"message": err.Error(),
+				})
+			}
+
+			if claims, ok := jwt.Claims.(*model.JWTClaims); ok && jwt.Valid {
 				// Store user info in context
-				c.Set("user", claims)
+				c.Set("claims", claims)
 				return next(c)
 			}
 

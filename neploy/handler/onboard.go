@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"neploy.dev/neploy/validation"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
+	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -22,29 +23,43 @@ func NewOnboard(validator validation.XValidator, service service.Onboard) *Onboa
 	}
 }
 
-func (o *Onboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
-	r.Post("", o.Initiate)
+func (o *Onboard) RegisterRoutes(r *echo.Group, i *gonertia.Inertia) {
+	r.POST("", o.Initiate)
 }
 
-func (o *Onboard) Initiate(c *fiber.Ctx) error {
+func (o *Onboard) Initiate(c echo.Context) error {
 	var req model.OnboardRequest
-	if err := c.BodyParser(&req); err != nil {
-		log.Err(err).Msg("error")
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	if err := c.Bind(&req); err != nil {
+		log.Err(err).Msg("error parsing request")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "Invalid request",
+		})
 	}
 
-	oauthID := c.Cookies("oauth_id")
-	if oauthID == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	oauthID, err := c.Cookie("oauth_id")
+	if err != nil || oauthID.Value == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error": "Unauthorized",
+		})
 	}
 
 	// delete oauth_id cookie
-	c.ClearCookie("oauth_id")
-	req.OauthID = oauthID
+	cookie := new(http.Cookie)
+	cookie.Name = "oauth_id"
+	cookie.Value = ""
+	cookie.Path = "/"
+	cookie.MaxAge = -1
+	c.SetCookie(cookie)
 
-	if err := o.service.Initiate(c.Context(), req); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	req.OauthID = oauthID.Value
+
+	if err := o.service.Initiate(c.Request().Context(), req); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
 	}
 
-	return c.JSON(fiber.Map{"message": "Onboarding initiated"})
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Onboarding initiated",
+	})
 }

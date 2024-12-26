@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
 	"golang.org/x/oauth2"
@@ -25,14 +24,12 @@ import (
 type Auth struct {
 	validator validation.XValidator
 	user      service.User
-	sessions  *session.Store
 }
 
-func NewAuth(validator validation.XValidator, user service.User, session *session.Store) *Auth {
+func NewAuth(validator validation.XValidator, user service.User) *Auth {
 	return &Auth{
 		validator: validator,
 		user:      user,
-		sessions:  session,
 	}
 }
 
@@ -62,18 +59,18 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.POST("/login", a.Login)
 	r.GET("/logout", a.Logout)
-	r.GET("", adaptor.HTTPHandler(a.Index(i)))
-	r.GET("/onboard", adaptor.HTTPHandler(a.Onboard(i)))
+	r.GET("", a.Index(i))
+	r.GET("/onboard", a.Onboard(i))
 	r.GET("/auth/github", a.GithubOAuth)
 	r.GET("/auth/github/callback", a.GithubOAuthCallback)
 	r.GET("/auth/gitlab", a.GitlabOAuth)
 	r.GET("/auth/gitlab/callback", a.GitlabOAuthCallback)
 }
 
-func (a *Auth) Login(c *fiber.Ctx) error {
+func (a *Auth) Login(c echo.Context) error {
 	var req model.LoginRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request",
 		})
 	}
@@ -90,122 +87,96 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 			))
 		}
 
-		return &fiber.Error{
-			Code:    fiber.ErrBadRequest.Code,
-			Message: strings.Join(errMsgs, " and "),
-		}
+		return echo.NewHTTPError(http.StatusBadRequest, strings.Join(errMsgs, " and "))
 	}
 
 	// Validate and authenticate user
-	res, err := a.user.Login(c.Context(), req)
+	res, err := a.user.Login(c.Request().Context(), req)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"error": "Invalid credentials",
 		})
 	}
 
-	// Get session from store
-	sess, err := a.sessions.Get(c)
+	// Generate JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
+		ID:    res.User.ID,
+		Email: res.User.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+	})
+
+	tokenString, err := token.SignedString([]byte(config.Env.JWTSecret))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Session error",
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "Failed to generate token",
 		})
 	}
 
-	// Set session values
-	sess.Set("authenticated", true)
-	sess.Set("user_id", res.User.ID)
-	sess.Set("username", res.User.Username)
-	sess.Set("email", res.User.Email)
-	sess.Set("name", res.User.FirstName+" "+res.User.LastName)
-	sess.Set("token", res.Token)
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = tokenString
+	cookie.HttpOnly = true
+	cookie.Path = "/"
+	c.SetCookie(cookie)
 
-	// put a cookie with token and user_id
-	c.Cookie(&fiber.Cookie{
-		Name:     "session",
-		Value:    sess.ID(),
-		HTTPOnly: true,
-	})
-
-	c.Cookie(&fiber.Cookie{
-		Name:     "token",
-		Value:    res.Token,
-		HTTPOnly: true,
-	})
-
-	if err := sess.Save(); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to save session",
-		})
-	}
-
-	return c.JSON(fiber.Map{
-		"token": res.Token,
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"token": tokenString,
 	})
 }
 
-func (h *Auth) Logout(c *fiber.Ctx) error {
-	// Get the session
-	sess, err := h.sessions.Get(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Session error",
-		})
-	}
+func (h *Auth) Logout(c echo.Context) error {
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = ""
+	cookie.HttpOnly = true
+	cookie.Path = "/"
+	cookie.MaxAge = -1
+	c.SetCookie(cookie)
 
-	// Clear all session data
-	if err := sess.Destroy(); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to logout",
-		})
-	}
-
-	// Optional: Clear the cookie explicitly
-	c.ClearCookie("session")
-
-	// Redirect to login page or return success response
-	return c.JSON(fiber.Map{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "Successfully logged out",
 	})
 }
 
-func (a *Auth) Index(i *inertia.Inertia) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		i.Render(w, r, "Home/Login", inertia.Props{})
+func (a *Auth) Index(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{})
 	}
 }
 
-func (a *Auth) Onboard(i *inertia.Inertia) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		i.Render(w, r, "Home/Onboard", inertia.Props{})
+func (a *Auth) Onboard(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return i.Render(c.Response(), c.Request(), "Home/Onboard", inertia.Props{})
 	}
 }
 
-func (a *Auth) GithubOAuth(c *fiber.Ctx) error {
+func (a *Auth) GithubOAuth(c echo.Context) error {
 	githubConfig := GetConfig(model.Github)
-	state := c.Query("state") // Get state parameter (invitation token)
+	state := c.QueryParam("state") // Get state parameter (invitation token)
 	logger.Info("Starting GitHub OAuth with state: %s", state)
 	url := githubConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
-	return c.Redirect(url, http.StatusTemporaryRedirect)
+	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
-	code := c.Query("code")
-	state := c.Query("state")
+func (a *Auth) GithubOAuthCallback(c echo.Context) error {
+	code := c.QueryParam("code")
+	state := c.QueryParam("state")
 	logger.Info("GitHub OAuth callback received with state: %s", state)
 	githubConfig := GetConfig(model.Github)
 	token, err := githubConfig.Exchange(context.Background(), code)
 	if err != nil {
 		logger.Error("Failed to exchange token: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to exchange token")
+		return c.String(http.StatusInternalServerError, "Failed to exchange token")
 	}
 
 	client := githubConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {
 		logger.Error("Failed to get user info: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get user info")
+		return c.String(http.StatusInternalServerError, "Failed to get user info")
 	}
 	defer resp.Body.Close()
 
@@ -216,24 +187,26 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to parse user info")
+		return c.String(http.StatusInternalServerError, "Failed to parse user info")
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:     "oauth_id",
-		Value:    fmt.Sprintf("%d", user.ID),
-		Path:     "/",
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Lax",
-		MaxAge:   24 * 60 * 60,
-		Domain:   c.Hostname(),
-	})
+	// Set oauth_id cookie
+	cookie := new(http.Cookie)
+	cookie.Name = "oauth_id"
+	cookie.Value = fmt.Sprintf("%d", user.ID)
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = true
+	cookie.SameSite = http.SameSiteLaxMode
+	cookie.MaxAge = 24 * 60 * 60
+	cookie.Domain = c.Request().Host
+	c.SetCookie(cookie)
 
 	if user.Email == "" {
 		resp, err = client.Get("https://api.github.com/user/emails")
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Failed to get user emails")
+			logger.Error("Failed to get user emails: %v", err)
+			return c.String(http.StatusInternalServerError, "Failed to get user emails")
 		}
 		defer resp.Body.Close()
 
@@ -244,10 +217,10 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 		}
 
 		if err := json.NewDecoder(resp.Body).Decode(&emails); err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Failed to parse user emails")
+			return c.String(http.StatusInternalServerError, "Failed to parse user emails")
 		}
 
-		// Encuentra el correo principal y verificado
+		// Find primary and verified email
 		for _, e := range emails {
 			if e.Primary && e.Verified {
 				user.Email = e.Email
@@ -264,43 +237,43 @@ func (a *Auth) GithubOAuthCallback(c *fiber.Ctx) error {
 
 	if state != "" {
 		// If we have an invitation token, redirect to the invite completion
-		return c.Redirect(fmt.Sprintf("/users/invite/%s?username=%s&email=%s&provider=%s",
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/users/invite/%s?username=%s&email=%s&provider=%s",
 			state,
 			oauthResponse.Username,
 			oauthResponse.Email,
 			oauthResponse.Provider))
 	}
 
-	return c.Redirect(fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s",
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s",
 		oauthResponse.Username,
 		oauthResponse.Email,
 		oauthResponse.Provider))
 }
 
-func (a *Auth) GitlabOAuth(c *fiber.Ctx) error {
+func (a *Auth) GitlabOAuth(c echo.Context) error {
 	gitlabConfig := GetConfig(model.Gitlab)
-	state := c.Query("state") // Get state parameter (invitation token)
+	state := c.QueryParam("state") // Get state parameter (invitation token)
 	logger.Info("Starting GitLab OAuth with state: %s", state)
 	url := gitlabConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
-	return c.Redirect(url, http.StatusTemporaryRedirect)
+	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func (a *Auth) GitlabOAuthCallback(c *fiber.Ctx) error {
-	code := c.Query("code")
-	state := c.Query("state")
+func (a *Auth) GitlabOAuthCallback(c echo.Context) error {
+	code := c.QueryParam("code")
+	state := c.QueryParam("state")
 	logger.Info("GitLab OAuth callback received with state: %s", state)
 	gitlabConfig := GetConfig(model.Gitlab)
 	token, err := gitlabConfig.Exchange(context.Background(), code)
 	if err != nil {
 		logger.Error("Failed to exchange token: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to exchange token")
+		return c.String(http.StatusInternalServerError, "Failed to exchange token")
 	}
 
 	client := gitlabConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://gitlab.com/api/v4/user")
 	if err != nil {
 		logger.Error("Failed to get user info: %v", err)
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get user info")
+		return c.String(http.StatusInternalServerError, "Failed to get user info")
 	}
 	defer resp.Body.Close()
 
@@ -309,20 +282,20 @@ func (a *Auth) GitlabOAuthCallback(c *fiber.Ctx) error {
 		Email    string `json:"email"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to parse user info")
+		return c.String(http.StatusInternalServerError, "Failed to parse user info")
 	}
 
-	// Set oauth_id cookie with the access token
-	c.Cookie(&fiber.Cookie{
-		Name:     "oauth_id",
-		Value:    token.AccessToken,
-		Path:     "/",
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Lax",
-		MaxAge:   24 * 60 * 60,
-		Domain:   c.Hostname(),
-	})
+	// Set oauth_id cookie
+	cookie := new(http.Cookie)
+	cookie.Name = "oauth_id"
+	cookie.Value = token.AccessToken
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = true
+	cookie.SameSite = http.SameSiteLaxMode
+	cookie.MaxAge = 24 * 60 * 60
+	cookie.Domain = c.Request().Host
+	c.SetCookie(cookie)
 
 	oauthResponse := model.OAuthResponse{
 		Username: user.Username,
@@ -332,14 +305,14 @@ func (a *Auth) GitlabOAuthCallback(c *fiber.Ctx) error {
 
 	if state != "" {
 		// If we have an invitation token, redirect to the invite completion
-		return c.Redirect(fmt.Sprintf("/users/invite/%s?username=%s&email=%s&provider=%s",
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/users/invite/%s?username=%s&email=%s&provider=%s",
 			state,
 			oauthResponse.Username,
 			oauthResponse.Email,
 			oauthResponse.Provider))
 	}
 
-	return c.Redirect(fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s",
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/onboard?username=%s&email=%s&provider=%s",
 		oauthResponse.Username,
 		oauthResponse.Email,
 		oauthResponse.Provider))
