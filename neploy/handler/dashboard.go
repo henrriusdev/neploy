@@ -10,6 +10,7 @@ import (
 	inertia "github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
 	"neploy.dev/config"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -60,6 +61,8 @@ func (d *Dashboard) Index(i *inertia.Inertia) echo.HandlerFunc {
 			log.Err(err).Msg("error getting provider")
 			return err
 		}
+
+		logger.Info("claims: %v", claims)
 
 		user := model.UserResponse{
 			Email:    claims.Email,

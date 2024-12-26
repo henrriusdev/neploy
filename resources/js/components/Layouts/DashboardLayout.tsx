@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2 } from 'lucide-react'
-import SidebarLayout from "@/components/Layout"
+import Layout from "@/components/Layout"
 import { Toaster } from '@/components/ui/toaster'
 import { usePage, useRemember } from '@inertiajs/react'
 
@@ -27,62 +27,70 @@ const defaultNavMain = [
     },
     {
         title: "Settings",
-        url: "#",
+        url: "/dashboard/settings",
         icon: Settings2,
+    },
+    {
+        title: "Logout",
+        url: "/logout",
+        icon: DoorOpen,
     },
 ]
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   user?: {
-    name: string;
-    email: string;
-    avatar: string;
-    provider?: string;
+    name?: string;
+    email?: string;
     username?: string;
+    provider?: string;
   };
   teamName?: string;
   logoUrl?: string;
+  navItems?: NavigationItem[];
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-    children,
-    user,
-    teamName = "Acme",
-    logoUrl = "https://unavatar.io/github/shadcn",
-}) => {
+interface NavigationItem {
+  title: string;
+  url: string;
+  icon: any;
+  isActive?: boolean;
+}
+
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user, teamName, logoUrl, navItems }) => {
     const { url } = usePage()
     
-    // Remember the layout data
     const [layoutData] = useRemember({
         user: {
-            name: user?.name,
-            email: user?.email,
+            name: user?.name || '',
+            email: user?.email || '',
             avatar: user?.provider === "github" 
                 ? `https://unavatar.io/github/${user?.username}` 
                 : `https://unavatar.io/${user?.email}`,
         },
-        teamName,
-        logoUrl,
-    }, 'layout')
+        teamName: teamName || '',
+        logoUrl: logoUrl || '',
+    }, 'dashboard-layout-state');
 
     // Create navigation with active state based on current URL
-    const navigation = defaultNavMain.map(item => ({
+    const navigation = (navItems || defaultNavMain).map(item => ({
         ...item,
-        isActive: url.startsWith(item.url) && item.url !== "#"
-    }))
+        isActive: url === item.url || (url.startsWith(item.url) && item.url !== "/dashboard" && item.url !== "/logout")
+    }));
 
     return (
-        <SidebarLayout
-            user={layoutData.user}
-            teamName={layoutData.teamName}
-            logoUrl={layoutData.logoUrl}
-            navMain={navigation}
-        >
-            {children}
-            <Toaster />
-        </SidebarLayout>
-    )
+        <div className="min-h-screen bg-background">
+            <Layout
+                user={layoutData.user}
+                teamName={layoutData.teamName}
+                logoUrl={layoutData.logoUrl}
+                navItems={navigation}
+            >
+                {children}
+                <Toaster />
+            </Layout>
+        </div>
+    );
 }
 
-export default DashboardLayout;
+export default DashboardLayout

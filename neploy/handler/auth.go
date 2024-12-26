@@ -58,7 +58,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 
 func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.POST("/login", a.Login(i))
-	r.GET("/logout", a.Logout)
+	r.GET("/logout", a.Logout(i))
 	r.GET("", a.Index(i))
 	r.GET("/onboard", a.Onboard(i))
 	r.GET("/auth/github", a.GithubOAuth)
@@ -101,8 +101,10 @@ func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 
 		// Generate JWT token
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
-			ID:    res.User.ID,
-			Email: res.User.Email,
+			ID:       res.User.ID,
+			Email:    res.User.Email,
+			Name:     res.User.FirstName + " " + res.User.LastName,
+			Username: res.User.Username,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			},
@@ -126,19 +128,21 @@ func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
-func (h *Auth) Logout(c echo.Context) error {
-	cookie := new(http.Cookie)
-	cookie.Name = "token"
-	cookie.Value = ""
-	cookie.HttpOnly = true
-	cookie.Path = "/"
-	cookie.MaxAge = -1
-	c.SetCookie(cookie)
+func (h *Auth) Logout(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie := new(http.Cookie)
+		cookie.Name = "token"
+		cookie.Value = ""
+		cookie.HttpOnly = true
+		cookie.Path = "/"
+		cookie.MaxAge = -1
+		cookie.Expires = time.Unix(0, 0)
+		c.SetCookie(cookie)
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status":  "success",
-		"message": "Successfully logged out",
-	})
+		i.Redirect(c.Response(), c.Request(), "/")
+
+		return nil
+	}
 }
 
 func (a *Auth) Index(i *inertia.Inertia) echo.HandlerFunc {

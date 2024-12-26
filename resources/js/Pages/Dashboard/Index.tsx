@@ -324,16 +324,12 @@ function Dashboard({
 }
 
 Dashboard.layout = (page: any) => {
-  const user = {
-    name: page.props.user.name,
-    email: page.props.user.email,
-    avatar: page.props.user.provider === "github" ? "https://unavatar.io/github/" + page.props.user.username : "https://unavatar.io/" + page.props.user.email
-  };
+  const { user, teamName, logoUrl } = page.props;
   return (
     <DashboardLayout
       user={user}
-      teamName={page.props.teamName}
-      logoUrl={page.props.logoUrl}
+      teamName={teamName}
+      logoUrl={logoUrl}
     >
       {page}
     </DashboardLayout>

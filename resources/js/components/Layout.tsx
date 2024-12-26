@@ -25,6 +25,7 @@ import {
     SidebarTrigger,
     useSidebar,
 } from '@/components/ui/sidebar'
+import { Link } from '@inertiajs/react'
 
 interface NavItem {
     title: string
@@ -66,10 +67,10 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
                             {navItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild isActive={item.isActive}>
-                                        <a href={item.url} className="flex items-center">
+                                        <Link href={item.url} className="flex items-center">
                                             <item.icon className="mr-2 h-4 w-4" />
                                             <span>{item.title}</span>
-                                        </a>
+                                        </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}

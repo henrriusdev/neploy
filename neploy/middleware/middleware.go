@@ -57,35 +57,22 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			// Get token from cookie
 			cookie, err := c.Cookie("token")
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authentication token")
+				return c.Redirect(http.StatusSeeOther, "")
 			}
 
 			// Check if token exists
 			if cookie.Value == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Missing authentication token")
+				return c.Redirect(http.StatusSeeOther, "")
 			}
 
 			// Validate JWT token
 			claims, valid, err := service.ValidateJWT(cookie.Value)
 			if err != nil || !valid {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid authentication token")
+				return c.Redirect(http.StatusSeeOther, "")
 			}
 
 			// Store claims in context
 			c.Set("claims", claims)
-			return next(c)
-		}
-	}
-}
-
-// AuthMiddleware checks if the user is authenticated via JWT
-func AuthMiddleware() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			user := c.Get("user")
-			if user == nil {
-				return c.Redirect(http.StatusTemporaryRedirect, "/login")
-			}
 			return next(c)
 		}
 	}
