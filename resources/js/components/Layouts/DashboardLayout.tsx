@@ -38,6 +38,8 @@ interface DashboardLayoutProps {
     name: string;
     email: string;
     avatar: string;
+    provider?: string;
+    username?: string;
   };
   teamName?: string;
   logoUrl?: string;
@@ -50,8 +52,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     logoUrl = "https://unavatar.io/github/shadcn",
 }) => {
     const { url } = usePage()
+    
+    // Remember the layout data
     const [layoutData] = useRemember({
-        user,
+        user: {
+            name: user?.name,
+            email: user?.email,
+            avatar: user?.provider === "github" 
+                ? `https://unavatar.io/github/${user?.username}` 
+                : `https://unavatar.io/${user?.email}`,
+        },
         teamName,
         logoUrl,
     }, 'layout')

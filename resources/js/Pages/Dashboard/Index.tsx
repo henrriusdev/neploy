@@ -28,8 +28,6 @@ import {
 } from "@/components/ui/chart";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import { techStackColors } from "@/lib/colors";
-import { useRemember } from "@inertiajs/react";
-
 
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
@@ -91,19 +89,6 @@ function Dashboard({
   logoUrl,
   health = "4/10",
 }: DashboardProps) {
-  // Remember user data for all pages
-  const [layoutData, setLayoutData] = useRemember({
-    user: {
-      name: user?.name,
-      email: user?.email,
-      avatar: user?.provider === "github" 
-        ? `https://unavatar.io/github/${user?.username}` 
-        : `https://unavatar.io/${user?.email}`,
-    },
-    teamName,
-    logoUrl,
-  }, 'layout');
-
   const healthPercentage =
     (parseInt(health?.split("/")[0]) / parseInt(health?.split("/")[1])) * 100;
   user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${user.username}`;
