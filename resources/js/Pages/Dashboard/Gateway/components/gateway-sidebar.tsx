@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link } from "@inertiajs/react"
 import { 
-  ChevronRight, 
+  ChevronLeft, 
   Globe, 
   Lock, 
   Activity,
@@ -39,21 +39,21 @@ export function GatewaySidebar() {
   return (
     <div
       className={cn(
-        "h-screen border-r bg-background transition-all duration-300",
+        "h-screen border-l bg-background transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
     >
       <div className="flex h-full flex-col">
         <div className="flex items-center justify-between p-4">
-          {!collapsed && <h2 className="text-lg font-semibold">Gateway</h2>}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className={cn("ml-auto", collapsed && "rotate-180")}
+            className={cn("", !collapsed && "rotate-180")}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
+          {!collapsed && <h2 className="text-lg font-semibold ml-2">Gateway</h2>}
         </div>
 
         <nav className="flex-1 space-y-2 p-2">
