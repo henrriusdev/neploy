@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -28,12 +27,11 @@ type gateway struct {
 	router  *neployway.Router
 	repo    repository.Gateway
 	appRepo repository.Application
-	mu      sync.RWMutex
 }
 
-func NewGatewayService(repo repository.Gateway, appRepo repository.Application) Gateway {
+func NewGatewayService(repo repository.Gateway, appRepo repository.Application, statRepo repository.ApplicationStat) Gateway {
 	return &gateway{
-		router:  neployway.NewRouter(),
+		router:  neployway.NewRouter(statRepo),
 		repo:    repo,
 		appRepo: appRepo,
 	}
