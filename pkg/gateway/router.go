@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -42,7 +43,7 @@ func (r *Router) AddRoute(route Route) error {
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
-	
+
 	// Custom director to handle path rewriting
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
@@ -59,6 +60,7 @@ func (r *Router) AddRoute(route Route) error {
 
 	// Add error handling
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		log.Printf("ERROR: Proxy error for route %s to %s: %v", route.Path, target.String(), err)
 		w.WriteHeader(http.StatusBadGateway)
 		fmt.Fprintf(w, "Error: %v", err)
 	}
@@ -92,12 +94,15 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for routeKey, proxy := range r.routes {
 		route := r.routeInfo[routeKey]
 		if r.matchesRoute(req, route) {
-			proxy.ServeHTTP(w, req)
+			// Wrap the proxy with our middlewares
+			handler := LoggingMiddleware(proxy)
+			handler.ServeHTTP(w, req)
 			return
 		}
 	}
 
 	// No matching route found
+	log.Printf("WARN: No matching route found for path: %s, host: %s", req.URL.Path, req.Host)
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(w, "404 Not Found")
 }
