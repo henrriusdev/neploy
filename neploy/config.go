@@ -103,7 +103,7 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.TechStack)
+	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.TechStack, npy.Repositories.Gateway)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
 	email := service.NewEmail()
 	user := service.NewUser(npy.Repositories, email)
