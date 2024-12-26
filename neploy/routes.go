@@ -1,41 +1,41 @@
 package neploy
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"neploy.dev/neploy/handler"
 
 	inertia "github.com/romsar/gonertia"
 )
 
-func loginRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
-	auth := handler.NewAuth(npy.Validator, npy.Services.User, npy.SessionStore)
-	auth.RegisterRoutes(app.Group(""), i)
+func loginRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
+	auth := handler.NewAuth(npy.Validator, npy.Services.User)
+	auth.RegisterRoutes(e.Group(""), i)
 }
 
-func onboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+func onboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	onboard := handler.NewOnboard(npy.Validator, npy.Services.Onboard)
-	onboard.RegisterRoutes(app.Group("/onboard"), i)
+	onboard.RegisterRoutes(e.Group("/onboard"), i)
 }
 
-func dashboardRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
-	dashboard := handler.NewDashboard(npy.Services, npy.SessionStore)
-	dashboard.RegisterRoutes(app.Group("/dashboard"), i)
+func dashboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
+	dashboard := handler.NewDashboard(npy.Services)
+	dashboard.RegisterRoutes(e.Group("/dashboard"), i)
 }
 
-func userRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	user := handler.NewUser(npy.Services.User)
-	user.RegisterRoutes(app.Group("/users"), i)
+	user.RegisterRoutes(e.Group("/users"), i)
 }
 
-func applicationRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
+func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	application := handler.NewApplication(npy.Services.Application)
-	application.RegisterRoutes(app.Group("/applications"), i)
+	application.RegisterRoutes(e.Group("/applications"), i)
 }
 
-func RegisterRoutes(app *fiber.App, i *inertia.Inertia, npy Neploy) {
-	loginRoutes(app, i, npy)
-	onboardRoutes(app, i, npy)
-	dashboardRoutes(app, i, npy)
-	userRoutes(app, i, npy)
-	applicationRoutes(app, i, npy)
+func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
+	loginRoutes(e, i, npy)
+	onboardRoutes(e, i, npy)
+	dashboardRoutes(e, i, npy)
+	userRoutes(e, i, npy)
+	applicationRoutes(e, i, npy)
 }

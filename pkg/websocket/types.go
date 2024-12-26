@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gofiber/websocket/v2"
+	"github.com/gorilla/websocket"
 )
 
 type (
@@ -72,6 +72,13 @@ type Client struct {
 	Mu   sync.Mutex
 }
 
+// NewClient creates a new client
+func NewClient(conn *websocket.Conn) *Client {
+	return &Client{
+		Conn: conn,
+	}
+}
+
 const (
 	writeWait      = 10 * time.Second
 	pongWait       = 60 * time.Second
@@ -107,10 +114,3 @@ const (
 	InputTypeCombo    = "combo"
 	InputTypeTextarea = "textarea"
 )
-
-func NewClient(c *websocket.Conn) *Client {
-	return &Client{
-		Conn: c,
-		Mu:   sync.Mutex{},
-	}
-}
