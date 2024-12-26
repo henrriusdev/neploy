@@ -22,12 +22,20 @@ type Router struct {
 	routes    map[string]*httputil.ReverseProxy
 	routeInfo map[string]Route
 	mu        sync.RWMutex
+	metrics   *MetricsCollector
 }
 
 func NewRouter() *Router {
+	metrics, err := NewMetricsCollector("./data/metrics")
+	if err != nil {
+		log.Printf("ERROR: Failed to create metrics collector: %v", err)
+		// Continue without metrics if there's an error
+	}
+
 	return &Router{
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),
+		metrics:   metrics,
 	}
 }
 
@@ -95,7 +103,15 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		route := r.routeInfo[routeKey]
 		if r.matchesRoute(req, route) {
 			// Wrap the proxy with our middlewares
-			handler := LoggingMiddleware(proxy)
+			var handler http.Handler = proxy
+			
+			// Add logging middleware with metrics
+			if r.metrics != nil {
+				handler = LoggingMiddleware(handler, r.metrics)
+			} else {
+				log.Printf("WARN: Metrics collector not available")
+			}
+
 			handler.ServeHTTP(w, req)
 			return
 		}

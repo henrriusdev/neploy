@@ -34,7 +34,7 @@ func (w *responseWriter) WriteHeader(status int) {
 }
 
 // LoggingMiddleware wraps an http.Handler and logs request/response details
-func LoggingMiddleware(next http.Handler) http.Handler {
+func LoggingMiddleware(next http.Handler, metrics *MetricsCollector) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
@@ -44,9 +44,9 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		// Create a response writer that captures the response
 		rw := &responseWriter{
 			ResponseWriter: w,
-			buf:            buf,
-			tee:            io.MultiWriter(w, buf),
-			status:         http.StatusOK, // Default status
+			buf:           buf,
+			tee:           io.MultiWriter(w, buf),
+			status:        http.StatusOK, // Default status
 		}
 
 		// Read and store the request body
@@ -61,6 +61,10 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 		// Calculate duration
 		duration := time.Since(start)
+
+		// Record metrics
+		isError := rw.status >= 400
+		metrics.RecordRequest(start, isError)
 
 		// Format request headers
 		headers := make(map[string]string)
