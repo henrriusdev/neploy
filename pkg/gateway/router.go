@@ -2,11 +2,14 @@ package gateway
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 	"sync"
+
+	"neploy.dev/pkg/repository"
 )
 
 type Route struct {
@@ -18,15 +21,38 @@ type Route struct {
 }
 
 type Router struct {
-	routes    map[string]*httputil.ReverseProxy
-	routeInfo map[string]Route
-	mu        sync.RWMutex
+	routes            map[string]*httputil.ReverseProxy
+	routeInfo         map[string]Route
+	mu                sync.RWMutex
+	metrics           *MetricsCollector
+	metricsAggregator *MetricsAggregator
 }
 
-func NewRouter() *Router {
-	return &Router{
+func NewRouter(appStatRepo repository.ApplicationStat) *Router {
+	metrics, err := NewMetricsCollector("./data/metrics")
+	if err != nil {
+		log.Printf("ERROR: Failed to create metrics collector: %v", err)
+		// Continue without metrics if there's an error
+	}
+
+	router := &Router{
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),
+		metrics:   metrics,
+	}
+
+	if metrics != nil {
+		router.metricsAggregator = NewMetricsAggregator(metrics, appStatRepo)
+		router.metricsAggregator.Start()
+	}
+
+	return router
+}
+
+// Close cleans up any resources used by the router
+func (r *Router) Close() {
+	if r.metricsAggregator != nil {
+		r.metricsAggregator.Stop()
 	}
 }
 
@@ -42,7 +68,7 @@ func (r *Router) AddRoute(route Route) error {
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
-	
+
 	// Custom director to handle path rewriting
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
@@ -59,6 +85,7 @@ func (r *Router) AddRoute(route Route) error {
 
 	// Add error handling
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		log.Printf("ERROR: Proxy error for route %s to %s: %v", route.Path, target.String(), err)
 		w.WriteHeader(http.StatusBadGateway)
 		fmt.Fprintf(w, "Error: %v", err)
 	}
@@ -92,12 +119,23 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for routeKey, proxy := range r.routes {
 		route := r.routeInfo[routeKey]
 		if r.matchesRoute(req, route) {
-			proxy.ServeHTTP(w, req)
+			// Wrap the proxy with our middlewares
+			var handler http.Handler = proxy
+
+			// Add logging middleware with metrics
+			if r.metrics != nil {
+				handler = LoggingMiddleware(handler, r.metrics)
+			} else {
+				log.Printf("WARN: Metrics collector not available")
+			}
+
+			handler.ServeHTTP(w, req)
 			return
 		}
 	}
 
 	// No matching route found
+	log.Printf("WARN: No matching route found for path: %s, host: %s", req.URL.Path, req.Host)
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(w, "404 Not Found")
 }

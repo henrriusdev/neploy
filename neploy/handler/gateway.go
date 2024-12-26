@@ -11,11 +11,13 @@ import (
 
 type Gateway struct {
 	gatewayService service.Gateway
+	healthChecker  service.HealthChecker
 }
 
-func NewGateway(gatewayService service.Gateway) *Gateway {
+func NewGateway(gatewayService service.Gateway, healthChecker service.HealthChecker) *Gateway {
 	return &Gateway{
 		gatewayService: gatewayService,
+		healthChecker:  healthChecker,
 	}
 }
 
@@ -25,6 +27,7 @@ func (h *Gateway) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.DELETE("/:id", h.Delete(i))
 	r.GET("/:id", h.Get(i))
 	r.GET("/app/:appId", h.ListByApp(i))
+	r.GET("/:id/health", h.CheckHealth(i))
 }
 
 func (h *Gateway) Create(i *inertia.Inertia) echo.HandlerFunc {
@@ -91,5 +94,27 @@ func (h *Gateway) ListByApp(i *inertia.Inertia) echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, gateways)
+	}
+}
+
+func (h *Gateway) CheckHealth(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+		gateway, err := h.gatewayService.Get(c.Request().Context(), id)
+		if err != nil {
+			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
+		}
+
+		if err := h.healthChecker.CheckGatewayHealth(c.Request().Context(), gateway); err != nil {
+			return echo.NewHTTPError(http.StatusServiceUnavailable, map[string]string{
+				"status":  "unhealthy",
+				"message": err.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{
+			"status":  "healthy",
+			"message": "Gateway is healthy",
+		})
 	}
 }

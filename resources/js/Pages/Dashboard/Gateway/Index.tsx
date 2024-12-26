@@ -103,8 +103,6 @@ export default function Index({ gateways, application }: Props) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <GatewaySidebar />
-      
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -135,6 +133,8 @@ export default function Index({ gateways, application }: Props) {
           )}
         </div>
       </div>
+
+      <GatewaySidebar />
 
       <GatewayForm
         open={isFormOpen || !!editingGateway}
