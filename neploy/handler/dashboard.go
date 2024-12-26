@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/romsar/gonertia"
+	"github.com/labstack/echo/v4"
+	inertia "github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
 	"neploy.dev/config"
 	"neploy.dev/pkg/model"
@@ -18,65 +16,59 @@ import (
 
 type Dashboard struct {
 	services service.Services
-	sessions *session.Store
 }
 
-func NewDashboard(services service.Services, sessions *session.Store) *Dashboard {
+func NewDashboard(services service.Services) *Dashboard {
 	return &Dashboard{
 		services: services,
-		sessions: sessions,
 	}
 }
 
-func (d *Dashboard) RegisterRoutes(r fiber.Router, i *gonertia.Inertia) {
-	r.Get("", adaptor.HTTPHandler(d.Index(i)))
-	r.Get("/team", adaptor.HTTPHandler(d.Team(i)))
-	r.Get("/applications", adaptor.HTTPHandler(d.Applications(i)))
+func (d *Dashboard) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
+	r.GET("", d.Index(i))
+	r.GET("/team", d.Team(i))
+	r.GET("/applications", d.Applications(i))
 }
 
-func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// get the token from the cookies
-		cookie, err := r.Cookie("token")
+func (d *Dashboard) Index(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("token")
 		if err != nil {
 			log.Err(err).Msg("error getting token")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 
-		// parse the jwt token
 		claims := &model.JWTClaims{}
 		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.Env.JWTSecret), nil
 		})
 		if err != nil {
 			log.Err(err).Msg("error parsing token")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 
 		roles, err := d.services.Role.GetUserRoles(context.Background(), claims.ID)
 		if err != nil {
 			log.Err(err).Msg("error checking admin status")
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		metadata, err := d.services.Metadata.Get(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting metadata")
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		healthyApps, _, err := d.services.Application.GetHealthy(context.Background())
 		if err != nil {
 			log.Err(err).Msg("error getting healthy apps")
-			return
+			return err
 		}
 
 		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 		if err != nil {
 			log.Err(err).Msg("error getting provider")
-			return
+			return err
 		}
 
 		user := model.UserResponse{
@@ -86,7 +78,7 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 			Provider: provider,
 		}
 
-		i.Render(w, r, "Dashboard/Index", gonertia.Props{
+		return i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,
 			"roles":    roles,
@@ -96,29 +88,24 @@ func (d *Dashboard) Index(i *gonertia.Inertia) http.HandlerFunc {
 	}
 }
 
-func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// get the token from the cookies
-		token, err := r.Cookie("token")
+func (d *Dashboard) Team(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("token")
 		if err != nil {
-			http.Redirect(w, r, "/auth/login", http.StatusFound)
-			return
+			return c.Redirect(http.StatusFound, "/auth/login")
 		}
 
-		// get user data
 		claims := &model.JWTClaims{}
-		_, err = jwt.ParseWithClaims(token.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.Env.JWTSecret), nil
 		})
 		if err != nil {
-			http.Redirect(w, r, "/auth/login", http.StatusFound)
-			return
+			return c.Redirect(http.StatusFound, "/auth/login")
 		}
 
 		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 		if err != nil {
-			http.Redirect(w, r, "/auth/login", http.StatusFound)
-			return
+			return c.Redirect(http.StatusFound, "/auth/login")
 		}
 
 		user := model.UserResponse{
@@ -130,24 +117,20 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 
 		roles, err := d.services.Role.Get(context.Background())
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		// get metadata
 		metadata, err := d.services.Metadata.Get(context.Background())
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		listResponse, err := d.services.User.List(context.Background(), 15, 0)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		i.Render(w, r, "Dashboard/Team", gonertia.Props{
+		return i.Render(c.Response(), c.Request(), "Dashboard/Team", inertia.Props{
 			"user":     user,
 			"teamName": metadata.TeamName,
 			"logoUrl":  metadata.LogoURL,
@@ -157,45 +140,38 @@ func (d *Dashboard) Team(i *gonertia.Inertia) http.HandlerFunc {
 	}
 }
 
-func (d *Dashboard) Applications(i *gonertia.Inertia) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// get the token from the cookies
-		cookie, err := r.Cookie("token")
+func (d *Dashboard) Applications(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("token")
 		if err != nil {
 			log.Err(err).Msg("error getting token")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 
-		// parse the jwt token
 		claims := &model.JWTClaims{}
 		_, err = jwt.ParseWithClaims(cookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.Env.JWTSecret), nil
 		})
 		if err != nil {
 			log.Err(err).Msg("error parsing token")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 
-		// get the applications for the user
-		applications, err := d.services.Application.GetAll(r.Context())
+		applications, err := d.services.Application.GetAll(c.Request().Context())
 		if err != nil {
 			log.Err(err).Msg("error getting applications")
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 		}
 
-		metadata, err := d.services.Metadata.Get(r.Context())
+		metadata, err := d.services.Metadata.Get(c.Request().Context())
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 		if err != nil {
 			log.Err(err).Msg("error getting provider")
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 		}
 
 		user := model.UserResponse{
@@ -205,17 +181,18 @@ func (d *Dashboard) Applications(i *gonertia.Inertia) http.HandlerFunc {
 			Provider: provider,
 		}
 
-		props := gonertia.Props{
+		props := inertia.Props{
 			"user":         user,
 			"teamName":     metadata.TeamName,
 			"logoUrl":      metadata.LogoURL,
 			"applications": applications,
 		}
 
-		if err := i.Render(w, r, "Dashboard/Applications", props); err != nil {
+		if err := i.Render(c.Response(), c.Request(), "Dashboard/Applications", props); err != nil {
 			log.Err(err).Msg("error rendering applications page")
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
+			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 		}
+
+		return nil
 	}
 }
