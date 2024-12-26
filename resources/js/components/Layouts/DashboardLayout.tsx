@@ -17,7 +17,7 @@ const defaultNavMain = [
     },
     {
         title: "Gateways",
-        url: "#",
+        url: "/dashboard/gateways",
         icon: DoorOpen
     },
     {

@@ -10,7 +10,6 @@ import (
 	inertia "github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
 	"neploy.dev/config"
-	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -29,6 +28,7 @@ func (d *Dashboard) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.GET("", d.Index(i))
 	r.GET("/team", d.Team(i))
 	r.GET("/applications", d.Applications(i))
+	r.GET("/gateways", d.Gateways(i))
 }
 
 func (d *Dashboard) Index(i *inertia.Inertia) echo.HandlerFunc {
@@ -61,8 +61,6 @@ func (d *Dashboard) Index(i *inertia.Inertia) echo.HandlerFunc {
 			log.Err(err).Msg("error getting provider")
 			return err
 		}
-
-		logger.Info("claims: %v", claims)
 
 		user := model.UserResponse{
 			Email:    claims.Email,
@@ -187,5 +185,11 @@ func (d *Dashboard) Applications(i *inertia.Inertia) echo.HandlerFunc {
 		}
 
 		return nil
+	}
+}
+
+func (d *Dashboard) Gateways(i *inertia.Inertia) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return i.Render(c.Response(), c.Request(), "Dashboard/Gateway/Index", inertia.Props{})
 	}
 }
