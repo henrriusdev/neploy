@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+
+	"neploy.dev/pkg/repository"
 )
 
 type Route struct {
@@ -19,23 +21,38 @@ type Route struct {
 }
 
 type Router struct {
-	routes    map[string]*httputil.ReverseProxy
-	routeInfo map[string]Route
-	mu        sync.RWMutex
-	metrics   *MetricsCollector
+	routes            map[string]*httputil.ReverseProxy
+	routeInfo         map[string]Route
+	mu                sync.RWMutex
+	metrics           *MetricsCollector
+	metricsAggregator *MetricsAggregator
 }
 
-func NewRouter() *Router {
+func NewRouter(appStatRepo repository.ApplicationStat) *Router {
 	metrics, err := NewMetricsCollector("./data/metrics")
 	if err != nil {
 		log.Printf("ERROR: Failed to create metrics collector: %v", err)
 		// Continue without metrics if there's an error
 	}
 
-	return &Router{
+	router := &Router{
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),
 		metrics:   metrics,
+	}
+
+	if metrics != nil {
+		router.metricsAggregator = NewMetricsAggregator(metrics, appStatRepo)
+		router.metricsAggregator.Start()
+	}
+
+	return router
+}
+
+// Close cleans up any resources used by the router
+func (r *Router) Close() {
+	if r.metricsAggregator != nil {
+		r.metricsAggregator.Stop()
 	}
 }
 
@@ -104,7 +121,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if r.matchesRoute(req, route) {
 			// Wrap the proxy with our middlewares
 			var handler http.Handler = proxy
-			
+
 			// Add logging middleware with metrics
 			if r.metrics != nil {
 				handler = LoggingMiddleware(handler, r.metrics)
