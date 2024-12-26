@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/go-connections/nat"
 	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
 	"neploy.dev/pkg/docker"
@@ -37,20 +38,22 @@ type Application interface {
 }
 
 type application struct {
-	repo   repository.Application
-	stat   repository.ApplicationStat
-	tech   repository.TechStack
-	hub    *websocket.Hub
-	docker *docker.Docker
+	repo    repository.Application
+	stat    repository.ApplicationStat
+	tech    repository.TechStack
+	gateway repository.Gateway
+	hub     *websocket.Hub
+	docker  *docker.Docker
 }
 
-func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack) Application {
+func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack, gateway repository.Gateway) Application {
 	return &application{
-		repo:   repo,
-		stat:   stat,
-		tech:   tech,
-		hub:    websocket.GetHub(),
-		docker: docker.NewDocker(),
+		repo:    repo,
+		stat:    stat,
+		tech:    tech,
+		gateway: gateway,
+		hub:     websocket.GetHub(),
+		docker:  docker.NewDocker(),
 	}
 }
 
@@ -247,13 +250,13 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	}
 
 	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, imageName, containerName, path)
+	go a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
 }
 
-func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string) {
+func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string, appID string) {
 	// First, build the Docker image
 	a.hub.BroadcastProgress(0, "Building Docker image...")
 
@@ -266,21 +269,51 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 
 	a.hub.BroadcastProgress(50, "Docker image built successfully")
 
-	// Create and start the container
-	config := &container.Config{
-		Image: imageName,
-		Tty:   true,
-	}
+	// Get a free port for the container
+	port := "3000" // Default port
 	hostConfig := &container.HostConfig{
 		AutoRemove: true,
+		PortBindings: nat.PortMap{
+			nat.Port(port + "/tcp"): []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: port,
+				},
+			},
+		},
+	}
+
+	// Create container config with exposed port
+	cfg := &container.Config{
+		Image: imageName,
+		Tty:   true,
+		ExposedPorts: nat.PortSet{
+			nat.Port(port + "/tcp"): struct{}{},
+		},
 	}
 
 	a.hub.BroadcastProgress(70, "Creating container...")
-	resp, err := a.docker.CreateContainer(ctx, config, hostConfig, containerName)
+	resp, err := a.docker.CreateContainer(ctx, cfg, hostConfig, containerName)
 	if err != nil {
 		logger.Error("error creating container: %v", err)
 		a.hub.BroadcastProgress(100, "Error creating container")
 		return
+	}
+
+	// Create default gateway for the application
+	gateway := model.Gateway{
+		Name:          containerName + "-gateway",
+		EndpointType:  "subdomain",
+		Domain:        config.Env.DefaultDomain,
+		Subdomain:     containerName,
+		Port:          port,
+		Status:        "inactive",
+		ApplicationID: appID,
+	}
+
+	if err := a.gateway.Insert(ctx, gateway); err != nil {
+		logger.Error("error creating gateway: %v", err)
+		// Continue even if gateway creation fails
 	}
 
 	a.hub.BroadcastProgress(90, "Starting container...")
@@ -288,6 +321,12 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 		logger.Error("error starting container: %v", err)
 		a.hub.BroadcastProgress(100, "Error starting container")
 		return
+	}
+
+	// Update gateway status to active
+	gateway.Status = "active"
+	if err := a.gateway.Update(ctx, gateway); err != nil {
+		logger.Error("error updating gateway status: %v", err)
 	}
 
 	a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
@@ -399,7 +438,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	containerName := fmt.Sprintf("neploy-%s", appName)
 
 	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, imageName, containerName, path)
+	go a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
 
 	logger.Info("application updated: %s", app.AppName)
 	a.hub.BroadcastProgress(100, "Deployment complete!")
@@ -415,32 +454,44 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 }
 
 func (a *application) Delete(ctx context.Context, id string) error {
+	// Delete associated gateways first
+	gateways, err := a.gateway.GetByApplicationID(ctx, id)
+	if err != nil {
+		logger.Error("error getting gateways: %v", err)
+		return err
+	}
+
+	for _, gateway := range gateways {
+		if err := a.gateway.Delete(ctx, gateway.ID); err != nil {
+			logger.Error("error deleting gateway: %v", err)
+			// Continue with other gateways
+		}
+	}
+
+	// Get application details
 	app, err := a.repo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return err
 	}
 
+	// Delete container if it exists
 	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
 	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
 	appName := strings.ToLower(appNameWithoutSpecialChars)
+	containerName := fmt.Sprintf("neploy-%s", appName)
 
-	containerId, err := a.docker.GetContainerID(ctx, appName)
-	if err != nil {
-		logger.Error("error getting container ID: %v", err)
-		return err
-	}
-
-	// Stop and remove container
-	if err := a.docker.RemoveContainer(ctx, containerId); err != nil && !strings.Contains(err.Error(), "not found") {
+	if err := a.docker.RemoveContainer(ctx, containerName); err != nil {
 		logger.Error("error removing container: %v", err)
-		return err
+		// Continue with deletion even if container removal fails
 	}
 
-	// Remove storage location
-	if err := os.RemoveAll(app.StorageLocation); err != nil {
-		logger.Error("error removing storage location: %v", err)
-		return err
+	// Delete application files
+	if app.StorageLocation != "" {
+		if err := os.RemoveAll(app.StorageLocation); err != nil {
+			logger.Error("error removing application files: %v", err)
+			// Continue with deletion even if file removal fails
+		}
 	}
 
 	return a.repo.Delete(ctx, id)

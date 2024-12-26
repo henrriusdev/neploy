@@ -26,6 +26,7 @@ type EnvVar struct {
 	GitlabSecret        string `env:"GITLAB_SECRET"`
 	ResendAPIKey        string `env:"RESEND_API_KEY"`
 	UploadPath          string `env:"UPLOAD_PATH" envDefault:"/uploads"`
+	DefaultDomain       string `env:"DEFAULT_DOMAIN" envDefault:"localhost"`
 }
 
 var Env EnvVar

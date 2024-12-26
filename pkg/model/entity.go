@@ -76,12 +76,17 @@ type Gateway struct {
 	BaseEntity
 	Name            string `json:"name" db:"name"`
 	EndpointURL     string `json:"endpointUrl" db:"endpoint_url"`
-	EndpointType    string `json:"endpointType" db:"endpoint_type"`
+	EndpointType    string `json:"endpointType" db:"endpoint_type"` // "subdomain" or "path"
+	Domain          string `json:"domain" db:"domain"`
+	Subdomain       string `json:"subdomain" db:"subdomain"`
+	Path            string `json:"path" db:"path"`
+	Port            string `json:"port" db:"port"`
 	Stage           string `json:"stage" db:"stage"`
 	HttpMethod      string `json:"httpMethod" db:"http_method"`
 	IntegrationType string `json:"integrationType" db:"integration_type"`
 	LoggingLevel    string `json:"loggingLevel" db:"logging_level"`
 	ApplicationID   string `json:"applicationId" db:"application_id"`
+	Status          string `json:"status" db:"status"` // "active", "inactive", "error"
 }
 
 type Environment struct {
