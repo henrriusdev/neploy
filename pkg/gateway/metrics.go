@@ -2,8 +2,10 @@ package gateway
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,14 +21,14 @@ type MetricsCollector struct {
 
 func NewMetricsCollector(dataDir string) (*MetricsCollector, error) {
 	// Ensure data directory exists
-	if err := os.MkdirAll(dataDir, 0755); err != nil {
+	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create metrics directory: %v", err)
 	}
 
 	metricsFile := filepath.Join(dataDir, "gateway_metrics.log")
-	
+
 	return &MetricsCollector{
-		metricsFile:   metricsFile,
+		metricsFile: metricsFile,
 		hourlyMetrics: make(map[string]struct {
 			requests int
 			errors   int
@@ -43,13 +45,13 @@ func (m *MetricsCollector) RecordRequest(timestamp time.Time, isError bool) {
 
 	// Get current metrics for this hour
 	metrics := m.hourlyMetrics[hourKey]
-	
+
 	// Update metrics
 	metrics.requests++
 	if isError {
 		metrics.errors++
 	}
-	
+
 	m.hourlyMetrics[hourKey] = metrics
 
 	// Write to file
@@ -61,7 +63,7 @@ func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {
 	line := fmt.Sprintf("%s - %d, %d\n", hourKey, requests, errors)
 
 	// Open file in append mode
-	file, err := os.OpenFile(m.metricsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(m.metricsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		log.Printf("ERROR: Failed to open metrics file: %v", err)
 		return
@@ -74,10 +76,11 @@ func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {
 }
 
 func (m *MetricsCollector) GetMetrics(days int) ([]struct {
-	Hour      string
-	Requests  int
-	Errors    int
-}, error) {
+	Hour     string
+	Requests int
+	Errors   int
+}, error,
+) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -103,15 +106,20 @@ func (m *MetricsCollector) GetMetrics(days int) ([]struct {
 		}
 
 		// Parse line: "2024-12-26 11:00 - 100, 5"
-		var hour string
+		parts := strings.Split(line, " - ")
+		if len(parts) != 2 {
+			continue
+		}
+
+		hourPart := parts[0]
 		var requests, errors int
-		_, err := fmt.Sscanf(line, "%s %s - %d, %d", &hour, &time.Hour, &requests, &errors)
+		_, err := fmt.Sscanf(parts[1], "%d, %d", &requests, &errors)
 		if err != nil {
 			continue
 		}
 
 		// Parse the timestamp
-		timestamp, err := time.Parse("2006-01-02 15:04", hour)
+		timestamp, err := time.Parse("2006-01-02 15:04", hourPart)
 		if err != nil {
 			continue
 		}
@@ -123,7 +131,7 @@ func (m *MetricsCollector) GetMetrics(days int) ([]struct {
 				Requests int
 				Errors   int
 			}{
-				Hour:     hour,
+				Hour:     hourPart,
 				Requests: requests,
 				Errors:   errors,
 			})
