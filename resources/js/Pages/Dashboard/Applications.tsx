@@ -621,17 +621,8 @@ function Applications({
 }
 
 Applications.layout = (page: any) => {
-  const { user: pageUser, teamName, logoUrl } = page.props;
-  const user = {
-    name: pageUser.name,
-    email: pageUser.email,
-    avatar:
-      pageUser.provider === "github"
-        ? "https://unavatar.io/github/" + pageUser.username
-        : "https://unavatar.io/" + pageUser.email,
-  };
   return (
-    <DashboardLayout teamName={teamName} logoUrl={logoUrl} user={user}>
+    <DashboardLayout>
       {page}
     </DashboardLayout>
   );
