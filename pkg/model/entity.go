@@ -89,17 +89,6 @@ type Gateway struct {
 	Status          string `json:"status" db:"status"` // "active", "inactive", "error"
 }
 
-type Environment struct {
-	BaseEntity
-	Name string `json:"name" db:"name"`
-}
-
-type ApplicationEnvironment struct {
-	BaseRelation
-	ApplicationID string `json:"application_id" db:"application_id"`
-	EnvironmentID string `json:"environment_id" db:"environment_id"`
-}
-
 type RefreshToken struct {
 	BaseEntity
 	UserID string `json:"user_id" db:"user_id"`
@@ -109,7 +98,6 @@ type RefreshToken struct {
 type ApplicationStat struct {
 	BaseEntity
 	ApplicationID       string `json:"application_id" db:"application_id"`
-	EnvironmentID       string `json:"environment_id" db:"environment_id"`
 	Date                Date   `json:"date" db:"date"`
 	Requests            int    `json:"requests" db:"requests"`
 	Errors              int    `json:"errors" db:"errors"`
