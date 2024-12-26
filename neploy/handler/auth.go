@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
@@ -58,15 +59,15 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 	}
 }
 
-func (a *Auth) RegisterRoutes(r fiber.Router, i *inertia.Inertia) {
-	r.Post("/login", a.Login)
-	r.Get("/logout", a.Logout)
-	r.Get("", adaptor.HTTPHandler(a.Index(i)))
-	r.Get("/onboard", adaptor.HTTPHandler(a.Onboard(i)))
-	r.Get("/auth/github", a.GithubOAuth)
-	r.Get("/auth/github/callback", a.GithubOAuthCallback)
-	r.Get("/auth/gitlab", a.GitlabOAuth)
-	r.Get("/auth/gitlab/callback", a.GitlabOAuthCallback)
+func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
+	r.POST("/login", a.Login)
+	r.GET("/logout", a.Logout)
+	r.GET("", adaptor.HTTPHandler(a.Index(i)))
+	r.GET("/onboard", adaptor.HTTPHandler(a.Onboard(i)))
+	r.GET("/auth/github", a.GithubOAuth)
+	r.GET("/auth/github/callback", a.GithubOAuthCallback)
+	r.GET("/auth/gitlab", a.GitlabOAuth)
+	r.GET("/auth/gitlab/callback", a.GitlabOAuthCallback)
 }
 
 func (a *Auth) Login(c *fiber.Ctx) error {

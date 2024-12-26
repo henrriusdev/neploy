@@ -1,83 +1,102 @@
 package middleware
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"net/http"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 	"neploy.dev/pkg/common"
+	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
 
-type AuthConfig struct {
-	SessionStore *session.Store
-}
-
-func OnboardingMiddleware(service service.Onboard) fiber.Handler {
+func OnboardingMiddleware(service service.Onboard) echo.MiddlewareFunc {
 	onboardPath := "/onboard" // Change this to match your onboarding path
 
-	return func(c *fiber.Ctx) error {
-		// Skip middleware for non-GET requests
-		if c.Method() != fiber.MethodGet {
-			return c.Next()
-		}
-
-		if common.AcceptedRoutesForOnboarding(c.Path()) {
-			return c.Next()
-		}
-
-		// Check if onboarding is completed
-		isDone, err := service.Done(c.Context())
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Failed to check onboarding status",
-			})
-		}
-
-		// If onboarding is not done, handle the redirect
-		if !isDone {
-			if c.Path() == onboardPath {
-				return c.Next()
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// Skip middleware for non-GET requests
+			if c.Request().Method != http.MethodGet {
+				return next(c)
 			}
-			// For regular requests, do a normal redirect
-			return c.Redirect(onboardPath)
+
+			if common.AcceptedRoutesForOnboarding(c.Path()) {
+				return next(c)
+			}
+
+			// Check if onboarding is completed
+			isDone, err := service.Done(c.Request().Context())
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+					"error": "Failed to check onboarding status",
+				})
+			}
+
+			// If onboarding is not done, handle the redirect
+			if !isDone {
+				if c.Path() == onboardPath {
+					return next(c)
+				}
+				// For regular requests, do a normal redirect
+				return c.Redirect(http.StatusTemporaryRedirect, onboardPath)
+			}
+
+			// If onboarding is done and user tries to access onboard page,
+			// handle the redirect to home
+			if isDone && c.Path() == onboardPath {
+				return c.Redirect(http.StatusTemporaryRedirect, "/")
+			}
+
+			return next(c)
 		}
-
-		// If onboarding is done and user tries to access onboard page,
-		// handle the redirect to home (optional)
-
-		if isDone && c.Path() == onboardPath {
-			return c.Redirect("/")
-		}
-
-		return c.Next()
 	}
 }
 
 // JWTMiddleware is a middleware that checks if the user is authenticated
-func SessionMiddleware(store *session.Store) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		sess, err := store.Get(c)
-		if err != nil {
-			return c.Next()
-		}
+func JWTMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// Get token from header
+			tokenString := c.Request().Header.Get("Authorization")
+			if tokenString == "" {
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"error": "missing authorization token",
+				})
+			}
 
-		// Store session in locals for easy access
-		c.Locals("session", sess)
-		return c.Next()
+			// Parse token
+			token, err := jwt.ParseWithClaims(tokenString[7:], &model.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+				// Replace this with your actual secret key
+				return []byte("your-secret-key"), nil
+			})
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+					"error": "invalid token",
+				})
+			}
+
+			if claims, ok := token.Claims.(*model.JWTClaims); ok && token.Valid {
+				// Store user info in context
+				c.Set("user", claims)
+				return next(c)
+			}
+
+			return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error": "invalid token claims",
+			})
+		}
 	}
 }
 
-func AuthMiddleware(config AuthConfig) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		sess, err := config.SessionStore.Get(c)
-		if err != nil {
-			return c.Redirect("/login")
+// AuthMiddleware checks if the user is authenticated via JWT
+func AuthMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			user := c.Get("user")
+			if user == nil {
+				return c.Redirect(http.StatusTemporaryRedirect, "/login")
+			}
+			return next(c)
 		}
-
-		auth := sess.Get("authenticated")
-		if auth == nil || !auth.(bool) {
-			return c.Redirect("/login")
-		}
-
-		return c.Next()
 	}
 }

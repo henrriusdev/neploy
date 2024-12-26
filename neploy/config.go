@@ -71,10 +71,10 @@ func Start(npy Neploy) {
 	e.Use(echo.WrapMiddleware(i.Middleware))
 
 	// WebSocket routes with specialized handlers
-	e.Use(websocket.EchoUpgradeProgressWS(), "/ws/notifications")
-	e.Use(websocket.EchoUpgradeInteractiveWS(), "/ws/interactive")
+	e.GET("/ws/notifications", websocket.UpgradeProgressWS())
+	e.GET("/ws/interactive", websocket.UpgradeInteractiveWS())
 
-	e.Use(neployware.EchoOnboardingMiddleware(services.Onboard))
+	e.Use(neployware.OnboardingMiddleware(services.Onboard))
 	e.Use(neployware.JWTMiddleware()) // Replace session middleware with JWT
 	logger.SetLogger()
 
