@@ -31,6 +31,17 @@ func (a *Application) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.DELETE("/:id", a.Delete)
 }
 
+// Create godoc
+// @Summary Create a new application
+// @Description Create a new application
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param request body model.CreateApplicationRequest true "Application details"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications [post]
 func (a *Application) Create(c echo.Context) error {
 	var req model.CreateApplicationRequest
 	if err := c.Bind(&req); err != nil {

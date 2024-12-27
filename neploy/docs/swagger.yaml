@@ -1,0 +1,59 @@
+basePath: /
+definitions:
+  model.CreateApplicationRequest:
+    properties:
+      appName:
+        type: string
+      description:
+        type: string
+      techStack:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: 6oMwz@example.com
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Neploy API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Neploy API
+  version: "1.0"
+paths:
+  /applications:
+    post:
+      consumes:
+      - application/json
+      description: Create a new application
+      parameters:
+      - description: Application details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateApplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new application
+      tags:
+      - Application
+swagger: "2.0"
