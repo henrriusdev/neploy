@@ -30,6 +30,17 @@ func (h *Gateway) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.GET("/:id/health", h.CheckHealth(i))
 }
 
+// Create godoc
+// @Summary Create a new gateway
+// @Description Create a new gateway
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Param request body model.Gateway true "Gateway details"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways [post]
 func (h *Gateway) Create(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var gateway model.Gateway
@@ -45,6 +56,18 @@ func (h *Gateway) Create(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// Update godoc
+// @Summary Update a gateway
+// @Description Update a gateway
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Param id path string true "Gateway ID"
+// @Param request body model.Gateway true "Gateway details"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways/{id} [put]
 func (h *Gateway) Update(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
@@ -62,6 +85,17 @@ func (h *Gateway) Update(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// Delete godoc
+// @Summary Delete a gateway
+// @Description Delete a gateway
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Param id path string true "Gateway ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways/{id} [delete]
 func (h *Gateway) Delete(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
@@ -73,6 +107,18 @@ func (h *Gateway) Delete(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// Get godoc
+// @Summary Get a gateway by ID
+// @Description Get a gateway by ID
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Param id path string true "Gateway ID"
+// @Success 200 {object} model.Gateway
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways/{id} [get]
 func (h *Gateway) Get(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
@@ -85,6 +131,17 @@ func (h *Gateway) Get(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// ListByApp godoc
+// @Summary List gateways by app ID
+// @Description List gateways by app ID
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Param appId path string true "App ID"
+// @Success 200 {object} []model.Gateway
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways/app/{appId} [get]
 func (h *Gateway) ListByApp(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		appID := c.Param("appId")
@@ -97,6 +154,17 @@ func (h *Gateway) ListByApp(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// CheckHealth godoc
+// @Summary Check the health of a gateway
+// @Description Check the health of a gateway
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Param id path string true "Gateway ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways/{id}/health [get]
 func (h *Gateway) CheckHealth(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
