@@ -70,12 +70,12 @@ func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 // Login godoc
 // @Summary Login a user
 // @Description Login a user
-// @Tags Auth User
+// @Tags Auth, User
 // @Accept json
 // @Produce json
 // @Param request body model.LoginRequest true "Login Request"
 // @Success 200 {object} model.LoginResponse
-// @Failure 400 {object} model.ErrorResponse
+// @Failure 400 {object} map[string]interface{}
 // @Router /login [post]
 func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -141,8 +141,7 @@ func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 // Logout godoc
 // @Summary Logout a user
 // @Description Logout a user
-// @Tags Auth User
-// @Accept none
+// @Tags Auth, User
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /logout [post]
@@ -178,8 +177,7 @@ func (a *Auth) Onboard(i *inertia.Inertia) echo.HandlerFunc {
 // GithubOAuth godoc
 // @Summary Start GitHub OAuth flow
 // @Description Start GitHub OAuth flow
-// @Tags Auth User
-// @Accept none
+// @Tags Auth
 // @Produce json
 // @Param state query string false "State parameter"
 // @Success 302 {string} string "Redirects to GitHub OAuth flow"
@@ -195,8 +193,7 @@ func (a *Auth) GithubOAuth(c echo.Context) error {
 // GithubOAuthCallback godoc
 // @Summary Handle GitHub OAuth callback
 // @Description Handle GitHub OAuth callback
-// @Tags Auth User
-// @Accept none
+// @Tags Auth
 // @Produce json
 // @Param state query string false "State parameter"
 // @Param code query string false "Authorization code"
@@ -295,8 +292,7 @@ func (a *Auth) GithubOAuthCallback(c echo.Context) error {
 // GitlabOAuth godoc
 // @Summary Start GitLab OAuth flow
 // @Description Start GitLab OAuth flow
-// @Tags Auth User
-// @Accept none
+// @Tags Auth
 // @Produce json
 // @Param state query string false "State parameter"
 // @Success 302 {string} string "Redirects to GitLab OAuth flow"
@@ -312,8 +308,7 @@ func (a *Auth) GitlabOAuth(c echo.Context) error {
 // GitlabOAuthCallback godoc
 // @Summary Handle GitLab OAuth callback
 // @Description Handle GitLab OAuth callback
-// @Tags Auth User
-// @Accept none
+// @Tags Auth
 // @Produce json
 // @Param state query string false "State parameter"
 // @Param code query string false "Authorization code"

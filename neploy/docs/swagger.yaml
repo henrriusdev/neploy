@@ -1,5 +1,26 @@
 basePath: /
 definitions:
+  model.Application:
+    properties:
+      appName:
+        type: string
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      deployLocation:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      storageLocation:
+        type: string
+      techStackId:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+    type: object
   model.CreateApplicationRequest:
     properties:
       appName:
@@ -7,6 +28,120 @@ definitions:
       description:
         type: string
       techStack:
+        type: string
+    type: object
+  model.Date:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  model.DeployApplicationRequest:
+    properties:
+      repoUrl:
+        type: string
+    type: object
+  model.Gateway:
+    properties:
+      applicationId:
+        type: string
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      domain:
+        type: string
+      endpointType:
+        description: '"subdomain" or "path"'
+        type: string
+      endpointUrl:
+        type: string
+      httpMethod:
+        type: string
+      id:
+        type: string
+      integrationType:
+        type: string
+      loggingLevel:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+      port:
+        type: string
+      stage:
+        type: string
+      status:
+        description: '"active", "inactive", "error"'
+        type: string
+      subdomain:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+    type: object
+  model.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  model.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+  model.OAuthResponse:
+    properties:
+      email:
+        type: string
+      provider:
+        $ref: '#/definitions/model.Provider'
+      username:
+        type: string
+    type: object
+  model.Provider:
+    enum:
+    - github
+    - gitlab
+    type: string
+    x-enum-varnames:
+    - Github
+    - Gitlab
+  model.User:
+    properties:
+      address:
+        type: string
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      dob:
+        $ref: '#/definitions/model.Date'
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      provider:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+      username:
         type: string
     type: object
 host: localhost:8080
@@ -24,6 +159,32 @@ info:
   version: "1.0"
 paths:
   /applications:
+    get:
+      consumes:
+      - application/json
+      description: List all applications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Application'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all applications
+      tags:
+      - Application
     post:
       consumes:
       - application/json
@@ -56,4 +217,509 @@ paths:
       summary: Create a new application
       tags:
       - Application
+  /applications/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an application
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an application
+      tags:
+      - Application
+    get:
+      consumes:
+      - application/json
+      description: Get an application by ID
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Application'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get an application by ID
+      tags:
+      - Application
+  /applications/{id}/deploy:
+    post:
+      consumes:
+      - application/json
+      description: Deploy an application
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Deployment details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.DeployApplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Deploy an application
+      tags:
+      - Application
+  /applications/{id}/start:
+    post:
+      consumes:
+      - application/json
+      description: Start an application
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Start an application
+      tags:
+      - Application
+  /applications/{id}/stop:
+    post:
+      consumes:
+      - application/json
+      description: Stop an application
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Stop an application
+      tags:
+      - Application
+  /auth/github:
+    get:
+      description: Start GitHub OAuth flow
+      parameters:
+      - description: State parameter
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirects to GitHub OAuth flow
+          schema:
+            type: string
+      summary: Start GitHub OAuth flow
+      tags:
+      - Auth
+  /auth/github/callback:
+    get:
+      description: Handle GitHub OAuth callback
+      parameters:
+      - description: State parameter
+        in: query
+        name: state
+        type: string
+      - description: Authorization code
+        in: query
+        name: code
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.OAuthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Handle GitHub OAuth callback
+      tags:
+      - Auth
+  /auth/gitlab:
+    get:
+      description: Start GitLab OAuth flow
+      parameters:
+      - description: State parameter
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirects to GitLab OAuth flow
+          schema:
+            type: string
+      summary: Start GitLab OAuth flow
+      tags:
+      - Auth
+  /auth/gitlab/callback:
+    get:
+      description: Handle GitLab OAuth callback
+      parameters:
+      - description: State parameter
+        in: query
+        name: state
+        type: string
+      - description: Authorization code
+        in: query
+        name: code
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.OAuthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Handle GitLab OAuth callback
+      tags:
+      - Auth
+  /gateways:
+    post:
+      consumes:
+      - application/json
+      description: Create a new gateway
+      parameters:
+      - description: Gateway details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Gateway'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new gateway
+      tags:
+      - Gateway
+  /gateways/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a gateway
+      parameters:
+      - description: Gateway ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a gateway
+      tags:
+      - Gateway
+    get:
+      consumes:
+      - application/json
+      description: Get a gateway by ID
+      parameters:
+      - description: Gateway ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Gateway'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a gateway by ID
+      tags:
+      - Gateway
+    put:
+      consumes:
+      - application/json
+      description: Update a gateway
+      parameters:
+      - description: Gateway ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Gateway details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Gateway'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a gateway
+      tags:
+      - Gateway
+  /gateways/{id}/health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health of a gateway
+      parameters:
+      - description: Gateway ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Check the health of a gateway
+      tags:
+      - Gateway
+  /gateways/app/{appId}:
+    get:
+      consumes:
+      - application/json
+      description: List gateways by app ID
+      parameters:
+      - description: App ID
+        in: path
+        name: appId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Gateway'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List gateways by app ID
+      tags:
+      - Gateway
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login a user
+      tags:
+      - Auth
+      - User
+  /logout:
+    post:
+      description: Logout a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Logout a user
+      tags:
+      - Auth
+      - User
 swagger: "2.0"

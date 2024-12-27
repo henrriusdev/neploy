@@ -62,3 +62,7 @@ type CreateApplicationRequest struct {
 	Description string `json:"description"`
 	TechStack   string `json:"techStack"`
 }
+
+type DeployApplicationRequest struct {
+	RepoURL string `json:"repoUrl"`
+}

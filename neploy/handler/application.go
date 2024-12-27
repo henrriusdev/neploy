@@ -126,10 +126,7 @@ func (a *Application) Deploy(c echo.Context) error {
 		})
 	}
 
-	var req struct {
-		RepoURL string `json:"repoUrl"`
-	}
-
+	var req model.DeployApplicationRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request body",
