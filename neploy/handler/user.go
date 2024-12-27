@@ -26,6 +26,17 @@ func (u *User) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.POST("/complete-invite", u.CompleteInvite)
 }
 
+// InviteUser godoc
+// @Summary Invite a user
+// @Description Invite a user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body model.InviteUserRequest true "Invite User Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /user/invite [post]
 func (h *User) InviteUser(c echo.Context) error {
 	var req model.InviteUserRequest
 	if err := c.Bind(&req); err != nil {
@@ -60,6 +71,17 @@ func (h *User) InviteUser(c echo.Context) error {
 	})
 }
 
+// CompleteInvite godoc
+// @Summary Complete user invitation
+// @Description Complete user invitation
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body model.CompleteInviteRequest true "Complete Invite Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /user/complete-invite [post]
 func (u *User) CompleteInvite(c echo.Context) error {
 	var req model.CompleteInviteRequest
 	if err := c.Bind(&req); err != nil {
@@ -80,7 +102,7 @@ func (u *User) CompleteInvite(c echo.Context) error {
 	cookieDel.Path = "/"
 	cookieDel.MaxAge = -1
 	c.SetCookie(cookieDel)
-	
+
 	req.OauthID = oauthID
 
 	// Accept the invitation

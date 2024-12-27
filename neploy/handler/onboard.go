@@ -27,6 +27,17 @@ func (o *Onboard) RegisterRoutes(r *echo.Group, i *gonertia.Inertia) {
 	r.POST("", o.Initiate)
 }
 
+// Initiate godoc
+// @Summary Initiate onboarding
+// @Description Initiate onboarding
+// @Tags Onboard
+// @Accept json
+// @Produce json
+// @Param request body model.OnboardRequest true "Onboard Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /onboard [post]
 func (o *Onboard) Initiate(c echo.Context) error {
 	var req model.OnboardRequest
 	if err := c.Bind(&req); err != nil {

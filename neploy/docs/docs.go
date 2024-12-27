@@ -859,6 +859,153 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/onboard": {
+            "post": {
+                "description": "Initiate onboarding",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Onboard"
+                ],
+                "summary": "Initiate onboarding",
+                "parameters": [
+                    {
+                        "description": "Onboard Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OnboardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/complete-invite": {
+            "post": {
+                "description": "Complete user invitation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Complete user invitation",
+                "parameters": [
+                    {
+                        "description": "Complete Invite Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CompleteInviteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/invite": {
+            "post": {
+                "description": "Invite a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Invite a user",
+                "parameters": [
+                    {
+                        "description": "Invite User Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.InviteUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -894,6 +1041,55 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CompleteInviteRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "dob",
+                "email",
+                "firstName",
+                "lastName",
+                "password",
+                "phone",
+                "token",
+                "username"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 2
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 8
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 10
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "model.CreateApplicationRequest": {
             "type": "object",
             "properties": {
@@ -905,6 +1101,100 @@ const docTemplate = `{
                 },
                 "techStack": {
                     "type": "string"
+                }
+            }
+        },
+        "model.CreateRoleRequest": {
+            "type": "object",
+            "required": [
+                "color",
+                "description",
+                "icon",
+                "name"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 2
+                },
+                "icon": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                }
+            }
+        },
+        "model.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "dob",
+                "email",
+                "firstName",
+                "lastName",
+                "password",
+                "phone",
+                "provider",
+                "username"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "maxLength": 128,
+                    "minLength": 2
+                },
+                "dob": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                },
+                "lastName": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 8
+                },
+                "phone": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 10
+                },
+                "provider": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
                 }
             }
         },
@@ -982,6 +1272,17 @@ const docTemplate = `{
                 }
             }
         },
+        "model.InviteUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
         "model.LoginRequest": {
             "type": "object",
             "required": [
@@ -1010,6 +1311,17 @@ const docTemplate = `{
                 }
             }
         },
+        "model.MetadataRequest": {
+            "type": "object",
+            "properties": {
+                "logoUrl": {
+                    "type": "string"
+                },
+                "teamName": {
+                    "type": "string"
+                }
+            }
+        },
         "model.OAuthResponse": {
             "type": "object",
             "properties": {
@@ -1021,6 +1333,28 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "model.OnboardRequest": {
+            "type": "object",
+            "required": [
+                "adminUser",
+                "metadata",
+                "roles"
+            ],
+            "properties": {
+                "adminUser": {
+                    "$ref": "#/definitions/model.CreateUserRequest"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/model.MetadataRequest"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.CreateRoleRequest"
+                    }
                 }
             }
         },
