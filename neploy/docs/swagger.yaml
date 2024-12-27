@@ -21,6 +21,43 @@ definitions:
       updatedAt:
         $ref: '#/definitions/model.Date'
     type: object
+  model.CompleteInviteRequest:
+    properties:
+      address:
+        maxLength: 128
+        minLength: 2
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      phone:
+        maxLength: 10
+        minLength: 10
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    required:
+    - address
+    - dob
+    - email
+    - firstName
+    - lastName
+    - password
+    - phone
+    - token
+    - username
+    type: object
   model.CreateApplicationRequest:
     properties:
       appName:
@@ -29,6 +66,79 @@ definitions:
         type: string
       techStack:
         type: string
+    type: object
+  model.CreateRoleRequest:
+    properties:
+      color:
+        maxLength: 64
+        minLength: 2
+        type: string
+      description:
+        maxLength: 128
+        minLength: 2
+        type: string
+      icon:
+        maxLength: 64
+        minLength: 2
+        type: string
+      name:
+        maxLength: 64
+        minLength: 2
+        type: string
+    required:
+    - color
+    - description
+    - icon
+    - name
+    type: object
+  model.CreateUserRequest:
+    properties:
+      address:
+        maxLength: 128
+        minLength: 2
+        type: string
+      dob:
+        $ref: '#/definitions/model.Date'
+      email:
+        type: string
+      firstName:
+        maxLength: 64
+        minLength: 2
+        type: string
+      lastName:
+        maxLength: 64
+        minLength: 2
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      phone:
+        maxLength: 10
+        minLength: 10
+        type: string
+      provider:
+        maxLength: 64
+        minLength: 2
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      username:
+        maxLength: 64
+        minLength: 2
+        type: string
+    required:
+    - address
+    - dob
+    - email
+    - firstName
+    - lastName
+    - password
+    - phone
+    - provider
+    - username
     type: object
   model.Date:
     properties:
@@ -79,6 +189,13 @@ definitions:
       updatedAt:
         $ref: '#/definitions/model.Date'
     type: object
+  model.InviteUserRequest:
+    properties:
+      email:
+        type: string
+      role:
+        type: string
+    type: object
   model.LoginRequest:
     properties:
       email:
@@ -98,6 +215,13 @@ definitions:
       user:
         $ref: '#/definitions/model.User'
     type: object
+  model.MetadataRequest:
+    properties:
+      logoUrl:
+        type: string
+      teamName:
+        type: string
+    type: object
   model.OAuthResponse:
     properties:
       email:
@@ -106,6 +230,21 @@ definitions:
         $ref: '#/definitions/model.Provider'
       username:
         type: string
+    type: object
+  model.OnboardRequest:
+    properties:
+      adminUser:
+        $ref: '#/definitions/model.CreateUserRequest'
+      metadata:
+        $ref: '#/definitions/model.MetadataRequest'
+      roles:
+        items:
+          $ref: '#/definitions/model.CreateRoleRequest'
+        type: array
+    required:
+    - adminUser
+    - metadata
+    - roles
     type: object
   model.Provider:
     enum:
@@ -721,5 +860,105 @@ paths:
       summary: Logout a user
       tags:
       - Auth
+      - User
+  /onboard:
+    post:
+      consumes:
+      - application/json
+      description: Initiate onboarding
+      parameters:
+      - description: Onboard Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.OnboardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Initiate onboarding
+      tags:
+      - Onboard
+      - User
+  /user/complete-invite:
+    post:
+      consumes:
+      - application/json
+      description: Complete user invitation
+      parameters:
+      - description: Complete Invite Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CompleteInviteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Complete user invitation
+      tags:
+      - User
+  /user/invite:
+    post:
+      consumes:
+      - application/json
+      description: Invite a user
+      parameters:
+      - description: Invite User Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.InviteUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Invite a user
+      tags:
       - User
 swagger: "2.0"
