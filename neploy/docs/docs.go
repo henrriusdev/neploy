@@ -870,8 +870,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Onboard",
-                    "User"
+                    "Onboard"
                 ],
                 "summary": "Initiate onboarding",
                 "parameters": [

@@ -894,7 +894,6 @@ paths:
       summary: Initiate onboarding
       tags:
       - Onboard
-      - User
   /user/complete-invite:
     post:
       consumes:

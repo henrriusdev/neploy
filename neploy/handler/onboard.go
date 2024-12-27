@@ -30,7 +30,7 @@ func (o *Onboard) RegisterRoutes(r *echo.Group, i *gonertia.Inertia) {
 // Initiate godoc
 // @Summary Initiate onboarding
 // @Description Initiate onboarding
-// @Tags Onboard, User
+// @Tags Onboard
 // @Accept json
 // @Produce json
 // @Param request body model.OnboardRequest true "Onboard Request"
