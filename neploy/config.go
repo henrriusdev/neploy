@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
 	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/logger"
@@ -14,6 +15,8 @@ import (
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
 	"neploy.dev/pkg/websocket"
+
+	_ "neploy.dev/neploy/docs"
 )
 
 type Neploy struct {
@@ -73,6 +76,9 @@ func Start(npy Neploy) {
 	// WebSocket routes with specialized handlers
 	e.GET("/ws/notifications", websocket.UpgradeProgressWS())
 	e.GET("/ws/interactive", websocket.UpgradeInteractiveWS())
+
+	// Swagger
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Use(neployware.OnboardingMiddleware(services.Onboard))
 	logger.SetLogger()

@@ -67,6 +67,16 @@ func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.GET("/auth/gitlab/callback", a.GitlabOAuthCallback)
 }
 
+// Login godoc
+// @Summary Login a user
+// @Description Login a user
+// @Tags Auth, User
+// @Accept json
+// @Produce json
+// @Param request body model.LoginRequest true "Login Request"
+// @Success 200 {object} model.LoginResponse
+// @Failure 400 {object} map[string]interface{}
+// @Router /login [post]
 func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var req model.LoginRequest
@@ -128,6 +138,13 @@ func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// Logout godoc
+// @Summary Logout a user
+// @Description Logout a user
+// @Tags Auth, User
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /logout [post]
 func (h *Auth) Logout(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie := new(http.Cookie)
@@ -157,6 +174,14 @@ func (a *Auth) Onboard(i *inertia.Inertia) echo.HandlerFunc {
 	}
 }
 
+// GithubOAuth godoc
+// @Summary Start GitHub OAuth flow
+// @Description Start GitHub OAuth flow
+// @Tags Auth
+// @Produce json
+// @Param state query string false "State parameter"
+// @Success 302 {string} string "Redirects to GitHub OAuth flow"
+// @Router /auth/github [get]
 func (a *Auth) GithubOAuth(c echo.Context) error {
 	githubConfig := GetConfig(model.Github)
 	state := c.QueryParam("state") // Get state parameter (invitation token)
@@ -165,6 +190,16 @@ func (a *Auth) GithubOAuth(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
+// GithubOAuthCallback godoc
+// @Summary Handle GitHub OAuth callback
+// @Description Handle GitHub OAuth callback
+// @Tags Auth
+// @Produce json
+// @Param state query string false "State parameter"
+// @Param code query string false "Authorization code"
+// @Success 200 {object} model.OAuthResponse
+// @Failure 500 {object} map[string]interface{}
+// @Router /auth/github/callback [get]
 func (a *Auth) GithubOAuthCallback(c echo.Context) error {
 	code := c.QueryParam("code")
 	state := c.QueryParam("state")
@@ -254,6 +289,14 @@ func (a *Auth) GithubOAuthCallback(c echo.Context) error {
 		oauthResponse.Provider))
 }
 
+// GitlabOAuth godoc
+// @Summary Start GitLab OAuth flow
+// @Description Start GitLab OAuth flow
+// @Tags Auth
+// @Produce json
+// @Param state query string false "State parameter"
+// @Success 302 {string} string "Redirects to GitLab OAuth flow"
+// @Router /auth/gitlab [get]
 func (a *Auth) GitlabOAuth(c echo.Context) error {
 	gitlabConfig := GetConfig(model.Gitlab)
 	state := c.QueryParam("state") // Get state parameter (invitation token)
@@ -262,6 +305,16 @@ func (a *Auth) GitlabOAuth(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
+// GitlabOAuthCallback godoc
+// @Summary Handle GitLab OAuth callback
+// @Description Handle GitLab OAuth callback
+// @Tags Auth
+// @Produce json
+// @Param state query string false "State parameter"
+// @Param code query string false "Authorization code"
+// @Success 200 {object} model.OAuthResponse
+// @Failure 500 {object} map[string]interface{}
+// @Router /auth/gitlab/callback [get]
 func (a *Auth) GitlabOAuthCallback(c echo.Context) error {
 	code := c.QueryParam("code")
 	state := c.QueryParam("state")

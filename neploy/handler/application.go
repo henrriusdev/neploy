@@ -31,6 +31,17 @@ func (a *Application) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 	r.DELETE("/:id", a.Delete)
 }
 
+// Create godoc
+// @Summary Create a new application
+// @Description Create a new application
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param request body model.CreateApplicationRequest true "Application details"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications [post]
 func (a *Application) Create(c echo.Context) error {
 	var req model.CreateApplicationRequest
 	if err := c.Bind(&req); err != nil {
@@ -65,6 +76,18 @@ func (a *Application) Create(c echo.Context) error {
 	})
 }
 
+// Get godoc
+// @Summary Get an application by ID
+// @Description Get an application by ID
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Success 200 {object} model.Application
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/{id} [get]
 func (a *Application) Get(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -83,6 +106,18 @@ func (a *Application) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, app)
 }
 
+// Deploy godoc
+// @Summary Deploy an application
+// @Description Deploy an application
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Param request body model.DeployApplicationRequest true "Deployment details"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/{id}/deploy [post]
 func (a *Application) Deploy(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -91,10 +126,7 @@ func (a *Application) Deploy(c echo.Context) error {
 		})
 	}
 
-	var req struct {
-		RepoURL string `json:"repoUrl"`
-	}
-
+	var req model.DeployApplicationRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request body",
@@ -108,6 +140,17 @@ func (a *Application) Deploy(c echo.Context) error {
 	})
 }
 
+// Start godoc
+// @Summary Start an application
+// @Description Start an application
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/{id}/start [post]
 func (a *Application) Start(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -129,6 +172,17 @@ func (a *Application) Start(c echo.Context) error {
 	})
 }
 
+// Stop godoc
+// @Summary Stop an application
+// @Description Stop an application
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/{id}/stop [post]
 func (a *Application) Stop(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -149,6 +203,17 @@ func (a *Application) Stop(c echo.Context) error {
 	})
 }
 
+// Delete godoc
+// @Summary Delete an application
+// @Description Delete an application
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/{id} [delete]
 func (a *Application) Delete(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
@@ -196,6 +261,16 @@ func (a *Application) Upload(c echo.Context) error {
 	})
 }
 
+// List godoc
+// @Summary List all applications
+// @Description List all applications
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Success 200 {object} []model.Application
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications [get]
 func (a *Application) List(c echo.Context) error {
 	apps, err := a.service.GetAll(c.Request().Context())
 	if err != nil {
