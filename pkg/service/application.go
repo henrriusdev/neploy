@@ -176,26 +176,6 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	logger.Info("repo cloned: %s", path)
 	app.StorageLocation = path
 
-	a.hub.BroadcastProgress(0, "Checking for Docker Compose...")
-	if filesystem.HasDockerCompose(path) {
-		logger.Error("docker-compose file found, not supported")
-		a.hub.BroadcastProgress(100, "Error: Docker Compose files are not supported")
-
-		// Delete the application and notify
-		if err := a.Delete(ctx, id); err != nil {
-			logger.Error("error deleting application: %v", err)
-		}
-
-		actionMsg := websocket.NewActionMessage(
-			websocket.ActionTypeError,
-			"Docker Compose Not Supported",
-			"Docker Compose files are not supported. The application has been deleted.",
-			nil,
-		)
-		a.hub.BroadcastInteractive(actionMsg)
-		return
-	}
-
 	techStack, err := filesystem.DetectStack(path)
 	if err != nil {
 		logger.Error("error detecting tech stack: %v", err)
@@ -208,39 +188,99 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		return
 	}
 
-	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
-	dockerStatus := filesystem.HasDockerfile(path, a.hub.GetNotificationClient())
+	// Broadcast progress if hub exists
+	if a.hub != nil {
+		a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
+	}
+
+	// Get notification client (may be nil)
+	var wsClient *websocket.Client
+	if a.hub != nil {
+		wsClient = a.hub.GetNotificationClient()
+	}
+
+	dockerStatus := filesystem.HasDockerfile(path, wsClient)
 	if !dockerStatus.Exists {
-		actionInput := websocket.NewSelectInput("action", []string{
-			"create",
-			"skip",
-		})
+		// Only send interactive message if hub exists
+		if a.hub != nil {
+			actionInput := websocket.NewSelectInput("action", []string{
+				"create",
+				"skip",
+			})
 
-		actionMsg := websocket.NewActionMessage(
-			websocket.ActionTypeCritical,
-			"Dockerfile Required",
-			"No Dockerfile found for application. Would you like to create one?",
-			[]websocket.Input{actionInput},
-		)
+			actionMsg := websocket.NewActionMessage(
+				websocket.ActionTypeCritical,
+				"Dockerfile Required",
+				"No Dockerfile found for application. Would you like to create one?",
+				[]websocket.Input{actionInput},
+			)
 
-		a.hub.BroadcastInteractive(actionMsg)
+			a.hub.BroadcastInteractive(actionMsg)
+		}
 
-		a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		// Only broadcast progress if hub exists
+		if a.hub != nil {
+			a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		}
+
 		tmpl, ok := docker.GetDefaultTemplate(techStack)
 		if !ok {
 			logger.Error("no default template for tech stack: %s", techStack)
-			a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			if a.hub != nil {
+				a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			}
 			return
 		}
 
 		dockerfilePath := filepath.Join(path, "Dockerfile")
 		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
 			logger.Error("error writing dockerfile: %v", err)
-			a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			if a.hub != nil {
+				a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			}
 			return
 		}
 
-		a.hub.BroadcastProgress(100, "Created default Dockerfile")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, "Created default Dockerfile")
+		}
+	}
+
+	// Check if Dockerfile has exposed port
+	if !filesystem.DockerfileHasExposedPort(path) {
+		if a.hub != nil {
+			actionInput := websocket.NewSelectInput("action", []string{
+				"expose",
+				"skip",
+			})
+
+			actionMsg := websocket.NewActionMessage(
+				websocket.ActionTypeCritical,
+				"Port Required",
+				"No exposed port found in Dockerfile. The application needs to expose a port to be accessible. Would you like to add EXPOSE 3000?",
+				[]websocket.Input{actionInput},
+			)
+
+			a.hub.BroadcastInteractive(actionMsg)
+		}
+
+		dockerfilePath := filepath.Join(path, "Dockerfile")
+		content, err := os.ReadFile(dockerfilePath)
+		if err != nil {
+			logger.Error("error reading dockerfile: %v", err)
+			return
+		}
+
+		// Add EXPOSE 3000 before the last line (usually CMD or ENTRYPOINT)
+		lines := strings.Split(string(content), "\n")
+		if len(lines) > 0 {
+			newLines := append(lines[:len(lines)-1], "EXPOSE 3000", lines[len(lines)-1])
+			newContent := strings.Join(newLines, "\n")
+			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0644); err != nil {
+				logger.Error("error writing dockerfile: %v", err)
+				return
+			}
+		}
 	}
 
 	app.TechStackID = tech.ID
@@ -253,21 +293,29 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	go a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
 
 	logger.Info("application updated: %s", app.AppName)
-	a.hub.BroadcastProgress(100, "Deployment complete!")
+	if a.hub != nil {
+		a.hub.BroadcastProgress(100, "Deployment complete!")
+	}
 }
 
 func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string, appID string) {
 	// First, build the Docker image
-	a.hub.BroadcastProgress(0, "Building Docker image...")
+	if a.hub != nil {
+		a.hub.BroadcastProgress(0, "Building Docker image...")
+	}
 
 	dockerfilePath := filepath.Join(projectPath, "Dockerfile")
-	if err := a.docker.BuildImage(ctx, dockerfilePath, imageName); err != nil {
+	if err := a.docker.BuildImage(context.Background(), dockerfilePath, imageName); err != nil {
 		logger.Error("error building image: %v", err)
-		a.hub.BroadcastProgress(100, "Error building Docker image")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, "Error building Docker image")
+		}
 		return
 	}
 
-	a.hub.BroadcastProgress(50, "Docker image built successfully")
+	if a.hub != nil {
+		a.hub.BroadcastProgress(50, "Docker image built successfully")
+	}
 
 	// Get a free port for the container
 	port := "3000" // Default port
@@ -292,11 +340,16 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 		},
 	}
 
-	a.hub.BroadcastProgress(70, "Creating container...")
-	resp, err := a.docker.CreateContainer(ctx, cfg, hostConfig, containerName)
+	if a.hub != nil {
+		a.hub.BroadcastProgress(70, "Creating container...")
+	}
+
+	resp, err := a.docker.CreateContainer(context.Background(), cfg, hostConfig, containerName)
 	if err != nil {
 		logger.Error("error creating container: %v", err)
-		a.hub.BroadcastProgress(100, "Error creating container")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, "Error creating container")
+		}
 		return
 	}
 
@@ -316,10 +369,15 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 		// Continue even if gateway creation fails
 	}
 
-	a.hub.BroadcastProgress(90, "Starting container...")
+	if a.hub != nil {
+		a.hub.BroadcastProgress(90, "Starting container...")
+	}
+
 	if err := a.docker.StartContainer(ctx, resp.ID); err != nil {
 		logger.Error("error starting container: %v", err)
-		a.hub.BroadcastProgress(100, "Error starting container")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, "Error starting container")
+		}
 		return
 	}
 
@@ -329,7 +387,9 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 		logger.Error("error updating gateway status: %v", err)
 	}
 
-	a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
+	if a.hub != nil {
+		a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
+	}
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
@@ -369,58 +429,122 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		return "", err
 	}
 
-	a.hub.BroadcastProgress(0, "Checking for Docker Compose...")
+	if a.hub != nil {
+		a.hub.BroadcastProgress(0, "Checking for Docker Compose...")
+	}
+
 	if filesystem.HasDockerCompose(path) {
 		logger.Error("docker-compose file found, not supported")
-		a.hub.BroadcastProgress(100, "Error: Docker Compose files are not supported")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, "Error: Docker Compose files are not supported")
+		}
 
 		// Delete the application and notify
 		if err := a.Delete(ctx, id); err != nil {
 			logger.Error("error deleting application: %v", err)
 		}
 
-		actionMsg := websocket.NewActionMessage(
-			websocket.ActionTypeError,
-			"Docker Compose Not Supported",
-			"Docker Compose files are not supported. The application has been deleted.",
-			nil,
-		)
-		a.hub.BroadcastInteractive(actionMsg)
+		if a.hub != nil {
+			actionMsg := websocket.NewActionMessage(
+				websocket.ActionTypeError,
+				"Docker Compose Not Supported",
+				"Docker Compose files are not supported. The application has been deleted.",
+				nil,
+			)
+			a.hub.BroadcastInteractive(actionMsg)
+		}
 		return "", err
 	}
-	a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
-	dockerStatus := filesystem.HasDockerfile(path, a.hub.GetNotificationClient())
+
+	if a.hub != nil {
+		a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
+	}
+
+	var wsClient *websocket.Client
+	if a.hub != nil {
+		wsClient = a.hub.GetNotificationClient()
+	}
+
+	dockerStatus := filesystem.HasDockerfile(path, wsClient)
 	if !dockerStatus.Exists {
-		actionInput := websocket.NewSelectInput("action", []string{
-			"create",
-			"skip",
-		})
+		if a.hub != nil {
+			actionInput := websocket.NewSelectInput("action", []string{
+				"create",
+				"skip",
+			})
 
-		actionMsg := websocket.NewActionMessage(
-			websocket.ActionTypeCritical,
-			"Dockerfile Required",
-			"No Dockerfile found for application. Would you like to create one?",
-			[]websocket.Input{actionInput},
-		)
+			actionMsg := websocket.NewActionMessage(
+				websocket.ActionTypeCritical,
+				"Dockerfile Required",
+				"No Dockerfile found for application. Would you like to create one?",
+				[]websocket.Input{actionInput},
+			)
 
-		a.hub.BroadcastInteractive(actionMsg)
+			a.hub.BroadcastInteractive(actionMsg)
+		}
 
-		a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(50, "Creating Dockerfile...")
+		}
+
 		tmpl, ok := docker.GetDefaultTemplate(techStack)
 		if !ok {
 			logger.Error("no default template for tech stack: %s", techStack)
-			a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			if a.hub != nil {
+				a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+			}
 			return "", err
 		}
 
 		dockerfilePath := filepath.Join(path, "Dockerfile")
 		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
 			logger.Error("error writing dockerfile: %v", err)
-			a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			if a.hub != nil {
+				a.hub.BroadcastProgress(100, "Error creating Dockerfile")
+			}
 			return "", err
 		}
 
-		a.hub.BroadcastProgress(100, "Created default Dockerfile")
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, "Created default Dockerfile")
+		}
+	}
+
+	// Check if Dockerfile has exposed port
+	if !filesystem.DockerfileHasExposedPort(path) {
+		if a.hub != nil {
+			actionInput := websocket.NewSelectInput("action", []string{
+				"expose",
+				"skip",
+			})
+
+			actionMsg := websocket.NewActionMessage(
+				websocket.ActionTypeCritical,
+				"Port Required",
+				"No exposed port found in Dockerfile. The application needs to expose a port to be accessible. Would you like to add EXPOSE 3000?",
+				[]websocket.Input{actionInput},
+			)
+
+			a.hub.BroadcastInteractive(actionMsg)
+		}
+
+		dockerfilePath := filepath.Join(path, "Dockerfile")
+		content, err := os.ReadFile(dockerfilePath)
+		if err != nil {
+			logger.Error("error reading dockerfile: %v", err)
+			return "", err
+		}
+
+		// Add EXPOSE 3000 before the last line (usually CMD or ENTRYPOINT)
+		lines := strings.Split(string(content), "\n")
+		if len(lines) > 0 {
+			newLines := append(lines[:len(lines)-1], "EXPOSE 3000", lines[len(lines)-1])
+			newContent := strings.Join(newLines, "\n")
+			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0644); err != nil {
+				logger.Error("error writing dockerfile: %v", err)
+				return "", err
+			}
+		}
 	}
 
 	app.TechStackID = tech.ID
@@ -441,7 +565,9 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	go a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
 
 	logger.Info("application updated: %s", app.AppName)
-	a.hub.BroadcastProgress(100, "Deployment complete!")
+	if a.hub != nil {
+		a.hub.BroadcastProgress(100, "Deployment complete!")
+	}
 
 	app.StorageLocation = path
 	app.TechStackID = tech.ID
@@ -455,18 +581,18 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 
 func (a *application) Delete(ctx context.Context, id string) error {
 	// Delete associated gateways first
-	gateways, err := a.gateway.GetByApplicationID(ctx, id)
-	if err != nil {
-		logger.Error("error getting gateways: %v", err)
-		return err
-	}
+	// gateways, err := a.gateway.GetByApplicationID(ctx, id)
+	// if err != nil {
+	// 	logger.Error("error getting gateways: %v", err)
+	// 	return err
+	// }
 
-	for _, gateway := range gateways {
-		if err := a.gateway.Delete(ctx, gateway.ID); err != nil {
-			logger.Error("error deleting gateway: %v", err)
-			// Continue with other gateways
-		}
-	}
+	// for _, gateway := range gateways {
+	// 	if err := a.gateway.Delete(ctx, gateway.ID); err != nil {
+	// 		logger.Error("error deleting gateway: %v", err)
+	// 		// Continue with other gateways
+	// 	}
+	// }
 
 	// Get application details
 	app, err := a.repo.GetByID(ctx, id)
@@ -481,7 +607,7 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	appName := strings.ToLower(appNameWithoutSpecialChars)
 	containerName := fmt.Sprintf("neploy-%s", appName)
 
-	if err := a.docker.RemoveContainer(ctx, containerName); err != nil {
+	if err := a.docker.RemoveContainer(ctx, containerName); err != nil && !strings.Contains(err.Error(), "No such container") {
 		logger.Error("error removing container: %v", err)
 		// Continue with deletion even if container removal fails
 	}

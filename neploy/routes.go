@@ -29,8 +29,8 @@ func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 }
 
 func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	application := handler.NewApplication(npy.Services.Application)
-	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware()), i)
+	application := handler.NewApplication(npy.Services.Application, i)
+	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware()))
 }
 
 func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {

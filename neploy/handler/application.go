@@ -14,13 +14,17 @@ import (
 
 type Application struct {
 	service service.Application
+	inertia *inertia.Inertia
 }
 
-func NewApplication(service service.Application) *Application {
-	return &Application{service: service}
+func NewApplication(service service.Application, i *inertia.Inertia) *Application {
+	return &Application{
+		service: service,
+		inertia: i,
+	}
 }
 
-func (a *Application) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
+func (a *Application) RegisterRoutes(r *echo.Group) {
 	r.POST("", a.Create)
 	r.GET("/:id", a.Get)
 	r.GET("", a.List)
@@ -45,19 +49,13 @@ func (a *Application) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 func (a *Application) Create(c echo.Context) error {
 	var req model.CreateApplicationRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request body",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	// Validate required fields
 	if req.AppName == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application name is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application name is required")
 	}
 
-	// Create the application
 	app := model.Application{
 		AppName:     req.AppName,
 		Description: req.Description,
@@ -65,14 +63,11 @@ func (a *Application) Create(c echo.Context) error {
 
 	appId, err := a.service.Create(c.Request().Context(), app, req.TechStack)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to create application",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create application")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"id":      appId,
-		"message": "Application created successfully",
+		"id": appId,
 	})
 }
 
@@ -91,16 +86,12 @@ func (a *Application) Create(c echo.Context) error {
 func (a *Application) Get(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application ID is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
 
 	app, err := a.service.Get(c.Request().Context(), id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
-			"error": "Application not found",
-		})
+		return echo.NewHTTPError(http.StatusNotFound, "Application not found")
 	}
 
 	return c.JSON(http.StatusOK, app)
@@ -121,22 +112,18 @@ func (a *Application) Get(c echo.Context) error {
 func (a *Application) Deploy(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application ID is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
 
 	var req model.DeployApplicationRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request body",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
 	a.service.Deploy(c.Request().Context(), id, req.RepoURL)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Deployment started",
+		"status": "Building",
 	})
 }
 
@@ -154,21 +141,17 @@ func (a *Application) Deploy(c echo.Context) error {
 func (a *Application) Start(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application ID is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
 
 	err := a.service.StartContainer(c.Request().Context(), id)
 	if err != nil {
 		logger.Error("error starting application: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to start application",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to start application")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Application started",
+		"status": "Running",
 	})
 }
 
@@ -186,20 +169,16 @@ func (a *Application) Start(c echo.Context) error {
 func (a *Application) Stop(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application ID is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
 
 	if err := a.service.StopContainer(c.Request().Context(), id); err != nil {
 		logger.Error("error stopping application: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to stop application",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to stop application")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Application stopped",
+		"status": "Stopped",
 	})
 }
 
@@ -217,47 +196,34 @@ func (a *Application) Stop(c echo.Context) error {
 func (a *Application) Delete(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application ID is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
 
 	if err := a.service.Delete(c.Request().Context(), id); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to delete application",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete application")
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Application deleted successfully",
-	})
+	return c.NoContent(http.StatusOK)
 }
 
 func (a *Application) Upload(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Application ID is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "File is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "File is required")
 	}
 
 	path, err := a.service.Upload(c.Request().Context(), id, file)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to upload file",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to upload file")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "File uploaded successfully",
-		"path":    filepath.Join(config.Env.UploadPath, path),
+		"storageLocation": filepath.Join(config.Env.UploadPath, path),
 	})
 }
 
@@ -274,10 +240,16 @@ func (a *Application) Upload(c echo.Context) error {
 func (a *Application) List(c echo.Context) error {
 	apps, err := a.service.GetAll(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to list applications",
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch applications")
+	}
+
+	// If it's a page load (Inertia request), render the full page
+	if c.Request().Header.Get("X-Inertia") != "" {
+		return a.inertia.Render(c.Response(), c.Request(), "Dashboard/Applications", inertia.Props{
+			"applications": apps,
 		})
 	}
 
+	// For API calls, return JSON
 	return c.JSON(http.StatusOK, apps)
 }
