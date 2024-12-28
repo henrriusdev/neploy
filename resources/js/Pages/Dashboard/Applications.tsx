@@ -1,4 +1,5 @@
 import * as React from "react";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -139,7 +140,7 @@ function Applications({
     title: "",
     description: "",
     fields: [],
-    onSubmit: () => {},
+    onSubmit: () => { }
   });
   const { toast } = useToast();
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
@@ -212,11 +213,27 @@ function Applications({
     onDragLeave: undefined,
   });
 
+  const refreshApplications = async () => {
+    try {
+      const { data } = await axios.get("/applications");
+      setApplications(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: axios.isAxiosError(error)
+          ? error.response?.data?.message || "Failed to fetch applications"
+          : "Failed to fetch applications",
+        variant: "destructive",
+      });
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
     setIsUploading(true);
+
     try {
-      // Create the application record using Inertia
-      router.post("/applications", {
+      // Create application
+      const { data: { id: applicationId } } = await axios.post("/applications", {
         appName: values.appName,
         description:
           values.description ||
@@ -224,84 +241,65 @@ function Applications({
             ? `Deployed from GitHub: ${values.repoUrl}`
             : "Uploaded from ZIP file"),
         techStack: values.language || "auto-detect",
-      }, {
-        onSuccess: (response) => {
-          const applicationId = response.props.id;
+      });
 
-          // Deploy either from GitHub URL or file upload, not both
-          if (values.repoUrl) {
-            if (uploadedFile) {
-              toast({
-                title: "Error",
-                description: "Please provide either a GitHub URL or a ZIP file, not both",
-                variant: "destructive",
-              });
-              return;
-            }
-
-            router.post(`/applications/${applicationId}/deploy`, {
-              repoUrl: values.repoUrl,
-            }, {
-              onSuccess: () => {
-                toast({
-                  title: "Success",
-                  description: "GitHub repository deployment started",
-                });
-              },
-            });
-          } else if (uploadedFile) {
-            const formData = new FormData();
-            formData.append("file", uploadedFile);
-
-            router.post(`/applications/${applicationId}/upload`, formData, {
-              onSuccess: () => {
-                toast({
-                  title: "Success",
-                  description: "Application file uploaded successfully",
-                });
-              },
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: "Please provide either a GitHub URL or a ZIP file",
-              variant: "destructive",
-            });
-            return;
-          }
-
-          // Refresh the applications list
-          router.visit("/applications", {
-            method: 'get',
-            onSuccess: (response) => {
-              setApplications(response.props);
-            },
-          });
-
-          // Reset form and close dialog
-          form.reset();
-          setUploadDialogOpen(false);
-        },
-        onError: (error) => {
+      // Deploy either from GitHub URL or file upload, not both
+      if (values.repoUrl) {
+        if (uploadedFile) {
           toast({
             title: "Error",
-            description: error.message || "Failed to create application",
+            description: "Please provide either a GitHub URL or a ZIP file, not both",
             variant: "destructive",
           });
-        },
-        onFinish: () => {
-          setIsUploading(false);
-        },
-      });
+          return;
+        }
+
+        await axios.post(`/applications/${applicationId}/deploy`, {
+          repoUrl: values.repoUrl,
+        });
+
+        toast({
+          title: "Success",
+          description: "GitHub repository deployment started",
+        });
+      } else if (uploadedFile) {
+        const formData = new FormData();
+        formData.append("file", uploadedFile);
+
+        await axios.post(`/applications/${applicationId}/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        toast({
+          title: "Success",
+          description: "Application file uploaded successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Please provide either a GitHub URL or a ZIP file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Refresh the applications list
+      await refreshApplications();
+
+      // Reset form and close dialog
+      form.reset();
+      setUploadDialogOpen(false);
     } catch (error) {
       toast({
         title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to deploy application",
+        description: axios.isAxiosError(error)
+          ? error.response?.data?.message || error.message
+          : "An error occurred",
         variant: "destructive",
       });
+    } finally {
       setIsUploading(false);
     }
   };
@@ -312,57 +310,38 @@ function Applications({
   ) => {
     try {
       if (action === "delete") {
-        router.delete(`/applications/${appId}`, {
-          onSuccess: () => {
-            toast({
-              title: "Success",
-              description: "Application deleted successfully",
-            });
-            setApplications((prev) =>
-              prev ? prev.filter((app) => app.id !== appId) : null
-            );
-          },
-          onError: (error) => {
-            toast({
-              title: "Error",
-              description: error.message || "Failed to delete application",
-              variant: "destructive",
-            });
-          },
-        });
+        await axios.delete(`/applications/${appId}`);
       } else {
-        router.post(`/applications/${appId}/${action}`, {}, {
-          onSuccess: () => {
-            toast({
-              title: "Success",
-              description: `Application ${action} request sent`,
-            });
-          },
-          onError: (error) => {
-            toast({
-              title: "Error",
-              description: error.message || `Failed to ${action} application`,
-              variant: "destructive",
-            });
-          },
-        });
+        await axios.post(`/applications/${appId}/${action}`);
       }
+
+      toast({
+        title: "Success",
+        description: `Application ${action} request sent`,
+      });
+
+      // Refresh the applications list
+      await refreshApplications();
     } catch (error) {
       toast({
         title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : `Failed to ${action} application`,
+        description: axios.isAxiosError(error)
+          ? error.response?.data?.message || `Failed to ${action} application`
+          : `Failed to ${action} application`,
         variant: "destructive",
       });
     }
   };
 
+  // Initial load of applications
+  React.useEffect(() => {
+    refreshApplications();
+  }, []);
+
   // WebSocket connection for real-time updates
   React.useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const wsUrl = `${protocol}//${window.location.host}/ws/interactive`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {

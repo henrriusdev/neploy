@@ -3,58 +3,57 @@ package filesystem
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"neploy.dev/pkg/websocket"
 )
-
-type DockerfileStatus struct {
-	Exists bool   `json:"exists"`
-	Path   string `json:"path,omitempty"`
-}
 
 func HasDockerfile(projectDir string, client *websocket.Client) DockerfileStatus {
 	status := DockerfileStatus{
 		Exists: false,
 	}
 
-	// Send initial progress
-	client.SendProgress(0, "Searching for Dockerfile...")
+	// Send progress only if client is not nil
+	if client != nil {
+		client.SendProgress(0, "Searching for Dockerfile...")
+	}
 
 	// First check in root directory
 	dockerfilePath := filepath.Join(projectDir, "Dockerfile")
 	if FileExists(dockerfilePath) {
 		status.Exists = true
 		status.Path = dockerfilePath
-		client.SendProgress(100, "Found Dockerfile in root directory")
+		if client != nil {
+			client.SendProgress(100, "Found Dockerfile in root directory")
+		}
 		return status
 	}
 
-	client.SendProgress(30, "Searching in subdirectories...")
-
-	// Then search in subdirectories
-	err := filepath.Walk(projectDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+	// Then check in docker directory
+	dockerfilePath = filepath.Join(projectDir, "docker", "Dockerfile")
+	if FileExists(dockerfilePath) {
+		status.Exists = true
+		status.Path = dockerfilePath
+		if client != nil {
+			client.SendProgress(100, "Found Dockerfile in docker directory")
 		}
-
-		if info.Name() == "Dockerfile" {
-			status.Exists = true
-			status.Path = path
-			client.SendProgress(100, "Found Dockerfile in subdirectory")
-			return filepath.SkipDir
-		}
-
-		return nil
-	})
-	if err != nil {
-		client.SendProgress(100, "Error searching for Dockerfile")
 		return status
 	}
 
-	if !status.Exists {
+	// Finally check in .docker directory
+	dockerfilePath = filepath.Join(projectDir, ".docker", "Dockerfile")
+	if FileExists(dockerfilePath) {
+		status.Exists = true
+		status.Path = dockerfilePath
+		if client != nil {
+			client.SendProgress(100, "Found Dockerfile in .docker directory")
+		}
+		return status
+	}
+
+	if client != nil {
 		client.SendProgress(100, "No Dockerfile found")
 	}
-
 	return status
 }
 
@@ -65,4 +64,24 @@ func HasDockerCompose(projectDir string) bool {
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return !os.IsNotExist(err)
+}
+
+func DockerfileHasExposedPort(projectDir string) bool {
+	dockerfilePath := filepath.Join(projectDir, "Dockerfile")
+	return FileContains(dockerfilePath, "EXPOSE")
+}
+
+func FileContains(filePath string, keyword string) bool {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return false
+	}
+
+	return strings.Contains(string(content), keyword)
 }

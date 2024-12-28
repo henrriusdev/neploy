@@ -254,6 +254,25 @@ definitions:
     x-enum-varnames:
     - Github
     - Gitlab
+  model.Role:
+    properties:
+      color:
+        type: string
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+    type: object
   model.User:
     properties:
       address:
@@ -281,6 +300,23 @@ definitions:
       updatedAt:
         $ref: '#/definitions/model.Date'
       username:
+        type: string
+    type: object
+  model.UserRoles:
+    properties:
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      role:
+        $ref: '#/definitions/model.Role'
+      roleId:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+      user:
+        $ref: '#/definitions/model.User'
+      userId:
         type: string
     type: object
 host: localhost:8080
@@ -894,6 +930,152 @@ paths:
       summary: Initiate onboarding
       tags:
       - Onboard
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: List all roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Role'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all roles
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: Create a new role
+      parameters:
+      - description: Role details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new role
+      tags:
+      - Role
+  /roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a role by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a role
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: Update a role by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a role
+      tags:
+      - Role
+  /roles/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get roles for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.UserRoles'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user roles
+      tags:
+      - Role
   /user/complete-invite:
     post:
       consumes:

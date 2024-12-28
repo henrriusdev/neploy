@@ -137,10 +137,12 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	visitorInfo := repository.NewVisitor(npy.DB)
 	visitorTrace := repository.NewVisitorTrace(npy.DB)
 	techStack := repository.NewTechStack(npy.DB)
+	gateway := repository.NewGateway(npy.DB)
 
 	return repository.Repositories{
 		Application:     application,
 		ApplicationStat: applicationStat,
+		Gateway:         gateway,
 		Metadata:        metadata,
 		Role:            role,
 		TechStack:       techStack,

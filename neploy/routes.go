@@ -29,8 +29,13 @@ func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 }
 
 func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	application := handler.NewApplication(npy.Services.Application)
-	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware()), i)
+	application := handler.NewApplication(npy.Services.Application, i)
+	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware()))
+}
+
+func roleRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
+	roleHandler := handler.NewRole(i, npy.Services.Role)
+	roleHandler.RegisterRoutes(e.Group("/roles", middleware.JWTMiddleware()))
 }
 
 func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
@@ -39,4 +44,5 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	dashboardRoutes(e, i, npy)
 	userRoutes(e, i, npy)
 	applicationRoutes(e, i, npy)
+	roleRoutes(e, i, npy)
 }

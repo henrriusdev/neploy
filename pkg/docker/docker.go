@@ -14,6 +14,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"neploy.dev/pkg/logger"
 )
@@ -67,7 +68,9 @@ func (d *Docker) PauseContainer(ctx context.Context, containerName string) error
 }
 
 func (d *Docker) RemoveContainer(ctx context.Context, containerID string) error {
-	return d.cli.ContainerRemove(ctx, containerID, container.RemoveOptions{})
+	return d.cli.ContainerRemove(ctx, containerID, container.RemoveOptions{
+		Force: true, // Force remove the container even if it is running
+	})
 }
 
 func (d *Docker) ContainerLogs(ctx context.Context, containerID string) (io.ReadCloser, error) {
@@ -228,4 +231,25 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 	}
 
 	return nil
+}
+
+func (d *Docker) RemoveImage(ctx context.Context, imageName string) error {
+	_, err := d.cli.ImageRemove(ctx, imageName, image.RemoveOptions{
+		Force: true, // Force remove the image even if it is in use
+	})
+	return err
+}
+
+func (d *Docker) GetExposedPorts(ctx context.Context, containerId string) ([]string, error) {
+	inspect, err := d.cli.ContainerInspect(ctx, containerId)
+	if err != nil {
+		return nil, err
+	}
+
+	ports := inspect.Config.ExposedPorts
+	var exposedPorts []string
+	for port := range ports {
+		exposedPorts = append(exposedPorts, port.Port())
+	}
+	return exposedPorts, nil
 }
