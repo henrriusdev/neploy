@@ -6,6 +6,7 @@ import (
 
 	"github.com/resend/resend-go/v2"
 	"neploy.dev/config"
+	"neploy.dev/pkg/logger"
 )
 
 type Email interface {
@@ -23,24 +24,48 @@ func NewEmail() Email {
 
 func (e *email) SendInvitation(ctx context.Context, to, teamName, role, inviteLink string) error {
 	params := &resend.SendEmailRequest{
-		From:    "Neploy <onboarding@resend.dev>", // You can use this for testing
+		From:    fmt.Sprintf("%s <%s>", config.Env.ResendFromName, config.Env.ResendFromEmail),
 		To:      []string{to},
 		Subject: fmt.Sprintf("Invitation to join %s on Neploy", teamName),
 		Html: fmt.Sprintf(`
-			<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-				<h2>You've been invited to join %s</h2>
-				<p>You've been invited to join %s as a %s.</p>
-				<p>Click the button below to accept the invitation:</p>
-				<a href="%s" style="display: inline-block; background: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 16px 0;">
-					Accept Invitation
-				</a>
-				<p>Or copy and paste this URL into your browser:</p>
-				<p>%s</p>
-				<p>This invitation will expire in 7 days.</p>
-			</div>
-		`, teamName, teamName, role, inviteLink, inviteLink),
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #ffffff;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <img src="https://lh3.googleusercontent.com/d/1McJEcUM6u69CasiERZNpf2sIh1jEg7Zz" alt="Neploy" style="width: 48px; height: 48px; margin-bottom: 24px;">
+        
+        <h1 style="color: #111827; font-size: 24px; margin-bottom: 24px;">Hey %s! You've been invited!</h1>
+        
+        <p style="color: #374151; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+            You've been invited to join <strong>%s</strong> as a <strong>%s</strong>.
+        </p>
+        
+        <a href="%s" style="display: inline-block; background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; margin-bottom: 24px;">
+            Accept Invitation
+        </a>
+        
+        <p style="color: #6B7280; font-size: 14px; line-height: 20px; margin-top: 32px;">
+            If you didn't expect this invitation, you can safely ignore this email.
+        </p>
+        
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;">
+        
+        <div style="color: #6B7280; font-size: 12px; line-height: 16px;">
+            <p style="margin: 0;">Best regards,</p>
+            <p style="margin: 8px 0;">The Neploy Team</p>
+            <img src="https://lh3.googleusercontent.com/d/1McJEcUM6u69CasiERZNpf2sIh1jEg7Zz" alt="Neploy" style="width: 32px; height: 32px; margin: 16px 0;">
+            <p style="margin: 0;">Neploy - Modern Deployment Platform</p>
+        </div>
+    </div>
+</body>
+</html>`, role, teamName, role, inviteLink),
 	}
 
-	_, err := e.client.Emails.Send(params)
+	res, err := e.client.Emails.Send(params)
+	logger.Info("send invitation: %v", res)
+	logger.Error("send invitation: %v", err)
 	return err
 }

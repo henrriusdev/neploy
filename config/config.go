@@ -27,6 +27,8 @@ type EnvVar struct {
 	ResendAPIKey        string `env:"RESEND_API_KEY"`
 	UploadPath          string `env:"UPLOAD_PATH" envDefault:"/uploads"`
 	DefaultDomain       string `env:"DEFAULT_DOMAIN" envDefault:"localhost"`
+	ResendFromEmail     string `env:"RESEND_FROM_EMAIL"`
+	ResendFromName      string `env:"RESEND_FROM_NAME" envDefault:"Neploy"`
 }
 
 var Env EnvVar
