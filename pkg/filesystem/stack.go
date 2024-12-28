@@ -25,14 +25,14 @@ func DetectStack(projectDir string) (string, error) {
 		}
 
 		// Check by file name
-		if stack, ok := stackIndicators[info.Name()]; ok {
+		if stack, ok := StackIndicators[info.Name()]; ok {
 			detectedStacks[stack]++
 			return nil
 		}
 
 		// Check by file extension
 		ext := filepath.Ext(info.Name())
-		if stack, ok := stackIndicators[ext]; ok {
+		if stack, ok := StackIndicators[ext]; ok {
 			detectedStacks[stack]++
 			return nil
 		}
