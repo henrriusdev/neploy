@@ -162,8 +162,15 @@ function Applications({
         description: message.message,
         fields: message.inputs,
         onSubmit: (data) => {
+          // Format response to match backend expectations
+          const response = {
+            action: data.action,
+            data: {
+              port: data.port
+            }
+          };
           // Send response back through websocket
-          sendMessage(message.type, data.action, data);
+          sendMessage(message.type, response.action, response.data);
           setActionDialog((prev) => ({ ...prev, show: false }));
         },
       });

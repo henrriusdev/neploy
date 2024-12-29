@@ -99,21 +99,21 @@ func (h *Hub) BroadcastInteractive(msg ActionMessage) *ActionResponse {
 		return nil
 	}
 
-	// Set read deadline to 30 seconds
+	// Set read deadline to prevent indefinite blocking
 	h.interactive.Conn.SetReadDeadline(time.Now().Add(30 * time.Second))
-	defer h.interactive.Conn.SetReadDeadline(time.Time{}) // Reset deadline
 
-	// Wait for response
+	// Read response
 	var response ActionResponse
 	err = h.interactive.ReadJSON(&response)
 	if err != nil {
 		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-			logger.Error("unexpected close error: %v", err)
-		} else {
 			logger.Error("error reading response: %v", err)
 		}
 		return nil
 	}
+
+	// Reset read deadline
+	h.interactive.Conn.SetReadDeadline(time.Time{})
 
 	return &response
 }
