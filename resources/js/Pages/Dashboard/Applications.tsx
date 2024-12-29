@@ -146,16 +146,16 @@ function Applications({
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
 
   useEffect(() => {
-    // Handle progress notifications
-    const unsubscribeNotifications = onNotification((message: ProgressMessage) => {
-      toast({
-        title: "Deployment Progress",
-        description: message.message,
-      });
+    const unsubProgress = onNotification((message: ProgressMessage) => {
+      if (message.type === "progress") {
+        toast({
+          title: "Deployment Progress",
+          description: message.message,
+        });
+      }
     });
 
-    // Handle interactive messages
-    const unsubscribeInteractive = onInteractive((message: ActionMessage) => {
+    const unsubInteractive = onInteractive((message: ActionMessage) => {
       setActionDialog({
         show: true,
         title: message.title,
@@ -163,15 +163,15 @@ function Applications({
         fields: message.inputs,
         onSubmit: (data) => {
           // Send response back through websocket
-          sendMessage(message.type, "response", data);
+          sendMessage(message.type, data.action, data);
           setActionDialog((prev) => ({ ...prev, show: false }));
         },
       });
     });
 
     return () => {
-      unsubscribeNotifications();
-      unsubscribeInteractive();
+      unsubProgress();
+      unsubInteractive();
     };
   }, [onNotification, onInteractive, sendMessage, toast]);
 
