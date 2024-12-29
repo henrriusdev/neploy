@@ -249,6 +249,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	// Check if Dockerfile has exposed port
 	if !filesystem.DockerfileHasExposedPort(path) {
 		if a.hub != nil {
+			portInput := websocket.NewTextInput("port", "Enter the port number (e.g. 3000)")
 			actionInput := websocket.NewSelectInput("action", []string{
 				"expose",
 				"skip",
@@ -257,8 +258,8 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 			actionMsg := websocket.NewActionMessage(
 				websocket.ActionTypeCritical,
 				"Port Required",
-				"No exposed port found in Dockerfile. The application needs to expose a port to be accessible. Would you like to add EXPOSE 3000?",
-				[]websocket.Input{actionInput},
+				"No exposed port found in Dockerfile. The application needs to expose a port to be accessible. What port would you like to expose?",
+				[]websocket.Input{portInput, actionInput},
 			)
 
 			a.hub.BroadcastInteractive(actionMsg)
@@ -271,12 +272,13 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 			return
 		}
 
-		// Add EXPOSE 3000 before the last line (usually CMD or ENTRYPOINT)
+		// Add EXPOSE with user-specified port before the last line (usually CMD or ENTRYPOINT)
 		lines := strings.Split(string(content), "\n")
 		if len(lines) > 0 {
-			newLines := append(lines[:len(lines)-1], "EXPOSE 3000", lines[len(lines)-1])
+			// The port will be provided by the user through the interactive input
+			newLines := append(lines[:len(lines)-1], "EXPOSE ${PORT}", lines[len(lines)-1])
 			newContent := strings.Join(newLines, "\n")
-			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0644); err != nil {
+			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0o644); err != nil {
 				logger.Error("error writing dockerfile: %v", err)
 				return
 			}
@@ -289,8 +291,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		return
 	}
 
-	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
+	a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
 
 	logger.Info("application updated: %s", app.AppName)
 	if a.hub != nil {
@@ -513,6 +514,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	// Check if Dockerfile has exposed port
 	if !filesystem.DockerfileHasExposedPort(path) {
 		if a.hub != nil {
+			portInput := websocket.NewTextInput("port", "Enter the port number (e.g. 3000)")
 			actionInput := websocket.NewSelectInput("action", []string{
 				"expose",
 				"skip",
@@ -521,8 +523,8 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 			actionMsg := websocket.NewActionMessage(
 				websocket.ActionTypeCritical,
 				"Port Required",
-				"No exposed port found in Dockerfile. The application needs to expose a port to be accessible. Would you like to add EXPOSE 3000?",
-				[]websocket.Input{actionInput},
+				"No exposed port found in Dockerfile. The application needs to expose a port to be accessible. What port would you like to expose?",
+				[]websocket.Input{portInput, actionInput},
 			)
 
 			a.hub.BroadcastInteractive(actionMsg)
@@ -535,12 +537,13 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 			return "", err
 		}
 
-		// Add EXPOSE 3000 before the last line (usually CMD or ENTRYPOINT)
+		// Add EXPOSE with user-specified port before the last line (usually CMD or ENTRYPOINT)
 		lines := strings.Split(string(content), "\n")
 		if len(lines) > 0 {
-			newLines := append(lines[:len(lines)-1], "EXPOSE 3000", lines[len(lines)-1])
+			// The port will be provided by the user through the interactive input
+			newLines := append(lines[:len(lines)-1], "EXPOSE ${PORT}", lines[len(lines)-1])
 			newContent := strings.Join(newLines, "\n")
-			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0644); err != nil {
+			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0o644); err != nil {
 				logger.Error("error writing dockerfile: %v", err)
 				return "", err
 			}

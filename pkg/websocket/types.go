@@ -67,6 +67,16 @@ func NewSelectInput(name string, options []string) Input {
 	}
 }
 
+// NewTextInput creates a new text input
+func NewTextInput(name, placeholder string) Input {
+	return Input{
+		Name:        name,
+		Type:        InputTypeText,
+		Placeholder: placeholder,
+		Required:    true,
+	}
+}
+
 type Client struct {
 	Conn *websocket.Conn
 	Mu   sync.Mutex
