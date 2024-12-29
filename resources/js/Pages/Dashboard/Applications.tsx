@@ -146,32 +146,39 @@ function Applications({
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
 
   useEffect(() => {
-    // Handle progress notifications
-    const unsubscribeNotifications = onNotification((message: ProgressMessage) => {
-      toast({
-        title: "Deployment Progress",
-        description: message.message,
-      });
+    const unsubProgress = onNotification((message: ProgressMessage) => {
+      if (message.type === "progress") {
+        toast({
+          title: "Deployment Progress",
+          description: message.message,
+        });
+      }
     });
 
-    // Handle interactive messages
-    const unsubscribeInteractive = onInteractive((message: ActionMessage) => {
+    const unsubInteractive = onInteractive((message: ActionMessage) => {
       setActionDialog({
         show: true,
         title: message.title,
         description: message.message,
         fields: message.inputs,
         onSubmit: (data) => {
+          // Format response to match backend expectations
+          const response = {
+            action: data.action,
+            data: {
+              port: data.port
+            }
+          };
           // Send response back through websocket
-          sendMessage(message.type, "response", data);
+          sendMessage(message.type, response.action, response.data);
           setActionDialog((prev) => ({ ...prev, show: false }));
         },
       });
     });
 
     return () => {
-      unsubscribeNotifications();
-      unsubscribeInteractive();
+      unsubProgress();
+      unsubInteractive();
     };
   }, [onNotification, onInteractive, sendMessage, toast]);
 

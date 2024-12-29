@@ -2,8 +2,10 @@ package websocket
 
 import (
 	"sync"
+	"time"
 
 	"neploy.dev/pkg/logger"
+	"github.com/gorilla/websocket"
 )
 
 // Global hub instance
@@ -60,6 +62,13 @@ func (h *Hub) GetNotificationClient() *Client {
 	return h.notification // can be nil
 }
 
+// GetInteractiveClient gets the interactive client
+func (h *Hub) GetInteractiveClient() *Client {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.interactive // can be nil
+}
+
 // BroadcastProgress sends a progress message to the notification client
 func (h *Hub) BroadcastProgress(progress float64, message string) {
 	h.mu.Lock()
@@ -75,19 +84,38 @@ func (h *Hub) BroadcastProgress(progress float64, message string) {
 	}
 }
 
-// BroadcastInteractive sends an action message to the interactive client
-func (h *Hub) BroadcastInteractive(msg ActionMessage) {
+// BroadcastInteractive sends an action message to the interactive client and waits for response
+func (h *Hub) BroadcastInteractive(msg ActionMessage) *ActionResponse {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	if h.interactive == nil {
-		return
+		return nil
 	}
 
 	err := h.interactive.SendJSON(msg)
 	if err != nil {
 		logger.Error("error sending interactive message: %v", err)
+		return nil
 	}
+
+	// Set read deadline to prevent indefinite blocking
+	h.interactive.Conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+
+	// Read response
+	var response ActionResponse
+	err = h.interactive.ReadJSON(&response)
+	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			logger.Error("error reading response: %v", err)
+		}
+		return nil
+	}
+
+	// Reset read deadline
+	h.interactive.Conn.SetReadDeadline(time.Time{})
+
+	return &response
 }
 
 // GetHub returns the global hub instance
