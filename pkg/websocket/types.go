@@ -45,6 +45,11 @@ func NewActionMessage(actionType ActionType, title, message string, inputs []Inp
 	}
 }
 
+type ActionResponse struct {
+	Action string            `json:"action"`
+	Data   map[string]string `json:"data"`
+}
+
 type Input struct {
 	Name        string    `json:"name"`
 	Type        InputType `json:"type"`
@@ -97,30 +102,34 @@ const (
 )
 
 const (
-	ActionTypeCritical = "critical"
-	ActionTypeError    = "error"
-	ActionTypeRequest  = "request"
-	ActionTypeResponse = "response"
-	ActionTypeQuery    = "query"
+	// Action types
+	ActionTypeInfo     ActionType = "info"
+	ActionTypeWarning  ActionType = "warning"
+	ActionTypeCritical ActionType = "critical"
+	ActionTypeError    ActionType = "error"
+	ActionTypeRequest  ActionType = "request"
+	ActionTypeResponse ActionType = "response"
+	ActionTypeQuery    ActionType = "query"
 )
 
 const (
-	InputTypeText     = "text"
-	InputTypePassword = "password"
-	InputTypeSelect   = "select"
-	InputTypeCheckbox = "checkbox"
-	InputTypeRadio    = "radio"
-	InputTypeDropzone = "dropzone"
-	InputTypeHidden   = "hidden"
-	InputTypeFile     = "file"
-	InputTypeTel      = "tel"
-	InputTypeEmail    = "email"
-	InputTypeUrl      = "url"
-	InputTypeNumber   = "number"
-	InputTypeRange    = "range"
-	InputTypeDate     = "date"
-	InputTypeTime     = "time"
-	InputTypeColor    = "color"
-	InputTypeCombo    = "combo"
-	InputTypeTextarea = "textarea"
+	// Input types
+	InputTypeText     InputType = "text"
+	InputTypePassword InputType = "password"
+	InputTypeSelect   InputType = "select"
+	InputTypeCheckbox InputType = "checkbox"
+	InputTypeRadio    InputType = "radio"
+	InputTypeDropzone InputType = "dropzone"
+	InputTypeHidden   InputType = "hidden"
+	InputTypeFile     InputType = "file"
+	InputTypeTel      InputType = "tel"
+	InputTypeEmail    InputType = "email"
+	InputTypeUrl      InputType = "url"
+	InputTypeNumber   InputType = "number"
+	InputTypeRange    InputType = "range"
+	InputTypeDate     InputType = "date"
+	InputTypeTime     InputType = "time"
+	InputTypeColor    InputType = "color"
+	InputTypeCombo    InputType = "combo"
+	InputTypeTextarea InputType = "textarea"
 )

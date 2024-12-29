@@ -68,7 +68,23 @@ func FileExists(filePath string) bool {
 
 func DockerfileHasExposedPort(projectDir string) bool {
 	dockerfilePath := filepath.Join(projectDir, "Dockerfile")
-	return FileContains(dockerfilePath, "EXPOSE")
+	if FileExists(dockerfilePath) && FileContains(dockerfilePath, "EXPOSE") {
+		return true
+	}
+
+	// Check in docker directory
+	dockerfilePath = filepath.Join(projectDir, "docker", "Dockerfile")
+	if FileExists(dockerfilePath) && FileContains(dockerfilePath, "EXPOSE") {
+		return true
+	}
+
+	// Check in .docker directory
+	dockerfilePath = filepath.Join(projectDir, ".docker", "Dockerfile")
+	if FileExists(dockerfilePath) && FileContains(dockerfilePath, "EXPOSE") {
+		return true
+	}
+
+	return false
 }
 
 func FileContains(filePath string, keyword string) bool {
