@@ -1,5 +1,8 @@
-import * as React from "react";
-import axios from "axios";
+import { DynamicForm } from "@/components/DynamicForm";
+import DashboardLayout from "@/components/Layouts/DashboardLayout";
+import { TechIcon } from "@/components/TechIcon";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,20 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  PlusCircle,
-  Grid,
-  List,
-  Upload,
-  Settings,
-  Play,
-  Square,
-  Trash2,
-  AlertCircle,
-} from "lucide-react";
-import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import {
   Dialog,
   DialogContent,
@@ -37,27 +26,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useDropzone } from "react-dropzone";
-import { useToast } from "@/hooks/use-toast";
-import { router } from '@inertiajs/react'
 import { Textarea } from "@/components/ui/textarea";
-import { TechIcon } from "@/components/TechIcon";
-import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import type { ProgressMessage, ActionMessage } from "@/types/websocket";
-import { DynamicForm } from "@/components/DynamicForm";
-import type { Input as InputType } from "@/types/websocket";
+import type { ActionMessage, Input as InputType, ProgressMessage } from "@/types/websocket";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import {
+  Grid,
+  List,
+  Play,
+  PlusCircle,
+  Square,
+  Trash2
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface ApplicationStat {
   id: string;
@@ -113,10 +101,7 @@ const uploadFormSchema = z.object({
     .refine((value) => value === "" || (value && typeof value === "string" && Boolean(new URL(value))),
       { message: "Invalid URL" })
     .optional(),
-  language: z.string().optional(),
 });
-
-const SUPPORTED_LANGUAGES = ["Node.js", "Go", "Python", "Java"];
 
 function Applications({
   user,
@@ -188,7 +173,6 @@ function Applications({
       appName: "",
       description: "",
       repoUrl: "",
-      language: undefined,
     },
   });
 
@@ -247,7 +231,6 @@ function Applications({
           (values.repoUrl
             ? `Deployed from GitHub: ${values.repoUrl}`
             : "Uploaded from ZIP file"),
-        techStack: values.language || "auto-detect",
       });
 
       // Deploy either from GitHub URL or file upload, not both
@@ -499,33 +482,6 @@ function Applications({
                     <p>Drag & drop a ZIP file here, or click to select</p>
                   )}
                 </div>
-                <FormField
-                  control={form.control}
-                  name="language"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Programming Language</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select language" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SUPPORTED_LANGUAGES.map((lang) => (
-                            <SelectItem key={lang} value={lang}>
-                              {lang}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <Button type="submit" className="w-full" disabled={isUploading}>
                   {isUploading ? "Deploying..." : "Deploy Application"}
                 </Button>
