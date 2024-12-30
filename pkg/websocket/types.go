@@ -28,8 +28,9 @@ func NewProgressMessage(progress float64, message string) ProgressMessage {
 }
 
 type ActionMessage struct {
-	Type    ActionType  `json:"type"`
-	Data    interface{} `json:"data"`
+	Type    string      `json:"type"`
+	Action  string      `json:"action"`
+	Data    interface{} `json:"data,omitempty"`
 	Inputs  []Input     `json:"inputs"`
 	Title   string      `json:"title"`
 	Message string      `json:"message"`
@@ -38,7 +39,7 @@ type ActionMessage struct {
 // NewActionMessage creates a new action message
 func NewActionMessage(actionType ActionType, title, message string, inputs []Input) ActionMessage {
 	return ActionMessage{
-		Type:    actionType,
+		Type:    string(actionType),
 		Title:   title,
 		Message: message,
 		Inputs:  inputs,
@@ -46,27 +47,28 @@ func NewActionMessage(actionType ActionType, title, message string, inputs []Inp
 }
 
 type ActionResponse struct {
-	Action string            `json:"action"`
-	Data   map[string]string `json:"data"`
+	Type   string                 `json:"type"`
+	Action string                 `json:"action"`
+	Data   map[string]interface{} `json:"data"`
 }
 
 type Input struct {
-	Name        string    `json:"name"`
-	Type        InputType `json:"type"`
-	Placeholder string    `json:"placeholder"`
-	Value       *string   `json:"value"`
-	Options     []string  `json:"options"`
-	Required    bool      `json:"required"`
-	Disabled    bool      `json:"disabled"`
-	ReadOnly    bool      `json:"readOnly"`
-	Order       int       `json:"order"`
+	Name        string   `json:"name"`
+	Type        string   `json:"type"`
+	Placeholder string   `json:"placeholder"`
+	Value       string   `json:"value,omitempty"`
+	Options     []string `json:"options,omitempty"`
+	Required    bool     `json:"required"`
+	Disabled    bool     `json:"disabled"`
+	ReadOnly    bool     `json:"readOnly"`
+	Order       int      `json:"order"`
 }
 
 // NewSelectInput creates a new select input
 func NewSelectInput(name string, options []string) Input {
 	return Input{
 		Name:     name,
-		Type:     InputTypeSelect,
+		Type:     "select",
 		Options:  options,
 		Required: true,
 	}
@@ -76,7 +78,7 @@ func NewSelectInput(name string, options []string) Input {
 func NewTextInput(name, placeholder string) Input {
 	return Input{
 		Name:        name,
-		Type:        InputTypeText,
+		Type:        "text",
 		Placeholder: placeholder,
 		Required:    true,
 	}

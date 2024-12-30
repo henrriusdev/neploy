@@ -8,9 +8,11 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
+	"github.com/pkg/errors"
 	"neploy.dev/config"
 	"neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
@@ -225,11 +227,10 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 
 	// Check if Dockerfile has exposed port
 	if !filesystem.DockerfileHasExposedPort(path) {
-		// Find the Dockerfile path
 		dockerStatus := filesystem.HasDockerfile(path, nil)
 		if !dockerStatus.Exists {
 			logger.Error("no dockerfile found")
-			return err
+			return errors.New("no dockerfile found")
 		}
 
 		if a.hub != nil && a.hub.GetInteractiveClient() != nil {
@@ -247,9 +248,12 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 			)
 
 			response := a.hub.BroadcastInteractive(actionMsg)
+			logger.Info("response: %+v", response)
 			if response != nil && response.Action == "expose" {
 				port := response.Data["port"]
+				logger.Info("port from response: %s", port)
 				if port == "" {
+					logger.Info("using default port 3000")
 					port = "3000" // fallback to default if somehow empty
 				}
 
@@ -264,11 +268,14 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 				if len(lines) > 0 {
 					newLines := append(lines[:len(lines)-1], fmt.Sprintf("EXPOSE %s", port), lines[len(lines)-1])
 					newContent := strings.Join(newLines, "\n")
+					logger.Info("writing new dockerfile content with port %s", port)
 					if err := os.WriteFile(dockerStatus.Path, []byte(newContent), 0o644); err != nil {
 						logger.Error("error writing dockerfile: %v", err)
 						return err
 					}
 				}
+			} else {
+				logger.Info("skipping port expose, response: %+v", response)
 			}
 		} else {
 			logger.Info("no interactive client connected, using default port 3000")
@@ -308,12 +315,23 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 }
 
 func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string, appID string) {
+	dockerfilePath := filepath.Join(projectPath, "Dockerfile")
+	
+	// Configure port before building image
+	port, err := a.configurePort(dockerfilePath)
+	if err != nil {
+		logger.Error("error configuring port: %v", err)
+		if a.hub != nil {
+			a.hub.BroadcastProgress(100, fmt.Sprintf("Error configuring port: %v", err))
+		}
+		return
+	}
+
 	// First, build the Docker image
 	if a.hub != nil {
 		a.hub.BroadcastProgress(0, "Building Docker image...")
 	}
 
-	dockerfilePath := filepath.Join(projectPath, "Dockerfile")
 	if err := a.docker.BuildImage(context.Background(), dockerfilePath, imageName); err != nil {
 		logger.Error("error building image: %v", err)
 		if a.hub != nil {
@@ -327,7 +345,6 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 	}
 
 	// Get a free port for the container
-	port := "3000" // Default port
 	hostConfig := &container.HostConfig{
 		AutoRemove: true,
 		PortBindings: nat.PortMap{
@@ -399,6 +416,95 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 	if a.hub != nil {
 		a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
 	}
+}
+
+func (a *application) configurePort(dockerfilePath string) (string, error) {
+	content, err := os.ReadFile(dockerfilePath)
+	if err != nil {
+		logger.Error("error reading dockerfile: %v", err)
+		return "", err
+	}
+
+	// Find EXPOSE directive and ask user for port
+	port := "3000" // Default port if not found
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "EXPOSE") {
+			parts := strings.Fields(line)
+			if len(parts) > 1 {
+				port = parts[1]
+				break
+			}
+		}
+	}
+
+	// Ask user to confirm or change port
+	if a.hub != nil {
+		// Wait for interactive client to be available
+		for i := 0; i < 5; i++ {
+			if a.hub.GetInteractiveClient() != nil {
+				break
+			}
+			logger.Info("waiting for interactive client to be available...")
+			time.Sleep(2 * time.Second)
+		}
+
+		if a.hub.GetInteractiveClient() == nil {
+			return "", fmt.Errorf("no interactive client available")
+		}
+
+		response := a.hub.BroadcastInteractive(websocket.ActionMessage{
+			Type:    "critical",
+			Action:  "expose",
+			Title:   "Port Configuration",
+			Message: fmt.Sprintf("The application wants to expose port %s. You can change this if needed.", port),
+			Inputs: []websocket.Input{
+				{
+					Name:        "port",
+					Type:        "text",
+					Placeholder: "Enter port number",
+					Value:       port,
+					Required:    true,
+					Order:       1,
+				},
+			},
+		})
+
+		if response != nil && response.Data["port"] != "" {
+			port = response.Data["port"].(string)
+			logger.Info("using user-specified port: %s", port)
+
+			// Update Dockerfile with new port
+			newContent := ""
+			foundExpose := false
+			for _, line := range lines {
+				if strings.HasPrefix(strings.TrimSpace(line), "EXPOSE") {
+					newContent += fmt.Sprintf("EXPOSE %s\n", port)
+					foundExpose = true
+				} else {
+					newContent += line + "\n"
+				}
+			}
+			
+			// Add EXPOSE if it wasn't found
+			if !foundExpose {
+				newContent += fmt.Sprintf("\nEXPOSE %s\n", port)
+			}
+
+			// Write updated Dockerfile
+			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0644); err != nil {
+				logger.Error("error updating dockerfile: %v", err)
+				return "", err
+			}
+		} else {
+			return "", fmt.Errorf("no response received from interactive client")
+		}
+	} else {
+		return "", fmt.Errorf("hub is not available")
+	}
+
+	return port, nil
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
@@ -521,14 +627,13 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 
 	// Check if Dockerfile has exposed port
 	if !filesystem.DockerfileHasExposedPort(path) {
-		// Find the Dockerfile path
 		dockerStatus := filesystem.HasDockerfile(path, nil)
 		if !dockerStatus.Exists {
 			logger.Error("no dockerfile found")
-			return "", err
+			return "", errors.New("no dockerfile found")
 		}
 
-		if a.hub != nil {
+		if a.hub != nil && a.hub.GetInteractiveClient() != nil {
 			portInput := websocket.NewTextInput("port", "Enter the port number (e.g. 3000)")
 			actionInput := websocket.NewSelectInput("action", []string{
 				"expose",
@@ -543,9 +648,12 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 			)
 
 			response := a.hub.BroadcastInteractive(actionMsg)
+			logger.Info("response: %+v", response)
 			if response != nil && response.Action == "expose" {
 				port := response.Data["port"]
+				logger.Info("port from response: %s", port)
 				if port == "" {
+					logger.Info("using default port 3000")
 					port = "3000" // fallback to default if somehow empty
 				}
 
@@ -560,11 +668,14 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 				if len(lines) > 0 {
 					newLines := append(lines[:len(lines)-1], fmt.Sprintf("EXPOSE %s", port), lines[len(lines)-1])
 					newContent := strings.Join(newLines, "\n")
+					logger.Info("writing new dockerfile content with port %s", port)
 					if err := os.WriteFile(dockerStatus.Path, []byte(newContent), 0o644); err != nil {
 						logger.Error("error writing dockerfile: %v", err)
 						return "", err
 					}
 				}
+			} else {
+				logger.Info("skipping port expose, response: %+v", response)
 			}
 		} else {
 			logger.Info("no interactive client connected, using default port 3000")
