@@ -11,7 +11,6 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
-	"github.com/go-git/go-git/v5"
 	"neploy.dev/config"
 	"neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
@@ -30,11 +29,12 @@ type Application interface {
 	CreateStat(ctx context.Context, stat model.ApplicationStat) error
 	UpdateStat(ctx context.Context, stat model.ApplicationStat) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
-	Deploy(ctx context.Context, id string, repoURL string)
+	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	Delete(ctx context.Context, id string) error
 	StartContainer(ctx context.Context, id string) error
 	StopContainer(ctx context.Context, id string) error
+	GetRepoBranches(ctx context.Context, repoURL string) ([]string, error)
 }
 
 type application struct {
@@ -68,40 +68,32 @@ func (a *application) Get(ctx context.Context, id string) (model.Application, er
 func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
 	apps, err := a.repo.GetAll(ctx)
 	if err != nil {
-		logger.Error("error getting all applications: %v", err)
+		logger.Error("error getting applications: %v", err)
 		return nil, err
 	}
 
-	fullApps := make([]model.FullApplication, len(apps))
-	for i, app := range apps {
+	var fullApps []model.FullApplication
+	for _, app := range apps {
 		stats, err := a.stat.GetByApplicationID(ctx, app.ID)
 		if err != nil {
-			logger.Error("error getting application stats: %v", err)
+			logger.Error("error getting application stat: %v", err)
 			return nil, err
 		}
 
-		tech, err := a.tech.GetByID(ctx, app.TechStackID)
-		if err != nil {
-			logger.Error("error getting tech stack: %v", err)
-			return nil, err
+		var tech model.TechStack
+		if app.TechStackID != nil {
+			tech, err = a.tech.GetByID(ctx, *app.TechStackID)
+			if err != nil {
+				logger.Error("error getting tech stack: %v", err)
+				return nil, err
+			}
 		}
 
-		appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-		appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-		appName := strings.ToLower(appNameWithoutSpecialChars)
-
-		containerStatus, err := a.docker.GetContainerStatus(ctx, appName)
-		if err != nil {
-			logger.Error("error getting container status: %v", err)
-			return nil, err
-		}
-
-		fullApps[i] = model.FullApplication{
+		fullApps = append(fullApps, model.FullApplication{
 			Application: app,
-			Stats:       stats,
 			TechStack:   tech,
-			Status:      containerStatus,
-		}
+			Stats:       stats,
+		})
 	}
 
 	return fullApps, nil
@@ -141,43 +133,36 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 	return healthy, totalApps, nil
 }
 
-func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
+func (a *application) Deploy(ctx context.Context, id string, repoURL string, branch string) error {
 	app, err := a.repo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
-		return
+		return err
 	}
 
 	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
 	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
 	appName := strings.ToLower(appNameWithoutSpecialChars)
-
-	// Create Docker image name with neploy prefix
 	imageName := fmt.Sprintf("neploy/%s", appName)
 	containerName := fmt.Sprintf("neploy-%s", appName)
 
 	path := filepath.Join(config.Env.UploadPath, appName)
-	_, err = git.PlainCloneContext(ctx, path, false, &git.CloneOptions{
-		URL:        repoURL,
-		RemoteName: "origin",
-	})
-	if err != nil {
-		logger.Error("error cloning repo: %v", err)
-		return
+	repo := filesystem.NewGitRepo(repoURL)
+	if err := repo.Clone(path, branch); err != nil {
+		logger.Error("error cloning repository: %v", err)
+		return err
 	}
-	logger.Info("repo cloned: %s", path)
-	app.StorageLocation = path
 
 	techStack, err := filesystem.DetectStack(path)
 	if err != nil {
 		logger.Error("error detecting tech stack: %v", err)
-		return
+		return err
 	}
 
 	tech, err := a.tech.FindOrCreate(ctx, techStack)
 	if err != nil {
 		logger.Error("error finding or creating tech stack: %v", err)
-		return
+		return err
 	}
 
 	// Broadcast progress if hub exists
@@ -221,7 +206,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 			if a.hub != nil {
 				a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
 			}
-			return
+			return err
 		}
 
 		dockerfilePath := filepath.Join(path, "Dockerfile")
@@ -230,7 +215,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 			if a.hub != nil {
 				a.hub.BroadcastProgress(100, "Error creating Dockerfile")
 			}
-			return
+			return err
 		}
 
 		if a.hub != nil {
@@ -244,7 +229,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 		dockerStatus := filesystem.HasDockerfile(path, nil)
 		if !dockerStatus.Exists {
 			logger.Error("no dockerfile found")
-			return
+			return err
 		}
 
 		if a.hub != nil && a.hub.GetInteractiveClient() != nil {
@@ -271,7 +256,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 				content, err := os.ReadFile(dockerStatus.Path)
 				if err != nil {
 					logger.Error("error reading dockerfile: %v", err)
-					return
+					return err
 				}
 
 				// Add EXPOSE with user-specified port before the last line (usually CMD or ENTRYPOINT)
@@ -281,7 +266,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 					newContent := strings.Join(newLines, "\n")
 					if err := os.WriteFile(dockerStatus.Path, []byte(newContent), 0o644); err != nil {
 						logger.Error("error writing dockerfile: %v", err)
-						return
+						return err
 					}
 				}
 			}
@@ -291,7 +276,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 			content, err := os.ReadFile(dockerStatus.Path)
 			if err != nil {
 				logger.Error("error reading dockerfile: %v", err)
-				return
+				return err
 			}
 
 			// Add EXPOSE with default port before the last line
@@ -301,16 +286,16 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 				newContent := strings.Join(newLines, "\n")
 				if err := os.WriteFile(dockerStatus.Path, []byte(newContent), 0o644); err != nil {
 					logger.Error("error writing dockerfile: %v", err)
-					return
+					return err
 				}
 			}
 		}
 	}
 
-	app.TechStackID = tech.ID
+	app.TechStackID = &tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
-		return
+		return err
 	}
 
 	a.createAndStartContainer(ctx, imageName, containerName, path, app.ID)
@@ -319,6 +304,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string) {
 	if a.hub != nil {
 		a.hub.BroadcastProgress(100, "Deployment complete!")
 	}
+	return nil
 }
 
 func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string, appID string) {
@@ -602,7 +588,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		}
 	}
 
-	app.TechStackID = tech.ID
+	app.TechStackID = &tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return "", err
@@ -625,7 +611,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	}
 
 	app.StorageLocation = path
-	app.TechStackID = tech.ID
+	app.TechStackID = &tech.ID
 	if err := a.repo.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return "", err
@@ -712,4 +698,9 @@ func (a *application) StopContainer(ctx context.Context, id string) error {
 	}
 
 	return a.docker.StopContainer(ctx, containerId)
+}
+
+func (a *application) GetRepoBranches(ctx context.Context, repoURL string) ([]string, error) {
+	repo := filesystem.NewGitRepo(repoURL)
+	return repo.GetBranches()
 }

@@ -64,4 +64,9 @@ type CreateApplicationRequest struct {
 
 type DeployApplicationRequest struct {
 	RepoURL string `json:"repoUrl"`
+	Branch  string `json:"branch"`
+}
+
+type GetBranchesRequest struct {
+	RepoURL string `json:"repoUrl"`
 }

@@ -25,8 +25,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -42,10 +44,11 @@ import {
   Trash2
 } from "lucide-react";
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { debounce, DebouncedFunc } from 'lodash';
 
 interface ApplicationStat {
   id: string;
@@ -98,9 +101,26 @@ const uploadFormSchema = z.object({
   description: z.string().optional(),
   repoUrl: z
     .string()
-    .refine((value) => value === "" || (value && typeof value === "string" && Boolean(new URL(value))),
-      { message: "Invalid URL" })
+    .refine(
+      (value) => {
+        if (!value) return true; // Allow empty string
+        try {
+          const url = new URL(value);
+          // Check if it's GitHub or GitLab
+          if (!['github.com', 'gitlab.com'].includes(url.hostname)) {
+            return false;
+          }
+          // Check if it has the pattern: hostname/user/repo
+          const parts = url.pathname.split('/').filter(Boolean);
+          return parts.length === 2; // Should have exactly user and repo
+        } catch {
+          return false;
+        }
+      },
+      { message: "Must be a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)" }
+    )
     .optional(),
+  branch: z.string().optional(),
 });
 
 function Applications({
@@ -112,8 +132,13 @@ function Applications({
   const [applications, setApplications] = useState<Application[] | null>(initialApplications);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const [branches, setBranches] = useState<string[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+
   const [actionDialog, setActionDialog] = useState<{
     show: boolean;
     title: string;
@@ -173,6 +198,7 @@ function Applications({
       appName: "",
       description: "",
       repoUrl: "",
+      branch: "",
     },
   });
 
@@ -204,6 +230,76 @@ function Applications({
     onDragLeave: undefined,
   });
 
+  const fetchBranches = async (repoUrl: string) => {
+    if (!repoUrl) {
+      setBranches([]);
+      setSelectedBranch('');
+      form.setValue('branch', '');
+      return;
+    }
+
+    try {
+      // Validate URL format before making API call
+      try {
+        const url = new URL(repoUrl);
+        if (!['github.com', 'gitlab.com'].includes(url.hostname)) {
+          return;
+        }
+        const parts = url.pathname.split('/').filter(Boolean);
+        if (parts.length !== 2) {
+          return;
+        }
+      } catch {
+        return;
+      }
+
+      setIsLoadingBranches(true);
+      const { data } = await axios.post('/applications/branches', {
+        repoUrl: repoUrl
+      });
+      setBranches(data.branches);
+      
+      // Set default branch if available (usually 'main' or 'master')
+      const defaultBranch = data.branches.find((b: string) => 
+        ['main', 'master'].includes(b)
+      ) || data.branches[0];
+      
+      if (defaultBranch) {
+        setSelectedBranch(defaultBranch);
+        form.setValue('branch', defaultBranch);
+      }
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+      toast({
+        title: "Error",
+        description: axios.isAxiosError(error)
+          ? error.response?.data?.message || "Failed to fetch repository branches"
+          : "Failed to fetch repository branches",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBranches(false);
+    }
+  };
+
+  const debouncedFetchBranches = useMemo(
+    () => debounce(fetchBranches, 1000),
+    [] // Empty deps since we want to create this only once
+  );
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'repoUrl') {
+        debouncedFetchBranches(value.repoUrl);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+      debouncedFetchBranches.cancel();
+    };
+  }, [debouncedFetchBranches, form]);
+
   const refreshApplications = async () => {
     try {
       const { data } = await axios.get("/applications");
@@ -223,6 +319,15 @@ function Applications({
     setIsUploading(true);
 
     try {
+      if (values.repoUrl && !values.branch) {
+        toast({
+          title: "Error",
+          description: "Please select a branch",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create application
       const { data: { id: applicationId } } = await axios.post("/applications", {
         appName: values.appName,
@@ -246,6 +351,7 @@ function Applications({
 
         await axios.post(`/applications/${applicationId}/deploy`, {
           repoUrl: values.repoUrl,
+          branch: values.branch,
         });
 
         toast({
@@ -460,17 +566,59 @@ function Applications({
                   name="repoUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>GitHub Repository URL (Optional)</FormLabel>
+                      <FormLabel>GitHub/GitLab Repository URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="https://github.com/username/repo"
+                        <Input 
+                          placeholder="https://github.com/username/repository" 
+                          {...field} 
                         />
                       </FormControl>
+                      <FormDescription>
+                        Enter a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {form.watch('repoUrl') && (
+                  <FormField
+                    control={form.control}
+                    name="branch"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Branch</FormLabel>
+                        <Select
+                          disabled={isLoadingBranches}
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedBranch(value);
+                          }}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue 
+                                placeholder={
+                                  isLoadingBranches 
+                                    ? "Loading branches..." 
+                                    : "Select a branch"
+                                } 
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {branches.map((branch) => (
+                              <SelectItem key={branch} value={branch}>
+                                {branch}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <div
                   {...getRootProps()}
                   className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"

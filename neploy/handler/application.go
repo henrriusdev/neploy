@@ -33,6 +33,7 @@ func (a *Application) RegisterRoutes(r *echo.Group) {
 	r.POST("/:id/start", a.Start)
 	r.POST("/:id/stop", a.Stop)
 	r.DELETE("/:id", a.Delete)
+	r.POST("/branches", a.GetRepoBranches)
 }
 
 // Create godoc
@@ -120,7 +121,9 @@ func (a *Application) Deploy(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	a.service.Deploy(c.Request().Context(), id, req.RepoURL)
+	if err := a.service.Deploy(c.Request().Context(), id, req.RepoURL, req.Branch); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "Building",
@@ -252,4 +255,35 @@ func (a *Application) List(c echo.Context) error {
 
 	// For API calls, return JSON
 	return c.JSON(http.StatusOK, apps)
+}
+
+// GetRepoBranches godoc
+// @Summary Get repository branches
+// @Description Get list of branches from a Git repository
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param request body model.GetBranchesRequest true "Repository URL"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/branches [post]
+func (a *Application) GetRepoBranches(c echo.Context) error {
+	var req model.GetBranchesRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if req.RepoURL == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Repository URL is required")
+	}
+
+	branches, err := a.service.GetRepoBranches(c.Request().Context(), req.RepoURL)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"branches": branches,
+	})
 }
