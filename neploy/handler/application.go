@@ -61,7 +61,7 @@ func (a *Application) Create(c echo.Context) error {
 		Description: req.Description,
 	}
 
-	appId, err := a.service.Create(c.Request().Context(), app, req.TechStack)
+	appId, err := a.service.Create(c.Request().Context(), app)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create application")
 	}

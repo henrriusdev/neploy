@@ -22,7 +22,7 @@ import (
 )
 
 type Application interface {
-	Create(ctx context.Context, app model.Application, techStack string) (string, error)
+	Create(ctx context.Context, app model.Application) (string, error)
 	Get(ctx context.Context, id string) (model.Application, error)
 	GetAll(ctx context.Context) ([]model.FullApplication, error)
 	Update(ctx context.Context, app model.Application) error
@@ -57,15 +57,7 @@ func NewApplication(repo repository.Application, stat repository.ApplicationStat
 	}
 }
 
-func (a *application) Create(ctx context.Context, app model.Application, techStack string) (string, error) {
-	tech, err := a.tech.FindOrCreate(ctx, techStack)
-	if err != nil {
-		logger.Error("error finding or creating tech stack: %v", err)
-		return "", err
-	}
-
-	app.TechStackID = tech.ID
-
+func (a *application) Create(ctx context.Context, app model.Application) (string, error) {
 	return a.repo.Insert(ctx, app)
 }
 
