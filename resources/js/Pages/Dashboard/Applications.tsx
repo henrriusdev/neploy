@@ -21,20 +21,21 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-  FormDescription
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import type { ActionMessage, Input as InputType, ProgressMessage } from "@/types/websocket";
+import type { ActionMessage, ActionResponse, Input as InputType, ProgressMessage } from "@/types/websocket";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { debounce } from 'lodash';
 import {
   Grid,
   List,
@@ -44,11 +45,10 @@ import {
   Trash2
 } from "lucide-react";
 import * as React from "react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { debounce, DebouncedFunc } from 'lodash';
 
 interface ApplicationStat {
   id: string;
@@ -166,29 +166,56 @@ function Applications({
     });
 
     const unsubInteractive = onInteractive((message: ActionMessage) => {
+      console.log('Received interactive message:', message);
+      if (!message?.inputs || !Array.isArray(message.inputs)) {
+        console.error('Invalid message inputs:', message.inputs);
+        return;
+      }
+      
       setActionDialog({
         show: true,
-        title: message.title,
-        description: message.message,
-        fields: message.inputs,
+        title: message.title || 'Action Required',
+        description: message.message || '',
+        fields: message.inputs.map(input => ({
+          ...input,
+          // Add validation for port number
+          validate: input.name === 'port' ? (value: string) => {
+            const port = parseInt(value);
+            if (isNaN(port) || port < 1 || port > 65535) {
+              return 'Please enter a valid port number (1-65535)';
+            }
+            return true;
+          } : undefined
+        })),
         onSubmit: (data) => {
-          // Format response to match backend expectations
-          const response = {
-            action: data.action,
+          console.log('Submitting form data:', data);
+          const response: ActionResponse = {
+            type: message.type,
+            action: message.action,
             data: {
-              port: data.port
+              ...data,
+              action: message.action
             }
           };
-          // Send response back through websocket
-          sendMessage(message.type, response.action, response.data);
+          console.log('Sending response:', response);
+          sendMessage(response.type, response.action, response.data);
           setActionDialog((prev) => ({ ...prev, show: false }));
+          
+          // Show confirmation toast
+          toast({
+            title: "Port Configuration",
+            description: `Port ${data.port} will be exposed for this application.`,
+          });
         },
       });
     });
 
+    // Store unsubscribe functions
+    const unsubFunctions = [unsubProgress, unsubInteractive];
+
     return () => {
-      unsubProgress();
-      unsubInteractive();
+      // Call all unsubscribe functions
+      unsubFunctions.forEach(unsub => unsub && unsub());
     };
   }, [onNotification, onInteractive, sendMessage, toast]);
 
@@ -740,11 +767,13 @@ function Applications({
             <DialogTitle>{actionDialog.title}</DialogTitle>
             <DialogDescription>{actionDialog.description}</DialogDescription>
           </DialogHeader>
-          <DynamicForm
-            fields={actionDialog.fields}
-            onSubmit={actionDialog.onSubmit}
-            className="mt-4"
-          />
+          {actionDialog.show && actionDialog.fields && actionDialog.fields.length > 0 && (
+            <DynamicForm
+              fields={actionDialog.fields}
+              onSubmit={actionDialog.onSubmit}
+              className="mt-4"
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
