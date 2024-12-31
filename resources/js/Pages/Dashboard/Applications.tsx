@@ -1,5 +1,8 @@
-import * as React from "react";
-import axios from "axios";
+import { DynamicForm } from "@/components/DynamicForm";
+import DashboardLayout from "@/components/Layouts/DashboardLayout";
+import { TechIcon } from "@/components/TechIcon";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,20 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  PlusCircle,
-  Grid,
-  List,
-  Upload,
-  Settings,
-  Play,
-  Square,
-  Trash2,
-  AlertCircle,
-} from "lucide-react";
-import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import {
   Dialog,
   DialogContent,
@@ -32,32 +21,34 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useDropzone } from "react-dropzone";
-import { useToast } from "@/hooks/use-toast";
-import { router } from '@inertiajs/react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { TechIcon } from "@/components/TechIcon";
-import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import type { ProgressMessage, ActionMessage } from "@/types/websocket";
-import { DynamicForm } from "@/components/DynamicForm";
-import type { Input as InputType } from "@/types/websocket";
+import type { ActionMessage, ActionResponse, Input as InputType, ProgressMessage } from "@/types/websocket";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { debounce } from 'lodash';
+import {
+  Grid,
+  List,
+  Play,
+  PlusCircle,
+  Square,
+  Trash2
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface ApplicationStat {
   id: string;
@@ -110,13 +101,27 @@ const uploadFormSchema = z.object({
   description: z.string().optional(),
   repoUrl: z
     .string()
-    .refine((value) => value === "" || (value && typeof value === "string" && Boolean(new URL(value))),
-      { message: "Invalid URL" })
+    .refine(
+      (value) => {
+        if (!value) return true; // Allow empty string
+        try {
+          const url = new URL(value);
+          // Check if it's GitHub or GitLab
+          if (!['github.com', 'gitlab.com'].includes(url.hostname)) {
+            return false;
+          }
+          // Check if it has the pattern: hostname/user/repo
+          const parts = url.pathname.split('/').filter(Boolean);
+          return parts.length === 2; // Should have exactly user and repo
+        } catch {
+          return false;
+        }
+      },
+      { message: "Must be a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)" }
+    )
     .optional(),
-  language: z.string().optional(),
+  branch: z.string().optional(),
 });
-
-const SUPPORTED_LANGUAGES = ["Node.js", "Go", "Python", "Java"];
 
 function Applications({
   user,
@@ -127,8 +132,13 @@ function Applications({
   const [applications, setApplications] = useState<Application[] | null>(initialApplications);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const [branches, setBranches] = useState<string[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+
   const [actionDialog, setActionDialog] = useState<{
     show: boolean;
     title: string;
@@ -156,29 +166,56 @@ function Applications({
     });
 
     const unsubInteractive = onInteractive((message: ActionMessage) => {
+      console.log('Received interactive message:', message);
+      if (!message?.inputs || !Array.isArray(message.inputs)) {
+        console.error('Invalid message inputs:', message.inputs);
+        return;
+      }
+      
       setActionDialog({
         show: true,
-        title: message.title,
-        description: message.message,
-        fields: message.inputs,
+        title: message.title || 'Action Required',
+        description: message.message || '',
+        fields: message.inputs.map(input => ({
+          ...input,
+          // Add validation for port number
+          validate: input.name === 'port' ? (value: string) => {
+            const port = parseInt(value);
+            if (isNaN(port) || port < 1 || port > 65535) {
+              return 'Please enter a valid port number (1-65535)';
+            }
+            return true;
+          } : undefined
+        })),
         onSubmit: (data) => {
-          // Format response to match backend expectations
-          const response = {
-            action: data.action,
+          console.log('Submitting form data:', data);
+          const response: ActionResponse = {
+            type: message.type,
+            action: message.action,
             data: {
-              port: data.port
+              ...data,
+              action: message.action
             }
           };
-          // Send response back through websocket
-          sendMessage(message.type, response.action, response.data);
+          console.log('Sending response:', response);
+          sendMessage(response.type, response.action, response.data);
           setActionDialog((prev) => ({ ...prev, show: false }));
+          
+          // Show confirmation toast
+          toast({
+            title: "Port Configuration",
+            description: `Port ${data.port} will be exposed for this application.`,
+          });
         },
       });
     });
 
+    // Store unsubscribe functions
+    const unsubFunctions = [unsubProgress, unsubInteractive];
+
     return () => {
-      unsubProgress();
-      unsubInteractive();
+      // Call all unsubscribe functions
+      unsubFunctions.forEach(unsub => unsub && unsub());
     };
   }, [onNotification, onInteractive, sendMessage, toast]);
 
@@ -188,7 +225,7 @@ function Applications({
       appName: "",
       description: "",
       repoUrl: "",
-      language: undefined,
+      branch: "",
     },
   });
 
@@ -220,6 +257,76 @@ function Applications({
     onDragLeave: undefined,
   });
 
+  const fetchBranches = async (repoUrl: string) => {
+    if (!repoUrl) {
+      setBranches([]);
+      setSelectedBranch('');
+      form.setValue('branch', '');
+      return;
+    }
+
+    try {
+      // Validate URL format before making API call
+      try {
+        const url = new URL(repoUrl);
+        if (!['github.com', 'gitlab.com'].includes(url.hostname)) {
+          return;
+        }
+        const parts = url.pathname.split('/').filter(Boolean);
+        if (parts.length !== 2) {
+          return;
+        }
+      } catch {
+        return;
+      }
+
+      setIsLoadingBranches(true);
+      const { data } = await axios.post('/applications/branches', {
+        repoUrl: repoUrl
+      });
+      setBranches(data.branches);
+      
+      // Set default branch if available (usually 'main' or 'master')
+      const defaultBranch = data.branches.find((b: string) => 
+        ['main', 'master'].includes(b)
+      ) || data.branches[0];
+      
+      if (defaultBranch) {
+        setSelectedBranch(defaultBranch);
+        form.setValue('branch', defaultBranch);
+      }
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+      toast({
+        title: "Error",
+        description: axios.isAxiosError(error)
+          ? error.response?.data?.message || "Failed to fetch repository branches"
+          : "Failed to fetch repository branches",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBranches(false);
+    }
+  };
+
+  const debouncedFetchBranches = useMemo(
+    () => debounce(fetchBranches, 1000),
+    [] // Empty deps since we want to create this only once
+  );
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'repoUrl') {
+        debouncedFetchBranches(value.repoUrl);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+      debouncedFetchBranches.cancel();
+    };
+  }, [debouncedFetchBranches, form]);
+
   const refreshApplications = async () => {
     try {
       const { data } = await axios.get("/applications");
@@ -239,6 +346,15 @@ function Applications({
     setIsUploading(true);
 
     try {
+      if (values.repoUrl && !values.branch) {
+        toast({
+          title: "Error",
+          description: "Please select a branch",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create application
       const { data: { id: applicationId } } = await axios.post("/applications", {
         appName: values.appName,
@@ -247,7 +363,6 @@ function Applications({
           (values.repoUrl
             ? `Deployed from GitHub: ${values.repoUrl}`
             : "Uploaded from ZIP file"),
-        techStack: values.language || "auto-detect",
       });
 
       // Deploy either from GitHub URL or file upload, not both
@@ -263,6 +378,7 @@ function Applications({
 
         await axios.post(`/applications/${applicationId}/deploy`, {
           repoUrl: values.repoUrl,
+          branch: values.branch,
         });
 
         toast({
@@ -477,17 +593,59 @@ function Applications({
                   name="repoUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>GitHub Repository URL (Optional)</FormLabel>
+                      <FormLabel>GitHub/GitLab Repository URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="https://github.com/username/repo"
+                        <Input 
+                          placeholder="https://github.com/username/repository" 
+                          {...field} 
                         />
                       </FormControl>
+                      <FormDescription>
+                        Enter a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {form.watch('repoUrl') && (
+                  <FormField
+                    control={form.control}
+                    name="branch"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Branch</FormLabel>
+                        <Select
+                          disabled={isLoadingBranches}
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedBranch(value);
+                          }}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue 
+                                placeholder={
+                                  isLoadingBranches 
+                                    ? "Loading branches..." 
+                                    : "Select a branch"
+                                } 
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {branches.map((branch) => (
+                              <SelectItem key={branch} value={branch}>
+                                {branch}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <div
                   {...getRootProps()}
                   className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
@@ -499,33 +657,6 @@ function Applications({
                     <p>Drag & drop a ZIP file here, or click to select</p>
                   )}
                 </div>
-                <FormField
-                  control={form.control}
-                  name="language"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Programming Language</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select language" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SUPPORTED_LANGUAGES.map((lang) => (
-                            <SelectItem key={lang} value={lang}>
-                              {lang}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <Button type="submit" className="w-full" disabled={isUploading}>
                   {isUploading ? "Deploying..." : "Deploy Application"}
                 </Button>
@@ -636,11 +767,13 @@ function Applications({
             <DialogTitle>{actionDialog.title}</DialogTitle>
             <DialogDescription>{actionDialog.description}</DialogDescription>
           </DialogHeader>
-          <DynamicForm
-            fields={actionDialog.fields}
-            onSubmit={actionDialog.onSubmit}
-            className="mt-4"
-          />
+          {actionDialog.show && actionDialog.fields && actionDialog.fields.length > 0 && (
+            <DynamicForm
+              fields={actionDialog.fields}
+              onSubmit={actionDialog.onSubmit}
+              className="mt-4"
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

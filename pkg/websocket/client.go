@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -106,11 +107,24 @@ func UpgradeInteractiveWS() echo.HandlerFunc {
 
 		// Keep connection alive and handle messages
 		for {
-			if _, _, err := ws.ReadMessage(); err != nil {
+			messageType, message, err := ws.ReadMessage()
+			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 					log.Printf("error: %v", err)
 				}
 				break
+			}
+
+			// Only handle text messages
+			if messageType == websocket.TextMessage {
+				var response ActionResponse
+				if err := json.Unmarshal(message, &response); err != nil {
+					log.Printf("error unmarshaling message: %v", err)
+					continue
+				}
+
+				// Send to hub for handling
+				GetHub().HandleResponse(response)
 			}
 		}
 

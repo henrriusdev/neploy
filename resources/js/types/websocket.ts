@@ -45,10 +45,17 @@ export interface ProgressMessage {
 
 export interface ActionMessage {
   type: ActionType;
+  action: string;
   data?: any;
   inputs: Input[];
   title: string;
   message: string;
 }
 
-export type WebSocketMessage = ProgressMessage | ActionMessage;
+export interface ActionResponse {
+  type: ActionType;
+  action: string;
+  data: Record<string, any>;
+}
+
+export type WebSocketMessage = ProgressMessage | ActionMessage | ActionResponse;

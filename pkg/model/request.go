@@ -60,9 +60,13 @@ type CompleteInviteRequest struct {
 type CreateApplicationRequest struct {
 	AppName     string `json:"appName"`
 	Description string `json:"description"`
-	TechStack   string `json:"techStack"`
 }
 
 type DeployApplicationRequest struct {
+	RepoURL string `json:"repoUrl"`
+	Branch  string `json:"branch"`
+}
+
+type GetBranchesRequest struct {
 	RepoURL string `json:"repoUrl"`
 }

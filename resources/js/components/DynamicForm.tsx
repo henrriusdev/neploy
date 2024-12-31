@@ -30,24 +30,31 @@ interface DynamicFormProps {
   className?: string;
 }
 
-export function DynamicForm({ 
-  fields, 
-  onSubmit, 
-  submitText = "Submit", 
-  className = "" 
+export function DynamicForm({
+  fields = [],
+  onSubmit,
+  submitText = "Submit",
+  className = "",
 }: DynamicFormProps) {
-  // Initialize form
+  // Initialize form with empty object if no fields
   const form = useForm({
-    defaultValues: fields.reduce((acc: any, field) => {
-      acc[field.name] = field.value || (field.type === "checkbox" ? false : "");
-      return acc;
-    }, {}),
+    defaultValues: Array.isArray(fields)
+      ? fields.reduce((acc: any, field) => {
+          acc[field.name] = field.value || (field.type === "checkbox" ? false : "");
+          return acc;
+        }, {})
+      : {},
   });
 
   // Sort fields by order if specified
-  const sortedFields = [...fields].sort((a, b) => 
-    (a.order || 0) - (b.order || 0)
-  );
+  const sortedFields = Array.isArray(fields)
+    ? [...fields].sort((a, b) => (a.order || 0) - (b.order || 0))
+    : [];
+
+  if (!Array.isArray(fields) || fields.length === 0) {
+    console.warn("DynamicForm received invalid or empty fields:", fields);
+    return null;
+  }
 
   return (
     <Form {...form}>
