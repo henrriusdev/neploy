@@ -8,39 +8,11 @@ import { useToast } from "@/hooks/use-toast"
 import { GatewayTable } from "./components/gateway-table"
 import { GatewayForm } from "./components/gateway-form"
 import { GatewaySidebar } from "./components/gateway-sidebar"
+import { Gateway } from "@/types/common"
+import { GatewayProps } from "@/types/props"
 
-interface Gateway {
-  id: string
-  name: string
-  path: string
-  httpMethod: string
-  backendUrl: string
-  requiresAuth: boolean
-  rateLimit: number
-  applicationId: string
-  application: {
-    id: string
-    name: string
-  }
-}
 
-interface Props {
-  gateways: Gateway[]
-  application?: {
-    id: string
-    name: string
-  }
-  user: {
-    name: string
-    email: string
-    username: string
-    provider: string
-  }
-  teamName: string
-  logoUrl: string
-}
-
-export default function Index({ gateways, application }: Props) {
+export default function Index({ gateways, application }: GatewayProps) {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingGateway, setEditingGateway] = useState<Gateway | null>(null)
   const { toast } = useToast()

@@ -1,15 +1,13 @@
-import * as React from 'react'
-import { useState, useEffect } from 'react'
-import { router } from '@inertiajs/react'
+import { OnboardingSidebar } from '@/components/OnboardingSidebar'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from '@/hooks/use-toast'
+import { router } from '@inertiajs/react'
+import { useEffect, useState } from 'react'
 import ProviderStep from '../Auth/InviteSteps/ProviderStep'
 import UserDataStep from '../Auth/InviteSteps/UserDataStep'
 import RolesStep from './Steps/RolesStep'
 import ServiceStep from './Steps/ServiceStep'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Check } from "lucide-react"
-import { OnboardingSidebar } from '@/components/OnboardingSidebar'
 
 interface Props {
     email?: string;

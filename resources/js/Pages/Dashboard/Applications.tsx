@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { Application } from "@/types/common";
 import type { ActionMessage, ActionResponse, Input as InputType, ProgressMessage } from "@/types/websocket";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -49,42 +50,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
-interface ApplicationStat {
-  id: string;
-  applicationId: string;
-  environmentId: string;
-  date: string;
-  requests: number;
-  errors: number;
-  averageResponseTime: number;
-  dataTransfered: number;
-  uniqueVisitors: number;
-  healthy: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface TechStack {
-  id: string;
-  name: string;
-  description: string;
-}
-
-interface Application {
-  id: string;
-  appName: string;
-  storageLocation: string;
-  deployLocation: string;
-  techStackId: string;
-  status: "Building" | "Running" | "Stopped" | "Error";
-  language?: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
-  stats: ApplicationStat[];
-  techStack: TechStack;
-}
 
 interface ApplicationsProps {
   user?: {

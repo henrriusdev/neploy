@@ -73,11 +73,7 @@ func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 	}
 
 	// Find metrics for the previous hour
-	var lastHourMetrics struct {
-		Hour     string
-		Requests int
-		Errors   int
-	}
+	var lastHourMetrics LastHourMetrics
 
 	targetHour := startTime.Format("2006-01-02 15:04")
 	for _, m := range metrics {

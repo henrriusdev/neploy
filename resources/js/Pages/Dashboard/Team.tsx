@@ -40,25 +40,8 @@ import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
 import { RoleIcon } from "@/components/RoleIcon";
 import { TrashIcon } from "@radix-ui/react-icons";
-
-interface TeamMember {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  provider: string;
-  roles: Array<{
-    name: string;
-    description: string;
-    icon: string;
-    color: string;
-  }>;
-  techStacks: Array<{
-    name: string;
-    description: string;
-  }>;
-}
+import { TeamMember } from "@/types/common";
+import { TeamProps } from "@/types/props";
 
 const defaultTeam: TeamMember[] = [
   {
@@ -84,23 +67,6 @@ const defaultTeam: TeamMember[] = [
     ],
   },
 ];
-
-interface TeamProps {
-  user?: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  teamName?: string;
-  logoUrl?: string;
-  team?: TeamMember[];
-  roles?: Array<{
-    name: string;
-    description: string;
-    icon: string;
-    color: string;
-  }>;
-}
 
 interface InviteMemberData {
   email: string;

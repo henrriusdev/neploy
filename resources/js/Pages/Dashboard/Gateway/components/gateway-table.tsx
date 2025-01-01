@@ -11,27 +11,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-
-interface Gateway {
-  id: string
-  name: string
-  path: string
-  httpMethod: string
-  backendUrl: string
-  requiresAuth: boolean
-  rateLimit: number
-  applicationId: string
-  application: {
-    id: string
-    name: string
-  }
-}
-
-interface Props {
-  gateways: Gateway[]
-  onEdit: (gateway: Gateway) => void
-  onDelete: (id: string) => void
-}
+import { GatewayTableProps } from "@/types/props"
 
 const methodColors = {
   GET: "bg-green-100 text-green-800",
@@ -40,7 +20,7 @@ const methodColors = {
   DELETE: "bg-red-100 text-red-800",
 } as const
 
-export function GatewayTable({ gateways, onEdit, onDelete }: Props) {
+export function GatewayTable({ gateways, onEdit, onDelete }: GatewayTableProps) {
   return (
     <div className="rounded-md border">
       <Table>

@@ -1,8 +1,6 @@
-import * as React from 'react'
-import { Button } from "@/components/ui/button"
-import { GitHubLogoIcon } from "@radix-ui/react-icons"
-import { router } from '@inertiajs/react'
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
 
 interface Props {
     onNext: () => void;

@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   Bar,
   BarChart,
@@ -12,22 +11,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  AppWindowMac,
-  DoorOpen,
-  Frame,
-  PieChartIcon,
-  Settings2,
-} from "lucide-react";
 
+import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import { techStackColors } from "@/lib/colors";
+import { DashboardProps } from "@/types/props";
 
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
@@ -61,29 +54,10 @@ const defaultUser = {
   username: "shadcn",
 };
 
-interface DashboardProps {
-  teamName?: string;
-  navMain?: typeof defaultNavMain;
-  requestData?: typeof defaultRequestsData;
-  techStack?: typeof defaultTechStackData;
-  user?: typeof defaultUser;
-  primaryColor?: string;
-  secondaryColor?: string;
-  visitorData?: typeof defaultVisitorsData;
-  health?: string;
-  logoUrl?: string;
-}
-
-interface PageProps {
-  props: DashboardProps
-}
-
 function Dashboard({
   requestData = defaultRequestsData,
   techStack = defaultTechStackData,
   user,
-  primaryColor = "#8884d8",
-  secondaryColor = "#82ca9d",
   visitorData = defaultVisitorsData,
   teamName,
   logoUrl,

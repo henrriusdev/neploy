@@ -3,15 +3,9 @@ import { router } from '@inertiajs/react'
 import { Button } from "@/components/ui/button"
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { AcceptInviteProps } from '@/types/props'
 
-interface Props {
-    token: string;
-    expired?: boolean;
-    alreadyAccepted?: boolean;
-    provider?: string;
-}
-
-export default function AcceptInvite({ token, expired, alreadyAccepted, provider }: Props) {
+export default function AcceptInvite({ token, expired, alreadyAccepted, provider }: AcceptInviteProps) {
     const { toast } = useToast()
     const [isLoading, setIsLoading] = React.useState(false)
 

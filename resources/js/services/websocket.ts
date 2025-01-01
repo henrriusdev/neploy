@@ -1,4 +1,4 @@
-import { WebSocketMessage, ProgressMessage, ActionMessage, ActionType } from "@/types/websocket";
+import { ActionMessage, ActionType, ProgressMessage } from "@/types/websocket";
 
 let notificationsSocket: WebSocket | null = null;
 let interactiveSocket: WebSocket | null = null;

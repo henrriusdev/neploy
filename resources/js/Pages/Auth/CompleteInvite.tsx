@@ -5,26 +5,8 @@ import ProviderStep from "./InviteSteps/ProviderStep";
 import UserDataStep from "./InviteSteps/UserDataStep";
 import SummaryStep from "./InviteSteps/SummaryStep";
 import axios from "axios";
-
-interface Props {
-  token: string;
-  email?: string;
-  username?: string;
-  provider?: string;
-  error?: string;
-  status?: "valid" | "expired" | "accepted" | "invalid";
-}
-
-interface UserData {
-  firstName: string;
-  lastName: string;
-  dob: string;
-  phone: string;
-  address: string;
-  email: string;
-  username: string;
-  password: string;
-}
+import { CompleteInviteProps } from "@/types/props";
+import { User } from "@/types/common";
 
 type Step = "provider" | "data" | "summary";
 
@@ -35,12 +17,12 @@ export default function CompleteInvite({
   provider,
   error,
   status,
-}: Props) {
+}: CompleteInviteProps) {
   const [step, setStep] = React.useState<Step>(() => {
     // If we have provider info, start at data step
     return provider ? "data" : "provider";
   });
-  const [userData, setUserData] = React.useState<UserData>({
+  const [userData, setUserData] = React.useState<User>({
     firstName: "",
     lastName: "",
     dob: "",
@@ -84,7 +66,7 @@ export default function CompleteInvite({
     setStep("data");
   };
 
-  const handleDataNext = (data: UserData) => {
+  const handleDataNext = (data: User) => {
     setUserData(data);
     setStep("summary");
   };

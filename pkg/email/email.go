@@ -1,4 +1,4 @@
-package service
+package email
 
 import (
 	"context"
@@ -6,23 +6,18 @@ import (
 
 	"github.com/resend/resend-go/v2"
 	"neploy.dev/config"
-	"neploy.dev/pkg/logger"
 )
 
-type Email interface {
-	SendInvitation(ctx context.Context, to, teamName, role, inviteLink string) error
-}
-
-type email struct {
+type Email struct {
 	client *resend.Client
 }
 
-func NewEmail() Email {
+func NewEmail() *Email {
 	client := resend.NewClient(config.Env.ResendAPIKey)
-	return &email{client: client}
+	return &Email{client: client}
 }
 
-func (e *email) SendInvitation(ctx context.Context, to, teamName, role, inviteLink string) error {
+func (e *Email) SendInvitation(ctx context.Context, to, teamName, role, inviteLink string) error {
 	params := &resend.SendEmailRequest{
 		From:    fmt.Sprintf("%s <%s>", config.Env.ResendFromName, config.Env.ResendFromEmail),
 		To:      []string{to},
@@ -64,8 +59,6 @@ func (e *email) SendInvitation(ctx context.Context, to, teamName, role, inviteLi
 </html>`, role, teamName, role, inviteLink),
 	}
 
-	res, err := e.client.Emails.Send(params)
-	logger.Info("send invitation: %v", res)
-	logger.Error("send invitation: %v", err)
+	_, err := e.client.Emails.Send(params)
 	return err
 }

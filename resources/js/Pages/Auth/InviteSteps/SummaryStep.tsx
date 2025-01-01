@@ -1,22 +1,9 @@
 import * as React from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { SummaryStepProps } from '@/types/props'
 
-interface Props {
-    data: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        username: string;
-        dob: Date;
-        phone: string;
-        address: string;
-    };
-    onBack: () => void;
-    onSubmit: () => void;
-}
-
-export default function SummaryStep({ data, onBack, onSubmit }: Props) {
+export default function SummaryStep({ data, onBack, onSubmit }: SummaryStepProps) {
     return (
         <Card className="w-full max-w-screen-md mx-auto">
             <CardHeader>
