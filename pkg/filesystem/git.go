@@ -12,13 +12,6 @@ import (
 	"neploy.dev/pkg/logger"
 )
 
-// GitRepo represents a Git repository
-type GitRepo struct {
-	URL     string
-	Branch  string
-	BaseDir string
-}
-
 // NewGitRepo creates a new GitRepo instance
 func NewGitRepo(url string) *GitRepo {
 	return &GitRepo{
@@ -76,7 +69,7 @@ func (g *GitRepo) Clone(destDir string, branch string) error {
 	cmd := exec.Command("git", "clone", "-b", branch, "--single-branch", g.URL, destDir)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-	
+
 	if err := cmd.Run(); err != nil {
 		errMsg := stderr.String()
 		logger.Error("error cloning repository: %v - %s", err, errMsg)

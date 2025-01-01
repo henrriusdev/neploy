@@ -22,14 +22,12 @@ import (
 )
 
 type Auth struct {
-	validator validation.XValidator
-	user      service.User
+	user service.User
 }
 
-func NewAuth(validator validation.XValidator, user service.User) *Auth {
+func NewAuth(user service.User) *Auth {
 	return &Auth{
-		validator: validator,
-		user:      user,
+		user: user,
 	}
 }
 

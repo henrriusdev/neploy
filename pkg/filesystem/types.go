@@ -6,6 +6,12 @@ type DockerfileStatus struct {
 	Path   string `json:"path,omitempty"`
 }
 
+type GitRepo struct {
+	URL     string
+	Branch  string
+	BaseDir string
+}
+
 // Map of indicators to tech stacks
 var StackIndicators = map[string]string{
 	".vue":             "Vue",

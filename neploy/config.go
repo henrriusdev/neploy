@@ -1,15 +1,14 @@
 package neploy
 
 import (
-	"net/http"
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
-	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
@@ -24,7 +23,6 @@ type Neploy struct {
 	Port         string
 	Services     service.Services
 	Repositories repository.Repositories
-	Validator    validation.XValidator
 }
 
 // Create a new config struct for session settings
@@ -39,25 +37,6 @@ func Start(npy Neploy) {
 	i := initInertia()
 
 	e := echo.New()
-
-	// Custom error handler
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
-		if he, ok := err.(*echo.HTTPError); ok {
-			if err := c.JSON(he.Code, validation.GlobalErrorHandlerResp{
-				Success: false,
-				Message: he.Message.(string),
-			}); err != nil {
-				e.Logger.Error(err)
-			}
-		} else {
-			if err := c.JSON(http.StatusBadRequest, validation.GlobalErrorHandlerResp{
-				Success: false,
-				Message: err.Error(),
-			}); err != nil {
-				e.Logger.Error(err)
-			}
-		}
-	}
 
 	// Initialize repositories
 	repos := NewRepositories(npy)
@@ -84,10 +63,8 @@ func Start(npy Neploy) {
 	logger.SetLogger()
 
 	// Validator
-	myValidator := &validation.XValidator{
-		Validator: validation.Validate,
-	}
-	npy.Validator = *myValidator
+	vldtr := validator.New()
+	e.Validator = &CustomValidator{validator: vldtr}
 
 	// Routes
 	RegisterRoutes(e, i, npy)
@@ -111,8 +88,7 @@ func Start(npy Neploy) {
 func NewServices(npy Neploy) service.Services {
 	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.TechStack, npy.Repositories.Gateway)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
-	email := service.NewEmail()
-	user := service.NewUser(npy.Repositories, email)
+	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
 

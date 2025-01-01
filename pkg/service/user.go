@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"neploy.dev/config"
+	"neploy.dev/pkg/email"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
@@ -35,11 +36,11 @@ type User interface {
 
 type user struct {
 	repos repository.Repositories
-	email Email
+	email *email.Email
 }
 
-func NewUser(repos repository.Repositories, email Email) User {
-	return &user{repos: repos, email: email}
+func NewUser(repos repository.Repositories) User {
+	return &user{repos: repos, email: email.NewEmail()}
 }
 
 func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID string) error {

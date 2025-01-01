@@ -6,20 +6,17 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/romsar/gonertia"
 	"github.com/rs/zerolog/log"
-	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
 
 type Onboard struct {
-	validator validation.XValidator
-	service   service.Onboard
+	service service.Onboard
 }
 
-func NewOnboard(validator validation.XValidator, service service.Onboard) *Onboard {
+func NewOnboard(service service.Onboard) *Onboard {
 	return &Onboard{
-		validator: validator,
-		service:   service,
+		service: service,
 	}
 }
 

@@ -9,12 +9,12 @@ import (
 )
 
 func loginRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	auth := handler.NewAuth(npy.Validator, npy.Services.User)
+	auth := handler.NewAuth(npy.Services.User)
 	auth.RegisterRoutes(e.Group(""), i)
 }
 
 func onboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	onboard := handler.NewOnboard(npy.Validator, npy.Services.Onboard)
+	onboard := handler.NewOnboard(npy.Services.Onboard)
 	onboard.RegisterRoutes(e.Group("/onboard"), i)
 }
 
