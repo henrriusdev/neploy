@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,7 +14,6 @@ import (
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/gitlab"
 	"neploy.dev/config"
-	"neploy.dev/neploy/validation"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
@@ -84,19 +82,8 @@ func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 			})
 		}
 
-		if errs := a.validator.Validate(req); len(errs) > 0 && errs[0].Error {
-			errMsgs := make([]string, 0)
-
-			for _, err := range errs {
-				errMsgs = append(errMsgs, fmt.Sprintf(
-					"[%s]: '%v' | Needs to implement '%s'",
-					err.FailedField,
-					err.Value,
-					err.Tag,
-				))
-			}
-
-			return echo.NewHTTPError(http.StatusBadRequest, strings.Join(errMsgs, " and "))
+		if err := c.Validate(req); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
 		// Validate and authenticate user

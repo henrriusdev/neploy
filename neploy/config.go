@@ -2,7 +2,6 @@ package neploy
 
 import (
 	"strings"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -23,14 +22,6 @@ type Neploy struct {
 	Port         string
 	Services     service.Services
 	Repositories repository.Repositories
-}
-
-// Create a new config struct for session settings
-type SessionConfig struct {
-	Expiration     time.Duration
-	CookieName     string
-	CookieSecure   bool
-	CookieHTTPOnly bool
 }
 
 func Start(npy Neploy) {
