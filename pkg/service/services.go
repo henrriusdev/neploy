@@ -4,10 +4,11 @@ import "errors"
 
 type Services struct {
 	Application Application
-	User        User
-	Role        Role
-	Onboard     Onboard
+	Gateway     Gateway
 	Metadata    Metadata
+	Onboard     Onboard
+	Role        Role
+	User        User
 }
 
 func NotFound(entity string) error {

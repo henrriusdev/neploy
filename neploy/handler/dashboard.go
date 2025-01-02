@@ -190,6 +190,40 @@ func (d *Dashboard) Applications(i *inertia.Inertia) echo.HandlerFunc {
 
 func (d *Dashboard) Gateways(i *inertia.Inertia) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return i.Render(c.Response(), c.Request(), "Dashboard/Gateway/Index", inertia.Props{})
+		claims, ok := c.Get("claims").(model.JWTClaims)
+		if !ok {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+		}
+
+		gateways, err := d.services.Gateway.GetAll(c.Request().Context())
+		if err != nil {
+			log.Err(err).Msg("error getting gateways")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
+		}
+
+		metadata, err := d.services.Metadata.Get(c.Request().Context())
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
+		if err != nil {
+			log.Err(err).Msg("error getting provider")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
+		}
+
+		user := model.UserResponse{
+			Email:    claims.Email,
+			Username: claims.Username,
+			Name:     claims.Name,
+			Provider: provider,
+		}
+
+		return i.Render(c.Response(), c.Request(), "Dashboard/Gateway/Index", inertia.Props{
+			"user":     user,
+			"teamName": metadata.TeamName,
+			"logoUrl":  metadata.LogoURL,
+			"gateways": gateways,
+		})
 	}
 }

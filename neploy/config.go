@@ -82,13 +82,15 @@ func NewServices(npy Neploy) service.Services {
 	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
+	gateway := service.NewGateway(npy.Repositories.Gateway, npy.Repositories.Application, npy.Repositories.ApplicationStat)
 
 	return service.Services{
 		Application: application,
-		User:        user,
-		Role:        role,
+		Gateway:     gateway,
 		Metadata:    metadata,
 		Onboard:     onboard,
+		Role:        role,
+		User:        user,
 	}
 }
 

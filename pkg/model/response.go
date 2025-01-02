@@ -40,3 +40,8 @@ type FullApplication struct {
 	TechStack TechStack         `json:"techStack"`
 	Status    string            `json:"status"`
 }
+
+type FullGateway struct {
+	Gateway
+	Application Application `json:"application"`
+}
