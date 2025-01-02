@@ -349,6 +349,7 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 		EndpointURL:   "/" + containerName,
 		Subdomain:     strings.Replace(containerName, "neploy", "", -1),
 		Port:          port,
+		Path:          "/" + containerName,
 		Status:        "inactive",
 		ApplicationID: appID,
 	}
