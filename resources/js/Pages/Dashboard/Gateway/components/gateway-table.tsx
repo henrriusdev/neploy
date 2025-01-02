@@ -61,7 +61,7 @@ export function GatewayTable({ gateways, onEdit, onDelete }: GatewayTableProps) 
                   href={`/dashboard/applications/${gateway.applicationId}`}
                   className="text-primary hover:underline"
                 >
-                  {gateway.application.name}
+                  {gateway.application.appName}
                 </Link>
               </TableCell>
               <TableCell className="text-right space-x-2">

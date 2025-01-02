@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -20,7 +19,7 @@ type Gateway interface {
 	ListByApp(ctx context.Context, appID string) ([]model.Gateway, error)
 	AddRoute(ctx context.Context, gateway model.Gateway) error
 	RemoveRoute(ctx context.Context, gateway model.Gateway) error
-	ServeHTTP(w http.ResponseWriter, r *http.Request)
+	GetAll(ctx context.Context) ([]model.FullGateway, error)
 }
 
 type gateway struct {
@@ -29,7 +28,7 @@ type gateway struct {
 	appRepo repository.Application
 }
 
-func NewGatewayService(repo repository.Gateway, appRepo repository.Application, statRepo repository.ApplicationStat) Gateway {
+func NewGateway(repo repository.Gateway, appRepo repository.Application, statRepo repository.ApplicationStat) Gateway {
 	return &gateway{
 		router:  neployway.NewRouter(statRepo),
 		repo:    repo,
@@ -173,6 +172,25 @@ func (s *gateway) RemoveRoute(ctx context.Context, gateway model.Gateway) error 
 	return nil
 }
 
-func (s *gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.router.ServeHTTP(w, r)
+func (s *gateway) GetAll(ctx context.Context) ([]model.FullGateway, error) {
+	gateways, err := s.repo.GetAll(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get gateways")
+	}
+
+	var fullGateways []model.FullGateway
+	for _, gateway := range gateways {
+		application, err := s.appRepo.GetByID(ctx, gateway.ApplicationID)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get application")
+		}
+
+		fullGateway := model.FullGateway{
+			Gateway:     gateway,
+			Application: application,
+		}
+		fullGateways = append(fullGateways, fullGateway)
+	}
+
+	return fullGateways, nil
 }

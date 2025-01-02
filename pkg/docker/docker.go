@@ -85,7 +85,9 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 
 	containerName = "neploy-" + containerName
 
+	logger.Info("Container: %s", containerName)
 	for _, container := range containers {
+		logger.Info("Container: %v", container.Names)
 		if container.Names[0] == "/"+containerName {
 			return container.ID, nil
 		}
@@ -100,10 +102,7 @@ func (d *Docker) GetContainerStatus(ctx context.Context, containerName string) (
 		return "", err
 	}
 
-	containerName = "neploy-" + containerName
-
 	for _, container := range containers {
-		logger.Info("Container name: %s, %v", containerName, container.Names)
 		if container.Names[0] == "/"+containerName {
 			// Use Status instead of State for more detailed information
 			if strings.HasPrefix(container.Status, "Up") {
@@ -125,7 +124,7 @@ func (d *Docker) GetContainerStatus(ctx context.Context, containerName string) (
 		}
 	}
 
-	return "Inactive", nil
+	return "Not created", nil
 }
 
 func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {

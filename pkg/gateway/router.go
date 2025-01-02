@@ -93,7 +93,7 @@ func (r *Router) AddRoute(route Route) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	routeKey := r.generateRouteKey(route)
+	routeKey := route.Path
 	r.routes[routeKey] = proxy
 	r.routeInfo[routeKey] = route
 
@@ -105,7 +105,7 @@ func (r *Router) RemoveRoute(route Route) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	routeKey := r.generateRouteKey(route)
+	routeKey := route.Path
 	delete(r.routes, routeKey)
 	delete(r.routeInfo, routeKey)
 }
@@ -142,28 +142,12 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 // matchesRoute checks if the request matches a route
 func (r *Router) matchesRoute(req *http.Request, route Route) bool {
-	// Check subdomain
-	if route.Subdomain != "" {
-		hostParts := strings.Split(req.Host, ".")
-		if len(hostParts) < 2 || hostParts[0] != route.Subdomain {
-			return false
-		}
-	}
-
 	// Check path
 	if route.Path != "" {
 		return strings.HasPrefix(req.URL.Path, route.Path)
 	}
 
 	return true
-}
-
-// generateRouteKey creates a unique key for a route
-func (r *Router) generateRouteKey(route Route) string {
-	if route.Subdomain != "" {
-		return fmt.Sprintf("%s.%s", route.Subdomain, route.Domain)
-	}
-	return fmt.Sprintf("%s%s", route.Domain, route.Path)
 }
 
 // ValidateRoute validates a route configuration

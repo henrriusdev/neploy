@@ -73,8 +73,5 @@ export interface Gateway {
   requiresAuth: boolean;
   rateLimit: number;
   applicationId: string;
-  application: {
-    id: string;
-    name: string;
-  };
+  application: Application;
 }
