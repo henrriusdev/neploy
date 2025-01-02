@@ -90,10 +90,47 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 			}
 		}
 
+		appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+		appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+		appName := strings.ToLower(appNameWithoutSpecialChars)
+		containerName := "neploy-" + strings.ToLower(appName)
+		imageName := "neploy/" + strings.ToLower(appName)
+
+		status, err := a.docker.GetContainerStatus(ctx, containerName)
+		if err != nil {
+			logger.Error("error getting container status: %v", err)
+			return nil, err
+		}
+		logger.Info("Container status: %s", status)
+
+		if status == "Not created" {
+			// get port from dockerfile
+			go func() error {
+				dockerfilePath := filepath.Join(app.StorageLocation, "Dockerfile")
+				port, err := a.configurePort(dockerfilePath, false)
+				if err != nil {
+					logger.Error("error configuring port: %v", err)
+					return err
+				}
+
+				// create container
+				a.createAndStartContainer(ctx, imageName, containerName, app.StorageLocation, app.ID, port)
+
+				status, err = a.docker.GetContainerStatus(ctx, containerName)
+				if err != nil {
+					logger.Error("error getting container status: %v", err)
+					return err
+				}
+
+				return nil
+			}()
+		}
+
 		fullApps = append(fullApps, model.FullApplication{
 			Application: app,
 			TechStack:   tech,
 			Stats:       stats,
+			Status:      status,
 		})
 	}
 
@@ -226,7 +263,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 
 	// Configure port
 	dockerfilePath := filepath.Join(path, "Dockerfile")
-	port, err := a.configurePort(dockerfilePath)
+	port, err := a.configurePort(dockerfilePath, true)
 	if err != nil {
 		logger.Error("error configuring port: %v", err)
 		if a.hub != nil {
@@ -343,7 +380,8 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 	}
 }
 
-func (a *application) configurePort(dockerfilePath string) (string, error) {
+func (a *application) configurePort(dockerfilePath string, interactive bool) (string, error) {
+	logger.Info("configuring port for Dockerfile: %s", dockerfilePath)
 	content, err := os.ReadFile(dockerfilePath)
 	if err != nil {
 		logger.Error("error reading dockerfile: %v", err)
@@ -365,7 +403,7 @@ func (a *application) configurePort(dockerfilePath string) (string, error) {
 	}
 
 	// Ask user to confirm or change port
-	if a.hub != nil {
+	if a.hub != nil && interactive {
 		// Wait for interactive client to be available
 		for i := 0; i < 5; i++ {
 			if a.hub.GetInteractiveClient() != nil {
@@ -425,8 +463,6 @@ func (a *application) configurePort(dockerfilePath string) (string, error) {
 		} else {
 			return "", fmt.Errorf("no response received from interactive client")
 		}
-	} else {
-		return "", fmt.Errorf("hub is not available")
 	}
 
 	return port, nil
@@ -552,7 +588,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 
 	// Configure port
 	dockerfilePath := filepath.Join(path, "Dockerfile")
-	port, err := a.configurePort(dockerfilePath)
+	port, err := a.configurePort(dockerfilePath, true)
 	if err != nil {
 		logger.Error("error configuring port: %v", err)
 		if a.hub != nil {
