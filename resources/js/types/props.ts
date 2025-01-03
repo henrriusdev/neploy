@@ -1,5 +1,6 @@
 import { ControllerRenderProps } from "react-hook-form";
 import { Gateway, TeamMember, User } from "./common";
+import { DateRange } from "react-day-picker";
 
 export interface AcceptInviteProps {
   token: string;
@@ -107,4 +108,14 @@ export interface AutoCompleteProps {
   disabled?: boolean;
   placeholder?: string;
   field?: ControllerRenderProps<any>;
+};
+
+export interface DatePickerProps {
+  className?: string;
+  date?: Date | DateRange | undefined;
+  onDateChange?: (date: Date | DateRange | undefined) => void;
+  isRangePicker?: boolean;
+  minYear?: number;
+  maxYear?: number;
+  field?: ControllerRenderProps<any, any>;
 };
