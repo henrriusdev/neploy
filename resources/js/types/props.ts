@@ -1,3 +1,4 @@
+import { ControllerRenderProps } from "react-hook-form";
 import { Gateway, TeamMember, User } from "./common";
 
 export interface AcceptInviteProps {
@@ -94,3 +95,16 @@ export interface GatewayTableProps {
   onEdit: (gateway: Gateway) => void;
   onDelete: (id: string) => void;
 }
+
+export type Option = Record<"value" | "label", string> & Record<string, string>;
+
+export interface AutoCompleteProps {
+  options: Option[];
+  emptyMessage: string;
+  value?: Option;
+  onValueChange?: (value: Option) => void;
+  isLoading?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  field?: ControllerRenderProps<any>;
+};
