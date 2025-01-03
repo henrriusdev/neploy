@@ -1,12 +1,11 @@
 import { DynamicForm } from "@/components/DynamicForm";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
-import { TechIcon } from "@/components/TechIcon";
-import { Badge } from "@/components/ui/badge";
+import { ApplicationCard } from "@/components/ApplicationCard";
+import { ApplicationForm } from "@/components/ApplicationForm";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,48 +17,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Application } from "@/types/common";
-import type { ActionMessage, ActionResponse, Input as InputType, ProgressMessage } from "@/types/websocket";
-import { zodResolver } from "@hookform/resolvers/zod";
+import type {
+  ActionMessage,
+  ActionResponse,
+  Input as InputType,
+  ProgressMessage,
+} from "@/types/websocket";
 import axios from "axios";
-import { debounce } from 'lodash';
-import {
-  Grid,
-  List,
-  Play,
-  PlusCircle,
-  Square,
-  Trash2
-} from "lucide-react";
+import { debounce } from "lodash";
+import { Grid, List, PlusCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { ApplicationsProps } from "@/types/props";
 
-interface ApplicationsProps {
-  user?: {
-    name: string;
-    email: string;
-  };
-  teamName: string;
-  logoUrl: string;
-  applications?: Application[] | null;
-}
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -71,18 +45,16 @@ const uploadFormSchema = z.object({
         if (!value) return true; // Allow empty string
         try {
           const url = new URL(value);
-          // Check if it's GitHub or GitLab
-          if (!['github.com', 'gitlab.com'].includes(url.hostname)) {
+          if (!["github.com", "gitlab.com"].includes(url.hostname)) {
             return false;
           }
-          // Check if it has the pattern: hostname/user/repo
-          const parts = url.pathname.split('/').filter(Boolean);
+          const parts = url.pathname.split("/").filter(Boolean);
           return parts.length === 2; // Should have exactly user and repo
         } catch {
           return false;
         }
       },
-      { message: "Must be a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)" }
+      { message: "Must be a valid GitHub or GitLab repository URL" }
     )
     .optional(),
   branch: z.string().optional(),
@@ -94,15 +66,14 @@ function Applications({
   logoUrl,
   applications: initialApplications = null,
 }: ApplicationsProps) {
-  const [applications, setApplications] = useState<Application[] | null>(initialApplications);
+  const [applications, setApplications] = useState<Application[] | null>(
+    initialApplications
+  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
   const [branches, setBranches] = useState<string[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
 
   const [actionDialog, setActionDialog] = useState<{
     show: boolean;
@@ -115,7 +86,7 @@ function Applications({
     title: "",
     description: "",
     fields: [],
-    onSubmit: () => { }
+    onSubmit: () => {},
   });
   const { toast } = useToast();
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
@@ -131,41 +102,44 @@ function Applications({
     });
 
     const unsubInteractive = onInteractive((message: ActionMessage) => {
-      console.log('Received interactive message:', message);
+      console.log("Received interactive message:", message);
       if (!message?.inputs || !Array.isArray(message.inputs)) {
-        console.error('Invalid message inputs:', message.inputs);
+        console.error("Invalid message inputs:", message.inputs);
         return;
       }
-      
+
       setActionDialog({
         show: true,
-        title: message.title || 'Action Required',
-        description: message.message || '',
-        fields: message.inputs.map(input => ({
+        title: message.title || "Action Required",
+        description: message.message || "",
+        fields: message.inputs.map((input) => ({
           ...input,
           // Add validation for port number
-          validate: input.name === 'port' ? (value: string) => {
-            const port = parseInt(value);
-            if (isNaN(port) || port < 1 || port > 65535) {
-              return 'Please enter a valid port number (1-65535)';
-            }
-            return true;
-          } : undefined
+          validate:
+            input.name === "port"
+              ? (value: string) => {
+                  const port = parseInt(value);
+                  if (isNaN(port) || port < 1 || port > 65535) {
+                    return "Please enter a valid port number (1-65535)";
+                  }
+                  return true;
+                }
+              : undefined,
         })),
         onSubmit: (data) => {
-          console.log('Submitting form data:', data);
+          console.log("Submitting form data:", data);
           const response: ActionResponse = {
             type: message.type,
             action: message.action,
             data: {
               ...data,
-              action: message.action
-            }
+              action: message.action,
+            },
           };
-          console.log('Sending response:', response);
+          console.log("Sending response:", response);
           sendMessage(response.type, response.action, response.data);
           setActionDialog((prev) => ({ ...prev, show: false }));
-          
+
           // Show confirmation toast
           toast({
             title: "Port Configuration",
@@ -180,117 +154,9 @@ function Applications({
 
     return () => {
       // Call all unsubscribe functions
-      unsubFunctions.forEach(unsub => unsub && unsub());
+      unsubFunctions.forEach((unsub) => unsub && unsub());
     };
   }, [onNotification, onInteractive, sendMessage, toast]);
-
-  const form = useForm<z.infer<typeof uploadFormSchema>>({
-    resolver: zodResolver(uploadFormSchema),
-    defaultValues: {
-      appName: "",
-      description: "",
-      repoUrl: "",
-      branch: "",
-    },
-  });
-
-  const onDrop = React.useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    if (!file.name.endsWith(".zip")) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a .zip file",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setUploadedFile(file);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "application/zip": [".zip"],
-    },
-    maxFiles: 1,
-    multiple: undefined,
-    onDragEnter: undefined,
-    onDragOver: undefined,
-    onDragLeave: undefined,
-  });
-
-  const fetchBranches = async (repoUrl: string) => {
-    if (!repoUrl) {
-      setBranches([]);
-      setSelectedBranch('');
-      form.setValue('branch', '');
-      return;
-    }
-
-    try {
-      // Validate URL format before making API call
-      try {
-        const url = new URL(repoUrl);
-        if (!['github.com', 'gitlab.com'].includes(url.hostname)) {
-          return;
-        }
-        const parts = url.pathname.split('/').filter(Boolean);
-        if (parts.length !== 2) {
-          return;
-        }
-      } catch {
-        return;
-      }
-
-      setIsLoadingBranches(true);
-      const { data } = await axios.post('/applications/branches', {
-        repoUrl: repoUrl
-      });
-      setBranches(data.branches);
-      
-      // Set default branch if available (usually 'main' or 'master')
-      const defaultBranch = data.branches.find((b: string) => 
-        ['main', 'master'].includes(b)
-      ) || data.branches[0];
-      
-      if (defaultBranch) {
-        setSelectedBranch(defaultBranch);
-        form.setValue('branch', defaultBranch);
-      }
-    } catch (error) {
-      console.error('Error fetching branches:', error);
-      toast({
-        title: "Error",
-        description: axios.isAxiosError(error)
-          ? error.response?.data?.message || "Failed to fetch repository branches"
-          : "Failed to fetch repository branches",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingBranches(false);
-    }
-  };
-
-  const debouncedFetchBranches = useMemo(
-    () => debounce(fetchBranches, 1000),
-    [] // Empty deps since we want to create this only once
-  );
-
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === 'repoUrl') {
-        debouncedFetchBranches(value.repoUrl);
-      }
-    });
-    
-    return () => {
-      subscription.unsubscribe();
-      debouncedFetchBranches.cancel();
-    };
-  }, [debouncedFetchBranches, form]);
 
   const refreshApplications = async () => {
     try {
@@ -307,7 +173,42 @@ function Applications({
     }
   };
 
-  const onSubmit = async (values: z.infer<typeof uploadFormSchema>) => {
+  const fetchBranches = async (repoUrl: string) => {
+    if (!repoUrl) {
+      setBranches([]);
+      return;
+    }
+
+    try {
+      setIsLoadingBranches(true);
+      const { data } = await axios.post("/applications/branches", {
+        repoUrl: repoUrl,
+      });
+      setBranches(data.branches);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+      toast({
+        title: "Error",
+        description: axios.isAxiosError(error)
+          ? error.response?.data?.message ||
+            "Failed to fetch repository branches"
+          : "Failed to fetch repository branches",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBranches(false);
+    }
+  };
+
+  const debouncedFetchBranches = useMemo(
+    () => debounce(fetchBranches, 1000),
+    []
+  );
+
+  const onSubmit = async (
+    values: z.infer<typeof uploadFormSchema>,
+    file: File | null
+  ) => {
     setIsUploading(true);
 
     try {
@@ -320,8 +221,9 @@ function Applications({
         return;
       }
 
-      // Create application
-      const { data: { id: applicationId } } = await axios.post("/applications", {
+      const {
+        data: { id: applicationId },
+      } = await axios.post("/applications", {
         appName: values.appName,
         description:
           values.description ||
@@ -330,12 +232,12 @@ function Applications({
             : "Uploaded from ZIP file"),
       });
 
-      // Deploy either from GitHub URL or file upload, not both
       if (values.repoUrl) {
-        if (uploadedFile) {
+        if (file) {
           toast({
             title: "Error",
-            description: "Please provide either a GitHub URL or a ZIP file, not both",
+            description:
+              "Please provide either a GitHub URL or a ZIP file, not both",
             variant: "destructive",
           });
           return;
@@ -350,13 +252,13 @@ function Applications({
           title: "Success",
           description: "GitHub repository deployment started",
         });
-      } else if (uploadedFile) {
+      } else if (file) {
         const formData = new FormData();
-        formData.append("file", uploadedFile);
+        formData.append("file", file);
 
         await axios.post(`/applications/${applicationId}/upload`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
 
@@ -373,11 +275,7 @@ function Applications({
         return;
       }
 
-      // Refresh the applications list
       await refreshApplications();
-
-      // Reset form and close dialog
-      form.reset();
       setUploadDialogOpen(false);
     } catch (error) {
       toast({
@@ -408,7 +306,6 @@ function Applications({
         description: `Application ${action} request sent`,
       });
 
-      // Refresh the applications list
       await refreshApplications();
     } catch (error) {
       toast({
@@ -421,12 +318,10 @@ function Applications({
     }
   };
 
-  // Initial load of applications
   React.useEffect(() => {
     refreshApplications();
   }, []);
 
-  // WebSocket connection for real-time updates
   React.useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/interactive`;
@@ -448,21 +343,6 @@ function Applications({
       ws.close();
     };
   }, []);
-
-  const getStatusBadgeColor = (status: Application["status"]) => {
-    switch (status) {
-      case "Running":
-        return "bg-green-500";
-      case "Building":
-        return "bg-yellow-500";
-      case "Stopped":
-        return "bg-gray-500";
-      case "Error":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
 
   return (
     <div className="space-y-6 p-3">
@@ -519,129 +399,26 @@ function Applications({
                 your application.
               </DialogDescription>
             </DialogHeader>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="appName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Application Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Enter application description"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="repoUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub/GitLab Repository URL (Optional)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="https://github.com/username/repository" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {form.watch('repoUrl') && (
-                  <FormField
-                    control={form.control}
-                    name="branch"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Branch</FormLabel>
-                        <Select
-                          disabled={isLoadingBranches}
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedBranch(value);
-                          }}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue 
-                                placeholder={
-                                  isLoadingBranches 
-                                    ? "Loading branches..." 
-                                    : "Select a branch"
-                                } 
-                              />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {branches.map((branch) => (
-                              <SelectItem key={branch} value={branch}>
-                                {branch}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                <div
-                  {...getRootProps()}
-                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
-                >
-                  <input {...getInputProps()} />
-                  {isDragActive ? (
-                    <p>Drop the ZIP file here...</p>
-                  ) : (
-                    <p>Drag & drop a ZIP file here, or click to select</p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" disabled={isUploading}>
-                  {isUploading ? "Deploying..." : "Deploy Application"}
-                </Button>
-              </form>
-            </Form>
+            <ApplicationForm
+              onSubmit={onSubmit}
+              isUploading={isUploading}
+              branches={branches}
+              isLoadingBranches={isLoadingBranches}
+              onRepoUrlChange={debouncedFetchBranches}
+            />
           </DialogContent>
         </Dialog>
         <div className="flex items-center gap-2">
           <Button
             variant={viewMode === "grid" ? "default" : "outline"}
             size="icon"
-            onClick={() => setViewMode("grid")}
-          >
+            onClick={() => setViewMode("grid")}>
             <Grid className="h-4 w-4" />
           </Button>
           <Button
             variant={viewMode === "list" ? "default" : "outline"}
             size="icon"
-            onClick={() => setViewMode("list")}
-          >
+            onClick={() => setViewMode("list")}>
             <List className="h-4 w-4" />
           </Button>
         </div>
@@ -669,76 +446,37 @@ function Applications({
             viewMode === "grid"
               ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
               : "space-y-4"
-          }
-        >
+          }>
           {applications.map((app: Application) => (
-            <Card key={app.id}>
-              <CardHeader className="flex flex-row items-start justify-between space-y-0">
-                <div>
-                  <CardTitle className="text-xl">{app.appName}</CardTitle>
-                  <CardDescription>
-                    {app?.techStack === null ? (
-                      "Auto detected"
-                    ) : (
-                      <TechIcon name={app.techStack.name} />
-                    )}
-                  </CardDescription>
-                </div>
-                <Badge
-                  className={`${getStatusBadgeColor(app.status)} text-white`}
-                >
-                  {app.status}
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  {app.status !== "Running" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleApplicationAction(app.id, "start")}
-                    >
-                      <Play className="h-4 w-4 mr-1" />
-                      Start
-                    </Button>
-                  )}
-                  {app.status === "Running" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleApplicationAction(app.id, "stop")}
-                    >
-                      <Square className="h-4 w-4 mr-1" />
-                      Stop
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleApplicationAction(app.id, "delete")}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <ApplicationCard
+              key={app.id}
+              app={app}
+              onStart={(id) => handleApplicationAction(id, "start")}
+              onStop={(id) => handleApplicationAction(id, "stop")}
+              onDelete={(id) => handleApplicationAction(id, "delete")}
+            />
           ))}
         </div>
       )}
-      <Dialog open={actionDialog.show} onOpenChange={(open) => setActionDialog(prev => ({ ...prev, show: open }))}>
+      <Dialog
+        open={actionDialog.show}
+        onOpenChange={(open) =>
+          setActionDialog((prev) => ({ ...prev, show: open }))
+        }>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{actionDialog.title}</DialogTitle>
             <DialogDescription>{actionDialog.description}</DialogDescription>
           </DialogHeader>
-          {actionDialog.show && actionDialog.fields && actionDialog.fields.length > 0 && (
-            <DynamicForm
-              fields={actionDialog.fields}
-              onSubmit={actionDialog.onSubmit}
-              className="mt-4"
-            />
-          )}
+          {actionDialog.show &&
+            actionDialog.fields &&
+            actionDialog.fields.length > 0 && (
+              <DynamicForm
+                fields={actionDialog.fields}
+                onSubmit={actionDialog.onSubmit}
+                className="mt-4"
+              />
+            )}
         </DialogContent>
       </Dialog>
     </div>
@@ -746,11 +484,7 @@ function Applications({
 }
 
 Applications.layout = (page: any) => {
-  return (
-    <DashboardLayout>
-      {page}
-    </DashboardLayout>
-  );
+  return <DashboardLayout>{page}</DashboardLayout>;
 };
 
 export default Applications;
