@@ -3,29 +3,12 @@ import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { ApplicationForm } from "@/components/ApplicationForm";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Application } from "@/types/common";
-import type {
-  ActionMessage,
-  ActionResponse,
-  Input as InputType,
-  ProgressMessage,
-} from "@/types/websocket";
+import type { ActionMessage, ActionResponse, Input as InputType, ProgressMessage } from "@/types/websocket";
 import axios from "axios";
 import { debounce } from "lodash";
 import { Grid, List, PlusCircle } from "lucide-react";

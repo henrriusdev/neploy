@@ -19,7 +19,6 @@ export default function CompleteInvite({
   status,
 }: CompleteInviteProps) {
   const [step, setStep] = React.useState<Step>(() => {
-    // If we have provider info, start at data step
     return provider ? "data" : "provider";
   });
   const [userData, setUserData] = React.useState<User>({
@@ -56,7 +55,6 @@ export default function CompleteInvite({
     }
   }, [status, error]);
 
-  // Don't show the form if the invitation is not valid
   if (status !== "valid") {
     router.visit("/login");
     return null;
