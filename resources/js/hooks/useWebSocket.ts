@@ -11,11 +11,9 @@ import { ActionType } from '@/types/websocket';
 
 export function useWebSocket() {
   useEffect(() => {
-    // Connect to both WebSocket endpoints when the component mounts
     connectNotifications();
     connectInteractive();
 
-    // Cleanup on unmount
     return () => {
       disconnect();
     };

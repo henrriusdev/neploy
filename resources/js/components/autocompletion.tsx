@@ -16,20 +16,7 @@ import {
 import { Skeleton } from "./ui/skeleton";
 import { Check } from "lucide-react";
 import { cn } from "../lib/utils";
-import { ControllerRenderProps } from "react-hook-form";
-
-export type Option = Record<"value" | "label", string> & Record<string, string>;
-
-type AutoCompleteProps = {
-  options: Option[];
-  emptyMessage: string;
-  value?: Option;
-  onValueChange?: (value: Option) => void;
-  isLoading?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
-  field?: ControllerRenderProps<any>;
-};
+import { AutoCompleteProps, Option } from "@/types/props";
 
 export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
   (

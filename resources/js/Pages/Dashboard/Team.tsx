@@ -1,72 +1,21 @@
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
 import { RoleIcon } from "@/components/RoleIcon";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { TeamMember } from "@/types/common";
 import { TeamProps } from "@/types/props";
-
-const defaultTeam: TeamMember[] = [
-  {
-    id: "1",
-    username: "johndoe",
-    email: "john@example.com",
-    firstName: "John",
-    lastName: "Doe",
-    provider: "github",
-    roles: [
-      {
-        name: "Admin",
-        description: "Administrator",
-        icon: "crown",
-        color: "#FFB020",
-      },
-    ],
-    techStacks: [
-      {
-        name: "React",
-        description: "Frontend Framework",
-      },
-    ],
-  },
-];
 
 interface InviteMemberData {
   email: string;
@@ -77,7 +26,7 @@ function Team({
   user,
   teamName,
   logoUrl,
-  team = defaultTeam,
+  team,
   roles,
 }: TeamProps) {
   const [open, setOpen] = React.useState(false);

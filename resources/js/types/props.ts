@@ -1,4 +1,6 @@
-import { Gateway, TeamMember, User } from "./common";
+import { ControllerRenderProps } from "react-hook-form";
+import { Application, Gateway, TeamMember, User } from "./common";
+import { DateRange } from "react-day-picker";
 
 export interface AcceptInviteProps {
   token: string;
@@ -93,4 +95,34 @@ export interface GatewayTableProps {
   gateways: Gateway[];
   onEdit: (gateway: Gateway) => void;
   onDelete: (id: string) => void;
+}
+
+export type Option = Record<"value" | "label", string> & Record<string, string>;
+
+export interface AutoCompleteProps {
+  options: Option[];
+  emptyMessage: string;
+  value?: Option;
+  onValueChange?: (value: Option) => void;
+  isLoading?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  field?: ControllerRenderProps<any>;
+};
+
+export interface DatePickerProps {
+  className?: string;
+  date?: Date | DateRange | undefined;
+  onDateChange?: (date: Date | DateRange | undefined) => void;
+  isRangePicker?: boolean;
+  minYear?: number;
+  maxYear?: number;
+  field?: ControllerRenderProps<any, any>;
+};
+
+export interface ApplicationsProps {
+  user?: User;
+  teamName: string;
+  logoUrl: string;
+  applications?: Application[] | null;
 }

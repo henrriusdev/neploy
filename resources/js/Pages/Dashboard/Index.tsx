@@ -1,26 +1,11 @@
 "use client";
 
-import {
-  Bar,
-  BarChart,
-  Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  XAxis,
-  YAxis,
-} from "recharts";
-
+import React from "react";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { techStackColors } from "@/lib/colors";
+import { DashboardCard } from "@/components/DashboardCard";
+import { BaseChart } from "@/components/BaseChart";
 import { DashboardProps } from "@/types/props";
+import { techStackColors } from "@/lib/colors";
 
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
@@ -46,14 +31,6 @@ const defaultTechStackData = [
   { name: "Svelte", value: 200 },
 ];
 
-const defaultUser = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "https://unavatar.io/github/shadcn",
-  provider: "github",
-  username: "shadcn",
-};
-
 function Dashboard({
   requestData = defaultRequestsData,
   techStack = defaultTechStackData,
@@ -65,14 +42,18 @@ function Dashboard({
 }: DashboardProps) {
   const healthPercentage =
     (parseInt(health?.split("/")[0]) / parseInt(health?.split("/")[1])) * 100;
-  user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${user.username}`;
+  user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${
+    user.username
+  }`;
 
   const dashboardContent = (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary-foreground">Health Apps</CardTitle>
+        <DashboardCard
+          title="Health Apps"
+          value={health}
+          description={`${healthPercentage}% are fully healthy`}
+          icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -81,23 +62,16 @@ function Dashboard({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4 w-4 text-primary"
-            >
+              className="h-4 w-4 text-primary">
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary-foreground">{health}</div>
-            <p className="text-xs text-primary/80">
-              {healthPercentage}% are fully healthy
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary-foreground">
-              Total Requests
-            </CardTitle>
+          }
+        />
+        <DashboardCard
+          title="Total Requests"
+          value="1,675,234"
+          description="+18% from last month"
+          icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -106,23 +80,16 @@ function Dashboard({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4 w-4 text-primary"
-            >
+              className="h-4 w-4 text-primary">
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
             </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary-foreground">1,675,234</div>
-            <p className="text-xs text-primary/80">
-              +18% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary-foreground">
-              Total Visitors
-            </CardTitle>
+          }
+        />
+        <DashboardCard
+          title="Total Visitors"
+          value="573,281"
+          description="+201 since last hour"
+          icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -131,23 +98,18 @@ function Dashboard({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4  w-4 text-primary"
-            >
+              className="h-4  w-4 text-primary">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
               <circle cx="9" cy="7" r="4" />
               <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary-foreground">573,281</div>
-            <p className="text-xs text-primary/80">
-              +201 since last hour
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary-foreground">Total Errors</CardTitle>
+          }
+        />
+        <DashboardCard
+          title="Total Errors"
+          value="78"
+          description="-5% from last hour"
+          icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -156,140 +118,65 @@ function Dashboard({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              className="h-4 w-4 text-primary"
-            >
+              className="h-4 w-4 text-primary">
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
             </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary-foreground">78</div>
-            <p className="text-xs text-primary/80">-5% from last hour</p>
-          </CardContent>
-        </Card>
+          }
+        />
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-full bg-card">
-          <CardHeader>
-            <CardTitle className="text-primary-foreground">Requests by Time</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <ChartContainer
-              config={{
-                successful: {
-                  label: "Successful",
-                  color: "hsl(var(--primary))",
-                },
-                errors: {
-                  label: "Errors",
-                  color: "hsl(var(--destructive))",
-                },
-              }}
-              className="h-[350px] w-full"
-            >
-              <BarChart data={requestData}>
-                <XAxis dataKey="name" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <YAxis />
-                <Bar
-                  isAnimationActive={false}
-                  dataKey="successful"
-                  stackId="a"
-                  fill="hsl(var(--primary))"
-                />
-                <Bar
-                  dataKey="errors"
-                  stackId="a"
-                  fill="hsl(var(--destructive))"
-                  isAnimationActive={false}
-                />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+        <BaseChart
+          title="Requests by Time"
+          data={requestData}
+          type="bar"
+          dataKeys={["successful", "errors"]}
+          colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
+          className="col-span-full"
+          config={{
+            successful: {
+              label: "Successful",
+              color: "hsl(var(--primary))",
+            },
+            errors: {
+              label: "Errors",
+              color: "hsl(var(--destructive))",
+            },
+          }}
+        />
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-3 lg:col-span-3 bg-card">
-          <CardHeader>
-            <CardTitle className="text-primary-foreground">Tech Stacks Most Used by Apps</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={techStack.reduce(
-                (acc, { name }, i) => ({
-                  ...acc,
-                  [name]: {
-                    label: name,
-                    color: techStackColors[i % techStackColors.length],
-                  },
-                }),
-                {},
-              )}
-              className="h-[350px] flex justify-center items-center w-full"
-            >
-              <PieChart>
-                <Pie
-                  data={techStack}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={true}
-                  outerRadius={80}
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {techStack.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={techStackColors[index % techStackColors.length]}
-                    />
-                  ))}
-                </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </PieChart>
-            </ChartContainer>
-            <div className="mt-4 flex justify-center">
-              {techStack.map((entry, index) => (
-                <div key={`legend-${index}`} className="mx-2 flex items-center">
-                  <div
-                    className="mr-2 h-3 w-3"
-                    style={{
-                      backgroundColor:
-                        techStackColors[index % techStackColors.length],
-                    }}
-                  />
-                  <span>{entry.name}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3 lg:col-span-4 bg-card border-none">
-          <CardHeader>
-            <CardTitle className="text-primary-foreground">Visitor Count by Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                visitors: {
-                  label: "Visitors",
-                  color: "var(--primary-color)",
-                },
-              }}
-              className="h-[350px]"
-            >
-              <LineChart data={visitorData}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Line
-                  type="monotone"
-                  dataKey="visitors"
-                  stroke="var(--primary-color)"
-                  strokeWidth={2}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </LineChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+        <BaseChart
+          title="Tech Stacks Most Used by Apps"
+          data={techStack}
+          type="pie"
+          dataKeys={["value"]}
+          colors={techStackColors}
+          className="col-span-3 lg:col-span-3"
+          config={techStack.reduce(
+            (acc, { name }, i) => ({
+              ...acc,
+              [name]: {
+                label: name,
+                color: techStackColors[i % techStackColors.length],
+              },
+            }),
+            {}
+          )}
+        />
+        <BaseChart
+          title="Visitor Count by Time"
+          data={visitorData}
+          type="line"
+          dataKeys={["visitors"]}
+          colors={["var(--primary-color)"]}
+          className="col-span-3 lg:col-span-4 border-none"
+          config={{
+            visitors: {
+              label: "Visitors",
+              color: "var(--primary-color)",
+            },
+          }}
+        />
       </div>
     </>
   );
@@ -300,11 +187,7 @@ function Dashboard({
 Dashboard.layout = (page: any) => {
   const { user, teamName, logoUrl } = page.props;
   return (
-    <DashboardLayout
-      user={user}
-      teamName={teamName}
-      logoUrl={logoUrl}
-    >
+    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
       {page}
     </DashboardLayout>
   );
