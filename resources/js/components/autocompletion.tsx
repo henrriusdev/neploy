@@ -16,7 +16,6 @@ import {
 import { Skeleton } from "./ui/skeleton";
 import { Check } from "lucide-react";
 import { cn } from "../lib/utils";
-import { ControllerRenderProps } from "react-hook-form";
 import { AutoCompleteProps, Option } from "@/types/props";
 
 export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(

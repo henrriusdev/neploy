@@ -1,6 +1,7 @@
 import { ControllerRenderProps } from "react-hook-form";
-import { AutoComplete, type Option } from "./autocompletion";
+import { AutoComplete } from "./autocompletion";
 import { useState, useEffect } from "react";
+import { Option } from "@/types/props";
 
 export function InputAutoComplete({
   OPTIONS,
