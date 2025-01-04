@@ -381,12 +381,12 @@ func (u *user) GetUser(ctx context.Context, userId string) (model.FullUser, erro
 
 	var techStacks []model.TechStack
 	for _, userTechStack := range userTechStacks {
-		techStacks = append(techStacks, userTechStack.)
+		techStacks = append(techStacks, *userTechStack.TechStack)
 	}
 
 	return model.FullUser{
-		User:      user,
-		Roles:     roles,
+		User:       user,
+		Roles:      roles,
 		TechStacks: techStacks,
 	}, nil
 }
