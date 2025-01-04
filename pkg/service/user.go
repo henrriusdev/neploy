@@ -357,3 +357,36 @@ func ValidateJWT(token string) (model.JWTClaims, bool, error) {
 	}
 	return claims, t.Valid, nil
 }
+
+func (u *user) GetUser(ctx context.Context, userId string) (model.FullUser, error) {
+	user, err := u.repos.User.Get(ctx, userId)
+	if err != nil {
+		return model.FullUser{}, err
+	}
+
+	userRoles, err := u.repos.UserRole.GetByUserID(ctx, userId)
+	if err != nil {
+		return model.FullUser{}, err
+	}
+
+	userTechStacks, err := u.repos.UserTechStack.GetByUserID(ctx, userId)
+	if err != nil {
+		return model.FullUser{}, err
+	}
+
+	var roles []model.Role
+	for _, userRole := range userRoles {
+		roles = append(roles, *userRole.Role)
+	}
+
+	var techStacks []model.TechStack
+	for _, userTechStack := range userTechStacks {
+		techStacks = append(techStacks, userTechStack.)
+	}
+
+	return model.FullUser{
+		User:      user,
+		Roles:     roles,
+		TechStacks: techStacks,
+	}, nil
+}
