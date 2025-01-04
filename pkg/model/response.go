@@ -45,3 +45,9 @@ type FullGateway struct {
 	Gateway
 	Application Application `json:"application"`
 }
+
+type FullUser struct {
+	User
+	Roles      []Role      `json:"roles"`
+	TechStacks []TechStack `json:"techStacks"`
+}
