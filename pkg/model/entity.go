@@ -59,8 +59,10 @@ type UserRoles struct {
 
 type UserTechStack struct {
 	BaseRelation
-	UserID      string `json:"userId" db:"user_id"`
-	TechStackID string `json:"techStackId" db:"tech_stack_id"`
+	UserID      string     `json:"userId" db:"user_id"`
+	TechStackID string     `json:"techStackId" db:"tech_stack_id"`
+	User        *User      `json:"user" db:"user"`
+	TechStack   *TechStack `json:"techStack" db:"tech_stack"`
 }
 
 type Trace struct {

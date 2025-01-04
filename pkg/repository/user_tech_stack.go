@@ -86,7 +86,26 @@ func (u *userTechStack[T]) Delete(ctx context.Context, id string) error {
 }
 
 func (u *userTechStack[T]) GetByUserID(ctx context.Context, userID string) ([]model.UserTechStack, error) {
-	query := u.baseQuery().Where(goqu.Ex{"user_id": userID})
+	query := u.baseQuery("ut").
+		Select(
+			goqu.I("ut.*"),
+			goqu.L(`"u"."id" AS "user.id"`),
+			goqu.L(`"u"."first_name" AS "user.first_name"`),
+			goqu.L(`"u"."last_name" AS "user.last_name"`),
+			goqu.L(`"u"."email" AS "user.email"`),
+			goqu.L(`"t"."id" AS "tech_stack.id"`),
+			goqu.L(`"t"."name" AS "tech_stack.name"`),
+			goqu.L(`"t"."description" AS "tech_stack.description"`),
+		).
+		LeftJoin(
+			goqu.T("users").As("u"),
+			goqu.On(goqu.I("u.id").Eq(goqu.I("ut.user_id"))),
+		).
+		LeftJoin(
+			goqu.T("tech_stack").As("t"),
+			goqu.On(goqu.I("t.id").Eq(goqu.I("ut.tech_stack_id"))),
+		).
+		Where(goqu.I("u.id").Eq(userID))
 	q, args, err := query.ToSQL()
 	if err != nil {
 		log.Err(err).Msg("error building select query")
@@ -103,7 +122,26 @@ func (u *userTechStack[T]) GetByUserID(ctx context.Context, userID string) ([]mo
 }
 
 func (u *userTechStack[T]) GetByTechStackID(ctx context.Context, techStackID string) ([]model.UserTechStack, error) {
-	query := u.baseQuery().Where(goqu.Ex{"tech_stack_id": techStackID})
+	query := u.baseQuery("ut").
+		Select(
+			goqu.I("ut.*"),
+			goqu.L(`"u"."id" AS "user.id"`),
+			goqu.L(`"u"."first_name" AS "user.first_name"`),
+			goqu.L(`"u"."last_name" AS "user.last_name"`),
+			goqu.L(`"u"."email" AS "user.email"`),
+			goqu.L(`"t"."id" AS "tech_stack.id"`),
+			goqu.L(`"t"."name" AS "tech_stack.name"`),
+			goqu.L(`"t"."description" AS "tech_stack.description"`),
+		).
+		LeftJoin(
+			goqu.T("users").As("u"),
+			goqu.On(goqu.I("u.id").Eq(goqu.I("ut.user_id"))),
+		).
+		LeftJoin(
+			goqu.T("tech_stack").As("t"),
+			goqu.On(goqu.I("t.id").Eq(goqu.I("ut.tech_stack_id"))),
+		).
+		Where(goqu.I("t.id").Eq(techStackID))
 	q, args, err := query.ToSQL()
 	if err != nil {
 		log.Err(err).Msg("error building select query")
