@@ -14,13 +14,13 @@ import (
 
 type Application struct {
 	service service.Application
-	inertia *inertia.Inertia
+	i       *inertia.Inertia
 }
 
 func NewApplication(service service.Application, i *inertia.Inertia) *Application {
 	return &Application{
 		service: service,
-		inertia: i,
+		i:       i,
 	}
 }
 
@@ -248,7 +248,7 @@ func (a *Application) List(c echo.Context) error {
 
 	// If it's a page load (Inertia request), render the full page
 	if c.Request().Header.Get("X-Inertia") != "" {
-		return a.inertia.Render(c.Response(), c.Request(), "Dashboard/Applications", inertia.Props{
+		return a.i.Render(c.Response(), c.Request(), "Dashboard/Applications", inertia.Props{
 			"applications": apps,
 		})
 	}

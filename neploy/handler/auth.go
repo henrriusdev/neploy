@@ -21,11 +21,13 @@ import (
 
 type Auth struct {
 	user service.User
+	i    *inertia.Inertia
 }
 
-func NewAuth(user service.User) *Auth {
+func NewAuth(user service.User, i *inertia.Inertia) *Auth {
 	return &Auth{
 		user: user,
+		i:    i,
 	}
 }
 
@@ -52,11 +54,11 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 	}
 }
 
-func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
-	r.POST("/login", a.Login(i))
-	r.GET("/logout", a.Logout(i))
-	r.GET("", a.Index(i))
-	r.GET("/onboard", a.Onboard(i))
+func (a *Auth) RegisterRoutes(r *echo.Group) {
+	r.POST("/login", a.Login)
+	r.GET("/logout", a.Logout)
+	r.GET("", a.Index)
+	r.GET("/onboard", a.Onboard)
 	r.GET("/auth/github", a.GithubOAuth)
 	r.GET("/auth/github/callback", a.GithubOAuthCallback)
 	r.GET("/auth/gitlab", a.GitlabOAuth)
@@ -73,54 +75,52 @@ func (a *Auth) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 // @Success 200 {object} model.LoginResponse
 // @Failure 400 {object} map[string]interface{}
 // @Router /login [post]
-func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var req model.LoginRequest
-		if err := c.Bind(&req); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": "Invalid request",
-			})
-		}
-
-		if err := c.Validate(req); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-
-		// Validate and authenticate user
-		res, err := a.user.Login(c.Request().Context(), req)
-		if err != nil {
-			return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-				"error": "Invalid credentials",
-			})
-		}
-
-		// Generate JWT token
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
-			ID:       res.User.ID,
-			Email:    res.User.Email,
-			Name:     res.User.FirstName + " " + res.User.LastName,
-			Username: res.User.Username,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			},
+func (a *Auth) Login(c echo.Context) error {
+	var req model.LoginRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "Invalid request",
 		})
-
-		tokenString, err := token.SignedString([]byte(config.Env.JWTSecret))
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": "Failed to generate token",
-			})
-		}
-
-		cookie := new(http.Cookie)
-		cookie.Name = "token"
-		cookie.Value = tokenString
-		cookie.HttpOnly = true
-		cookie.Path = "/"
-		c.SetCookie(cookie)
-
-		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate and authenticate user
+	res, err := a.user.Login(c.Request().Context(), req)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error": "Invalid credentials",
+		})
+	}
+
+	// Generate JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
+		ID:       res.User.ID,
+		Email:    res.User.Email,
+		Name:     res.User.FirstName + " " + res.User.LastName,
+		Username: res.User.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+	})
+
+	tokenString, err := token.SignedString([]byte(config.Env.JWTSecret))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "Failed to generate token",
+		})
+	}
+
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = tokenString
+	cookie.HttpOnly = true
+	cookie.Path = "/"
+	c.SetCookie(cookie)
+
+	return c.Redirect(http.StatusSeeOther, "/dashboard")
 }
 
 // Logout godoc
@@ -130,33 +130,27 @@ func (a *Auth) Login(i *inertia.Inertia) echo.HandlerFunc {
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Router /logout [post]
-func (h *Auth) Logout(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		cookie := new(http.Cookie)
-		cookie.Name = "token"
-		cookie.Value = ""
-		cookie.HttpOnly = true
-		cookie.Path = "/"
-		cookie.MaxAge = -1
-		cookie.Expires = time.Unix(0, 0)
-		c.SetCookie(cookie)
+func (a *Auth) Logout(c echo.Context) error {
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = ""
+	cookie.HttpOnly = true
+	cookie.Path = "/"
+	cookie.MaxAge = -1
+	cookie.Expires = time.Unix(0, 0)
+	c.SetCookie(cookie)
 
-		i.Redirect(c.Response(), c.Request(), "/")
+	a.i.Redirect(c.Response(), c.Request(), "/")
 
-		return nil
-	}
+	return nil
 }
 
-func (a *Auth) Index(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{})
-	}
+func (a *Auth) Index(c echo.Context) error {
+	return a.i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{})
 }
 
-func (a *Auth) Onboard(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return i.Render(c.Response(), c.Request(), "Home/Onboard", inertia.Props{})
-	}
+func (a *Auth) Onboard(c echo.Context) error {
+	return a.i.Render(c.Response(), c.Request(), "Home/Onboard", inertia.Props{})
 }
 
 // GithubOAuth godoc

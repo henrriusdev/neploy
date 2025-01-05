@@ -12,22 +12,24 @@ import (
 type Gateway struct {
 	gatewayService service.Gateway
 	healthChecker  service.HealthChecker
+	i              *inertia.Inertia
 }
 
-func NewGateway(gatewayService service.Gateway, healthChecker service.HealthChecker) *Gateway {
+func NewGateway(gatewayService service.Gateway, healthChecker service.HealthChecker, i *inertia.Inertia) *Gateway {
 	return &Gateway{
 		gatewayService: gatewayService,
 		healthChecker:  healthChecker,
+		i:              i,
 	}
 }
 
-func (h *Gateway) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
-	r.POST("", h.Create(i))
-	r.PUT("/:id", h.Update(i))
-	r.DELETE("/:id", h.Delete(i))
-	r.GET("/:id", h.Get(i))
-	r.GET("/app/:appId", h.ListByApp(i))
-	r.GET("/:id/health", h.CheckHealth(i))
+func (h *Gateway) RegisterRoutes(r *echo.Group) {
+	r.POST("", h.Create)
+	r.PUT("/:id", h.Update)
+	r.DELETE("/:id", h.Delete)
+	r.GET("/:id", h.Get)
+	r.GET("/app/:appId", h.ListByApp)
+	r.GET("/:id/health", h.CheckHealth)
 }
 
 // Create godoc
@@ -41,19 +43,17 @@ func (h *Gateway) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /gateways [post]
-func (h *Gateway) Create(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var gateway model.Gateway
-		if err := c.Bind(&gateway); err != nil {
-			return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
-		}
-
-		if err := h.gatewayService.Create(c.Request().Context(), gateway); err != nil {
-			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/dashboard/gateways")
+func (h *Gateway) Create(c echo.Context) error {
+	var gateway model.Gateway
+	if err := c.Bind(&gateway); err != nil {
+		return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
 	}
+
+	if err := h.gatewayService.Create(c.Request().Context(), gateway); err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/dashboard/gateways")
 }
 
 // Update godoc
@@ -68,21 +68,19 @@ func (h *Gateway) Create(i *inertia.Inertia) echo.HandlerFunc {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /gateways/{id} [put]
-func (h *Gateway) Update(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id := c.Param("id")
-		var gateway model.Gateway
-		if err := c.Bind(&gateway); err != nil {
-			return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
-		}
-
-		gateway.ID = id
-		if err := h.gatewayService.Update(c.Request().Context(), gateway); err != nil {
-			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/dashboard/gateways")
+func (h *Gateway) Update(c echo.Context) error {
+	id := c.Param("id")
+	var gateway model.Gateway
+	if err := c.Bind(&gateway); err != nil {
+		return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
 	}
+
+	gateway.ID = id
+	if err := h.gatewayService.Update(c.Request().Context(), gateway); err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/dashboard/gateways")
 }
 
 // Delete godoc
@@ -96,15 +94,13 @@ func (h *Gateway) Update(i *inertia.Inertia) echo.HandlerFunc {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /gateways/{id} [delete]
-func (h *Gateway) Delete(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id := c.Param("id")
-		if err := h.gatewayService.Delete(c.Request().Context(), id); err != nil {
-			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/dashboard/gateways")
+func (h *Gateway) Delete(c echo.Context) error {
+	id := c.Param("id")
+	if err := h.gatewayService.Delete(c.Request().Context(), id); err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
 	}
+
+	return c.Redirect(http.StatusSeeOther, "/dashboard/gateways")
 }
 
 // Get godoc
@@ -119,16 +115,14 @@ func (h *Gateway) Delete(i *inertia.Inertia) echo.HandlerFunc {
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /gateways/{id} [get]
-func (h *Gateway) Get(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id := c.Param("id")
-		gateway, err := h.gatewayService.Get(c.Request().Context(), id)
-		if err != nil {
-			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
-		}
-
-		return c.JSON(http.StatusOK, gateway)
+func (h *Gateway) Get(c echo.Context) error {
+	id := c.Param("id")
+	gateway, err := h.gatewayService.Get(c.Request().Context(), id)
+	if err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
 	}
+
+	return c.JSON(http.StatusOK, gateway)
 }
 
 // ListByApp godoc
@@ -142,16 +136,14 @@ func (h *Gateway) Get(i *inertia.Inertia) echo.HandlerFunc {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /gateways/app/{appId} [get]
-func (h *Gateway) ListByApp(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		appID := c.Param("appId")
-		gateways, err := h.gatewayService.ListByApp(c.Request().Context(), appID)
-		if err != nil {
-			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
-		}
-
-		return c.JSON(http.StatusOK, gateways)
+func (h *Gateway) ListByApp(c echo.Context) error {
+	appID := c.Param("appId")
+	gateways, err := h.gatewayService.ListByApp(c.Request().Context(), appID)
+	if err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
 	}
+
+	return c.JSON(http.StatusOK, gateways)
 }
 
 // CheckHealth godoc
@@ -165,24 +157,22 @@ func (h *Gateway) ListByApp(i *inertia.Inertia) echo.HandlerFunc {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /gateways/{id}/health [get]
-func (h *Gateway) CheckHealth(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id := c.Param("id")
-		gateway, err := h.gatewayService.Get(c.Request().Context(), id)
-		if err != nil {
-			return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
-		}
+func (h *Gateway) CheckHealth(c echo.Context) error {
+	id := c.Param("id")
+	gateway, err := h.gatewayService.Get(c.Request().Context(), id)
+	if err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
+	}
 
-		if err := h.healthChecker.CheckGatewayHealth(c.Request().Context(), gateway); err != nil {
-			return echo.NewHTTPError(http.StatusServiceUnavailable, map[string]string{
-				"status":  "unhealthy",
-				"message": err.Error(),
-			})
-		}
-
-		return c.JSON(http.StatusOK, map[string]string{
-			"status":  "healthy",
-			"message": "Gateway is healthy",
+	if err := h.healthChecker.CheckGatewayHealth(c.Request().Context(), gateway); err != nil {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, map[string]string{
+			"status":  "unhealthy",
+			"message": err.Error(),
 		})
 	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"status":  "healthy",
+		"message": "Gateway is healthy",
+	})
 }
