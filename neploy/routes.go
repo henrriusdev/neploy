@@ -14,8 +14,8 @@ import (
 )
 
 func loginRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	auth := handler.NewAuth(npy.Services.User)
-	auth.RegisterRoutes(e.Group(""), i)
+	auth := handler.NewAuth(npy.Services.User, i)
+	auth.RegisterRoutes(e.Group(""))
 }
 
 func onboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
@@ -24,13 +24,13 @@ func onboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 }
 
 func dashboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	dashboard := handler.NewDashboard(npy.Services)
-	dashboard.RegisterRoutes(e.Group("/dashboard", middleware.JWTMiddleware()), i)
+	dashboard := handler.NewDashboard(npy.Services, i)
+	dashboard.RegisterRoutes(e.Group("/dashboard", middleware.JWTMiddleware()))
 }
 
 func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	user := handler.NewUser(npy.Services.User)
-	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware()), i)
+	user := handler.NewUser(npy.Services.User, i)
+	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware()))
 }
 
 func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
