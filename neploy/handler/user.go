@@ -14,15 +14,16 @@ import (
 
 type User struct {
 	user service.User
+	i    *inertia.Inertia
 }
 
-func NewUser(user service.User) *User {
-	return &User{user: user}
+func NewUser(user service.User, i *inertia.Inertia) *User {
+	return &User{user: user, i: i}
 }
 
-func (u *User) RegisterRoutes(r *echo.Group, i *inertia.Inertia) {
+func (u *User) RegisterRoutes(r *echo.Group) {
 	r.POST("/invite", u.InviteUser)
-	r.GET("/invite/:token", u.AcceptInvite(i))
+	r.GET("/invite/:token", u.AcceptInvite)
 	r.POST("/complete-invite", u.CompleteInvite)
 }
 
@@ -135,59 +136,57 @@ func (u *User) CompleteInvite(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (u *User) AcceptInvite(i *inertia.Inertia) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		token := c.Param("token")
-		username := c.QueryParam("username")
-		email := c.QueryParam("email")
-		provider := c.QueryParam("provider")
+func (u *User) AcceptInvite(c echo.Context) error {
+	token := c.Param("token")
+	username := c.QueryParam("username")
+	email := c.QueryParam("email")
+	provider := c.QueryParam("provider")
 
-		// Get oauth_id from cookies
-		cookie, err := c.Cookie("oauth_id")
-		var oauthID string
-		if err == nil && cookie.Value != "" {
-			oauthID = cookie.Value
-			// Clear the cookie
-			cookieDel := new(http.Cookie)
-			cookieDel.Name = "oauth_id"
-			cookieDel.Value = ""
-			cookieDel.Path = "/"
-			cookieDel.Expires = time.Now().Add(-1 * time.Hour)
-			cookieDel.HttpOnly = true
-			c.SetCookie(cookieDel)
-		}
-
-		// Get the invitation
-		invitation, err := u.user.GetInvitationByToken(context.Background(), token)
-		if err != nil {
-			logger.Error("failed to get invitation: token=%s, error=%v", token, err)
-			return i.Render(c.Response(), c.Request(), "Auth/CompleteInvite", inertia.Props{
-				"token":  token,
-				"error":  "Invalid or expired invitation",
-				"status": "invalid",
-			})
-		}
-
-		props := inertia.Props{
-			"token":  token,
-			"email":  invitation.Email,
-			"status": "valid",
-		}
-
-		// Add OAuth data if present
-		if username != "" {
-			props["username"] = username
-		}
-		if email != "" {
-			props["email"] = email
-		}
-		if provider != "" {
-			props["provider"] = provider
-		}
-		if oauthID != "" {
-			props["oauth_id"] = oauthID
-		}
-
-		return i.Render(c.Response(), c.Request(), "Auth/CompleteInvite", props)
+	// Get oauth_id from cookies
+	cookie, err := c.Cookie("oauth_id")
+	var oauthID string
+	if err == nil && cookie.Value != "" {
+		oauthID = cookie.Value
+		// Clear the cookie
+		cookieDel := new(http.Cookie)
+		cookieDel.Name = "oauth_id"
+		cookieDel.Value = ""
+		cookieDel.Path = "/"
+		cookieDel.Expires = time.Now().Add(-1 * time.Hour)
+		cookieDel.HttpOnly = true
+		c.SetCookie(cookieDel)
 	}
+
+	// Get the invitation
+	invitation, err := u.user.GetInvitationByToken(context.Background(), token)
+	if err != nil {
+		logger.Error("failed to get invitation: token=%s, error=%v", token, err)
+		return u.i.Render(c.Response(), c.Request(), "Auth/CompleteInvite", inertia.Props{
+			"token":  token,
+			"error":  "Invalid or expired invitation",
+			"status": "invalid",
+		})
+	}
+
+	props := inertia.Props{
+		"token":  token,
+		"email":  invitation.Email,
+		"status": "valid",
+	}
+
+	// Add OAuth data if present
+	if username != "" {
+		props["username"] = username
+	}
+	if email != "" {
+		props["email"] = email
+	}
+	if provider != "" {
+		props["provider"] = provider
+	}
+	if oauthID != "" {
+		props["oauth_id"] = oauthID
+	}
+
+	return u.i.Render(c.Response(), c.Request(), "Auth/CompleteInvite", props)
 }

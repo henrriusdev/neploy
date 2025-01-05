@@ -33,7 +33,7 @@ function Team({
   const [isLoading, setIsLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<InviteMemberData>({
     email: "",
-    role: "member", // default role
+    role: "", 
   });
   const [teamState, setTeam] = React.useState(team);
   const { toast } = useToast();
