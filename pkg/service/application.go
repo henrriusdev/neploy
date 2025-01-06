@@ -15,6 +15,7 @@ import (
 	"neploy.dev/config"
 	"neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
+	neployway "neploy.dev/pkg/gateway"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
@@ -39,35 +40,26 @@ type Application interface {
 }
 
 type application struct {
-	repo    repository.Application
-	stat    repository.ApplicationStat
-	tech    repository.TechStack
-	gateway repository.Gateway
-	hub     *websocket.Hub
-	docker  *docker.Docker
+	repos  repository.Repositories
+	router *neployway.Router
+	hub    *websocket.Hub
+	docker *docker.Docker
 }
 
-func NewApplication(repo repository.Application, stat repository.ApplicationStat, tech repository.TechStack, gateway repository.Gateway) Application {
-	return &application{
-		repo:    repo,
-		stat:    stat,
-		tech:    tech,
-		gateway: gateway,
-		hub:     websocket.GetHub(),
-		docker:  docker.NewDocker(),
-	}
+func NewApplication(repos repository.Repositories, router *neployway.Router) Application {
+	return &application{repos, router, websocket.GetHub(), docker.NewDocker()}
 }
 
 func (a *application) Create(ctx context.Context, app model.Application) (string, error) {
-	return a.repo.Insert(ctx, app)
+	return a.repos.Application.Insert(ctx, app)
 }
 
 func (a *application) Get(ctx context.Context, id string) (model.Application, error) {
-	return a.repo.GetByID(ctx, id)
+	return a.repos.Application.GetByID(ctx, id)
 }
 
 func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
-	apps, err := a.repo.GetAll(ctx)
+	apps, err := a.repos.Application.GetAll(ctx)
 	if err != nil {
 		logger.Error("error getting applications: %v", err)
 		return nil, err
@@ -75,7 +67,7 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 
 	var fullApps []model.FullApplication
 	for _, app := range apps {
-		stats, err := a.stat.GetByApplicationID(ctx, app.ID)
+		stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
 		if err != nil {
 			logger.Error("error getting application stat: %v", err)
 			return nil, err
@@ -83,7 +75,7 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 
 		var tech model.TechStack
 		if app.TechStackID != nil {
-			tech, err = a.tech.GetByID(ctx, *app.TechStackID)
+			tech, err = a.repos.TechStack.GetByID(ctx, *app.TechStackID)
 			if err != nil {
 				logger.Error("error getting tech stack: %v", err)
 				return nil, err
@@ -138,23 +130,23 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 }
 
 func (a *application) Update(ctx context.Context, app model.Application) error {
-	return a.repo.Update(ctx, app)
+	return a.repos.Application.Update(ctx, app)
 }
 
 func (a *application) GetStat(ctx context.Context, id string) (model.ApplicationStat, error) {
-	return a.stat.GetByID(ctx, id)
+	return a.repos.ApplicationStat.GetByID(ctx, id)
 }
 
 func (a *application) CreateStat(ctx context.Context, stat model.ApplicationStat) error {
-	return a.stat.Insert(ctx, stat)
+	return a.repos.ApplicationStat.Insert(ctx, stat)
 }
 
 func (a *application) UpdateStat(ctx context.Context, stat model.ApplicationStat) error {
-	return a.stat.Update(ctx, stat)
+	return a.repos.ApplicationStat.Update(ctx, stat)
 }
 
 func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
-	apps, err := a.stat.GetAll(ctx)
+	apps, err := a.repos.ApplicationStat.GetAll(ctx)
 	if err != nil {
 		logger.Error("error getting all application stats: %v", err)
 		return 0, 0, err
@@ -172,7 +164,7 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 }
 
 func (a *application) Deploy(ctx context.Context, id string, repoURL string, branch string) error {
-	app, err := a.repo.GetByID(ctx, id)
+	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return err
@@ -197,7 +189,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 		return err
 	}
 
-	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	tech, err := a.repos.TechStack.FindOrCreate(ctx, techStack)
 	if err != nil {
 		logger.Error("error finding or creating tech stack: %v", err)
 		return err
@@ -274,7 +266,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 
 	// Update application
 	app.TechStackID = &tech.ID
-	if err := a.repo.Update(ctx, app); err != nil {
+	if err := a.repos.Application.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return err
 	}
@@ -354,7 +346,7 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 		ApplicationID: appID,
 	}
 
-	if err := a.gateway.Insert(ctx, gateway); err != nil {
+	if err := a.repos.Gateway.Insert(ctx, gateway); err != nil {
 		logger.Error("error creating gateway: %v", err)
 		// Continue even if gateway creation fails
 	}
@@ -373,8 +365,20 @@ func (a *application) createAndStartContainer(ctx context.Context, imageName, co
 
 	// Update gateway status to active
 	gateway.Status = "active"
-	if err := a.gateway.Update(ctx, gateway); err != nil {
+	if err := a.repos.Gateway.Update(ctx, gateway); err != nil {
 		logger.Error("error updating gateway status: %v", err)
+	}
+
+	route := neployway.Route{
+		AppID:     appID,
+		Port:      port,
+		Domain:    config.Env.DefaultDomain,
+		Path:      "/" + containerName,
+		Subdomain: "",
+	}
+	if err := a.router.AddRoute(route); err != nil {
+		logger.Error("Failed to add route: %v", err)
+		return
 	}
 
 	if a.hub != nil {
@@ -471,7 +475,7 @@ func (a *application) configurePort(dockerfilePath string, interactive bool) (st
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
-	app, err := a.repo.GetByID(ctx, id)
+	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return "", err
@@ -495,7 +499,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		return "", err
 	}
 
-	tech, err := a.tech.FindOrCreate(ctx, techStack)
+	tech, err := a.repos.TechStack.FindOrCreate(ctx, techStack)
 	if err != nil {
 		logger.Error("error finding or creating tech stack: %v", err)
 		return "", err
@@ -601,7 +605,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 
 	// Update application
 	app.TechStackID = &tech.ID
-	if err := a.repo.Update(ctx, app); err != nil {
+	if err := a.repos.Application.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return "", err
 	}
@@ -624,8 +628,20 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 
 	app.StorageLocation = path
 	app.TechStackID = &tech.ID
-	if err := a.repo.Update(ctx, app); err != nil {
+	if err := a.repos.Application.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
+		return "", err
+	}
+
+	route := neployway.Route{
+		AppID:     app.ID,
+		Port:      port,
+		Domain:    config.Env.DefaultDomain,
+		Path:      "/" + containerName,
+		Subdomain: "",
+	}
+	if err := a.router.AddRoute(route); err != nil {
+		logger.Error("Failed to add route: %v", err)
 		return "", err
 	}
 
@@ -634,21 +650,21 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 
 func (a *application) Delete(ctx context.Context, id string) error {
 	// Delete associated gateways first
-	// gateways, err := a.gateway.GetByApplicationID(ctx, id)
-	// if err != nil {
-	// 	logger.Error("error getting gateways: %v", err)
-	// 	return err
-	// }
+	gateways, err := a.repos.Gateway.GetByApplicationID(ctx, id)
+	if err != nil {
+		logger.Error("error getting gateways: %v", err)
+		return err
+	}
 
-	// for _, gateway := range gateways {
-	// 	if err := a.gateway.Delete(ctx, gateway.ID); err != nil {
-	// 		logger.Error("error deleting gateway: %v", err)
-	// 		// Continue with other gateways
-	// 	}
-	// }
+	for _, gateway := range gateways {
+		if err := a.repos.Gateway.Delete(ctx, gateway.ID); err != nil {
+			logger.Error("error deleting gateway: %v", err)
+			// Continue with other gateways
+		}
+	}
 
 	// Get application details
-	app, err := a.repo.GetByID(ctx, id)
+	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return err
@@ -673,11 +689,13 @@ func (a *application) Delete(ctx context.Context, id string) error {
 		}
 	}
 
-	return a.repo.Delete(ctx, id)
+	a.router.RemoveRoute("/" + containerName)
+
+	return a.repos.Application.Delete(ctx, id)
 }
 
 func (a *application) StartContainer(ctx context.Context, id string) error {
-	app, err := a.repo.GetByID(ctx, id)
+	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return err
@@ -693,7 +711,7 @@ func (a *application) StartContainer(ctx context.Context, id string) error {
 }
 
 func (a *application) StopContainer(ctx context.Context, id string) error {
-	app, err := a.repo.GetByID(ctx, id)
+	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return err
