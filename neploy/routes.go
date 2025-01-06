@@ -52,7 +52,6 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	roleRoutes(e, i, npy)
 
 	gateways, _ := npy.Services.Gateway.GetAll(context.Background())
-	router := neployway.NewRouter(npy.Repositories.ApplicationStat)
 	for _, gateway := range gateways {
 		route := neployway.Route{
 			AppID:     gateway.ApplicationID,
@@ -61,13 +60,13 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 			Path:      gateway.Path,
 			Subdomain: gateway.Subdomain,
 		}
-		if err := router.AddRoute(route); err != nil {
+		if err := npy.Router.AddRoute(route); err != nil {
 			logger.Error("Failed to add route: %v", err)
 		}
 	}
 
 	// Use the router as a fallback handler for unmatched routes
 	e.Any("/*", echo.WrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		router.ServeHTTP(w, r)
+		npy.Router.ServeHTTP(w, r)
 	})))
 }
