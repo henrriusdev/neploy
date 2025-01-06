@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
+	neployway "neploy.dev/pkg/gateway"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
@@ -22,6 +23,7 @@ type Neploy struct {
 	Port         string
 	Services     service.Services
 	Repositories repository.Repositories
+	Router       *neployway.Router
 }
 
 func Start(npy Neploy) {
@@ -57,6 +59,10 @@ func Start(npy Neploy) {
 	vldtr := validator.New()
 	e.Validator = &CustomValidator{validator: vldtr}
 
+	// API Gateway router
+	router := neployway.NewRouter(npy.Repositories.ApplicationStat)
+	npy.Router = router
+
 	// Routes
 	RegisterRoutes(e, i, npy)
 
@@ -77,7 +83,7 @@ func Start(npy Neploy) {
 }
 
 func NewServices(npy Neploy) service.Services {
-	application := service.NewApplication(npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.TechStack, npy.Repositories.Gateway)
+	application := service.NewApplication(npy.Repositories, npy.Router)
 	metadata := service.NewMetadata(npy.Repositories.Metadata)
 	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
