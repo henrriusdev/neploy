@@ -633,23 +633,35 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 		return "", err
 	}
 
+	route := neployway.Route{
+		AppID:     app.ID,
+		Port:      port,
+		Domain:    config.Env.DefaultDomain,
+		Path:      "/" + containerName,
+		Subdomain: "",
+	}
+	if err := a.router.AddRoute(route); err != nil {
+		logger.Error("Failed to add route: %v", err)
+		return "", err
+	}
+
 	return path, nil
 }
 
 func (a *application) Delete(ctx context.Context, id string) error {
 	// Delete associated gateways first
-	// gateways, err := a.repos.Gateway.GetByApplicationID(ctx, id)
-	// if err != nil {
-	// 	logger.Error("error getting gateways: %v", err)
-	// 	return err
-	// }
+	gateways, err := a.repos.Gateway.GetByApplicationID(ctx, id)
+	if err != nil {
+		logger.Error("error getting gateways: %v", err)
+		return err
+	}
 
-	// for _, gateway := range gateways {
-	// 	if err := a.repos.Gateway.Delete(ctx, gateway.ID); err != nil {
-	// 		logger.Error("error deleting gateway: %v", err)
-	// 		// Continue with other gateways
-	// 	}
-	// }
+	for _, gateway := range gateways {
+		if err := a.repos.Gateway.Delete(ctx, gateway.ID); err != nil {
+			logger.Error("error deleting gateway: %v", err)
+			// Continue with other gateways
+		}
+	}
 
 	// Get application details
 	app, err := a.repos.Application.GetByID(ctx, id)
@@ -676,6 +688,8 @@ func (a *application) Delete(ctx context.Context, id string) error {
 			// Continue with deletion even if file removal fails
 		}
 	}
+
+	a.router.RemoveRoute("/" + containerName)
 
 	return a.repos.Application.Delete(ctx, id)
 }
