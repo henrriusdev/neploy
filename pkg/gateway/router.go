@@ -101,11 +101,10 @@ func (r *Router) AddRoute(route Route) error {
 }
 
 // RemoveRoute removes a route from the router
-func (r *Router) RemoveRoute(route Route) {
+func (r *Router) RemoveRoute(routeKey string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	routeKey := route.Path
 	delete(r.routes, routeKey)
 	delete(r.routeInfo, routeKey)
 }
