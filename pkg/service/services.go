@@ -8,7 +8,10 @@ type Services struct {
 	Metadata    Metadata
 	Onboard     Onboard
 	Role        Role
+	TechStack   TechStack
+	Trace       Trace
 	User        User
+	Visitor     Visitor
 }
 
 func NotFound(entity string) error {
