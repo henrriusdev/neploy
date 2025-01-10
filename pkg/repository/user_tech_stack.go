@@ -102,7 +102,7 @@ func (u *userTechStack[T]) GetByUserID(ctx context.Context, userID string) ([]mo
 			goqu.On(goqu.I("u.id").Eq(goqu.I("ut.user_id"))),
 		).
 		LeftJoin(
-			goqu.T("tech_stack").As("t"),
+			goqu.T("tech_stacks").As("t"),
 			goqu.On(goqu.I("t.id").Eq(goqu.I("ut.tech_stack_id"))),
 		).
 		Where(goqu.I("u.id").Eq(userID))
@@ -138,7 +138,7 @@ func (u *userTechStack[T]) GetByTechStackID(ctx context.Context, techStackID str
 			goqu.On(goqu.I("u.id").Eq(goqu.I("ut.user_id"))),
 		).
 		LeftJoin(
-			goqu.T("tech_stack").As("t"),
+			goqu.T("tech_stacks").As("t"),
 			goqu.On(goqu.I("t.id").Eq(goqu.I("ut.tech_stack_id"))),
 		).
 		Where(goqu.I("t.id").Eq(techStackID))

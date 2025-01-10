@@ -2,7 +2,7 @@ import { OnboardingSidebar } from '@/components/OnboardingSidebar'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from '@/hooks/use-toast'
-import { router } from '@inertiajs/react'
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 import ProviderStep from '../Auth/InviteSteps/ProviderStep'
 import UserDataStep from '../Auth/InviteSteps/UserDataStep'
@@ -69,29 +69,36 @@ export default function Onboard({ email, username }: Props) {
         setStep('service')
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const payload = {
             adminUser: adminData,
             roles: roles,
             metadata: serviceData,
         }
 
-        router.post('/onboard', payload, {
-            onSuccess: () => {
+        try {
+            const response = await axios.post('/onboard', payload);
+            
+            if (response.data.success) {
                 toast({
                     title: "Success",
                     description: "Your account has been set up successfully!",
-                })
-                router.visit('/dashboard')
-            },
-            onError: (error) => {
+                });
+                window.location.href = '/';
+            } else {
                 toast({
                     title: "Error",
-                    description: error?.message || "Failed to complete setup",
+                    description: response.data.message || "Failed to complete setup",
                     variant: "destructive",
-                })
+                });
             }
-        })
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error?.response?.data?.message || "Failed to complete setup",
+                variant: "destructive",
+            });
+        }
     }
 
     const renderStep = () => {
@@ -177,7 +184,7 @@ export default function Onboard({ email, username }: Props) {
 
     return (
         <div className="flex min-h-screen">
-            <OnboardingSidebar currentStep={step} />
+            <OnboardingSidebar currentStep={step} className='w-1/4' />
             <div className="flex-1 p-6">
                 <h1 className="text-3xl font-bold mb-6 text-center">Setup Your Account</h1>
                 {renderStep()}

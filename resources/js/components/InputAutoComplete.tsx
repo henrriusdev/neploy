@@ -6,9 +6,11 @@ import { Option } from "@/types/props";
 export function InputAutoComplete({
   OPTIONS,
   field,
+  placeholder,
 }: {
   OPTIONS: Option[];
   field: ControllerRenderProps<any>;
+  placeholder?: string;
 }) {
   const [isLoading, setLoading] = useState(false);
   const [isDisabled, setDisabled] = useState(false);
@@ -35,10 +37,10 @@ export function InputAutoComplete({
       <AutoComplete
         options={OPTIONS}
         emptyMessage="No results."
-        placeholder="Find something"
+        placeholder={placeholder}
         isLoading={isLoading}
         disabled={isDisabled}
-        value={field.value}
+        value={selectedOption}
         onValueChange={handleValueChange}
       />
     </div>

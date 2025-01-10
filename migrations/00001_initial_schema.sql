@@ -166,21 +166,6 @@ execute function update_updated_at_column ();
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-create table public.application_environments (
-  application_id uuid references public.applications (id),
-  environment_id uuid references public.environments (id),
-  created_at timestamptz default current_timestamp,
-  updated_at timestamptz default current_timestamp,
-  deleted_at timestamptz default null,
-  primary key (application_id, environment_id)
-);
-
-create trigger update_application_environments_updated_at before
-update on public.application_environments for each row
-execute function update_updated_at_column ();
--- +goose StatementEnd
-
--- +goose StatementBegin
 create table public.refresh_tokens (
   id uuid primary key default gen_random_uuid (),
   user_id uuid references public.users (id),
@@ -283,10 +268,6 @@ create index idx_traces_user_id on public.traces using btree (user_id);
 
 create index idx_gateways_application_id on public.gateways using btree (application_id);
 
-create index idx_application_environments_application_id on public.application_environments using btree (application_id);
-
-create index idx_application_environments_environment_id on public.application_environments using btree (environment_id);
-
 create index idx_refresh_tokens_user_id on public.refresh_tokens using btree (user_id);
 
 create index idx_application_stats_application_id on public.application_stats using btree (application_id);
@@ -323,8 +304,6 @@ drop table public.visitor_traces cascade;
 drop table public.visitor_info cascade;
 drop table public.application_stats cascade;
 drop table public.refresh_tokens cascade;
-drop table public.application_environments cascade;
-drop table public.environments cascade;
 drop table public.gateways cascade;
 drop table public.traces cascade;
 drop table public.applications cascade;

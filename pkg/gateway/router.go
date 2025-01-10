@@ -39,6 +39,7 @@ func NewRouter(appStatRepo repository.ApplicationStat) *Router {
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),
 		metrics:   metrics,
+		mu:        sync.RWMutex{},
 	}
 
 	if metrics != nil {

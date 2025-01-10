@@ -168,7 +168,7 @@ func (s *gateway) RemoveRoute(ctx context.Context, gateway model.Gateway) error 
 		Path:      gateway.Path,
 	}
 
-	s.router.RemoveRoute(route)
+	s.router.RemoveRoute(route.Path)
 	return nil
 }
 

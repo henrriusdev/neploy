@@ -1,3 +1,16 @@
-export const icons = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Check", "X", "Search", "Loading", "ChevronLeft", "ChevronRight", "ChevronDown", "ChevronUp", "Activity", "AlarmClock", "AlignCenter", "Angry", "Antenna", "AudioLines", "AudioWaveform", "Award", "Axe", "Bean", "Beer", "Bell", "Binoculars", "Blocks", "Bomb", "Box", "Braces", "Brain", "Bug", "Chrome", "Code", "CodeXml", "Coffee", "Database", "FlaskConical", "Flame", "Folder", "Gamepad2", "Gem", "Gift", "Handshake", "Headphones", "Heart", "Home", "Hourglass", "Key", "Laptop", "Lightbulb", "Lock", "MagicWand", "Map", "Medal", "Microphone", "Moon", "MusicNote", "Palette", "PaperPlane", "Pencil", "Phone", "PiggyBank", "Pin", "Plane", "Plug", "Power", "Rocket", "Ruler", "Scale", "Scissors", "Screwdriver", "Shield", "ShoppingCart", "Skull", "Smiley", "Snowflake", "Speaker", "Star", "Sun", "Sword", "Tag", "Target", "Trophy", "Umbrella", "User", "Users", "Wallet", "Wrench", "ZoomIn", "ZoomOut", "ZoomReset", "Zoom", "Zap"];
+import { icons as lucideIconsList } from 'lucide-react';
+import * as RadixIcons from "@radix-ui/react-icons";
 
-export type Icon = "ArrowDown" | "ArrowUp" | "ArrowLeft" | "ArrowRight" | "Check" | "X" | "Search" | "Loading" | "ChevronLeft" | "ChevronRight" | "ChevronDown" | "ChevronUp" | "Activity" | "AlarmClock" | "AlignCenter" | "Angry" | "Antenna" | "AudioLines" | "AudioWaveform" | "Award" | "Axe" | "Bean" | "Beer" | "Bell" | "Binoculars" | "Blocks" | "Bomb" | "Box" | "Braces" | "Brain" | "Bug" | "Chrome" | "Code" | "CodeXml" | "Coffee" | "Database" | "FlaskConical" | "Flame" | "Folder" | "Gamepad2" | "Gem" | "Gift" | "Handshake" | "Headphones" | "Heart" | "Home" | "Hourglass" | "Key" | "Laptop" | "Lightbulb" | "Lock" | "MagicWand" | "Map" | "Medal" | "Microphone" | "Moon" | "MusicNote" | "Palette" | "PaperPlane" | "Pencil" | "Phone" | "PiggyBank" | "Pin" | "Plane" | "Plug" | "Power" | "Rocket" | "Ruler" | "Scale" | "Scissors" | "Screwdriver" | "Shield" | "ShoppingCart" | "Skull" | "Smiley" | "Snowflake" | "Speaker" | "Star" | "Sun" | "Sword" | "Tag" | "Target" | "Trophy" | "Umbrella" | "User" | "Users" | "Wallet" | "Wrench" | "ZoomIn" | "ZoomOut" | "ZoomReset" | "Zoom" | "Zap";
+// Get Lucide icons
+const lucideIconNames = Object.keys(lucideIconsList);
+
+// Get Radix icons and remove the 'Icon' suffix
+const radixIconNames = Object.keys(RadixIcons)
+  .filter((key) => typeof RadixIcons[key as keyof typeof RadixIcons] === "function")
+  .map((name) => name.replace(/Icon$/, ""));
+
+// Combine both sets of icons and sort alphabetically
+export const icons = [...new Set([...lucideIconNames, ...radixIconNames])].sort();
+
+// Create a type union of all icon names
+export type Icon = typeof icons[number];

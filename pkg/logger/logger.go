@@ -30,26 +30,26 @@ func getCaller() string {
 func Error(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	caller := getCaller()
-	defaultLogger.Add(color.FgWhite, color.BgRed).Printf("[ERROR] %s | %s", caller, msg)
+	defaultLogger.Add(color.FgWhite, color.BgRed).Printf("[ERROR] %s | %s\n", caller, msg)
 }
 
 // Info logs an info message
 func Info(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	caller := getCaller()
-	defaultLogger.Add(color.FgWhite, color.BgGreen).Printf("[INFO] %s | %s", caller, msg)
+	defaultLogger.Add(color.FgWhite, color.BgGreen).Printf("[INFO] %s | %s\n", caller, msg)
 }
 
 // Debug logs a debug message
 func Debug(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	caller := getCaller()
-	defaultLogger.Add(color.FgWhite, color.BgBlue).Printf("[DEBUG] %s | %s", caller, msg)
+	defaultLogger.Add(color.FgWhite, color.BgBlue).Printf("[DEBUG] %s | %s\n", caller, msg)
 }
 
 // Warn logs a warning message
 func Warn(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	caller := getCaller()
-	defaultLogger.Add(color.FgWhite, color.BgYellow).Printf("[WARN] %s | %s", caller, msg)
+	defaultLogger.Add(color.FgWhite, color.BgYellow).Printf("[WARN] %s | %s\n", caller, msg)
 }

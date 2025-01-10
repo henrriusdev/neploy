@@ -86,16 +86,40 @@ export default function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
                                 <FormItem>
                                     <FormLabel>Icon</FormLabel>
                                     <FormControl>
-                                        <Controller
-                                            control={form.control}
-                                            name="icon"
-                                            render={({ field }) => (
-                                                <InputAutoComplete
-                                                    field={field}
-                                                    OPTIONS={icons.map((icon) => ({ value: icon, label: icon }))}
-                                                />
+                                        <div className="flex gap-2 items-center">
+                                            {field.value && (
+                                                <div className="flex-shrink-0">
+                                                    <RoleIcon 
+                                                        icon={field.value} 
+                                                        color={form.getValues("color") || "#000000"} 
+                                                        size={32}
+                                                    />
+                                                </div>
                                             )}
-                                        />
+                                            <div className="flex-grow">
+                                                <Controller
+                                                    control={form.control}
+                                                    name="icon"
+                                                    render={({ field }) => (
+                                                        <InputAutoComplete
+                                                            field={field}
+                                                            OPTIONS={icons.map((icon) => ({
+                                                                value: icon,
+                                                                label: icon,
+                                                                icon: (
+                                                                    <RoleIcon
+                                                                        icon={icon}
+                                                                        color={form.getValues("color") || "#000000"}
+                                                                        size={24}
+                                                                    />
+                                                                ),
+                                                            }))}
+                                                            placeholder="Search for an icon..."
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

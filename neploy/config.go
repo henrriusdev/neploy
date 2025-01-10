@@ -35,6 +35,10 @@ func Start(npy Neploy) {
 	repos := NewRepositories(npy)
 	npy.Repositories = repos
 
+	// Initialize router
+	router := neployway.NewRouter(npy.Repositories.ApplicationStat)
+	npy.Router = router
+
 	// Initialize services
 	services := NewServices(npy)
 	npy.Services = services
@@ -58,10 +62,6 @@ func Start(npy Neploy) {
 	// Validator
 	vldtr := validator.New()
 	e.Validator = &CustomValidator{validator: vldtr}
-
-	// API Gateway router
-	router := neployway.NewRouter(npy.Repositories.ApplicationStat)
-	npy.Router = router
 
 	// Routes
 	RegisterRoutes(e, i, npy)
