@@ -84,7 +84,7 @@ export default function Onboard({ email, username }: Props) {
                     title: "Success",
                     description: "Your account has been set up successfully!",
                 });
-                window.location.href = '/';
+                window.location.replace('/');
             } else {
                 toast({
                     title: "Error",

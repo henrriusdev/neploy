@@ -98,7 +98,7 @@ export function BaseChart({
   return (
     <Card className={`bg-card ${className}`}>
       <CardHeader>
-        <CardTitle className="text-primary-foreground">{title}</CardTitle>
+        <CardTitle className="text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={config} className="h-[350px] w-full">

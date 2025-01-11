@@ -94,7 +94,7 @@ type Gateway struct {
 type RefreshToken struct {
 	BaseEntity
 	UserID string `json:"user_id" db:"user_id"`
-	Token  string `json:"token" db:"token"`
+	Token  string `json:"token" db:"token"` // hello
 }
 
 type ApplicationStat struct {

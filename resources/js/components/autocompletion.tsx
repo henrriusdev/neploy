@@ -139,7 +139,7 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
         <div className="relative mt-1">
           <div
             className={cn(
-              "animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-xl bg-white outline-none",
+              "animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-xl bg-background text-white outline-none",
               isOpen ? "block" : "hidden"
             )}>
             <CommandList className="rounded-lg ring-1 ring-slate-200">
@@ -164,8 +164,10 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
                         }}
                         onSelect={() => handleSelectOption(option)}
                         className={cn(
-                          "flex w-full items-center gap-2",
-                          !isSelected ? "pl-8" : null
+                          "flex w-full items-center gap-2 text-white",
+                          !isSelected
+                            ? "pl-8"
+                            : "bg-primary text-primary-foreground"
                         )}>
                         {isSelected ? <Check className="w-4" /> : null}
                         {option.label}

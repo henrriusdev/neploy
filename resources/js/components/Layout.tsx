@@ -87,7 +87,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton
                       size="lg"
-                      className="w-full justify-start gap-2">
+                      variant="outline"
+                      className="w-full justify-start gap-2 !bg-transparent hover:text-foreground">
                       <Avatar className="h-6 w-6">
                         <AvatarImage src={user.avatar} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>

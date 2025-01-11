@@ -152,20 +152,6 @@ execute function update_updated_at_column ();
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-create table public.environments (
-  id uuid primary key default gen_random_uuid (),
-  name text not null unique,
-  created_at timestamptz default current_timestamp,
-  updated_at timestamptz default current_timestamp,
-  deleted_at timestamptz default null
-);
-
-create trigger update_environments_updated_at before
-update on public.environments for each row
-execute function update_updated_at_column ();
--- +goose StatementEnd
-
--- +goose StatementBegin
 create table public.refresh_tokens (
   id uuid primary key default gen_random_uuid (),
   user_id uuid references public.users (id),
@@ -185,7 +171,6 @@ execute function update_updated_at_column ();
 create table public.application_stats (
   id uuid primary key default gen_random_uuid (),
   application_id uuid references public.applications (id),
-  environment_id uuid references public.environments (id),
   date date not null,
   requests bigint default 0,
   errors bigint default 0,

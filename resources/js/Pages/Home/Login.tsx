@@ -59,7 +59,7 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Side Content */}
-      <div className="md:w-2/5 bg-accent p-8 flex flex-col justify-center">
+      <div className="md:w-2/5 bg-gradient-to-r from-[#2b354c] to-background from-30% to-100% p-8 flex flex-col justify-center">
         <div className="mb-8">
           <img
             src="/placeholder.svg?height=80&width=80"
