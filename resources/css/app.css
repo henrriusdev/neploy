@@ -42,12 +42,12 @@
     --ring: 191 92% 48%;
 
     /* Sidebar Light Theme */
-    --sidebar-background: 222 63% 10%;
+    --sidebar-background: 222 63% 15%;
     --sidebar-foreground: 222 9% 97.4%;
     --sidebar-primary: 191 92% 48%;
     --sidebar-primary-foreground: 222 9% 4.8%;
-    --sidebar-accent: 157 68% 51%;
-    --sidebar-accent-foreground: 222 9% 97.4%;
+    --sidebar-accent: 191 92% 51%;
+    --sidebar-accent-foreground: 222 9% 3%;
     --sidebar-border: 222 45% 14.4%;
     --sidebar-ring: 191 92% 48%;
   }
@@ -84,7 +84,6 @@
 
     --radius: 0.5rem;
 
-    /* Sidebar Dark Theme */
     --sidebar-background: 222 63% 8%;
     --sidebar-foreground: 222 9% 98%;
     --sidebar-primary: 191 92% 48%;
