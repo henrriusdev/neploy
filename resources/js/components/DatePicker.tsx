@@ -105,7 +105,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
               </Button>
             </FormControl>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-accent" align="start">
+          <PopoverContent className="w-auto p-0 bg-background" align="start">
             <div className="w-[350px] p-3 space-y-3 flex items-center justify-between">
               <div className="flex space-x-1">
                 <Select

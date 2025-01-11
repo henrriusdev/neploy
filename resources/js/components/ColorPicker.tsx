@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ControllerRenderProps } from "react-hook-form";
+import { techStackColors } from "@/lib/colors";
 
 export interface ColorPickerProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -58,16 +59,7 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
               </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64">
-            <Tabs defaultValue="solid">
-              <TabsList className="w-full mb-4">
-                <TabsTrigger className="flex-1" value="solid">
-                  Solid
-                </TabsTrigger>
-                <TabsTrigger className="flex-1" value="gradient">
-                  Gradient
-                </TabsTrigger>
-              </TabsList>
+          <PopoverContent className="w-64 bg-background text-!white">
               <div className="flex flex-wrap gap-1 mb-4">
                 <Button
                   variant={"outline"}
@@ -86,25 +78,7 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                 >
                   <Pencil1Icon />
                 </Button>
-                {[
-                  "#000000",
-                  "#f44336",
-                  "#e91e63",
-                  "#9c27b0",
-                  "#673ab7",
-                  "#3f51b5",
-                  "#2196f3",
-                  "#03a9f4",
-                  "#00bcd4",
-                  "#009688",
-                  "#4caf50",
-                  "#8bc34a",
-                  "#ffc107",
-                  "#ff9800",
-                  "#ff5722",
-                  "#795548",
-                  "#607d8b",
-                ].map((color) => (
+                {techStackColors.map((color) => (
                   <Button
                     key={color}
                     variant={"outline"}
@@ -133,7 +107,6 @@ const ColorPicker = React.forwardRef<HTMLInputElement, ColorPickerProps>(
                   />
                 </div>
               </div>
-            </Tabs>
           </PopoverContent>
         </Popover>
         <Input

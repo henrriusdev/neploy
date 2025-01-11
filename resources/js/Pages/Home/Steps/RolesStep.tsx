@@ -87,15 +87,6 @@ export default function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
                                     <FormLabel>Icon</FormLabel>
                                     <FormControl>
                                         <div className="flex gap-2 items-center">
-                                            {field.value && (
-                                                <div className="flex-shrink-0">
-                                                    <RoleIcon 
-                                                        icon={field.value} 
-                                                        color={form.getValues("color") || "#000000"} 
-                                                        size={32}
-                                                    />
-                                                </div>
-                                            )}
                                             <div className="flex-grow">
                                                 <Controller
                                                     control={form.control}
