@@ -93,7 +93,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                         <AvatarImage src={user.avatar} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col items-start text-left">
+                      <div className"flex flex-col items-start text-left">
                         <span className="text-xs font-medium">{user.name}</span>
                         <span className="text-xs text-sidebar-foreground/60">
                           {user.email}
