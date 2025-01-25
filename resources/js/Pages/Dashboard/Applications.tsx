@@ -9,14 +9,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Application } from "@/types/common";
 import type { ActionMessage, ActionResponse, Input as InputType, ProgressMessage } from "@/types/websocket";
-import axios from "axios";
 import { debounce } from "lodash";
 import { Grid, List, PlusCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
 import { ApplicationsProps } from "@/types/props";
-
+import { 
+  useGetAllApplicationsQuery, 
+  useLoadBranchesQuery, 
+  useCreateApplicationMutation, 
+  useDeployApplicationMutation,
+  useUploadApplicationMutation,
+  useStartApplicationMutation,
+  useStopApplicationMutation,
+  useDeleteApplicationMutation
+} from "@/services/api/applications";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -49,15 +57,10 @@ function Applications({
   logoUrl,
   applications: initialApplications = null,
 }: ApplicationsProps) {
-  const [applications, setApplications] = useState<Application[] | null>(
-    initialApplications
-  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
   const [branches, setBranches] = useState<string[]>([]);
-
   const [actionDialog, setActionDialog] = useState<{
     show: boolean;
     title: string;
@@ -73,6 +76,180 @@ function Applications({
   });
   const { toast } = useToast();
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
+
+  const { data: applications, refetch: refreshApplications, error: applicationsError } = useGetAllApplicationsQuery(undefined, {
+    // Refetch cada 30 segundos
+    pollingInterval: 30000,
+    refetchOnFocus: true,
+    refetchOnReconnect: true
+  });
+
+  const { data: branchesData, isFetching: isLoadingBranches, error: branchesError } = useLoadBranchesQuery(
+    { repoUrl: "" },
+    {
+      skip: true,
+    }
+  );
+
+  useEffect(() => {
+    if (applicationsError) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch applications",
+        variant: "destructive",
+      });
+    }
+  }, [applicationsError]);
+
+  useEffect(() => {
+    if (branchesError) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch repository branches",
+        variant: "destructive",
+      });
+    }
+  }, [branchesError]);
+
+  useEffect(() => {
+    if (branchesData?.branches) {
+      setBranches(branchesData.branches);
+    }
+  }, [branchesData]);
+
+  const debouncedFetchBranches = useMemo(
+    () => debounce((repoUrl: string) => {
+      if (!repoUrl) {
+        setBranches([]);
+        return;
+      }
+      // Refetch con el nuevo repoUrl
+      useLoadBranchesQuery({ repoUrl }, { skip: false });
+    }, 1000),
+    []
+  );
+
+  const [createApplication] = useCreateApplicationMutation();
+  const [deployApplication] = useDeployApplicationMutation();
+  const [uploadApplication] = useUploadApplicationMutation();
+  const [startApplication] = useStartApplicationMutation();
+  const [stopApplication] = useStopApplicationMutation();
+  const [deleteApplication] = useDeleteApplicationMutation();
+
+  const handleApplicationAction = async (
+    appId: string,
+    action: "start" | "stop" | "delete"
+  ) => {
+    try {
+      if (action === "delete") {
+        await deleteApplication({ appId });
+      } else if (action === "start") {
+        await startApplication({ appId });
+      } else if (action === "stop") {
+        await stopApplication({ appId });
+      }
+
+      toast({
+        title: "Success",
+        description: `Application ${action} request sent`,
+      });
+      
+      refreshApplications();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${action} application`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onSubmit = async (
+    values: z.infer<typeof uploadFormSchema>,
+    file: File | null
+  ) => {
+    if (!values.appName) {
+      toast({
+        title: "Error",
+        description: "Application name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!file && !values.repoUrl) {
+      toast({
+        title: "Error",
+        description: "Please provide either a file or a repository URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const response = await createApplication({
+        appName: values.appName,
+        description:
+          values.description ||
+          `Application created from ${
+            file ? "file upload" : "repository " + values.repoUrl
+          }`,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to create application');
+      }
+
+      const applicationId = response.data.id;
+
+      if (values.repoUrl) {
+        if (!values.branch) {
+          toast({
+            title: "Error",
+            description: "Please select a branch",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        await deployApplication({
+          appId: applicationId,
+          repoUrl: values.repoUrl,
+          branch: values.branch,
+        });
+
+        toast({
+          title: "Success",
+          description: "Deployment started successfully",
+        });
+      }
+
+      if (file) {
+        await uploadApplication({
+          appId: applicationId,
+          file: file
+        });
+
+        toast({
+          title: "Success",
+          description: "Application uploaded successfully",
+        });
+      }
+
+      refreshApplications();
+      setUploadDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   useEffect(() => {
     const unsubProgress = onNotification((message: ProgressMessage) => {
@@ -141,192 +318,29 @@ function Applications({
     };
   }, [onNotification, onInteractive, sendMessage, toast]);
 
-  const refreshApplications = async () => {
-    try {
-      const { data } = await axios.get("/applications");
-      setApplications(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: axios.isAxiosError(error)
-          ? error.response?.data?.message || "Failed to fetch applications"
-          : "Failed to fetch applications",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchBranches = async (repoUrl: string) => {
-    if (!repoUrl) {
-      setBranches([]);
-      return;
-    }
-
-    try {
-      setIsLoadingBranches(true);
-      const { data } = await axios.post("/applications/branches", {
-        repoUrl: repoUrl,
-      });
-      setBranches(data.branches);
-    } catch (error) {
-      console.error("Error fetching branches:", error);
-      toast({
-        title: "Error",
-        description: axios.isAxiosError(error)
-          ? error.response?.data?.message ||
-            "Failed to fetch repository branches"
-          : "Failed to fetch repository branches",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingBranches(false);
-    }
-  };
-
-  const debouncedFetchBranches = useMemo(
-    () => debounce(fetchBranches, 1000),
-    []
-  );
-
-  const onSubmit = async (
-    values: z.infer<typeof uploadFormSchema>,
-    file: File | null
-  ) => {
-    setIsUploading(true);
-
-    try {
-      if (values.repoUrl && !values.branch) {
-        toast({
-          title: "Error",
-          description: "Please select a branch",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const {
-        data: { id: applicationId },
-      } = await axios.post("/applications", {
-        appName: values.appName,
-        description:
-          values.description ||
-          (values.repoUrl
-            ? `Deployed from GitHub: ${values.repoUrl}`
-            : "Uploaded from ZIP file"),
-      });
-
-      if (values.repoUrl) {
-        if (file) {
-          toast({
-            title: "Error",
-            description:
-              "Please provide either a GitHub URL or a ZIP file, not both",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        await axios.post(`/applications/${applicationId}/deploy`, {
-          repoUrl: values.repoUrl,
-          branch: values.branch,
-        });
-
-        toast({
-          title: "Success",
-          description: "GitHub repository deployment started",
-        });
-      } else if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        await axios.post(`/applications/${applicationId}/upload`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        toast({
-          title: "Success",
-          description: "Application file uploaded successfully",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Please provide either a GitHub URL or a ZIP file",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      await refreshApplications();
-      setUploadDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: axios.isAxiosError(error)
-          ? error.response?.data?.message || error.message
-          : "An error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleApplicationAction = async (
-    appId: string,
-    action: "start" | "stop" | "delete"
-  ) => {
-    try {
-      if (action === "delete") {
-        await axios.delete(`/applications/${appId}`);
-      } else {
-        await axios.post(`/applications/${appId}/${action}`);
-      }
-
-      toast({
-        title: "Success",
-        description: `Application ${action} request sent`,
-      });
-
-      await refreshApplications();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: axios.isAxiosError(error)
-          ? error.response?.data?.message || `Failed to ${action} application`
-          : `Failed to ${action} application`,
-        variant: "destructive",
-      });
-    }
-  };
-
   React.useEffect(() => {
     refreshApplications();
   }, []);
 
   React.useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws/interactive`;
-    const ws = new WebSocket(wsUrl);
+    const ws = new WebSocket(
+      `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${
+        window.location.host
+      }/ws`
+    );
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "APPLICATION_UPDATE") {
-        setApplications((prev) => {
-          if (!prev) return prev;
-          return prev.map((app) =>
-            app.id === data.applicationId ? { ...app, ...data.updates } : app
-          );
-        });
+        // Refetch para obtener los datos actualizados
+        refreshApplications();
       }
     };
 
     return () => {
       ws.close();
     };
-  }, []);
-
+  }, [refreshApplications]);
   return (
     <div className="space-y-6 p-3">
       {/* Stats Section */}

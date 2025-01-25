@@ -2,7 +2,7 @@ import { OnboardingSidebar } from '@/components/OnboardingSidebar'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from '@/hooks/use-toast'
-import axios from 'axios'
+import { useOnboardMutation } from '@/services/api/onboard'
 import { useEffect, useState } from 'react'
 import ProviderStep from '../Auth/InviteSteps/ProviderStep'
 import UserDataStep from '../Auth/InviteSteps/UserDataStep'
@@ -22,6 +22,7 @@ export default function Onboard({ email, username }: Props) {
     const [roles, setRoles] = useState<any[]>([])
     const [serviceData, setServiceData] = useState<any>(null)
     const { toast } = useToast()
+    const [onboard] = useOnboardMutation();
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
@@ -77,9 +78,9 @@ export default function Onboard({ email, username }: Props) {
         }
 
         try {
-            const response = await axios.post('/onboard', payload);
+            const response = await onboard({ data: payload });
             
-            if (response.data.success) {
+            if ('data' in response && response.data.success) {
                 toast({
                     title: "Success",
                     description: "Your account has been set up successfully!",
@@ -88,14 +89,14 @@ export default function Onboard({ email, username }: Props) {
             } else {
                 toast({
                     title: "Error",
-                    description: response.data.message || "Failed to complete setup",
+                    description: "Failed to complete setup",
                     variant: "destructive",
                 });
             }
         } catch (error: any) {
             toast({
                 title: "Error",
-                description: error?.response?.data?.message || "Failed to complete setup",
+                description: error?.data?.message || "Failed to complete setup",
                 variant: "destructive",
             });
         }

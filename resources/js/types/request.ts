@@ -19,7 +19,6 @@ export interface CreateRoleRequest {
 
 export interface OnboardRequest {
   adminUser: CreateUserRequest;
-  users: CreateUserRequest[];
   roles: CreateRoleRequest[];
   metadata: MetadataRequest;
 }
