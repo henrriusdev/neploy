@@ -2446,7 +2446,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.0, axios@npm:^1.7.7":
+"axios@npm:^1.6.0":
   version: 1.7.8
   resolution: "axios@npm:1.7.8"
   dependencies:
@@ -3800,7 +3800,6 @@ __metadata:
     "@types/react-redux": "npm:^7.1.34"
     "@vitejs/plugin-react": "npm:^4.2.1"
     autoprefixer: "npm:^10.4.12"
-    axios: "npm:^1.7.7"
     class-variance-authority: "npm:^0.7.0"
     clsx: "npm:^2.1.1"
     cmdk: "npm:1.0.0"
