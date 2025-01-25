@@ -12,3 +12,5 @@ export const onboard = baseApi.injectEndpoints({
     }),
   }),
 });
+
+export const { useOnboardMutation } = onboard;

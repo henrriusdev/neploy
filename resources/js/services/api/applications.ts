@@ -2,7 +2,7 @@ import { baseApi } from "./api";
 
 export const applications = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAll: builder.query({
+    getAllApplications: builder.query({
       query: () => ({
         url: "applications",
         method: "GET",
@@ -15,21 +15,21 @@ export const applications = baseApi.injectEndpoints({
         body: {repoUrl},
       }),
     }),
-    create: builder.mutation({
+    createApplication: builder.mutation({
       query: ({ appName, description }: { appName: string; description: string }) => ({
         url: "applications",
         method: "POST",
         body: { appName, description },
       })
     }),
-    deploy: builder.mutation({
+    deployApplication: builder.mutation({
       query: ({ appId, repoUrl, branch }: { appId: string; repoUrl: string; branch: string }) => ({
         url: `applications/${appId}/deploy`,
         method: "POST",
         body: { repoUrl, branch },
       })
     }),
-    upload: builder.mutation({
+    uploadApplication: builder.mutation({
       query: ({ appId, file }: { appId: string; file: File }) => ({
         url: `applications/${appId}/upload`,
         method: "POST",
@@ -39,24 +39,25 @@ export const applications = baseApi.injectEndpoints({
         },
       })
     }),
-
-    start: builder.mutation({
-      query: ({ appId }: { appId: string }) => ({
-        url: `applications/${appId}/start`,
-        method: "POST",
-      })
-    }),
-    stop: builder.mutation({
-      query: ({ appId }: { appId: string }) => ({
-        url: `applications/${appId}/stop`,
-        method: "POST",
-      })
-    }),
-    delete: builder.mutation({
+    deleteApplication: builder.mutation({
       query: ({ appId }: { appId: string }) => ({
         url: `applications/${appId}`,
         method: "DELETE",
       })
     }),
+    startApplication: builder.mutation({
+      query: ({ appId }: { appId: string }) => ({
+        url: `applications/${appId}/start`,
+        method: "POST",
+      })
+    }),
+    stopApplication: builder.mutation({
+      query: ({ appId }: { appId: string }) => ({
+        url: `applications/${appId}/stop`,
+        method: "POST",
+      })
+    }),
   }),
 });
+
+export const { useGetAllApplicationsQuery, useLoadBranchesQuery, useCreateApplicationMutation, useDeployApplicationMutation, useUploadApplicationMutation, useStartApplicationMutation, useStopApplicationMutation, useDeleteApplicationMutation } = applications;
