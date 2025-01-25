@@ -1,0 +1,38 @@
+{
+  "onboarding": {
+    "steps": {
+      "provider": {
+        "title": "Select a provider",
+        "description": "Choose the provider you want to continue with"
+      },
+      "data": {
+        "title": "Personal Information",
+        "description": "Complete your personal information"
+      },
+      "roles": {
+        "title": "Roles",
+        "description": "Configure your organization roles"
+      },
+      "service": {
+        "title": "Service Configuration",
+        "description": "Configure your service details",
+        "language": {
+          "label": "Language",
+          "placeholder": "Select a language",
+          "options": {
+            "es": "Spanish",
+            "en": "English",
+            "pt": "Portuguese",
+            "zh": "Chinese",
+            "fr": "French"
+          }
+        }
+      }
+    },
+    "buttons": {
+      "next": "Next",
+      "back": "Back",
+      "finish": "Finish"
+    }
+  }
+}

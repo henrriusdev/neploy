@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast'
 import { useOnboardMutation } from '@/services/api/onboard'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 import ProviderStep from '../Auth/InviteSteps/ProviderStep'
 import UserDataStep from '../Auth/InviteSteps/UserDataStep'
 import RolesStep from './Steps/RolesStep'
@@ -23,6 +25,7 @@ export default function Onboard({ email, username }: Props) {
     const [serviceData, setServiceData] = useState<any>(null)
     const { toast } = useToast()
     const [onboard] = useOnboardMutation();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
@@ -50,7 +53,10 @@ export default function Onboard({ email, username }: Props) {
     }
 
     const handleServiceNext = (data: any) => {
-        setServiceData(data)
+        setServiceData({
+            ...data,
+            language: data.language
+        });
         setStep('summary')
     }
 
@@ -74,7 +80,10 @@ export default function Onboard({ email, username }: Props) {
         const payload = {
             adminUser: adminData,
             roles: roles,
-            metadata: serviceData,
+            metadata: {
+                ...serviceData,
+                language: serviceData.language
+            },
         }
 
         try {
@@ -82,21 +91,21 @@ export default function Onboard({ email, username }: Props) {
             
             if ('data' in response && response.data.success) {
                 toast({
-                    title: "Success",
-                    description: "Your account has been set up successfully!",
+                    title: t('common.success'),
+                    description: t('onboarding.success'),
                 });
                 window.location.replace('/');
             } else {
                 toast({
-                    title: "Error",
-                    description: "Failed to complete setup",
+                    title: t('common.error'),
+                    description: t('onboarding.error'),
                     variant: "destructive",
                 });
             }
         } catch (error: any) {
             toast({
-                title: "Error",
-                description: error?.data?.message || "Failed to complete setup",
+                title: t('common.error'),
+                description: error?.data?.message || t('onboarding.error'),
                 variant: "destructive",
             });
         }
@@ -135,25 +144,25 @@ export default function Onboard({ email, username }: Props) {
                 return (
                     <Card className="w-full max-w-screen-md mx-auto">
                         <CardHeader>
-                            <CardTitle>Review Your Setup</CardTitle>
-                            <CardDescription>Please verify your information before completing</CardDescription>
+                            <CardTitle>{t('onboarding.reviewSetup')}</CardTitle>
+                            <CardDescription>{t('onboarding.verifyInformation')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div>
-                                <h3 className="font-medium text-lg">Administrator Account</h3>
+                                <h3 className="font-medium text-lg">{t('onboarding.administratorAccount')}</h3>
                                 <dl className="mt-2 space-y-1">
                                     <div>
-                                        <dt className="text-sm text-muted-foreground">Name</dt>
+                                        <dt className="text-sm text-muted-foreground">{t('onboarding.name')}</dt>
                                         <dd>{adminData.firstName} {adminData.lastName}</dd>
                                     </div>
                                     <div>
-                                        <dt className="text-sm text-muted-foreground">Email</dt>
+                                        <dt className="text-sm text-muted-foreground">{t('onboarding.email')}</dt>
                                         <dd>{adminData.email}</dd>
                                     </div>
                                 </dl>
                             </div>
                             <div>
-                                <h3 className="font-medium text-lg">Roles ({roles.length})</h3>
+                                <h3 className="font-medium text-lg">{t('onboarding.roles')} ({roles.length})</h3>
                                 <ul className="mt-2 space-y-1">
                                     {roles.map((role, index) => (
                                         <li key={index}>{role.name}</li>
@@ -161,21 +170,25 @@ export default function Onboard({ email, username }: Props) {
                                 </ul>
                             </div>
                             <div>
-                                <h3 className="font-medium text-lg">Team Information</h3>
+                                <h3 className="font-medium text-lg">{t('onboarding.teamInformation')}</h3>
                                 <dl className="mt-2 space-y-1">
                                     <div>
-                                        <dt className="text-sm text-muted-foreground">Team Name</dt>
+                                        <dt className="text-sm text-muted-foreground">{t('onboarding.teamName')}</dt>
                                         <dd>{serviceData.teamName}</dd>
+                                    </div>
+                                    <div>
+                                        <dt className="text-sm text-muted-foreground">{t('onboarding.language')}</dt>
+                                        <dd>{serviceData.language}</dd>
                                     </div>
                                 </dl>
                             </div>
                         </CardContent>
                         <CardFooter className="flex justify-between">
                             <Button type="button" variant="outline" onClick={handleSummaryBack}>
-                                Back
+                                {t('common.back')}
                             </Button>
                             <Button onClick={handleSubmit}>
-                                Complete Setup
+                                {t('onboarding.completeSetup')}
                             </Button>
                         </CardFooter>
                     </Card>
@@ -187,7 +200,7 @@ export default function Onboard({ email, username }: Props) {
         <div className="flex min-h-screen">
             <OnboardingSidebar currentStep={step} className='w-1/4' />
             <div className="flex-1 p-6">
-                <h1 className="text-3xl font-bold mb-6 text-center">Setup Your Account</h1>
+                <h1 className="text-3xl font-bold mb-6 text-center">{t('onboarding.setupAccount')}</h1>
                 {renderStep()}
             </div>
         </div>

@@ -1,0 +1,38 @@
+{
+  "onboarding": {
+    "steps": {
+      "provider": {
+        "title": "选择提供商",
+        "description": "选择您想继续使用的提供商"
+      },
+      "data": {
+        "title": "个人信息",
+        "description": "完善您的个人信息"
+      },
+      "roles": {
+        "title": "角色",
+        "description": "配置您组织的角色"
+      },
+      "service": {
+        "title": "服务配置",
+        "description": "配置您的服务详情",
+        "language": {
+          "label": "语言",
+          "placeholder": "选择语言",
+          "options": {
+            "es": "西班牙语",
+            "en": "英语",
+            "pt": "葡萄牙语",
+            "zh": "中文",
+            "fr": "法语"
+          }
+        }
+      }
+    },
+    "buttons": {
+      "next": "下一步",
+      "back": "返回",
+      "finish": "完成"
+    }
+  }
+}

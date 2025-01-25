@@ -4,7 +4,9 @@
     "paths": {
       "@/*": ["./resources/js/*"]
     },
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "exclude": ["./node_modules", "./public/build"]
 }
