@@ -1,8 +1,9 @@
+import { Application } from "@/types/common";
 import { baseApi } from "./api";
 
 export const applications = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllApplications: builder.query({
+    getAllApplications: builder.query<Application[], void>({
       query: () => ({
         url: "applications",
         method: "GET",

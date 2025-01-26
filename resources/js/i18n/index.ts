@@ -29,6 +29,12 @@ i18n
       fr: { translation: fr },
     },
     fallbackLng: 'en',
+    supportedLngs: ['en', 'es', 'pt', 'zh', 'fr'],
+    load: 'languageOnly',
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+    },
     debug: process.env.NODE_ENV === 'development',
     interpolation: {
       escapeValue: false,

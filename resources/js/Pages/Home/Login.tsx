@@ -21,6 +21,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { router } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from "@/components/LanguageSelector";
+import '@/i18n';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -31,6 +34,7 @@ const formSchema = z.object({
 
 export default function Component() {
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,7 +52,7 @@ export default function Component() {
       },
       onError: (errors) => {
         console.error(errors);
-        form.setError("root", { message: "An error occurred during login" });
+        form.setError("root", { message: t('errors.serverError') });
       },
       onFinish: () => {
         setIsLoading(false);
@@ -70,16 +74,15 @@ export default function Component() {
           />
         </div>
         <h2 className="text-3xl font-bold text-white mb-4">
-          Welcome to Our Platform
+          {t('auth.welcomeTitle')}
         </h2>
         <p className="text-white mb-4">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          {t('auth.welcomeDescription')}
         </p>
         <ul className="text-white list-disc list-inside">
-          <li>Feature 1: Lorem ipsum dolor sit amet</li>
-          <li>Feature 2: Consectetur adipiscing elit</li>
-          <li>Feature 3: Sed do eiusmod tempor incididunt</li>
+          <li>{t('auth.feature1')}</li>
+          <li>{t('auth.feature2')}</li>
+          <li>{t('auth.feature3')}</li>
         </ul>
       </div>
 
@@ -87,9 +90,12 @@ export default function Component() {
       <div className="md:w-1/2 flex items-center justify-center p-8">
         <Card className="w-full max-w-[400px]">
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>{t('auth.login')}</CardTitle>
+              <LanguageSelector />
+            </div>
             <CardDescription>
-              Enter your email and password to log in
+              {t('auth.enterEmail')}
             </CardDescription>
           </CardHeader>
           <Form {...form}>
@@ -100,9 +106,9 @@ export default function Component() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('auth.email')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your email" {...field} />
+                        <Input placeholder={t('auth.enterEmail')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -113,11 +119,11 @@ export default function Component() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t('auth.password')}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Enter your password"
+                          placeholder={t('auth.enterPassword')}
                           {...field}
                         />
                       </FormControl>
@@ -133,7 +139,7 @@ export default function Component() {
               </CardContent>
               <CardFooter>
                 <Button className="w-full" type="submit" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Log in"}
+                  {isLoading ? t('auth.loggingIn') : t('auth.logIn')}
                 </Button>
               </CardFooter>
             </form>

@@ -16,6 +16,8 @@ import { RoleIcon } from "@/components/RoleIcon";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { TeamMember } from "@/types/common";
 import { TeamProps } from "@/types/props";
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 
 interface InviteMemberData {
   email: string;
@@ -37,7 +39,7 @@ function Team({
   });
   const [teamState, setTeam] = React.useState(team);
   const { toast } = useToast();
-  console.log(roles);
+  const { t } = useTranslation();
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,194 +48,168 @@ function Team({
     router.post("/users/invite", formData, {
       onSuccess: () => {
         toast({
-          title: "Success",
-          description: "Invitation sent successfully",
+          title: t('dashboard.team.inviteSuccess'),
+          description: t('dashboard.team.inviteSuccess'),
         });
-        setFormData({ email: "", role: "member" });
         setOpen(false);
-        
-        // Refresh the team list
-        router.visit("/team", {
-          method: 'get',
-          onSuccess: (response) => {
-            setTeam(response.props.team);
-          },
-        });
+        setFormData({ email: "", role: "" });
       },
-      onError: (error) => {
+      onError: () => {
         toast({
-          title: "Error",
-          description: error || "Failed to send invitation",
+          title: t('dashboard.team.inviteError'),
+          description: t('dashboard.team.inviteError'),
           variant: "destructive",
         });
       },
-      onFinish: () => {
-        setIsLoading(false);
-      }
+      onFinish: () => setIsLoading(false),
+    });
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!confirm(t('dashboard.team.confirmRemove'))) return;
+
+    router.delete(`/users/${memberId}`, {
+      onSuccess: () => {
+        toast({
+          title: t('dashboard.team.removeSuccess'),
+          description: t('dashboard.team.removeSuccess'),
+        });
+        setTeam(team.filter((member) => member.id !== memberId));
+      },
+      onError: () => {
+        toast({
+          title: t('dashboard.team.removeError'),
+          description: t('dashboard.team.removeError'),
+          variant: "destructive",
+        });
+      },
     });
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Team Members</h2>
-          <p className="text-muted-foreground">
-            Manage your team members and their access levels
-          </p>
-        </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Member
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invite Team Member</DialogTitle>
-              <DialogDescription>
-                Enter the email address and select a role for the new team
-                member.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleInvite} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, email: e.target.value }))
-                  }
-                  placeholder="colleague@company.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, role: value }))
-                  }>
-                  <SelectTrigger className="h-20">
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles?.map((role) => (
-                      <SelectItem key={role.name} value={role.name}>
-                        <div className="!flex items-center gap-2 justify-start flex-row">
-                          <RoleIcon icon={role.icon} color={role.color} />
-                          <div>
-                            <span className="capitalize font-bold text-gray-100">{role.name}</span>
-                            <span className="block text-xs text-gray-200">
-                              {role.description}
-                            </span>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send Invitation"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
+    <div className="container mx-auto py-6">
       <Card>
         <CardHeader>
-          <CardTitle>Team Overview</CardTitle>
-          <CardDescription>
-            A list of all team members including their roles and tech stacks.
-          </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>{t('dashboard.team.title')}</CardTitle>
+              <CardDescription>
+                {t('dashboard.team.description')}
+              </CardDescription>
+            </div>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  {t('dashboard.team.inviteMember')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t('dashboard.team.inviteMember')}</DialogTitle>
+                  <DialogDescription>
+                    {t('dashboard.team.inviteDescription')}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleInvite} className="space-y-4">
+                  <div>
+                    <Label htmlFor="email">{t('dashboard.team.email')}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="role">{t('dashboard.team.role')}</Label>
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, role: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('dashboard.team.selectRole')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.name} value={role.name}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? t('dashboard.team.inviting') : t('dashboard.team.invite')}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Tech Stacks</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('dashboard.team.member')}</TableHead>
+                <TableHead>{t('dashboard.team.role')}</TableHead>
+                <TableHead>{t('dashboard.team.status')}</TableHead>
+                <TableHead className="text-right">
+                  {t('dashboard.team.actions')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {teamState.length > 0 ? (
-                teamState.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage
-                            src={`https://unavatar.io/${member.provider === 'github' ? `github/${member.username}` : member.email}`}
-                            alt={`${member.firstName} ${member.lastName}`}
-                          />
-                          <AvatarFallback>
-                            {member.firstName[0]}
-                            {member.lastName[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">
-                            {member.firstName} {member.lastName}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {member.email}
-                          </div>
+              {teamState.map((member) => (
+                <TableRow key={member.id}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center space-x-4">
+                      <Avatar>
+                        <AvatarImage
+                          src={`https://unavatar.io/${member.provider}/${member.username}`}
+                          alt={member.firstName + " " + member.lastName}
+                        />
+                        <AvatarFallback>
+                          {member.firstName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">
+                          {member.firstName + " " + member.lastName}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {member.email}
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        {member.roles && member.roles.map((role) => (
-                          <Badge
-                            key={role.name}
-                            variant="secondary"
-                            style={{
-                              backgroundColor: role.color + "20",
-                              color: role.color,
-                            }}>
-                            {role.name}
-                          </Badge>
-                        ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {member.roles.map((role) => (
+                      <div className="flex items-center space-x-2" key={role.name}>
+                        <RoleIcon icon={role.icon} color={role.color} />
+                        <span>{role.name}</span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        {member.techStacks && member.techStacks.map((tech) => (
-                          <Badge
-                            key={tech.name}
-                            variant="outline"
-                            className="text-foreground">
-                            {tech.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button variant="destructive" size="icon" className="flex items-center justify-center">
-                          <TrashIcon className="!h-7 !w-7" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    No team members found.
+                    ))}
+                  </TableCell>
+                  <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveMember(member.id)}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
                   </TableCell>
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </CardContent>
@@ -242,12 +218,6 @@ function Team({
   );
 }
 
-Team.layout = (page: any) => {
-  return (
-    <DashboardLayout>
-      {page}
-    </DashboardLayout>
-  );
-};
+Team.layout = (page: any) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Team;

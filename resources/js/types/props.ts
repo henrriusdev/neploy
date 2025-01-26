@@ -56,6 +56,7 @@ export interface DashboardProps {
   visitorData?: VisitorData[];
   health?: string;
   logoUrl?: string;
+  stats?: Stats
 }
 
 export interface TeamProps {

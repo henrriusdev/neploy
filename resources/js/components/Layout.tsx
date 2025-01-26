@@ -24,6 +24,7 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link } from "@inertiajs/react";
+import { LanguageSelector } from "./LanguageSelector";
 
 interface NavItem {
   title: string;
@@ -93,7 +94,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                         <AvatarImage src={user.avatar} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <div className"flex flex-col items-start text-left">
+                      <div className="flex flex-col items-start text-left">
                         <span className="text-xs font-medium">{user.name}</span>
                         <span className="text-xs text-sidebar-foreground/60">
                           {user.email}
@@ -106,14 +107,28 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                     align="start"
                     alignOffset={-8}
                     forceMount>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                    <DropdownMenuItem className="p-0">
+                      <LanguageSelector className="w-full p-2" />
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
+                        className="w-full flex items-center"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
