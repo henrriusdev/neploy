@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -27,13 +27,13 @@ func (u *userOauth[T]) Insert(ctx context.Context, user model.UserOAuth) error {
 	query := u.BaseQueryInsert().Rows(user)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building query")
+		logger.Error("error building query: %v", err)
 		return err
 	}
 
 	_, err = u.Store.ExecContext(ctx, q, args...)
 	if err != nil {
-		log.Err(err).Msg("error inserting user oauth")
+		logger.Error("error inserting user oauth: %v", err)
 		return err
 	}
 
@@ -44,14 +44,14 @@ func (u *userOauth[T]) GetByOAuthID(ctx context.Context, oauthID string) (model.
 	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("oauth_id", oauthID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building query")
+		logger.Error("error building query: %v", err)
 		return model.UserOAuth{}, err
 	}
 
 	var user model.UserOAuth
 	err = u.Store.GetContext(ctx, &user, q, args...)
 	if err != nil {
-		log.Err(err).Msg("error getting user oauth")
+		logger.Error("error getting user oauth: %v", err)
 		return model.UserOAuth{}, err
 	}
 
@@ -62,14 +62,14 @@ func (u *userOauth[T]) GetByUserID(ctx context.Context, userID string) (model.Us
 	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("user_id", userID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building query")
+		logger.Error("error building query: %v", err)
 		return model.UserOAuth{}, err
 	}
 
 	var user model.UserOAuth
 	err = u.Store.GetContext(ctx, &user, q, args...)
 	if err != nil {
-		log.Err(err).Msg("error getting user oauth")
+		logger.Error("error getting user oauth: %v", err)
 		return model.UserOAuth{}, err
 	}
 
