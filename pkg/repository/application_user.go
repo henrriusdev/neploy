@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -31,12 +31,12 @@ func (a *applicationUser[T]) Insert(ctx context.Context, applicationUser model.A
 	query := a.BaseQueryInsert().Rows(applicationUser)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building insert query")
+		logger.Error("error building insert query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing insert query")
+		logger.Error("error executing insert query: %v", err)
 		return err
 	}
 
@@ -47,12 +47,12 @@ func (a *applicationUser[T]) Update(ctx context.Context, applicationUser model.A
 	query := filters.ApplyUpdateFilters(a.BaseQueryUpdate().Set(applicationUser), filters.IsUpdateFilter("application_id", applicationUser.ApplicationID), filters.IsUpdateFilter("user_id", applicationUser.UserID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building update query")
+		logger.Error("error building update query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing update query")
+		logger.Error("error executing update query: %v", err)
 		return err
 	}
 
@@ -68,12 +68,12 @@ func (a *applicationUser[T]) Delete(ctx context.Context, id string) error {
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building delete query")
+		logger.Error("error building delete query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing delete query")
+		logger.Error("error executing delete query: %v", err)
 		return err
 	}
 
@@ -84,13 +84,13 @@ func (a *applicationUser[T]) GetByUserID(ctx context.Context, userID string) ([]
 	query := a.baseQuery().Where(goqu.Ex{"user_id": userID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationUsers []model.ApplicationUser
 	if err := a.Store.SelectContext(ctx, &applicationUsers, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -101,13 +101,13 @@ func (a *applicationUser[T]) GetByApplicationID(ctx context.Context, application
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationUsers []model.ApplicationUser
 	if err := a.Store.SelectContext(ctx, &applicationUsers, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -118,13 +118,13 @@ func (a *applicationUser[T]) GetAll(ctx context.Context) ([]model.ApplicationUse
 	query := a.baseQuery().Where(goqu.Ex{"deleted_at": nil})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationUsers []model.ApplicationUser
 	if err := a.Store.SelectContext(ctx, &applicationUsers, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 

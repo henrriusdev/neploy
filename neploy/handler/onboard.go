@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/romsar/gonertia"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -38,7 +38,7 @@ func (o *Onboard) RegisterRoutes(r *echo.Group, i *gonertia.Inertia) {
 func (o *Onboard) Initiate(c echo.Context) error {
 	var req model.OnboardRequest
 	if err := c.Bind(&req); err != nil {
-		log.Err(err).Msg("error parsing request")
+		logger.Error("error parsing request: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "Invalid request",
 		})

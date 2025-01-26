@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -40,12 +40,12 @@ func (a *applicationStat[T]) Insert(ctx context.Context, applicationStat model.A
 	query := a.BaseQueryInsert().Rows(applicationStat)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building insert query")
+		logger.Error("error building insert query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing insert query")
+		logger.Error("error executing insert query: %v", err)
 		return err
 	}
 
@@ -56,12 +56,12 @@ func (a *applicationStat[T]) Update(ctx context.Context, applicationStat model.A
 	query := filters.ApplyUpdateFilters(a.BaseQueryUpdate().Set(applicationStat), filters.IsUpdateFilter("id", applicationStat.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building update query")
+		logger.Error("error building update query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing update query")
+		logger.Error("error executing update query: %v", err)
 		return err
 	}
 
@@ -77,12 +77,12 @@ func (a *applicationStat[T]) Delete(ctx context.Context, id string) error {
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building delete query")
+		logger.Error("error building delete query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing delete query")
+		logger.Error("error executing delete query: %v", err)
 		return err
 	}
 
@@ -93,13 +93,13 @@ func (a *applicationStat[T]) GetByID(ctx context.Context, id string) (model.Appl
 	query := a.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return model.ApplicationStat{}, err
 	}
 
 	var applicationStat model.ApplicationStat
 	if err := a.Store.GetContext(ctx, &applicationStat, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return model.ApplicationStat{}, err
 	}
 
@@ -110,13 +110,13 @@ func (a *applicationStat[T]) GetByApplicationID(ctx context.Context, application
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationStats []model.ApplicationStat
 	if err := a.Store.SelectContext(ctx, &applicationStats, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -127,13 +127,13 @@ func (a *applicationStat[T]) GetByEnvironmentID(ctx context.Context, environment
 	query := a.baseQuery().Where(goqu.Ex{"environment_id": environmentID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationStats []model.ApplicationStat
 	if err := a.Store.SelectContext(ctx, &applicationStats, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -144,13 +144,13 @@ func (a *applicationStat[T]) GetByDate(ctx context.Context, date time.Time) ([]m
 	query := a.baseQuery().Where(goqu.Ex{"date": date})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationStats []model.ApplicationStat
 	if err := a.Store.SelectContext(ctx, &applicationStats, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -161,13 +161,13 @@ func (a *applicationStat[T]) GetAll(ctx context.Context) ([]model.ApplicationSta
 	query := a.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applicationStats []model.ApplicationStat
 	if err := a.Store.SelectContext(ctx, &applicationStats, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -178,13 +178,13 @@ func (a *applicationStat[T]) GetUniqueVisitors(ctx context.Context, applicationI
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID, "environment_id": environmentID}).Select(goqu.COUNT("DISTINCT(visitor_id)"))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return 0, err
 	}
 
 	var count int
 	if err := a.Store.GetContext(ctx, &count, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return 0, err
 	}
 
@@ -195,13 +195,13 @@ func (a *applicationStat[T]) GetDataTransfered(ctx context.Context, applicationI
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID, "environment_id": environmentID}).Select(goqu.SUM("data_transfered"))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return 0, err
 	}
 
 	var sum int
 	if err := a.Store.GetContext(ctx, &sum, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return 0, err
 	}
 
@@ -212,13 +212,13 @@ func (a *applicationStat[T]) GetRequests(ctx context.Context, applicationID, env
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID, "environment_id": environmentID}).Select(goqu.SUM("requests"))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return 0, err
 	}
 
 	var sum int
 	if err := a.Store.GetContext(ctx, &sum, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return 0, err
 	}
 
@@ -229,13 +229,13 @@ func (a *applicationStat[T]) GetAverageResponseTime(ctx context.Context, applica
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID, "environment_id": environmentID}).Select(goqu.AVG("response_time"))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return 0, err
 	}
 
 	var avg int
 	if err := a.Store.GetContext(ctx, &avg, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return 0, err
 	}
 
@@ -246,13 +246,13 @@ func (a *applicationStat[T]) GetErrorRate(ctx context.Context, applicationID, en
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID, "environment_id": environmentID}).Select(goqu.AVG("error_rate"))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return 0, err
 	}
 
 	var avg int
 	if err := a.Store.GetContext(ctx, &avg, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return 0, err
 	}
 
@@ -263,13 +263,13 @@ func (a *applicationStat[T]) GetByApplicationIDAndEnvironmentID(ctx context.Cont
 	query := a.baseQuery().Where(goqu.Ex{"application_id": applicationID, "environment_id": environmentID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return model.ApplicationStat{}, err
 	}
 
 	var applicationStat model.ApplicationStat
 	if err := a.Store.GetContext(ctx, &applicationStat, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return model.ApplicationStat{}, err
 	}
 

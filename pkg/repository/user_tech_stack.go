@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -32,12 +32,12 @@ func (u *userTechStack[T]) Insert(ctx context.Context, userTechStack model.UserT
 	query := u.BaseQueryInsert().Rows(userTechStack)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building insert query")
+		logger.Error("error building insert query: %v", err)
 		return err
 	}
 
 	if _, err := u.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing insert query")
+		logger.Error("error executing insert query: %v", err)
 		return err
 	}
 
@@ -52,12 +52,12 @@ func (u *userTechStack[T]) Update(ctx context.Context, userTechStack model.UserT
 	)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building update query")
+		logger.Error("error building update query: %v", err)
 		return err
 	}
 
 	if _, err := u.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing update query")
+		logger.Error("error executing update query: %v", err)
 		return err
 	}
 
@@ -73,12 +73,12 @@ func (u *userTechStack[T]) Delete(ctx context.Context, id string) error {
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building delete query")
+		logger.Error("error building delete query: %v", err)
 		return err
 	}
 
 	if _, err := u.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing delete query")
+		logger.Error("error executing delete query: %v", err)
 		return err
 	}
 
@@ -108,13 +108,13 @@ func (u *userTechStack[T]) GetByUserID(ctx context.Context, userID string) ([]mo
 		Where(goqu.I("u.id").Eq(userID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var userTechStacks []model.UserTechStack
 	if err := u.Store.SelectContext(ctx, &userTechStacks, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -144,13 +144,13 @@ func (u *userTechStack[T]) GetByTechStackID(ctx context.Context, techStackID str
 		Where(goqu.I("t.id").Eq(techStackID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var userTechStacks []model.UserTechStack
 	if err := u.Store.SelectContext(ctx, &userTechStacks, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -161,13 +161,13 @@ func (u *userTechStack[T]) GetByUserIDAndTechStackID(ctx context.Context, userID
 	query := u.baseQuery().Where(goqu.Ex{"user_id": userID, "tech_stack_id": techStackID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return model.UserTechStack{}, err
 	}
 
 	var userTechStack model.UserTechStack
 	if err := u.Store.GetContext(ctx, &userTechStack, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return model.UserTechStack{}, err
 	}
 
@@ -178,13 +178,13 @@ func (u *userTechStack[T]) GetAll(ctx context.Context) ([]model.UserTechStack, e
 	query := u.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var userTechStacks []model.UserTechStack
 	if err := u.Store.SelectContext(ctx, &userTechStacks, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
