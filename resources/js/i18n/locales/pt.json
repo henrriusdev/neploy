@@ -139,7 +139,11 @@
         "repoUrlDescription": "Insira uma URL válida do repositório GitHub/Gitlab (ex. https://github.com/usuario/repo)",
         "loadingBranches": "Carregando ramais...",
         "port": "Porta",
-        "portPlaceholder": "Insira o número da porta"
+        "portPlaceholder": "Insira o número da porta",
+        "dropzoneActive": "Soltar o arquivo ZIP aqui...",
+        "dropzoneInactive": "Arraste e solte o arquivo ZIP",
+        "deploying": "Implantando...",
+        "deploy": "Implantar aplicativo"
       },
       "empty": {
         "title": "Nenhum aplicativo encontrado",

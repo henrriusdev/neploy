@@ -19,8 +19,8 @@ export const applications = baseApi.injectEndpoints({
     loadBranches: builder.query({
       query: ({repoUrl}: {repoUrl: string}) => ({
         url: "applications/branches",
-        method: "GET",
-        params: { repoUrl },
+        method: "POST",
+        body: { repoUrl },
       }),
     }),
     createApplication: builder.mutation({

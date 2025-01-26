@@ -102,7 +102,11 @@
         "branchPlaceholder": "选择分支",
         "loadingBranches": "加载分支...",
         "port": "端口",
-        "portPlaceholder": "输入端口号"
+        "portPlaceholder": "输入端口号",
+        "dropzoneActive": "释放 ZIP 文件到此...",
+        "dropzoneInactive": "拖拽并释放 ZIP 文件",
+        "deploying": "部署中...",
+        "deploy": "部署应用"
       },
       "empty": {
         "title": "没有找到应用程序",

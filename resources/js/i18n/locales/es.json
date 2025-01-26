@@ -152,7 +152,11 @@
         "branchPlaceholder": "Seleccionar una rama",
         "loadingBranches": "Cargando ramas...",
         "port": "Puerto",
-        "portPlaceholder": "Ingresar número de puerto"
+        "portPlaceholder": "Ingresar número de puerto",
+        "dropzoneActive": "Suelta el archivo ZIP aqui...",
+        "dropzoneInactive": "Arrastra y suelta un archivo ZIP",
+        "deploying": "Desplegando...",
+        "deploy": "Desplegar aplicación"
       },
       "empty": {
         "title": "No hay aplicaciones",

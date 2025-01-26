@@ -166,7 +166,11 @@
         "branchPlaceholder": "Select branch",
         "loadingBranches": "Loading branches...",
         "port": "Port",
-        "portPlaceholder": "Enter port number"
+        "portPlaceholder": "Enter port number",
+        "dropzoneActive": "Drop the ZIP file here...",
+        "dropzoneInactive": "Drag and drop a ZIP file",
+        "deploying": "Deploying...",
+        "deploy": "Deploy app"
       },
       "empty": {
         "title": "No Applications Found",

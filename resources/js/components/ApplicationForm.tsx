@@ -211,13 +211,13 @@ export function ApplicationForm({
           className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary">
           <input {...getInputProps()} />
           {isDragActive ? (
-            <p>Drop the ZIP file here...</p>
+            <p>{t("dashboard.applications.createNew.dropzoneActive")}</p>
           ) : (
-            <p>Drag & drop a ZIP file here, or click to select</p>
+            <p>{t("dashboard.applications.createNew.dropzoneInactive")}</p>
           )}
         </div>
         <Button type="submit" className="w-full" disabled={isUploading}>
-          {isUploading ? "Deploying..." : "Deploy Application"}
+          {isUploading ? t("dashboard.applications.createNew.deploying") : t("dashboard.applications.createNew.deploy")}
         </Button>
       </form>
     </Form>

@@ -120,7 +120,11 @@
         "branchPlaceholder": "Choisissez une branche",
         "loadingBranches": "Chargement des branches...",
         "port": "Port",
-        "portPlaceholder": "Inserer le numéro de port"
+        "portPlaceholder": "Inserer le numéro de port",
+        "dropzoneActive": "Suelta o arquivo ZIP aqui...",
+        "dropzoneInactive": "Arraste e solte o arquivo ZIP",
+        "deploying": "Déploiement...",
+        "deploy": "Déployer l'application"
       },
       "empty": {
         "title": "Aucune application trouvé",
