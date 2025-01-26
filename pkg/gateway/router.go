@@ -24,28 +24,21 @@ type Router struct {
 	routes            map[string]*httputil.ReverseProxy
 	routeInfo         map[string]Route
 	mu                sync.RWMutex
-	metrics           *MetricsCollector
+	metrics           map[string]*MetricsCollector
 	metricsAggregator *MetricsAggregator
 }
 
 func NewRouter(appStatRepo repository.ApplicationStat) *Router {
-	metrics, err := NewMetricsCollector("./data/metrics")
-	if err != nil {
-		log.Printf("ERROR: Failed to create metrics collector: %v", err)
-		// Continue without metrics if there's an error
-	}
-
 	router := &Router{
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),
-		metrics:   metrics,
+		metrics:   make(map[string]*MetricsCollector),
 		mu:        sync.RWMutex{},
 	}
 
-	if metrics != nil {
-		router.metricsAggregator = NewMetricsAggregator(metrics, appStatRepo)
-		router.metricsAggregator.Start()
-	}
+	// Create metrics aggregator without a specific collector
+	router.metricsAggregator = NewMetricsAggregator(nil, appStatRepo)
+	router.metricsAggregator.Start()
 
 	return router
 }
@@ -67,6 +60,22 @@ func (r *Router) AddRoute(route Route) error {
 	if err != nil {
 		return fmt.Errorf("invalid target URL: %v", err)
 	}
+
+	// Create metrics collector for this app if it doesn't exist
+	r.mu.Lock()
+	if _, exists := r.metrics[route.AppID]; !exists {
+		metrics, err := NewMetricsCollector("./data/metrics", route.AppID)
+		if err != nil {
+			log.Printf("ERROR: Failed to create metrics collector for app %s: %v", route.AppID, err)
+		} else {
+			r.metrics[route.AppID] = metrics
+			// Update metrics aggregator to use this collector
+			if r.metricsAggregator != nil {
+				r.metricsAggregator.AddCollector(metrics)
+			}
+		}
+	}
+	r.mu.Unlock()
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
 
@@ -124,7 +133,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 			// Add logging middleware with metrics
 			if r.metrics != nil {
-				handler = LoggingMiddleware(handler, r.metrics)
+				handler = LoggingMiddleware(handler, r.metrics[route.AppID])
 			} else {
 				log.Printf("WARN: Metrics collector not available")
 			}
