@@ -8,8 +8,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
-	"github.com/rs/zerolog/log"
 	"neploy.dev/config"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
@@ -41,26 +41,26 @@ func (d *Dashboard) Index(c echo.Context) error {
 
 	roles, err := d.services.Role.GetUserRoles(context.Background(), claims.ID)
 	if err != nil {
-		log.Err(err).Msg("error checking admin status")
+		logger.Error("error checking admin status: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	metadata, err := d.services.Metadata.Get(context.Background())
 	if err != nil {
-		log.Err(err).Msg("error getting metadata")
+		logger.Error("error getting metadata: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	healthyApps, _, err := d.services.Application.GetHealthy(context.Background())
 	if err != nil {
-		log.Err(err).Msg("error getting healthy apps")
-		return err
+		logger.Error("error getting healthy apps: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 	if err != nil {
-		log.Err(err).Msg("error getting provider")
-		return err
+		logger.Error("error getting provider: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	user := model.UserResponse{
@@ -90,11 +90,13 @@ func (d *Dashboard) Team(c echo.Context) error {
 		return []byte(config.Env.JWTSecret), nil
 	})
 	if err != nil {
+		logger.Error("error parsing token: %v", err)
 		return c.Redirect(http.StatusFound, "/auth/login")
 	}
 
 	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 	if err != nil {
+		logger.Error("error getting provider: %v", err)
 		return c.Redirect(http.StatusFound, "/auth/login")
 	}
 
@@ -107,16 +109,19 @@ func (d *Dashboard) Team(c echo.Context) error {
 
 	roles, err := d.services.Role.Get(context.Background())
 	if err != nil {
+		logger.Error("error getting roles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	metadata, err := d.services.Metadata.Get(context.Background())
 	if err != nil {
+		logger.Error("error getting metadata: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	listResponse, err := d.services.User.List(context.Background(), 15, 0)
 	if err != nil {
+		logger.Error("error listing users: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -132,7 +137,7 @@ func (d *Dashboard) Team(c echo.Context) error {
 func (d *Dashboard) Applications(c echo.Context) error {
 	cookie, err := c.Cookie("token")
 	if err != nil {
-		log.Err(err).Msg("error getting token")
+		logger.Error("error getting token: %v", err)
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
@@ -141,24 +146,25 @@ func (d *Dashboard) Applications(c echo.Context) error {
 		return []byte(config.Env.JWTSecret), nil
 	})
 	if err != nil {
-		log.Err(err).Msg("error parsing token")
+		logger.Error("error parsing token: %v", err)
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
 	applications, err := d.services.Application.GetAll(c.Request().Context())
 	if err != nil {
-		log.Err(err).Msg("error getting applications")
+		logger.Error("error getting applications: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	metadata, err := d.services.Metadata.Get(c.Request().Context())
 	if err != nil {
+		logger.Error("error getting metadata: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 	if err != nil {
-		log.Err(err).Msg("error getting provider")
+		logger.Error("error getting provider: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 	}
 
@@ -177,7 +183,7 @@ func (d *Dashboard) Applications(c echo.Context) error {
 	}
 
 	if err := d.i.Render(c.Response(), c.Request(), "Dashboard/Applications", props); err != nil {
-		log.Err(err).Msg("error rendering applications page")
+		logger.Error("error rendering applications page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 	}
 
@@ -192,18 +198,19 @@ func (d *Dashboard) Gateways(c echo.Context) error {
 
 	gateways, err := d.services.Gateway.GetAll(c.Request().Context())
 	if err != nil {
-		log.Err(err).Msg("error getting gateways")
+		logger.Error("error getting gateways: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	metadata, err := d.services.Metadata.Get(c.Request().Context())
 	if err != nil {
+		logger.Error("error getting metadata: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 	if err != nil {
-		log.Err(err).Msg("error getting provider")
+		logger.Error("error getting provider: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 	}
 

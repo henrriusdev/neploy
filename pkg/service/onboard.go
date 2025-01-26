@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 )
 
@@ -28,7 +28,7 @@ func NewOnboard(userService User, roleService Role, metadataService Metadata) On
 func (o *onboard) Done(ctx context.Context) (bool, error) {
 	users, err := o.userService.List(ctx, 1, 0)
 	if err != nil {
-		log.Err(err).Msg("error getting users")
+		logger.Error("error getting users: %v", err)
 		return false, err
 	}
 
@@ -38,7 +38,7 @@ func (o *onboard) Done(ctx context.Context) (bool, error) {
 	case 1:
 		userRoles, err := o.roleService.GetUserRoles(ctx, users[0].ID)
 		if err != nil {
-			log.Err(err).Msg("error getting user roles")
+			logger.Error("error getting user roles: %v", err)
 			return false, err
 		}
 
@@ -67,7 +67,7 @@ func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error 
 			Color:       "#ff0000",
 		}
 		if err := o.roleService.Create(ctx, role); err != nil {
-			log.Err(err).Msg("error creating default role")
+			logger.Error("error creating default role: %v", err)
 		}
 	}
 	// create the admin user
@@ -75,21 +75,21 @@ func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error 
 	req.AdminUser.Roles = []string{"Administrator"}
 
 	if err := o.userService.Create(ctx, req.AdminUser, req.OauthID); err != nil {
-		log.Err(err).Msg("error users")
+		logger.Error("error creating admin user: %v", err)
 		return err
 	}
 
 	// create the roles
 	for _, role := range req.Roles {
 		if err := o.roleService.Create(ctx, role); err != nil {
-			log.Err(err).Msg("error roles")
+			logger.Error("error creating role: %v", err)
 			return err
 		}
 	}
 
 	// create the metadata
 	if err := o.metadataService.Create(ctx, req.Metadata); err != nil {
-		log.Err(err).Msg("error meta")
+		logger.Error("error creating metadata: %v", err)
 		return err
 	}
 

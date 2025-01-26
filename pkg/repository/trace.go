@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -34,12 +34,12 @@ func (t *trace[T]) Insert(ctx context.Context, trace model.Trace) error {
 	query := t.BaseQueryInsert().Rows(trace)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building insert query")
+		logger.Error("error building insert query: %v", err)
 		return err
 	}
 
 	if _, err := t.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing insert query")
+		logger.Error("error executing insert query: %v", err)
 		return err
 	}
 
@@ -50,12 +50,12 @@ func (t *trace[T]) Update(ctx context.Context, trace model.Trace) error {
 	query := filters.ApplyUpdateFilters(t.BaseQueryUpdate().Set(trace), filters.IsUpdateFilter("id", trace.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building update query")
+		logger.Error("error building update query: %v", err)
 		return err
 	}
 
 	if _, err := t.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing update query")
+		logger.Error("error executing update query: %v", err)
 		return err
 	}
 
@@ -71,12 +71,12 @@ func (t *trace[T]) Delete(ctx context.Context, id string) error {
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building delete query")
+		logger.Error("error building delete query: %v", err)
 		return err
 	}
 
 	if _, err := t.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing delete query")
+		logger.Error("error executing delete query: %v", err)
 		return err
 	}
 
@@ -87,13 +87,13 @@ func (t *trace[T]) GetByID(ctx context.Context, id string) (model.Trace, error) 
 	query := t.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return model.Trace{}, err
 	}
 
 	var trace model.Trace
 	if err := t.Store.GetContext(ctx, &trace, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return model.Trace{}, err
 	}
 
@@ -104,13 +104,13 @@ func (t *trace[T]) GetAll(ctx context.Context) ([]model.Trace, error) {
 	query := t.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var traces []model.Trace
 	if err := t.Store.SelectContext(ctx, &traces, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -121,13 +121,13 @@ func (t *trace[T]) GetByUserID(ctx context.Context, userID string) ([]model.Trac
 	query := t.baseQuery().Where(goqu.Ex{"user_id": userID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var traces []model.Trace
 	if err := t.Store.SelectContext(ctx, &traces, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -138,13 +138,13 @@ func (t *trace[T]) GetByType(ctx context.Context, traceType string) ([]model.Tra
 	query := t.baseQuery().Where(goqu.Ex{"type": traceType})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var traces []model.Trace
 	if err := t.Store.SelectContext(ctx, &traces, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -155,13 +155,13 @@ func (t *trace[T]) GetByAction(ctx context.Context, action string) ([]model.Trac
 	query := t.baseQuery().Where(goqu.Ex{"action": action})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var traces []model.Trace
 	if err := t.Store.SelectContext(ctx, &traces, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -172,13 +172,13 @@ func (t *trace[T]) GetByActionTimestamp(ctx context.Context, timestamp model.Dat
 	query := t.baseQuery().Where(goqu.Ex{"timestamp": timestamp})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var traces []model.Trace
 	if err := t.Store.SelectContext(ctx, &traces, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 

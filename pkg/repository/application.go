@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -31,12 +31,12 @@ func (a *application[T]) Insert(ctx context.Context, application model.Applicati
 	query := a.BaseQueryInsert().Rows(application).Returning("id")
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building insert query")
+		logger.Error("error building insert query: %v", err)
 		return "", err
 	}
 
 	if err := a.Store.QueryRowxContext(ctx, q, args...).Scan(&id); err != nil {
-		log.Err(err).Msg("error executing insert query")
+		logger.Error("error executing insert query: %v", err)
 		return "", err
 	}
 
@@ -47,12 +47,12 @@ func (a *application[T]) Update(ctx context.Context, application model.Applicati
 	query := filters.ApplyUpdateFilters(a.BaseQueryUpdate().Set(application), filters.IsUpdateFilter("id", application.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building update query")
+		logger.Error("error building update query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing update query")
+		logger.Error("error executing update query: %v", err)
 		return err
 	}
 
@@ -68,12 +68,12 @@ func (a *application[T]) Delete(ctx context.Context, id string) error {
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building delete query")
+		logger.Error("error building delete query: %v", err)
 		return err
 	}
 
 	if _, err := a.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing delete query")
+		logger.Error("error executing delete query: %v", err)
 		return err
 	}
 
@@ -84,13 +84,13 @@ func (a *application[T]) GetByID(ctx context.Context, id string) (model.Applicat
 	query := a.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return model.Application{}, err
 	}
 
 	var application model.Application
 	if err := a.Store.QueryRowxContext(ctx, q, args...).StructScan(&application); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return model.Application{}, err
 	}
 
@@ -101,13 +101,13 @@ func (a *application[T]) GetAll(ctx context.Context) ([]model.Application, error
 	query := a.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var applications []model.Application
 	if err := a.Store.SelectContext(ctx, &applications, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 

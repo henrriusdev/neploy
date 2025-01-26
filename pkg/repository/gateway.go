@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/doug-martin/goqu/v9"
-	"github.com/rs/zerolog/log"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/store"
@@ -36,12 +36,12 @@ func (g *gateway[T]) Insert(ctx context.Context, gateway model.Gateway) error {
 	query := g.BaseQueryInsert().Rows(gateway)
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building insert query")
+		logger.Error("error building insert query: %v", err)
 		return err
 	}
 
 	if _, err := g.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing insert query")
+		logger.Error("error executing insert query: %v", err)
 		return err
 	}
 
@@ -52,12 +52,12 @@ func (g *gateway[T]) Update(ctx context.Context, gateway model.Gateway) error {
 	query := filters.ApplyUpdateFilters(g.BaseQueryUpdate().Set(gateway), filters.IsUpdateFilter("id", gateway.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building update query")
+		logger.Error("error building update query: %v", err)
 		return err
 	}
 
 	if _, err := g.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing update query")
+		logger.Error("error executing update query: %v", err)
 		return err
 	}
 
@@ -73,12 +73,12 @@ func (g *gateway[T]) Delete(ctx context.Context, id string) error {
 
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building delete query")
+		logger.Error("error building delete query: %v", err)
 		return err
 	}
 
 	if _, err := g.Store.ExecContext(ctx, q, args...); err != nil {
-		log.Err(err).Msg("error executing delete query")
+		logger.Error("error executing delete query: %v", err)
 		return err
 	}
 
@@ -89,13 +89,13 @@ func (g *gateway[T]) GetByID(ctx context.Context, id string) (model.Gateway, err
 	query := g.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return model.Gateway{}, err
 	}
 
 	var gateway model.Gateway
 	if err := g.Store.GetContext(ctx, &gateway, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return model.Gateway{}, err
 	}
 
@@ -106,13 +106,13 @@ func (g *gateway[T]) GetAll(ctx context.Context) ([]model.Gateway, error) {
 	query := g.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -123,13 +123,13 @@ func (g *gateway[T]) GetByHttpMethod(ctx context.Context, httpMethod string) ([]
 	query := g.baseQuery().Where(goqu.Ex{"http_method": httpMethod})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -140,13 +140,13 @@ func (g *gateway[T]) GetByEndpoint(ctx context.Context, endpoint string) ([]mode
 	query := g.baseQuery().Where(goqu.Ex{"endpoint": endpoint})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -157,13 +157,13 @@ func (g *gateway[T]) GetByLogLevel(ctx context.Context, logLevel string) ([]mode
 	query := g.baseQuery().Where(goqu.Ex{"log_level": logLevel})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -174,13 +174,13 @@ func (g *gateway[T]) GetByStage(ctx context.Context, stage string) ([]model.Gate
 	query := g.baseQuery().Where(goqu.Ex{"stage": stage})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -191,13 +191,13 @@ func (g *gateway[T]) GetByName(ctx context.Context, name string) ([]model.Gatewa
 	query := g.baseQuery().Where(goqu.Ex{"name": name})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
@@ -208,13 +208,13 @@ func (g *gateway[T]) GetByApplicationID(ctx context.Context, applicationID strin
 	query := g.baseQuery().Where(goqu.Ex{"application_id": applicationID})
 	q, args, err := query.ToSQL()
 	if err != nil {
-		log.Err(err).Msg("error building select query")
+		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
 
 	var gateways []model.Gateway
 	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		log.Err(err).Msg("error executing select query")
+		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
 
