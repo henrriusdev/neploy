@@ -153,5 +153,13 @@
     "techStacksMostUsed": "最常用的技术栈",
     "visitorCountByTime": "按时间的访问量",
     "visitors": "访问者"
+  },
+  "sidebar": {
+    "dashboard": "仪表板",
+    "applications": "应用程序",
+    "gateways": "网关",
+    "team": "团队",
+    "settings": "设置",
+    "logout": "登出"
   }
 }

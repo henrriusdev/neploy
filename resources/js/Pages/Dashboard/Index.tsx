@@ -60,7 +60,7 @@ function Dashboard({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalApps}</div>
+            <div className="text-2xl font-bold">{stats?.totalApps ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               {t('dashboard.stats.totalAppsDescription')}
             </p>
@@ -73,7 +73,7 @@ function Dashboard({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.runningApps}</div>
+            <div className="text-2xl font-bold">{stats?.runningApps ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               {t('dashboard.stats.runningAppsDescription')}
             </p>
@@ -86,7 +86,7 @@ function Dashboard({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.teamMembers}</div>
+            <div className="text-2xl font-bold">{stats?.teamMembers ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               {t('dashboard.stats.teamMembersDescription')}
             </p>
@@ -99,7 +99,7 @@ function Dashboard({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.deployments}</div>
+            <div className="text-2xl font-bold">{stats?.deployments ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               {t('dashboard.stats.deploymentsDescription')}
             </p>

@@ -151,5 +151,13 @@
         "activeApplications": "Aplicaciones Activas"
       }
     }
+  },
+  "sidebar": {
+    "dashboard": "Panel de Control",
+    "applications": "Aplicaciones",
+    "gateways": "Puertas de Enlace",
+    "team": "Equipo",
+    "settings": "Configuraciones",
+    "logout": "Cerrar sesión"
   }
 }

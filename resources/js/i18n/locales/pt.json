@@ -138,5 +138,13 @@
         "activeApplications": "Aplicações Ativas"
       }
     }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "applications": "Aplicativos",
+    "gateways": "Gateways",
+    "team": "Equipe",
+    "settings": "Configuracoes",
+    "logout": "Sair"
   }
 }

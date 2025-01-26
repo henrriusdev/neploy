@@ -61,5 +61,13 @@
   },
   "errors": {
     "serverError": "Une erreur s'est produite lors de la connexion"
+  },
+  "sidebar": {
+    "dashboard": "Tableau de bord",
+    "applications": "Applications",
+    "gateways": "Passerelles",
+    "team": "Équipe",
+    "settings": "Paramètres",
+    "logout": "Se déconnecter"
   }
 }
