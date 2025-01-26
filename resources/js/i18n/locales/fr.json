@@ -76,7 +76,13 @@
       "create": "Créer",
       "description": "Deploy and manage your applications",
       "name": "Nom de l'application",
-      "status": "Statut",
+      "status": {
+        "running": "En cours",
+        "building": "En construction",
+        "stopped": "Arreté",
+        "error": "Erreur",
+        "unknown": "Inconnu"
+      },
       "deploy": "Deployer",
       "start": "Demarrer",
       "stop": "Arreter",

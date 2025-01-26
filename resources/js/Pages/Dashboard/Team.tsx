@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -18,6 +17,7 @@ import { TeamMember } from "@/types/common";
 import { TeamProps } from "@/types/props";
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
+import { Badge } from "@/components/ui/badge";
 
 interface InviteMemberData {
   email: string;
@@ -193,11 +193,11 @@ function Team({
                   </TableCell>
                   <TableCell>
                     {member.roles.map((role) => (
-                      <div className="flex items-center space-x-2" key={role.name}>
-                        <RoleIcon icon={role.icon} color={role.color} />
-                        <span>{role.name}</span>
-                      </div>
+                      <Badge key={role.name} variant="default" style={{backgroundColor: role.color}}>{role.name}</Badge>
                     ))}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs">Active</span>
                   </TableCell>
                   <TableCell className="text-right">
                       <Button

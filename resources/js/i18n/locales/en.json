@@ -122,12 +122,18 @@
       "create": "Create Application",
       "description": "Deploy and manage your applications",
       "name": "Application Name",
-      "status": "Status",
       "deploy": "Deploy",
       "start": "Start",
       "stop": "Stop",
       "delete": "Delete",
       "confirmDelete": "Are you sure you want to delete this application?",
+      "status": {
+        "running": "Running",
+        "building": "Building",
+        "stopped": "Stopped",
+        "error": "Error",
+        "unknown": "Unknown"
+      },
       "stats": {
         "totalApplications": "Total Applications",
         "runningApplications": "Running Applications",

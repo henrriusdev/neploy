@@ -108,12 +108,18 @@
       "create": "Crear aplicación",
       "description": "Implementa y gestiona tus aplicaciones",
       "name": "Nombre de la aplicación",
-      "status": "Estado",
       "deploy": "Implementar",
       "start": "Iniciar",
       "stop": "Detener",
       "delete": "Eliminar",
       "confirmDelete": "¿Estás seguro de que quieres eliminar esta aplicación?",
+      "status": {
+        "running": "En ejecución",
+        "building": "En construcción",
+        "stopped": "Detenida",
+        "error": "Error",
+        "unknown": "Desconocido"
+      },
       "stats": {
         "totalApplications": "Total de aplicaciones",
         "runningApplications": "Aplicaciones en ejecución",

@@ -95,7 +95,13 @@
       "create": "Criar aplicativo",
       "description": "Implante e gerencie seus aplicativos",
       "name": "Nome do aplicativo",
-      "status": "Status",
+      "status": {
+        "running": "Em execução",
+        "building": "Em construção",
+        "stopped": "Parado",
+        "error": "Erro",
+        "unknown": "Desconhecido"
+      },
       "deploy": "Implantar",
       "start": "Iniciar",
       "stop": "Parar",

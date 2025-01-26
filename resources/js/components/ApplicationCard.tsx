@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { TechIcon } from "@/components/TechIcon";
 import { Play, Square, Trash2 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 
 interface ApplicationCardProps {
   app: Application;
@@ -24,6 +26,8 @@ export function ApplicationCard({
   onStop,
   onDelete,
 }: ApplicationCardProps) {
+  const { t } = useTranslation();
+
   const getStatusBadgeColor = (status: Application["status"]) => {
     switch (status) {
       case "Running":
@@ -36,6 +40,21 @@ export function ApplicationCard({
         return "bg-red-500";
       default:
         return "bg-gray-500";
+    }
+  };
+
+  const translateStatus = (status: Application["status"]) => {
+    switch (status) {
+      case "Running":
+        return t('dashboard.applications.status.running');
+      case "Building":
+        return t('dashboard.applications.status.building');
+      case "Stopped":
+        return t('dashboard.applications.status.stopped');
+      case "Error":
+        return t('dashboard.applications.status.error');
+      default:
+        return t('dashboard.applications.status.unknown');
     }
   };
 
@@ -53,7 +72,7 @@ export function ApplicationCard({
           </CardDescription>
         </div>
         <Badge className={`${getStatusBadgeColor(app.status)} text-white`}>
-          {app.status}
+          {translateStatus(app.status)}
         </Badge>
       </CardHeader>
       <CardContent>
@@ -61,13 +80,13 @@ export function ApplicationCard({
           {app.status !== "Running" && (
             <Button size="sm" variant="outline" onClick={() => onStart(app.id)}>
               <Play className="h-4 w-4 mr-1" />
-              Start
+              {t('dashboard.applications.start')}
             </Button>
           )}
           {app.status === "Running" && (
             <Button size="sm" variant="outline" onClick={() => onStop(app.id)}>
               <Square className="h-4 w-4 mr-1" />
-              Stop
+              {t('dashboard.applications.stop')}
             </Button>
           )}
           <Button
@@ -75,7 +94,7 @@ export function ApplicationCard({
             variant="destructive"
             onClick={() => onDelete(app.id)}>
             <Trash2 className="h-4 w-4 mr-1" />
-            Delete
+            {t('dashboard.applications.delete')}
           </Button>
         </div>
       </CardContent>
