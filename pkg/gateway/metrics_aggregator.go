@@ -11,18 +11,39 @@ import (
 )
 
 type MetricsAggregator struct {
-	metricsCollector *MetricsCollector
-	appStatRepo      repository.ApplicationStat
-	stopChan         chan struct{}
-	wg               sync.WaitGroup
+	collectors  map[string]*MetricsCollector // Map of appID to collector
+	mu          sync.RWMutex
+	appStatRepo repository.ApplicationStat
+	stopChan    chan struct{}
+	wg          sync.WaitGroup
 }
 
 func NewMetricsAggregator(metricsCollector *MetricsCollector, appStatRepo repository.ApplicationStat) *MetricsAggregator {
-	return &MetricsAggregator{
-		metricsCollector: metricsCollector,
-		appStatRepo:      appStatRepo,
-		stopChan:         make(chan struct{}),
+	collectors := make(map[string]*MetricsCollector)
+	if metricsCollector != nil {
+		collectors[metricsCollector.applicationID] = metricsCollector
 	}
+
+	return &MetricsAggregator{
+		collectors:  collectors,
+		appStatRepo: appStatRepo,
+		stopChan:    make(chan struct{}),
+	}
+}
+
+func (m *MetricsAggregator) AddCollector(collector *MetricsCollector) {
+	if collector == nil {
+		return
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.collectors[collector.applicationID] = collector
+}
+
+func (m *MetricsAggregator) RemoveCollector(appID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.collectors, appID)
 }
 
 func (m *MetricsAggregator) Start() {
@@ -66,41 +87,39 @@ func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Hour)
 
-	metrics, err := m.metricsCollector.GetMetrics(1) // Get last 24 hours of metrics
-	if err != nil {
-		log.Printf("ERROR: Failed to get metrics: %v", err)
-		return
-	}
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
-	// Find metrics for the previous hour
-	var lastHourMetrics LastHourMetrics
+	// Aggregate metrics for each collector
+	for appID, collector := range m.collectors {
+		metrics, err := collector.GetMetrics(1) // Get last 24 hours of metrics
+		if err != nil {
+			log.Printf("ERROR: Failed to get metrics for app %s: %v", appID, err)
+			continue
+		}
 
-	targetHour := startTime.Format("2006-01-02 15:04")
-	for _, m := range metrics {
-		if m.Hour == targetHour {
-			lastHourMetrics = m
-			break
+		// Find metrics for the previous hour
+		var lastHourMetrics LastHourMetrics
+
+		targetHour := startTime.Format("2006-01-02 15:04")
+		for _, m := range metrics {
+			if m.Hour == targetHour {
+				lastHourMetrics = m
+				break
+			}
+		}
+
+		// Create application stat
+		stat := model.ApplicationStat{
+			ApplicationID: appID,
+			Requests:      lastHourMetrics.Requests,
+			Errors:        lastHourMetrics.Errors,
+			Date:          model.Date{Time: startTime},
+		}
+
+		// Save to repository
+		if err := m.appStatRepo.Insert(context.Background(), stat); err != nil {
+			log.Printf("ERROR: Failed to save metrics for app %s: %v", appID, err)
 		}
 	}
-
-	// Create application stat
-	stat := model.ApplicationStat{
-		ApplicationID: "default", // TODO: Update when we add per-app metrics
-		Date:          model.Date{Time: startTime},
-		Requests:      lastHourMetrics.Requests,
-		Errors:        lastHourMetrics.Errors,
-		// TODO: Add these fields when implemented
-		// AverageResponseTime: 0,
-		// DataTransfered:      0,
-		// UniqueVisitors:      0,
-	}
-
-	// Save to database
-	ctx := context.Background()
-	if err := m.appStatRepo.Insert(ctx, stat); err != nil {
-		log.Printf("ERROR: Failed to save application stats: %v", err)
-		return
-	}
-
-	log.Printf("INFO: Successfully saved application stats for hour %s", targetHour)
 }

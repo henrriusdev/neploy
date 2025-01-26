@@ -17,9 +17,10 @@ type MetricsCollector struct {
 		requests int
 		errors   int
 	}
+	applicationID string
 }
 
-func NewMetricsCollector(dataDir string) (*MetricsCollector, error) {
+func NewMetricsCollector(dataDir string, applicationID string) (*MetricsCollector, error) {
 	// Ensure data directory exists
 	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create metrics directory: %v", err)
@@ -33,6 +34,7 @@ func NewMetricsCollector(dataDir string) (*MetricsCollector, error) {
 			requests int
 			errors   int
 		}),
+		applicationID: applicationID,
 	}, nil
 }
 
@@ -60,7 +62,7 @@ func (m *MetricsCollector) RecordRequest(timestamp time.Time, isError bool) {
 
 func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {
 	// Format the line: "2024-12-26 11:00 - 100, 5"
-	line := fmt.Sprintf("%s - %d, %d\n", hourKey, requests, errors)
+	line := fmt.Sprintf("%s - %d, %d = %s \n", hourKey, requests, errors, m.applicationID)
 
 	// Open file in append mode
 	file, err := os.OpenFile(m.metricsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
@@ -75,12 +77,7 @@ func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {
 	}
 }
 
-func (m *MetricsCollector) GetMetrics(days int) ([]struct {
-	Hour     string
-	Requests int
-	Errors   int
-}, error,
-) {
+func (m *MetricsCollector) GetMetrics(days int) ([]LastHourMetrics, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -92,11 +89,7 @@ func (m *MetricsCollector) GetMetrics(days int) ([]struct {
 
 	// Parse lines and aggregate data
 	lines := strings.Split(string(content), "\n")
-	metrics := make([]struct {
-		Hour     string
-		Requests int
-		Errors   int
-	}, 0)
+	metrics := make([]LastHourMetrics, 0)
 
 	cutoff := time.Now().AddDate(0, 0, -days)
 
@@ -113,7 +106,8 @@ func (m *MetricsCollector) GetMetrics(days int) ([]struct {
 
 		hourPart := parts[0]
 		var requests, errors int
-		_, err := fmt.Sscanf(parts[1], "%d, %d", &requests, &errors)
+		var applicationID string
+		_, err := fmt.Sscanf(parts[1], "%d, %d = %s", &requests, &errors, &applicationID)
 		if err != nil {
 			continue
 		}
@@ -126,14 +120,11 @@ func (m *MetricsCollector) GetMetrics(days int) ([]struct {
 
 		// Only include data after cutoff
 		if timestamp.After(cutoff) {
-			metrics = append(metrics, struct {
-				Hour     string
-				Requests int
-				Errors   int
-			}{
-				Hour:     hourPart,
-				Requests: requests,
-				Errors:   errors,
+			metrics = append(metrics, LastHourMetrics{
+				Hour:          hourPart,
+				Requests:      requests,
+				Errors:        errors,
+				ApplicationID: applicationID,
 			})
 		}
 	}

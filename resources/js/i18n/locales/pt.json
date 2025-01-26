@@ -1,0 +1,207 @@
+{
+  "onboarding": {
+    "steps": {
+      "provider": {
+        "title": "Selecione um provedor",
+        "description": "Escolha o provedor com o qual deseja continuar"
+      },
+      "data": {
+        "title": "Informações pessoais",
+        "description": "Complete suas informações pessoais"
+      },
+      "roles": {
+        "title": "Funções",
+        "description": "Configure as funções da sua organização"
+      },
+      "service": {
+        "title": "Configuração do serviço",
+        "description": "Configure os detalhes do seu serviço",
+        "language": {
+          "label": "Idioma",
+          "placeholder": "Selecione um idioma",
+          "options": {
+            "es": "Espanhol",
+            "en": "Inglês",
+            "pt": "Português",
+            "zh": "Chinês",
+            "fr": "Francês"
+          }
+        }
+      }
+    },
+    "buttons": {
+      "next": "Próximo",
+      "back": "Voltar",
+      "finish": "Finalizar"
+    },
+    "language": "Idioma",
+    "success": "Sua conta foi criada com sucesso",
+    "error": "Houve um erro ao criar sua conta"
+  },
+  "auth": {
+    "login": "Entrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "enterEmail": "Digite seu e-mail",
+    "enterPassword": "Digite sua senha",
+    "loggingIn": "Entrando...",
+    "logIn": "Entrar",
+    "welcomeTitle": "Bem-vindo à nossa plataforma",
+    "welcomeDescription": "Digite seu e-mail e senha para entrar",
+    "feature1": "Recurso 1: Lorem ipsum dolor sit amet",
+    "feature2": "Recurso 2: Consectetur adipiscing elit",
+    "feature3": "Recurso 3: Sed do eiusmod tempor incididunt"
+  },
+  "dashboard": {
+    "welcome": "Bem-vindo de volta, {{name}}",
+    "stats": {
+      "totalApps": "Total de aplicativos",
+      "totalAppsDescription": "Número total de aplicativos implantados",
+      "runningApps": "Aplicativos em execução",
+      "runningAppsDescription": "Aplicativos atualmente em execução",
+      "teamMembers": "Membros da equipe",
+      "teamMembersDescription": "Membros ativos da equipe",
+      "deployments": "Implantações",
+      "deploymentsDescription": "Total de implantações este mês"
+    },
+    "recentActivity": {
+      "title": "Atividade recente",
+      "description": "Ações recentes da sua equipe"
+    },
+    "resources": {
+      "title": "Recursos",
+      "description": "Recursos e documentação útil",
+      "documentation": "Documentação",
+      "apiReference": "Referência da API",
+      "guides": "Guias",
+      "examples": "Exemplos"
+    },
+    "healthApps": "Saúde dos aplicativos",
+    "fullyHealthy": "estão completamente saudáveis",
+    "totalRequests": "Total de requisições",
+    "requestsLastMonth": "+18% desde o mês passado",
+    "totalVisitors": "Total de visitantes",
+    "visitorsLastHour": "+201 desde a última hora",
+    "totalErrors": "Total de erros",
+    "errorsLastHour": "-5% desde a última hora",
+    "requestsByTime": "Requisições por tempo",
+    "successful": "Bem-sucedidas",
+    "errors": "Erros",
+    "techStacksMostUsed": "Tecnologias mais utilizadas",
+    "visitorCountByTime": "Contagem de visitantes por tempo",
+    "visitors": "Visitantes",
+    "applications": {
+      "title": "Aplicativos",
+      "create": "Criar aplicativo",
+      "description": "Implante e gerencie seus aplicativos",
+      "name": "Nome do aplicativo",
+      "status": {
+        "running": "Em execução",
+        "building": "Em construção",
+        "stopped": "Parado",
+        "error": "Erro",
+        "unknown": "Desconhecido"
+      },
+      "deploy": "Implantar",
+      "start": "Iniciar",
+      "stop": "Parar",
+      "delete": "Excluir",
+      "confirmDelete": "Tem certeza de que deseja excluir esta aplicação?",
+      "stats": {
+        "totalApplications": "Total de aplicativos",
+        "runningApplications": "Aplicativos em execução",
+        "failedApplications": "Aplicativos com falhas"
+      },
+      "errors": {
+        "fetchFailed": "Falha ao buscar aplicativos",
+        "branchesFetchFailed": "Falha ao buscar ramais do repositório",
+        "nameRequired": "O nome do aplicativo é obrigatório",
+        "fileOrRepoRequired": "Por favor, fornecer um arquivo ou uma URL do repositório",
+        "branchRequired": "Por favor, selecione uma ramal",
+        "portInvalid": "Por favor, insira um número de porta válido (1-65535)",
+        "unknown": "Um erro inesperado ocorreu"
+      },
+      "actions": {
+        "deploymentProgress": "Progresso do deployment",
+        "required": "Ação obrigatória",
+        "portConfiguration": "Configuração de porta",
+        "portExposed": "A porta {{port}} será exposta para este aplicativo",
+        "deploySuccess": "O deployment do aplicativo foi iniciado",
+        "uploadSuccess": "O aplicativo foi carregado com sucesso",
+        "startSuccess": "O aplicativo foi iniciado com sucesso",
+        "stopSuccess": "O aplicativo foi parado com sucesso",
+        "deleteSuccess": "Aplicativo excluído com sucesso"
+      },
+      "createNew": {
+        "title": "Criar novo aplicativo",
+        "description": "Preencha os detalhes para criar um novo aplicativo",
+        "name": "Nome do aplicativo",
+        "namePlaceholder": "Insira o nome do aplicativo",
+        "descriptionField": "Descrição do aplicativo",
+        "descriptionPlaceholder": "Insira a descrição do aplicativo",
+        "fileOrRepo": "URL do repositório GitHub/Gitlab (opcional)",
+        "branch": "Ramal",
+        "branchPlaceholder": "Selecione um ramal",
+        "repoUrlDescription": "Insira uma URL válida do repositório GitHub/Gitlab (ex. https://github.com/usuario/repo)",
+        "loadingBranches": "Carregando ramais...",
+        "port": "Porta",
+        "portPlaceholder": "Insira o número da porta",
+        "dropzoneActive": "Soltar o arquivo ZIP aqui...",
+        "dropzoneInactive": "Arraste e solte o arquivo ZIP",
+        "deploying": "Implantando...",
+        "deploy": "Implantar aplicativo"
+      },
+      "empty": {
+        "title": "Nenhum aplicativo encontrado",
+        "description": "Crie seu primeiro aplicativo"
+      },
+      "views": {
+        "grid": "Visualização em grade",
+        "list": "Visualização em lista"
+      }
+    },
+    "team": {
+      "title": "Gerenciamento da equipe",
+      "description": "Gerencie os membros da sua equipe e suas funções",
+      "inviteMember": "Convidar membro",
+      "inviteDescription": "Envie um convite para um novo membro da equipe",
+      "email": "E-mail",
+      "role": "Função",
+      "selectRole": "Selecione uma função",
+      "member": "Membro",
+      "status": "Status",
+      "actions": "Ações",
+      "inviting": "Convidando...",
+      "invite": "Enviar convite",
+      "inviteSuccess": "Convite enviado com sucesso",
+      "inviteError": "Erro ao enviar convite",
+      "confirmRemove": "Tem certeza que deseja remover este membro?",
+      "removeSuccess": "Membro removido com sucesso",
+      "removeError": "Erro ao remover membro"
+    },
+    "overview": {
+      "title": "Painel de Controle",
+      "health": "Saúde do Sistema",
+      "requests": "Requisições",
+      "visitors": "Visitantes",
+      "techStack": "Stack Tecnológica",
+      "successful": "Bem-sucedidas",
+      "errors": "Erros",
+      "statistics": {
+        "title": "Estatísticas",
+        "totalRequests": "Total de Requisições",
+        "totalVisitors": "Total de Visitantes",
+        "totalApplications": "Total de Aplicações",
+        "activeApplications": "Aplicações Ativas"
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "applications": "Aplicativos",
+    "gateways": "Gateways",
+    "team": "Equipe",
+    "settings": "Configuracoes",
+    "logout": "Sair"
+  }
+}

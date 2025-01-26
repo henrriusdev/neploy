@@ -15,16 +15,9 @@ import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
 import { ApplicationsProps } from "@/types/props";
-import { 
-  useGetAllApplicationsQuery, 
-  useLoadBranchesQuery, 
-  useCreateApplicationMutation, 
-  useDeployApplicationMutation,
-  useUploadApplicationMutation,
-  useStartApplicationMutation,
-  useStopApplicationMutation,
-  useDeleteApplicationMutation
-} from "@/services/api/applications";
+import { useGetAllApplicationsQuery, useLoadBranchesQuery, useCreateApplicationMutation, useDeployApplicationMutation, useUploadApplicationMutation, useStartApplicationMutation, useStopApplicationMutation, useDeleteApplicationMutation } from "@/services/api/applications";
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -74,7 +67,9 @@ function Applications({
     fields: [],
     onSubmit: () => {},
   });
+  const [currentRepoUrl, setCurrentRepoUrl] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
 
   const { data: applications, refetch: refreshApplications, error: applicationsError } = useGetAllApplicationsQuery(undefined, {
@@ -85,31 +80,29 @@ function Applications({
   });
 
   const { data: branchesData, isFetching: isLoadingBranches, error: branchesError } = useLoadBranchesQuery(
-    { repoUrl: "" },
-    {
-      skip: true,
-    }
+    { repoUrl: currentRepoUrl },
+    { skip: !currentRepoUrl }
   );
 
   useEffect(() => {
     if (applicationsError) {
       toast({
-        title: "Error",
-        description: "Failed to fetch applications",
+        title: t('common.error'),
+        description: t('applications.errors.fetchFailed'),
         variant: "destructive",
       });
     }
-  }, [applicationsError]);
+  }, [applicationsError, t]);
 
   useEffect(() => {
     if (branchesError) {
       toast({
-        title: "Error",
-        description: "Failed to fetch repository branches",
+        title: t('common.error'),
+        description: t('dashboard.applications.errors.branchesFetchFailed'),
         variant: "destructive",
       });
     }
-  }, [branchesError]);
+  }, [branchesError, t]);
 
   useEffect(() => {
     if (branchesData?.branches) {
@@ -121,13 +114,17 @@ function Applications({
     () => debounce((repoUrl: string) => {
       if (!repoUrl) {
         setBranches([]);
+        setCurrentRepoUrl("");
         return;
       }
-      // Refetch con el nuevo repoUrl
-      useLoadBranchesQuery({ repoUrl }, { skip: false });
+      setCurrentRepoUrl(repoUrl);
     }, 1000),
     []
   );
+
+  const handleRepoUrlChange = (repoUrl: string) => {
+    debouncedFetchBranches(repoUrl);
+  };
 
   const [createApplication] = useCreateApplicationMutation();
   const [deployApplication] = useDeployApplicationMutation();
@@ -150,15 +147,15 @@ function Applications({
       }
 
       toast({
-        title: "Success",
-        description: `Application ${action} request sent`,
+        title: t('common.success'),
+        description: t(`applications.actions.${action}Success`),
       });
       
       refreshApplications();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || `Failed to ${action} application`,
+        title: t('common.error'),
+        description: error.message || t(`applications.errors.${action}Failed`),
         variant: "destructive",
       });
     }
@@ -170,8 +167,8 @@ function Applications({
   ) => {
     if (!values.appName) {
       toast({
-        title: "Error",
-        description: "Application name is required",
+        title: t('common.error'),
+        description: t('applications.errors.nameRequired'),
         variant: "destructive",
       });
       return;
@@ -179,8 +176,8 @@ function Applications({
 
     if (!file && !values.repoUrl) {
       toast({
-        title: "Error",
-        description: "Please provide either a file or a repository URL",
+        title: t('common.error'),
+        description: t('applications.errors.fileOrRepoRequired'),
         variant: "destructive",
       });
       return;
@@ -207,8 +204,8 @@ function Applications({
       if (values.repoUrl) {
         if (!values.branch) {
           toast({
-            title: "Error",
-            description: "Please select a branch",
+            title: t('common.error'),
+            description: t('applications.errors.branchRequired'),
             variant: "destructive",
           });
           return;
@@ -221,8 +218,8 @@ function Applications({
         });
 
         toast({
-          title: "Success",
-          description: "Deployment started successfully",
+          title: t('common.success'),
+          description: t('applications.actions.deploySuccess'),
         });
       }
 
@@ -233,8 +230,8 @@ function Applications({
         });
 
         toast({
-          title: "Success",
-          description: "Application uploaded successfully",
+          title: t('common.success'),
+          description: t('applications.actions.uploadSuccess'),
         });
       }
 
@@ -242,8 +239,8 @@ function Applications({
       setUploadDialogOpen(false);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "An error occurred",
+        title: t('common.error'),
+        description: error.message || t('applications.errors.unknown'),
         variant: "destructive",
       });
     } finally {
@@ -255,7 +252,7 @@ function Applications({
     const unsubProgress = onNotification((message: ProgressMessage) => {
       if (message.type === "progress") {
         toast({
-          title: "Deployment Progress",
+          title: t('applications.actions.deploymentProgress'),
           description: message.message,
         });
       }
@@ -270,7 +267,7 @@ function Applications({
 
       setActionDialog({
         show: true,
-        title: message.title || "Action Required",
+        title: message.title || t('applications.actions.required'),
         description: message.message || "",
         fields: message.inputs.map((input) => ({
           ...input,
@@ -280,7 +277,7 @@ function Applications({
               ? (value: string) => {
                   const port = parseInt(value);
                   if (isNaN(port) || port < 1 || port > 65535) {
-                    return "Please enter a valid port number (1-65535)";
+                    return t('applications.errors.portInvalid');
                   }
                   return true;
                 }
@@ -302,8 +299,8 @@ function Applications({
 
           // Show confirmation toast
           toast({
-            title: "Port Configuration",
-            description: `Port ${data.port} will be exposed for this application.`,
+            title: t('applications.actions.portConfiguration'),
+            description: t('applications.actions.portExposed', { port: data.port }),
           });
         },
       });
@@ -316,7 +313,7 @@ function Applications({
       // Call all unsubscribe functions
       unsubFunctions.forEach((unsub) => unsub && unsub());
     };
-  }, [onNotification, onInteractive, sendMessage, toast]);
+  }, [onNotification, onInteractive, sendMessage, toast, t]);
 
   React.useEffect(() => {
     refreshApplications();
@@ -341,13 +338,14 @@ function Applications({
       ws.close();
     };
   }, [refreshApplications]);
+
   return (
     <div className="space-y-6 p-3">
       {/* Stats Section */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.applications.stats.totalApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -357,23 +355,21 @@ function Applications({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Running Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.applications.stats.runningApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {applications?.filter((app) => app.status === "Running").length ||
-                0}
+              {applications?.filter((app) => app.status === "Running").length || 0}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Failed Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.applications.stats.failedApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {applications?.filter((app) => app.status === "Error").length ||
-                0}
+              {applications?.filter((app) => app.status === "Error").length || 0}
             </div>
           </CardContent>
         </Card>
@@ -381,99 +377,50 @@ function Applications({
 
       {/* Actions Bar */}
       <div className="flex justify-between items-center">
-        <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              New Application
-            </Button>
-          </DialogTrigger>
+          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                {t('dashboard.applications.create')}
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Deploy New Application</DialogTitle>
-              <DialogDescription>
-                Upload a zip file or provide a GitHub repository URL to deploy
-                your application.
-              </DialogDescription>
-            </DialogHeader>
-            <ApplicationForm
-              onSubmit={onSubmit}
-              isUploading={isUploading}
-              branches={branches}
-              isLoadingBranches={isLoadingBranches}
-              onRepoUrlChange={debouncedFetchBranches}
-            />
-          </DialogContent>
-        </Dialog>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("grid")}>
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("list")}>
-            <List className="h-4 w-4" />
-          </Button>
+              <DialogHeader>
+                <DialogTitle>{t('dashboard.applications.createNew.title')}</DialogTitle>
+                <DialogDescription>
+                  {t('dashboard.applications.createNew.description')}
+                </DialogDescription>
+              </DialogHeader>
+              <ApplicationForm
+                onSubmit={onSubmit}
+                isUploading={isUploading}
+                branches={branches}
+                isLoadingBranches={isLoadingBranches}
+                onRepoUrlChange={handleRepoUrlChange}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
+
+      <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
+        {applications?.map((app) => (
+          <ApplicationCard
+            key={app.id}
+            app={app}
+            onStart={() => handleApplicationAction(app.id, "start")}
+            onStop={() => handleApplicationAction(app.id, "stop")}
+            onDelete={() => handleApplicationAction(app.id, "delete")}
+          />
+        ))}
       </div>
 
-      {/* Applications List/Grid */}
-      {!applications || applications.length === 0 ? (
-        <Card className="p-12">
-          <div className="flex flex-col items-center justify-center text-center space-y-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <PlusCircle className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">No applications found</h3>
-              <p className="text-sm text-muted-foreground">
-                Get started by clicking the "New Application" button above to
-                deploy your first application.
-              </p>
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-              : "space-y-4"
-          }>
-          {applications.map((app: Application) => (
-            <ApplicationCard
-              key={app.id}
-              app={app}
-              onStart={(id) => handleApplicationAction(id, "start")}
-              onStop={(id) => handleApplicationAction(id, "stop")}
-              onDelete={(id) => handleApplicationAction(id, "delete")}
-            />
-          ))}
-        </div>
-      )}
-      <Dialog
-        open={actionDialog.show}
-        onOpenChange={(open) =>
-          setActionDialog((prev) => ({ ...prev, show: open }))
-        }>
+      <Dialog open={actionDialog.show} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, show: false })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{actionDialog.title}</DialogTitle>
             <DialogDescription>{actionDialog.description}</DialogDescription>
           </DialogHeader>
-          {actionDialog.show &&
-            actionDialog.fields &&
-            actionDialog.fields.length > 0 && (
-              <DynamicForm
-                fields={actionDialog.fields}
-                onSubmit={actionDialog.onSubmit}
-                className="mt-4"
-              />
-            )}
+          <DynamicForm fields={actionDialog.fields} onSubmit={actionDialog.onSubmit} />
         </DialogContent>
       </Dialog>
     </div>

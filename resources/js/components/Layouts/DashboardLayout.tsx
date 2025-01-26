@@ -3,35 +3,36 @@ import { AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2 } from 'lucide-r
 import Layout from "@/components/Layout"
 import { Toaster } from '@/components/ui/toaster'
 import { usePage, useRemember } from '@inertiajs/react'
+import { useTranslation } from 'react-i18next'
 
 const defaultNavMain = [
     {
-        title: "Dashboard",
+        title: "sidebar.dashboard",
         url: "/dashboard",
         icon: PieChartIcon,
     },
     {
-        title: "Applications",
+        title: "sidebar.applications",
         url: "/dashboard/applications",
         icon: AppWindowMac,
     },
     {
-        title: "Gateways",
+        title: "sidebar.gateways",
         url: "/dashboard/gateways",
         icon: DoorOpen
     },
     {
-        title: "Team",
+        title: "sidebar.team",
         url: "/dashboard/team",
         icon: Frame,
     },
     {
-        title: "Settings",
+        title: "sidebar.settings",
         url: "/dashboard/settings",
         icon: Settings2,
     },
     {
-        title: "Logout",
+        title: "sidebar.logout",
         url: "/logout",
         icon: DoorOpen,
     },
@@ -59,6 +60,7 @@ interface NavigationItem {
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user, teamName, logoUrl, navItems }) => {
     const { url } = usePage()
+    const { t } = useTranslation()
     
     const [layoutData] = useRemember({
         user: {
@@ -75,6 +77,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
     // Create navigation with active state based on current URL
     const navigation = (navItems || defaultNavMain).map(item => ({
         ...item,
+        title: t(item.title), // Translate the title
         isActive: url === item.url || (url.startsWith(item.url) && item.url !== "/dashboard" && item.url !== "/logout")
     }));
 
@@ -87,10 +90,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
                 navItems={navigation}
             >
                 {children}
-                <Toaster />
             </Layout>
+            <Toaster />
         </div>
-    );
+    )
 }
 
 export default DashboardLayout

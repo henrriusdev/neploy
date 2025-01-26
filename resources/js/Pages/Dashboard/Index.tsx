@@ -1,11 +1,12 @@
-"use client";
-
-import React from "react";
+import * as React from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
-import { DashboardCard } from "@/components/DashboardCard";
-import { BaseChart } from "@/components/BaseChart";
 import { DashboardProps } from "@/types/props";
 import { techStackColors } from "@/lib/colors";
+import { useTranslation } from "react-i18next";
+import { DashboardCard } from "@/components/DashboardCard";
+import { BaseChart } from "@/components/BaseChart";
 
 const defaultRequestsData = [
   { name: "00:00", successful: 165, errors: 5 },
@@ -32,14 +33,17 @@ const defaultTechStackData = [
 ];
 
 function Dashboard({
-  requestData = defaultRequestsData,
-  techStack = defaultTechStackData,
   user,
-  visitorData = defaultVisitorsData,
   teamName,
   logoUrl,
+  stats,
+  requestData = defaultRequestsData,
+  techStack = defaultTechStackData,
+  visitorData = defaultVisitorsData,
   health = "4/10",
 }: DashboardProps) {
+  const { t } = useTranslation();
+
   const healthPercentage =
     (parseInt(health?.split("/")[0]) / parseInt(health?.split("/")[1])) * 100;
   user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${
@@ -49,10 +53,102 @@ function Dashboard({
   const dashboardContent = (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('dashboard.stats.totalApps')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.totalApps ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {t('dashboard.stats.totalAppsDescription')}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('dashboard.stats.runningApps')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.runningApps ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {t('dashboard.stats.runningAppsDescription')}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('dashboard.stats.teamMembers')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.teamMembers ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {t('dashboard.stats.teamMembersDescription')}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {t('dashboard.stats.deployments')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.deployments ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {t('dashboard.stats.deploymentsDescription')}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>{t('dashboard.recentActivity.title')}</CardTitle>
+            <CardDescription>
+              {t('dashboard.recentActivity.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Activity content */}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>{t('dashboard.resources.title')}</CardTitle>
+            <CardDescription>
+              {t('dashboard.resources.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button variant="outline" className="w-full justify-start">
+              {t('dashboard.resources.documentation')}
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              {t('dashboard.resources.apiReference')}
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              {t('dashboard.resources.guides')}
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              {t('dashboard.resources.examples')}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <DashboardCard
-          title="Health Apps"
+          title={t('dashboard.healthApps')}
           value={health}
-          description={`${healthPercentage}% are fully healthy`}
+          description={`${healthPercentage}% ${t('dashboard.fullyHealthy')}`}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -68,9 +164,9 @@ function Dashboard({
           }
         />
         <DashboardCard
-          title="Total Requests"
+          title={t('dashboard.totalRequests')}
           value="1,675,234"
-          description="+18% from last month"
+          description={t('dashboard.requestsLastMonth')}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -86,9 +182,9 @@ function Dashboard({
           }
         />
         <DashboardCard
-          title="Total Visitors"
+          title={t('dashboard.totalVisitors')}
           value="573,281"
-          description="+201 since last hour"
+          description={t('dashboard.visitorsLastHour')}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -106,9 +202,9 @@ function Dashboard({
           }
         />
         <DashboardCard
-          title="Total Errors"
+          title={t('dashboard.totalErrors')}
           value="78"
-          description="-5% from last hour"
+          description={t('dashboard.errorsLastHour')}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +222,7 @@ function Dashboard({
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <BaseChart
-          title="Requests by Time"
+          title={t('dashboard.requestsByTime')}
           data={requestData}
           type="bar"
           dataKeys={["successful", "errors"]}
@@ -134,11 +230,11 @@ function Dashboard({
           className="col-span-full"
           config={{
             successful: {
-              label: "Successful",
+              label: t('dashboard.successful'),
               color: "hsl(var(--primary))",
             },
             errors: {
-              label: "Errors",
+              label: t('dashboard.errors'),
               color: "hsl(var(--destructive))",
             },
           }}
@@ -146,7 +242,7 @@ function Dashboard({
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <BaseChart
-          title="Tech Stacks Most Used by Apps"
+          title={t('dashboard.techStacksMostUsed')}
           data={techStack}
           type="pie"
           dataKeys={["value"]}
@@ -164,7 +260,7 @@ function Dashboard({
           )}
         />
         <BaseChart
-          title="Visitor Count by Time"
+          title={t('dashboard.visitorCountByTime')}
           data={visitorData}
           type="line"
           dataKeys={["visitors"]}
@@ -172,7 +268,7 @@ function Dashboard({
           className="col-span-3 lg:col-span-4 border-none"
           config={{
             visitors: {
-              label: "Visitors",
+              label: t('dashboard.visitors'),
               color: "var(--primary-color)",
             },
           }}

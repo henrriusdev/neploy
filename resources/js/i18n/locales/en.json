@@ -1,0 +1,232 @@
+{
+  "common": {
+    "languageSelector": "Language",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish",
+    "pt": "Portuguese",
+    "zh": "Chinese",
+    "fr": "French"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "loginWith": "Login with {{provider}}",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create Account",
+    "orContinueWith": "Or continue with",
+    "welcomeTitle": "Welcome to Our Platform",
+    "welcomeDescription": "Discover a smarter way to manage your cloud applications and services",
+    "feature1": "Simple and fast application deployment",
+    "feature2": "Intuitive cloud resource management",
+    "feature3": "Real-time performance monitoring",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "loggingIn": "Logging in...",
+    "logIn": "Log in"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Neploy",
+    "description": "Let's get you started with your deployment journey",
+    "steps": {
+      "personal": "Personal Info",
+      "team": "Team Setup",
+      "project": "Project Details",
+      "summary": "Summary"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Tell us a bit about yourself",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "language": "Preferred Language"
+    },
+    "teamSetup": {
+      "title": "Team Setup",
+      "description": "Configure your team settings",
+      "teamName": "Team Name",
+      "teamSize": "Team Size",
+      "industry": "Industry"
+    },
+    "projectDetails": {
+      "title": "Project Details",
+      "description": "Tell us about your project",
+      "projectName": "Project Name",
+      "projectType": "Project Type",
+      "framework": "Framework",
+      "database": "Database"
+    },
+    "summary": {
+      "title": "Summary",
+      "description": "Review your information",
+      "personalSection": "Personal Information",
+      "teamSection": "Team Information",
+      "projectSection": "Project Information"
+    },
+    "buttons": {
+      "next": "Next",
+      "previous": "Previous",
+      "finish": "Finish"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {{name}}",
+    "stats": {
+      "totalApps": "Total Apps",
+      "totalAppsDescription": "Total number of applications deployed",
+      "runningApps": "Running Apps",
+      "runningAppsDescription": "Applications currently running",
+      "teamMembers": "Team Members",
+      "teamMembersDescription": "Active team members",
+      "deployments": "Deployments",
+      "deploymentsDescription": "Total deployments this month"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "description": "Your team's recent actions"
+    },
+    "resources": {
+      "title": "Resources",
+      "description": "Helpful resources and documentation",
+      "documentation": "Documentation",
+      "apiReference": "API Reference",
+      "guides": "Guides",
+      "examples": "Examples"
+    },
+    "healthApps": "Health Apps",
+    "fullyHealthy": "are fully healthy",
+    "totalRequests": "Total Requests",
+    "requestsLastMonth": "+18% from last month",
+    "totalVisitors": "Total Visitors",
+    "visitorsLastHour": "+201 since last hour",
+    "totalErrors": "Total Errors",
+    "errorsLastHour": "-5% from last hour",
+    "requestsByTime": "Requests by Time",
+    "successful": "Successful",
+    "errors": "Errors",
+    "techStacksMostUsed": "Tech Stacks Most Used by Apps",
+    "visitorCountByTime": "Visitor Count by Time",
+    "visitors": "Visitors",
+    "applications": {
+      "title": "Applications",
+      "create": "Create Application",
+      "description": "Deploy and manage your applications",
+      "name": "Application Name",
+      "deploy": "Deploy",
+      "start": "Start",
+      "stop": "Stop",
+      "delete": "Delete",
+      "confirmDelete": "Are you sure you want to delete this application?",
+      "status": {
+        "running": "Running",
+        "building": "Building",
+        "stopped": "Stopped",
+        "error": "Error",
+        "unknown": "Unknown"
+      },
+      "stats": {
+        "totalApplications": "Total Applications",
+        "runningApplications": "Running Applications",
+        "failedApplications": "Failed Applications"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch applications",
+        "branchesFetchFailed": "Failed to fetch repository branches",
+        "nameRequired": "Application name is required",
+        "fileOrRepoRequired": "Please provide either a file or a repository URL",
+        "branchRequired": "Please select a branch",
+        "portInvalid": "Please enter a valid port number (1-65535)",
+        "unknown": "An unexpected error occurred"
+      },
+      "actions": {
+        "deploymentProgress": "Deployment Progress",
+        "required": "Action Required",
+        "portConfiguration": "Port Configuration",
+        "portExposed": "Port {{port}} will be exposed for this application",
+        "deploySuccess": "Application deployment started",
+        "uploadSuccess": "Application uploaded successfully",
+        "startSuccess": "Application started successfully",
+        "stopSuccess": "Application stopped successfully",
+        "deleteSuccess": "Application deleted successfully"
+      },
+      "createNew": {
+        "title": "Create New Application",
+        "description": "Fill in the details to create a new application",
+        "name": "Application Name",
+        "namePlaceholder": "Enter application name",
+        "descriptionField": "Application Description",
+        "descriptionPlaceholder": "Enter application description",
+        "fileOrRepo": "GitHub/Gitlab Repository URL (optional)",
+        "repoUrlDescription": "Enter a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)",
+        "branch": "Branch",
+        "branchPlaceholder": "Select branch",
+        "loadingBranches": "Loading branches...",
+        "port": "Port",
+        "portPlaceholder": "Enter port number",
+        "dropzoneActive": "Drop the ZIP file here...",
+        "dropzoneInactive": "Drag and drop a ZIP file",
+        "deploying": "Deploying...",
+        "deploy": "Deploy app"
+      },
+      "empty": {
+        "title": "No Applications Found",
+        "description": "Get started by creating your first application"
+      },
+      "views": {
+        "grid": "Grid View",
+        "list": "List View"
+      }
+    },
+    "gateways": {
+      "title": "Gateways",
+      "description": "Manage your application gateways"
+    },
+    "team": {
+      "title": "Team",
+      "description": "Manage your team members and their roles",
+      "inviteMember": "Invite Member",
+      "inviteDescription": "Send an invitation to a new team member",
+      "email": "Email Address",
+      "role": "Role",
+      "selectRole": "Select a role",
+      "member": "Member",
+      "status": "Status",
+      "actions": "Actions",
+      "inviting": "Inviting...",
+      "invite": "Send Invitation",
+      "inviteSuccess": "Invitation sent successfully",
+      "inviteError": "Failed to send invitation",
+      "confirmRemove": "Are you sure you want to remove this member?",
+      "removeSuccess": "Member removed successfully",
+      "removeError": "Failed to remove member"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure your account and workspace settings"
+    }
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPassword": "Password must be at least 8 characters",
+    "serverError": "An error occurred during login"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "applications": "Applications",
+    "gateways": "Gateways",
+    "team": "Team",
+    "settings": "Settings",
+    "logout": "Logout"
+  }
+}
