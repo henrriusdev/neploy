@@ -34,5 +34,32 @@
       "back": "Retour",
       "finish": "Terminer"
     }
+  },
+  "common": {
+    "languageSelector": "Sélectionner la langue"
+  },
+  "languages": {
+    "es": "Espagnol",
+    "en": "Anglais",
+    "pt": "Portugais",
+    "zh": "Chinois",
+    "fr": "Français"
+  },
+  "auth": {
+    "login": "Connexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "enterEmail": "Entrez votre email",
+    "enterPassword": "Entrez votre mot de passe",
+    "loggingIn": "Connexion en cours...",
+    "logIn": "Se connecter",
+    "welcomeTitle": "Bienvenue sur notre plateforme",
+    "welcomeDescription": "Découvrez une façon plus intelligente de gérer vos applications et services cloud",
+    "feature1": "Déploiement simple et rapide des applications",
+    "feature2": "Gestion intuitive des ressources cloud",
+    "feature3": "Surveillance des performances en temps réel"
+  },
+  "errors": {
+    "serverError": "Une erreur s'est produite lors de la connexion"
   }
 }

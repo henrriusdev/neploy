@@ -33,6 +33,123 @@
       "next": "Siguiente",
       "back": "Atrás",
       "finish": "Finalizar"
+    },
+    "language": "Idioma",
+    "success": "Tu cuenta ha sido creada exitosamente",
+    "error": "Hubo un error al crear tu cuenta"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "enterEmail": "Ingresa tu correo electrónico",
+    "enterPassword": "Ingresa tu contraseña",
+    "loggingIn": "Iniciando sesión...",
+    "logIn": "Iniciar sesión",
+    "welcomeTitle": "Bienvenido a nuestra plataforma",
+    "welcomeDescription": "Descubre una forma más inteligente de gestionar tus aplicaciones y servicios en la nube",
+    "feature1": "Despliegue sencillo y rápido de aplicaciones",
+    "feature2": "Gestión intuitiva de recursos en la nube",
+    "feature3": "Monitoreo en tiempo real del rendimiento"
+  },
+  "common": {
+    "languageSelector": "Seleccionar idioma"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "Inglés",
+    "pt": "Portugués",
+    "zh": "Chino",
+    "fr": "Francés"
+  },
+  "errors": {
+    "serverError": "Ha ocurrido un error durante el inicio de sesión"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido de nuevo, {{name}}",
+    "stats": {
+      "totalApps": "Total de aplicaciones",
+      "totalAppsDescription": "Número total de aplicaciones implementadas",
+      "runningApps": "Aplicaciones en ejecución",
+      "runningAppsDescription": "Aplicaciones actualmente en ejecución",
+      "teamMembers": "Miembros del equipo",
+      "teamMembersDescription": "Miembros activos del equipo",
+      "deployments": "Implementaciones",
+      "deploymentsDescription": "Total de implementaciones este mes"
+    },
+    "recentActivity": {
+      "title": "Actividad reciente",
+      "description": "Acciones recientes de tu equipo"
+    },
+    "resources": {
+      "title": "Recursos",
+      "description": "Recursos y documentación útil",
+      "documentation": "Documentación",
+      "apiReference": "Referencia de API",
+      "guides": "Guías",
+      "examples": "Ejemplos"
+    },
+    "healthApps": "Salud de aplicaciones",
+    "fullyHealthy": "están completamente saludables",
+    "totalRequests": "Total de solicitudes",
+    "requestsLastMonth": "+18% desde el mes pasado",
+    "totalVisitors": "Total de visitantes",
+    "visitorsLastHour": "+201 desde la última hora",
+    "totalErrors": "Total de errores",
+    "errorsLastHour": "-5% desde la última hora",
+    "requestsByTime": "Solicitudes por tiempo",
+    "successful": "Exitosas",
+    "errors": "Errores",
+    "techStacksMostUsed": "Tecnologías más utilizadas",
+    "visitorCountByTime": "Conteo de visitantes por tiempo",
+    "visitors": "Visitantes",
+    "applications": {
+      "title": "Aplicaciones",
+      "create": "Crear aplicación",
+      "description": "Implementa y gestiona tus aplicaciones",
+      "name": "Nombre de la aplicación",
+      "status": "Estado",
+      "actions": "Acciones",
+      "deploy": "Implementar",
+      "start": "Iniciar",
+      "stop": "Detener",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esta aplicación?"
+    },
+    "team": {
+      "title": "Gestión del equipo",
+      "description": "Gestiona los miembros de tu equipo y sus roles",
+      "inviteMember": "Invitar miembro",
+      "inviteDescription": "Envía una invitación a un nuevo miembro del equipo",
+      "email": "Correo electrónico",
+      "role": "Rol",
+      "selectRole": "Seleccionar un rol",
+      "member": "Miembro",
+      "status": "Estado",
+      "actions": "Acciones",
+      "inviting": "Invitando...",
+      "invite": "Enviar invitación",
+      "inviteSuccess": "Invitación enviada exitosamente",
+      "inviteError": "Error al enviar la invitación",
+      "confirmRemove": "¿Estás seguro de que quieres eliminar este miembro?",
+      "removeSuccess": "Miembro eliminado exitosamente",
+      "removeError": "Error al eliminar el miembro"
+    },
+    "overview": {
+      "title": "Panel de Control",
+      "health": "Salud del Sistema",
+      "requests": "Solicitudes",
+      "visitors": "Visitantes",
+      "techStack": "Stack Tecnológico",
+      "successful": "Exitosas",
+      "errors": "Errores",
+      "statistics": {
+        "title": "Estadísticas",
+        "totalRequests": "Total de Solicitudes",
+        "totalVisitors": "Total de Visitantes",
+        "totalApplications": "Total de Aplicaciones",
+        "activeApplications": "Aplicaciones Activas"
+      }
     }
   }
 }

@@ -33,6 +33,110 @@
       "next": "Próximo",
       "back": "Voltar",
       "finish": "Finalizar"
+    },
+    "language": "Idioma",
+    "success": "Sua conta foi criada com sucesso",
+    "error": "Houve um erro ao criar sua conta"
+  },
+  "auth": {
+    "login": "Entrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "enterEmail": "Digite seu e-mail",
+    "enterPassword": "Digite sua senha",
+    "loggingIn": "Entrando...",
+    "logIn": "Entrar",
+    "welcomeTitle": "Bem-vindo à nossa plataforma",
+    "welcomeDescription": "Digite seu e-mail e senha para entrar",
+    "feature1": "Recurso 1: Lorem ipsum dolor sit amet",
+    "feature2": "Recurso 2: Consectetur adipiscing elit",
+    "feature3": "Recurso 3: Sed do eiusmod tempor incididunt"
+  },
+  "dashboard": {
+    "welcome": "Bem-vindo de volta, {{name}}",
+    "stats": {
+      "totalApps": "Total de aplicativos",
+      "totalAppsDescription": "Número total de aplicativos implantados",
+      "runningApps": "Aplicativos em execução",
+      "runningAppsDescription": "Aplicativos atualmente em execução",
+      "teamMembers": "Membros da equipe",
+      "teamMembersDescription": "Membros ativos da equipe",
+      "deployments": "Implantações",
+      "deploymentsDescription": "Total de implantações este mês"
+    },
+    "recentActivity": {
+      "title": "Atividade recente",
+      "description": "Ações recentes da sua equipe"
+    },
+    "resources": {
+      "title": "Recursos",
+      "description": "Recursos e documentação útil",
+      "documentation": "Documentação",
+      "apiReference": "Referência da API",
+      "guides": "Guias",
+      "examples": "Exemplos"
+    },
+    "healthApps": "Saúde dos aplicativos",
+    "fullyHealthy": "estão completamente saudáveis",
+    "totalRequests": "Total de requisições",
+    "requestsLastMonth": "+18% desde o mês passado",
+    "totalVisitors": "Total de visitantes",
+    "visitorsLastHour": "+201 desde a última hora",
+    "totalErrors": "Total de erros",
+    "errorsLastHour": "-5% desde a última hora",
+    "requestsByTime": "Requisições por tempo",
+    "successful": "Bem-sucedidas",
+    "errors": "Erros",
+    "techStacksMostUsed": "Tecnologias mais utilizadas",
+    "visitorCountByTime": "Contagem de visitantes por tempo",
+    "visitors": "Visitantes",
+    "applications": {
+      "title": "Aplicativos",
+      "create": "Criar aplicativo",
+      "description": "Implante e gerencie seus aplicativos",
+      "name": "Nome do aplicativo",
+      "status": "Status",
+      "actions": "Ações",
+      "deploy": "Implantar",
+      "start": "Iniciar",
+      "stop": "Parar",
+      "delete": "Excluir",
+      "confirmDelete": "Tem certeza que deseja excluir este aplicativo?"
+    },
+    "team": {
+      "title": "Gerenciamento da equipe",
+      "description": "Gerencie os membros da sua equipe e suas funções",
+      "inviteMember": "Convidar membro",
+      "inviteDescription": "Envie um convite para um novo membro da equipe",
+      "email": "E-mail",
+      "role": "Função",
+      "selectRole": "Selecione uma função",
+      "member": "Membro",
+      "status": "Status",
+      "actions": "Ações",
+      "inviting": "Convidando...",
+      "invite": "Enviar convite",
+      "inviteSuccess": "Convite enviado com sucesso",
+      "inviteError": "Erro ao enviar convite",
+      "confirmRemove": "Tem certeza que deseja remover este membro?",
+      "removeSuccess": "Membro removido com sucesso",
+      "removeError": "Erro ao remover membro"
+    },
+    "overview": {
+      "title": "Painel de Controle",
+      "health": "Saúde do Sistema",
+      "requests": "Requisições",
+      "visitors": "Visitantes",
+      "techStack": "Stack Tecnológica",
+      "successful": "Bem-sucedidas",
+      "errors": "Erros",
+      "statistics": {
+        "title": "Estatísticas",
+        "totalRequests": "Total de Requisições",
+        "totalVisitors": "Total de Visitantes",
+        "totalApplications": "Total de Aplicações",
+        "activeApplications": "Aplicações Ativas"
+      }
     }
   }
 }

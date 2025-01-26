@@ -33,6 +33,125 @@
       "next": "下一步",
       "back": "返回",
       "finish": "完成"
-    }
+    },
+    "language": "语言",
+    "success": "您的账户已成功创建",
+    "error": "创建账户时出现错误"
+  },
+  "auth": {
+    "login": "登录",
+    "email": "邮箱",
+    "password": "密码",
+    "enterEmail": "请输入邮箱",
+    "enterPassword": "请输入密码",
+    "loggingIn": "登录中...",
+    "logIn": "登录",
+    "welcomeTitle": "欢迎使用我们的平台",
+    "welcomeDescription": "请输入邮箱和密码登录",
+    "feature1": "功能1：Lorem ipsum dolor sit amet",
+    "feature2": "功能2：Consectetur adipiscing elit",
+    "feature3": "功能3：Sed do eiusmod tempor incididunt"
+  },
+  "dashboard": {
+    "applications": {
+      "title": "应用程序",
+      "create": "创建应用",
+      "upload": "上传应用",
+      "appName": "应用名称",
+      "description": "描述",
+      "repoUrl": "仓库地址",
+      "branch": "分支",
+      "actions": "操作",
+      "status": "状态",
+      "deploy": "部署",
+      "start": "启动",
+      "stop": "停止",
+      "delete": "删除",
+      "confirmDelete": "确定要删除此应用吗？",
+      "deploySuccess": "应用部署成功",
+      "deployError": "应用部署失败",
+      "createSuccess": "应用创建成功",
+      "createError": "应用创建失败",
+      "deleteSuccess": "应用删除成功",
+      "deleteError": "应用删除失败",
+      "startSuccess": "应用启动成功",
+      "startError": "应用启动失败",
+      "stopSuccess": "应用停止成功",
+      "stopError": "应用停止失败",
+      "viewMode": {
+        "grid": "网格视图",
+        "list": "列表视图"
+      }
+    },
+    "team": {
+      "title": "团队管理",
+      "inviteMember": "邀请成员",
+      "members": "成员",
+      "roles": "角色",
+      "email": "邮箱",
+      "role": "角色",
+      "status": "状态",
+      "actions": "操作",
+      "invite": "邀请",
+      "remove": "移除",
+      "inviteSuccess": "邀请发送成功",
+      "inviteError": "邀请发送失败",
+      "removeSuccess": "成员移除成功",
+      "removeError": "成员移除失败",
+      "confirmRemove": "确定要移除此成员吗？"
+    },
+    "overview": {
+      "title": "仪表板概览",
+      "health": "系统健康",
+      "requests": "请求",
+      "visitors": "访问者",
+      "techStack": "技术栈",
+      "successful": "成功",
+      "errors": "错误",
+      "statistics": {
+        "title": "统计",
+        "totalRequests": "总请求数",
+        "totalVisitors": "总访问量",
+        "totalApplications": "总应用数",
+        "activeApplications": "活跃应用"
+      }
+    },
+    "welcome": "欢迎回来，{{name}}",
+    "stats": {
+      "totalApps": "应用总数",
+      "totalAppsDescription": "已部署的应用总数",
+      "runningApps": "运行中的应用",
+      "runningAppsDescription": "当前正在运行的应用",
+      "teamMembers": "团队成员",
+      "teamMembersDescription": "活跃的团队成员",
+      "deployments": "部署次数",
+      "deploymentsDescription": "本月部署总次数"
+    },
+    "recentActivity": {
+      "title": "最近活动",
+      "description": "您团队的最近操作"
+    },
+    "resources": {
+      "title": "资源",
+      "description": "有用的资源和文档",
+      "documentation": "文档",
+      "apiReference": "API 参考",
+      "guides": "指南",
+      "examples": "示例"
+    },
+    "healthApps": "应用健康状况",
+    "fullyHealthy": "完全健康",
+    "totalRequests": "总请求数",
+    "requestsLastMonth": "较上月增长 18%",
+    "totalVisitors": "总访问量",
+    "visitorsLastHour": "较上小时增加 201",
+    "totalErrors": "总错误数",
+    "errorsLastHour": "较上小时减少 5%",
+    "requestsByTime": "按时间的请求数",
+    "successful": "成功",
+    "errors": "错误",
+    "techStacksMostUsed": "最常用的技术栈",
+    "visitorCountByTime": "按时间的访问量",
+    "visitors": "访问者"
   }
 }
