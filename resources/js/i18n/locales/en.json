@@ -155,7 +155,18 @@
       },
       "createNew": {
         "title": "Create New Application",
-        "description": "Fill in the details to create a new application"
+        "description": "Fill in the details to create a new application",
+        "name": "Application Name",
+        "namePlaceholder": "Enter application name",
+        "descriptionField": "Application Description",
+        "descriptionPlaceholder": "Enter application description",
+        "fileOrRepo": "GitHub/Gitlab Repository URL (optional)",
+        "repoUrlDescription": "Enter a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)",
+        "branch": "Branch",
+        "branchPlaceholder": "Select branch",
+        "loadingBranches": "Loading branches...",
+        "port": "Port",
+        "portPlaceholder": "Enter port number"
       },
       "empty": {
         "title": "No Applications Found",

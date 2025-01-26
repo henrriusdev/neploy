@@ -109,7 +109,18 @@
       },
       "createNew": {
         "title": "Créer une nouvelle application",
-        "description": "Remplissez les détails pour créer une nouvelle application"
+        "description": "Remplissez les détails pour créer une nouvelle application",
+        "name": "Nom de l'application",
+        "namePlaceholder": "Inserer le nom de l'application",
+        "descriptionField": "Description de l'application",
+        "descriptionPlaceholder": "Inserer la description de l'application",
+        "fileOrRepo": "URL du repository GitHub/Gitlab (facultatif)",
+        "repoUrlDescription": "Inserer une URL valide du repository GitHub/Gitlab (ex. https://github.com/username/repository)",
+        "branch": "Branche",
+        "branchPlaceholder": "Choisissez une branche",
+        "loadingBranches": "Chargement des branches...",
+        "port": "Port",
+        "portPlaceholder": "Inserer le numéro de port"
       },
       "empty": {
         "title": "Aucune application trouvé",

@@ -67,6 +67,7 @@ function Applications({
     fields: [],
     onSubmit: () => {},
   });
+  const [currentRepoUrl, setCurrentRepoUrl] = useState("");
   const { toast } = useToast();
   const { t } = useTranslation();
   const { onNotification, onInteractive, sendMessage } = useWebSocket();
@@ -79,10 +80,8 @@ function Applications({
   });
 
   const { data: branchesData, isFetching: isLoadingBranches, error: branchesError } = useLoadBranchesQuery(
-    { repoUrl: "" },
-    {
-      skip: true,
-    }
+    { repoUrl: currentRepoUrl },
+    { skip: !currentRepoUrl }
   );
 
   useEffect(() => {
@@ -99,7 +98,7 @@ function Applications({
     if (branchesError) {
       toast({
         title: t('common.error'),
-        description: t('applications.errors.branchesFetchFailed'),
+        description: t('dashboard.applications.errors.branchesFetchFailed'),
         variant: "destructive",
       });
     }
@@ -115,13 +114,17 @@ function Applications({
     () => debounce((repoUrl: string) => {
       if (!repoUrl) {
         setBranches([]);
+        setCurrentRepoUrl("");
         return;
       }
-      // Refetch con el nuevo repoUrl
-      useLoadBranchesQuery({ repoUrl }, { skip: false });
+      setCurrentRepoUrl(repoUrl);
     }, 1000),
     []
   );
+
+  const handleRepoUrlChange = (repoUrl: string) => {
+    debouncedFetchBranches(repoUrl);
+  };
 
   const [createApplication] = useCreateApplicationMutation();
   const [deployApplication] = useDeployApplicationMutation();
@@ -393,7 +396,7 @@ function Applications({
                 isUploading={isUploading}
                 branches={branches}
                 isLoadingBranches={isLoadingBranches}
-                onRepoUrlChange={debouncedFetchBranches}
+                onRepoUrlChange={handleRepoUrlChange}
               />
             </DialogContent>
           </Dialog>

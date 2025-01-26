@@ -22,6 +22,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useDropzone } from "react-dropzone";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -83,6 +85,8 @@ export function ApplicationForm({
     },
   });
 
+  const { t } = useTranslation();
+
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
@@ -124,9 +128,9 @@ export function ApplicationForm({
           name="appName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Application Name</FormLabel>
+              <FormLabel>{t("dashboard.applications.createNew.name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder={t("dashboard.applications.createNew.namePlaceholder")} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -137,10 +141,10 @@ export function ApplicationForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t("dashboard.applications.createNew.description")}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Enter application description"
+                  placeholder={t("dashboard.applications.createNew.descriptionPlaceholder")}
                   {...field}
                 />
               </FormControl>
@@ -153,7 +157,7 @@ export function ApplicationForm({
           name="repoUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>GitHub/GitLab Repository URL (Optional)</FormLabel>
+              <FormLabel>{t("dashboard.applications.createNew.fileOrRepo")}</FormLabel>
               <FormControl>
                 <Input
                   placeholder="https://github.com/username/repository"
@@ -161,8 +165,7 @@ export function ApplicationForm({
                 />
               </FormControl>
               <FormDescription>
-                Enter a valid GitHub or GitLab repository URL (e.g.,
-                https://github.com/user/repo)
+                {t("dashboard.applications.createNew.repoUrlDescription")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -174,7 +177,7 @@ export function ApplicationForm({
             name="branch"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Branch</FormLabel>
+                <FormLabel>{t("dashboard.applications.createNew.branch")}</FormLabel>
                 <Select
                   disabled={isLoadingBranches}
                   value={field.value}
@@ -184,8 +187,8 @@ export function ApplicationForm({
                       <SelectValue
                         placeholder={
                           isLoadingBranches
-                            ? "Loading branches..."
-                            : "Select a branch"
+                            ? t("dashboard.applications.createNew.loadingBranches")
+                            : t("dashboard.applications.createNew.branchPlaceholder")
                         }
                       />
                     </SelectTrigger>

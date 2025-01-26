@@ -91,7 +91,18 @@
       },
       "createNew": {
         "title": "创建新应用",
-        "description": "填写详细信息以创建新应用"
+        "description": "填写详细信息以创建新应用",
+        "name": "应用程序名称",
+        "namePlaceholder": "输入应用程序名称",
+        "descriptionField": "应用程序描述",
+        "descriptionPlaceholder": "输入应用程序描述",
+        "fileOrRepo": "GitHub/Gitlab 仓库 URL（可选）",
+        "repoUrlDescription": "输入有效的 GitHub 或 GitLab 仓库 URL（例如：https://github.com/用户名/仓库）",
+        "branch": "分支",
+        "branchPlaceholder": "选择分支",
+        "loadingBranches": "加载分支...",
+        "port": "端口",
+        "portPlaceholder": "输入端口号"
       },
       "empty": {
         "title": "没有找到应用程序",
