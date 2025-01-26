@@ -123,12 +123,48 @@
       "description": "Deploy and manage your applications",
       "name": "Application Name",
       "status": "Status",
-      "actions": "Actions",
       "deploy": "Deploy",
       "start": "Start",
       "stop": "Stop",
       "delete": "Delete",
-      "confirmDelete": "Are you sure you want to delete this application?"
+      "confirmDelete": "Are you sure you want to delete this application?",
+      "stats": {
+        "totalApplications": "Total Applications",
+        "runningApplications": "Running Applications",
+        "failedApplications": "Failed Applications"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch applications",
+        "branchesFetchFailed": "Failed to fetch repository branches",
+        "nameRequired": "Application name is required",
+        "fileOrRepoRequired": "Please provide either a file or a repository URL",
+        "branchRequired": "Please select a branch",
+        "portInvalid": "Please enter a valid port number (1-65535)",
+        "unknown": "An unexpected error occurred"
+      },
+      "actions": {
+        "deploymentProgress": "Deployment Progress",
+        "required": "Action Required",
+        "portConfiguration": "Port Configuration",
+        "portExposed": "Port {{port}} will be exposed for this application",
+        "deploySuccess": "Application deployment started",
+        "uploadSuccess": "Application uploaded successfully",
+        "startSuccess": "Application started successfully",
+        "stopSuccess": "Application stopped successfully",
+        "deleteSuccess": "Application deleted successfully"
+      },
+      "createNew": {
+        "title": "Create New Application",
+        "description": "Fill in the details to create a new application"
+      },
+      "empty": {
+        "title": "No Applications Found",
+        "description": "Get started by creating your first application"
+      },
+      "views": {
+        "grid": "Grid View",
+        "list": "List View"
+      }
     },
     "gateways": {
       "title": "Gateways",

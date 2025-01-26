@@ -104,17 +104,53 @@
     "visitorCountByTime": "Conteo de visitantes por tiempo",
     "visitors": "Visitantes",
     "applications": {
-      "title": "Aplicaciones",
+      "title": "Applicaciones",
       "create": "Crear aplicación",
       "description": "Implementa y gestiona tus aplicaciones",
       "name": "Nombre de la aplicación",
       "status": "Estado",
-      "actions": "Acciones",
       "deploy": "Implementar",
       "start": "Iniciar",
       "stop": "Detener",
       "delete": "Eliminar",
-      "confirmDelete": "¿Estás seguro de que quieres eliminar esta aplicación?"
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esta aplicación?",
+      "stats": {
+        "totalApplications": "Total de aplicaciones",
+        "runningApplications": "Aplicaciones en ejecución",
+        "failedApplications": "Aplicaciones fallidas"
+      },
+      "errors": {
+        "fetchFailed": "Fallo al obtener las aplicaciones",
+        "branchesFetchFailed": "Fallo al obtener las ramas del repositorio",
+        "nameRequired": "Nombre de la aplicación es requerido",
+        "fileOrRepoRequired": "Por favor, proporciona un archivo o una URL de repositorio",
+        "branchRequired": "Por favor, selecciona una rama",
+        "portInvalid": "Por favor, introduce un número de puerto válido (1-65535)",
+        "unknown": "Un error inesperado ha ocurrido"
+      },
+      "actions": {
+        "deploymentProgress": "Progreso del despliegue",
+        "required": "Acción requerida",
+        "portConfiguration": "Configuración de puerto",
+        "portExposed": "El puerto {{port}} se expondrá para esta aplicación",
+        "deploySuccess": "Iniciado el despliegue de la aplicación",
+        "uploadSuccess": "Aplicación subida correctamente",
+        "startSuccess": "Aplicación iniciada correctamente",
+        "stopSuccess": "Aplicación detenida correctamente",
+        "deleteSuccess": "Aplicación eliminada correctamente"
+      },
+      "createNew": {
+        "title": "Crear nueva aplicación",
+        "description": "Llena los detalles para crear una nueva aplicación"
+      },
+      "empty": {
+        "title": "No hay aplicaciones",
+        "description": "Empeza ahora creando tu primera aplicación"
+      },
+      "views": {
+        "grid": "Vista de grilla",
+        "list": "Vista de lista"
+      }
     },
     "team": {
       "title": "Gestión del equipo",

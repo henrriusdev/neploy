@@ -69,5 +69,56 @@
     "team": "Équipe",
     "settings": "Paramètres",
     "logout": "Se déconnecter"
+  },
+  "dashboard": {
+    "applications": {
+      "title": "Applications",
+      "create": "Créer",
+      "description": "Deploy and manage your applications",
+      "name": "Nom de l'application",
+      "status": "Statut",
+      "deploy": "Deployer",
+      "start": "Demarrer",
+      "stop": "Arreter",
+      "delete": "Supprimer",
+      "confirmDelete": "Etes-vous sur de vouloir supprimer cette application?",
+      "stats": {
+        "totalApplications": "Total Applications",
+        "runningApplications": "Applications en Cours",
+        "failedApplications": "Applications en Échec"
+      },
+      "errors": {
+        "fetchFailed": "Echec de récupération des applications",
+        "branchesFetchFailed": "Echec de récupération des branches du repository",
+        "nameRequired": "Nom de l'application est obligatoire",
+        "fileOrRepoRequired": "Veuillez fournir soit un fichier soit un URL de repository",
+        "branchRequired": "Veuillez sélectionner une branche",
+        "portInvalid": "Veuillez entrer un numéro de port valide (1-65535)",
+        "unknown": "Une erreur inconnue s'est produite"
+      },
+      "actions": {
+        "deploymentProgress": "Progression du déploiement",
+        "required": "Action Required",
+        "portConfiguration": "Configuration du port",
+        "portExposed": "Le port {{port}} sera exposé pour cette application",
+        "deploySuccess": "Déploiement de l'application commencé",
+        "uploadSuccess": "Application chargée avec succès",
+        "startSuccess": "Application commencée avec succès",
+        "stopSuccess": "Application arretée avec succès",
+        "deleteSuccess": "Application supprimée avec succès"
+      },
+      "createNew": {
+        "title": "Créer une nouvelle application",
+        "description": "Remplissez les détails pour créer une nouvelle application"
+      },
+      "empty": {
+        "title": "Aucune application trouvé",
+        "description": "Commencez par créer votre première application"
+      },
+      "views": {
+        "grid": "Grille",
+        "list": "Liste"
+      }
+    }
   }
 }

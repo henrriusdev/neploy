@@ -88,22 +88,22 @@ function Applications({
   useEffect(() => {
     if (applicationsError) {
       toast({
-        title: "Error",
-        description: "Failed to fetch applications",
+        title: t('common.error'),
+        description: t('applications.errors.fetchFailed'),
         variant: "destructive",
       });
     }
-  }, [applicationsError]);
+  }, [applicationsError, t]);
 
   useEffect(() => {
     if (branchesError) {
       toast({
-        title: "Error",
-        description: "Failed to fetch repository branches",
+        title: t('common.error'),
+        description: t('applications.errors.branchesFetchFailed'),
         variant: "destructive",
       });
     }
-  }, [branchesError]);
+  }, [branchesError, t]);
 
   useEffect(() => {
     if (branchesData?.branches) {
@@ -144,15 +144,15 @@ function Applications({
       }
 
       toast({
-        title: "Success",
-        description: `Application ${action} request sent`,
+        title: t('common.success'),
+        description: t(`applications.actions.${action}Success`),
       });
       
       refreshApplications();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || `Failed to ${action} application`,
+        title: t('common.error'),
+        description: error.message || t(`applications.errors.${action}Failed`),
         variant: "destructive",
       });
     }
@@ -164,8 +164,8 @@ function Applications({
   ) => {
     if (!values.appName) {
       toast({
-        title: "Error",
-        description: "Application name is required",
+        title: t('common.error'),
+        description: t('applications.errors.nameRequired'),
         variant: "destructive",
       });
       return;
@@ -173,8 +173,8 @@ function Applications({
 
     if (!file && !values.repoUrl) {
       toast({
-        title: "Error",
-        description: "Please provide either a file or a repository URL",
+        title: t('common.error'),
+        description: t('applications.errors.fileOrRepoRequired'),
         variant: "destructive",
       });
       return;
@@ -201,8 +201,8 @@ function Applications({
       if (values.repoUrl) {
         if (!values.branch) {
           toast({
-            title: "Error",
-            description: "Please select a branch",
+            title: t('common.error'),
+            description: t('applications.errors.branchRequired'),
             variant: "destructive",
           });
           return;
@@ -215,8 +215,8 @@ function Applications({
         });
 
         toast({
-          title: "Success",
-          description: "Deployment started successfully",
+          title: t('common.success'),
+          description: t('applications.actions.deploySuccess'),
         });
       }
 
@@ -227,8 +227,8 @@ function Applications({
         });
 
         toast({
-          title: "Success",
-          description: "Application uploaded successfully",
+          title: t('common.success'),
+          description: t('applications.actions.uploadSuccess'),
         });
       }
 
@@ -236,8 +236,8 @@ function Applications({
       setUploadDialogOpen(false);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "An error occurred",
+        title: t('common.error'),
+        description: error.message || t('applications.errors.unknown'),
         variant: "destructive",
       });
     } finally {
@@ -249,7 +249,7 @@ function Applications({
     const unsubProgress = onNotification((message: ProgressMessage) => {
       if (message.type === "progress") {
         toast({
-          title: "Deployment Progress",
+          title: t('applications.actions.deploymentProgress'),
           description: message.message,
         });
       }
@@ -264,7 +264,7 @@ function Applications({
 
       setActionDialog({
         show: true,
-        title: message.title || "Action Required",
+        title: message.title || t('applications.actions.required'),
         description: message.message || "",
         fields: message.inputs.map((input) => ({
           ...input,
@@ -274,7 +274,7 @@ function Applications({
               ? (value: string) => {
                   const port = parseInt(value);
                   if (isNaN(port) || port < 1 || port > 65535) {
-                    return "Please enter a valid port number (1-65535)";
+                    return t('applications.errors.portInvalid');
                   }
                   return true;
                 }
@@ -296,8 +296,8 @@ function Applications({
 
           // Show confirmation toast
           toast({
-            title: "Port Configuration",
-            description: `Port ${data.port} will be exposed for this application.`,
+            title: t('applications.actions.portConfiguration'),
+            description: t('applications.actions.portExposed', { port: data.port }),
           });
         },
       });
@@ -310,7 +310,7 @@ function Applications({
       // Call all unsubscribe functions
       unsubFunctions.forEach((unsub) => unsub && unsub());
     };
-  }, [onNotification, onInteractive, sendMessage, toast]);
+  }, [onNotification, onInteractive, sendMessage, toast, t]);
 
   React.useEffect(() => {
     refreshApplications();
@@ -337,13 +337,12 @@ function Applications({
   }, [refreshApplications]);
 
   return (
-    <>
     <div className="space-y-6 p-3">
       {/* Stats Section */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.applications.stats.totalApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -353,23 +352,21 @@ function Applications({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Running Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.applications.stats.runningApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {applications?.filter((app) => app.status === "Running").length ||
-                0}
+              {applications?.filter((app) => app.status === "Running").length || 0}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Failed Apps</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.applications.stats.failedApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {applications?.filter((app) => app.status === "Error").length ||
-                0}
+              {applications?.filter((app) => app.status === "Error").length || 0}
             </div>
           </CardContent>
         </Card>
@@ -386,9 +383,9 @@ function Applications({
             </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>{t('dashboard.applications.create')}</DialogTitle>
+                <DialogTitle>{t('dashboard.applications.createNew.title')}</DialogTitle>
                 <DialogDescription>
-                  {t('dashboard.applications.description')}
+                  {t('dashboard.applications.createNew.description')}
                 </DialogDescription>
               </DialogHeader>
               <ApplicationForm
@@ -424,7 +421,6 @@ function Applications({
         </DialogContent>
       </Dialog>
     </div>
-    </>
   );
 }
 

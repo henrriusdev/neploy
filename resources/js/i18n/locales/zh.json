@@ -56,29 +56,48 @@
     "applications": {
       "title": "应用程序",
       "create": "创建应用",
-      "upload": "上传应用",
-      "appName": "应用名称",
-      "description": "描述",
-      "repoUrl": "仓库地址",
-      "branch": "分支",
-      "actions": "操作",
-      "status": "状态",
-      "deploy": "部署",
-      "start": "启动",
-      "stop": "停止",
-      "delete": "删除",
-      "confirmDelete": "确定要删除此应用吗？",
-      "deploySuccess": "应用部署成功",
-      "deployError": "应用部署失败",
-      "createSuccess": "应用创建成功",
-      "createError": "应用创建失败",
-      "deleteSuccess": "应用删除成功",
-      "deleteError": "应用删除失败",
-      "startSuccess": "应用启动成功",
-      "startError": "应用启动失败",
-      "stopSuccess": "应用停止成功",
-      "stopError": "应用停止失败",
-      "viewMode": {
+      "description": "创建应用",
+      "name": "创建应用",
+      "status": "创建应用",
+      "deploy": "创建应用",
+      "start": "创建应用",
+      "stop": "创建应用",
+      "delete": "创建应用",
+      "confirmDelete": "创建应用",
+      "stats": {
+        "totalApplications": "总应用程序",
+        "runningApplications": "运行中的应用程序",
+        "failedApplications": "失败的应用程序"
+      },
+      "errors": {
+        "fetchFailed": "无法获取应用程序",
+        "branchesFetchFailed": "无法获取仓库分支",
+        "nameRequired": "应用程序名称是必需的",
+        "fileOrRepoRequired": "请提供文件或仓库 URL",
+        "branchRequired": "请选择分支",
+        "portInvalid": "请输入有效的端口号（1-65535）",
+        "unknown": "发生未知错误"
+      },
+      "actions": {
+        "deploymentProgress": "部署进度",
+        "required": "需要执行的操作",
+        "portConfiguration": "端口配置",
+        "portExposed": "Port {{port}} will be exposed for this application",
+        "deploySuccess": "应用部署已开始",
+        "uploadSuccess": "应用上传成功",
+        "startSuccess": "应用启动成功",
+        "stopSuccess": "应用停止成功",
+        "deleteSuccess": "应用删除成功"
+      },
+      "createNew": {
+        "title": "创建新应用",
+        "description": "填写详细信息以创建新应用"
+      },
+      "empty": {
+        "title": "没有找到应用程序",
+        "description": "开始创建您的第一个应用程序"
+      },
+      "views": {
         "grid": "网格视图",
         "list": "列表视图"
       }

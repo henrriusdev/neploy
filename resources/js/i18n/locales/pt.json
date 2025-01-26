@@ -96,12 +96,48 @@
       "description": "Implante e gerencie seus aplicativos",
       "name": "Nome do aplicativo",
       "status": "Status",
-      "actions": "Ações",
       "deploy": "Implantar",
       "start": "Iniciar",
       "stop": "Parar",
       "delete": "Excluir",
-      "confirmDelete": "Tem certeza que deseja excluir este aplicativo?"
+      "confirmDelete": "Tem certeza de que deseja excluir esta aplicação?",
+      "stats": {
+        "totalApplications": "Total de aplicativos",
+        "runningApplications": "Aplicativos em execução",
+        "failedApplications": "Aplicativos com falhas"
+      },
+      "errors": {
+        "fetchFailed": "Falha ao buscar aplicativos",
+        "branchesFetchFailed": "Falha ao buscar ramais do repositório",
+        "nameRequired": "O nome do aplicativo é obrigatório",
+        "fileOrRepoRequired": "Por favor, fornecer um arquivo ou uma URL do repositório",
+        "branchRequired": "Por favor, selecione uma ramal",
+        "portInvalid": "Por favor, insira um número de porta válido (1-65535)",
+        "unknown": "Um erro inesperado ocorreu"
+      },
+      "actions": {
+        "deploymentProgress": "Progresso do deployment",
+        "required": "Ação obrigatória",
+        "portConfiguration": "Configuração de porta",
+        "portExposed": "A porta {{port}} será exposta para este aplicativo",
+        "deploySuccess": "O deployment do aplicativo foi iniciado",
+        "uploadSuccess": "O aplicativo foi carregado com sucesso",
+        "startSuccess": "O aplicativo foi iniciado com sucesso",
+        "stopSuccess": "O aplicativo foi parado com sucesso",
+        "deleteSuccess": "Aplicativo excluído com sucesso"
+      },
+      "createNew": {
+        "title": "Criar novo aplicativo",
+        "description": "Preencha os detalhes para criar um novo aplicativo"
+      },
+      "empty": {
+        "title": "Nenhum aplicativo encontrado",
+        "description": "Crie seu primeiro aplicativo"
+      },
+      "views": {
+        "grid": "Visualização em grade",
+        "list": "Visualização em lista"
+      }
     },
     "team": {
       "title": "Gerenciamento da equipe",
