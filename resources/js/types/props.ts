@@ -1,5 +1,12 @@
 import { ControllerRenderProps } from "react-hook-form";
-import { Application, Gateway, TeamMember, User } from "./common";
+import {
+  Application,
+  Gateway,
+  Roles,
+  TeamMember,
+  TechStack,
+  User,
+} from "./common";
 import { DateRange } from "react-day-picker";
 
 export interface AcceptInviteProps {
@@ -118,4 +125,19 @@ export interface ApplicationsProps {
   teamName: string;
   logoUrl: string;
   applications?: Application[] | null;
+}
+
+export interface SettingsProps {
+  teamName: string;
+  logoUrl: string;
+  language: string;
+  roles: Roles[];
+  techStacks: TechStack[];
+  user?: User;
+}
+
+export interface GeneralSettingsProps {
+  teamName: string;
+  logoUrl: string;
+  language: string;
 }

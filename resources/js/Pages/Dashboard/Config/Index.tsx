@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -7,8 +7,16 @@ import RolesTab from "./components/RolesTab";
 import TechStackTab from "./components/TechStackTab";
 import ApiGatewayTab from "./components/ApiGatewayTab";
 import TraceabilityTab from "./components/TraceabilityTab";
+import { SettingsProps } from "@/types/props";
 
-const Config = () => {
+const Config: React.FC<SettingsProps> = ({
+  user,
+  teamName,
+  logoUrl,
+  language,
+  roles = [],
+  techStacks = [],
+}) => {
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6">
@@ -24,15 +32,19 @@ const Config = () => {
           </TabsList>
 
           <TabsContent value="general">
-            <GeneralTab />
+            <GeneralTab
+              teamName={teamName}
+              logoUrl={logoUrl}
+              language={language}
+            />
           </TabsContent>
 
           <TabsContent value="roles">
-            <RolesTab />
+            <RolesTab roles={roles} />
           </TabsContent>
 
           <TabsContent value="techstack">
-            <TechStackTab />
+            <TechStackTab techStacks={techStacks} />
           </TabsContent>
 
           <TabsContent value="apigateway">
