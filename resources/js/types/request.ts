@@ -28,3 +28,13 @@ export interface MetadataRequest {
   logo?: string;
   language: string;
 }
+
+export interface CompleteInviteRequest {
+  token: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  email: string;
+  username: string;
+}

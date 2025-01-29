@@ -8,6 +8,7 @@ export interface User {
   username?: string;
   avatar?: string;
   provider?: string;
+  password?: string;
 }
 
 export interface ApplicationStat {

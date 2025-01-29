@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, Settings } from "lucide-react"
 import { router } from "@inertiajs/react"
 
 import { DashboardLayout } from "@/components/Layouts/DashboardLayout"
@@ -18,7 +18,8 @@ export default function Index({ gateways, application }: GatewayProps) {
   const { toast } = useToast()
 
   const handleCreate = (data: Partial<Gateway>) => {
-    router.post("/gateways", data, {
+    const { application, ...formData } = data;
+    router.post("/gateways", formData, {
       onSuccess: () => {
         setIsFormOpen(false)
         toast({
@@ -37,7 +38,8 @@ export default function Index({ gateways, application }: GatewayProps) {
   }
 
   const handleUpdate = (id: string, data: Partial<Gateway>) => {
-    router.put(`/gateways/${id}`, data, {
+    const { application, ...formData } = data;
+    router.put(`/gateways/${id}`, formData, {
       onSuccess: () => {
         setEditingGateway(null)
         toast({
@@ -73,6 +75,10 @@ export default function Index({ gateways, application }: GatewayProps) {
     })
   }
 
+  const navigateToConfig = () => {
+    router.get('/gateway/config')
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       <div className="flex-1 overflow-auto">
@@ -86,10 +92,19 @@ export default function Index({ gateways, application }: GatewayProps) {
                 </p>
               )}
             </div>
-            <Button onClick={() => setIsFormOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Route
-            </Button>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                onClick={navigateToConfig}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Configuration
+              </Button>
+              <Button onClick={() => setIsFormOpen(true)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Route
+              </Button>
+            </div>
           </div>
 
           {!gateways || gateways?.length === 0 ? (

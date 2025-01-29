@@ -45,7 +45,12 @@ function Team({
     e.preventDefault();
     setIsLoading(true);
     
-    router.post("/users/invite", formData, {
+    const inviteData = {
+      email: formData.email,
+      role: formData.role
+    };
+    
+    router.post("/users/invite", inviteData, {
       onSuccess: () => {
         toast({
           title: t('dashboard.team.inviteSuccess'),
