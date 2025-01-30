@@ -10,7 +10,7 @@ import Layout from "@/components/Layouts/Layout";
 import { Toaster } from "@/components/ui/toaster";
 import { usePage, useRemember } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
-import { Home } from "../views";
+import { Applications, Home } from "../views";
 
 const defaultNavMain = [
   {
@@ -97,7 +97,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case "":
         return <Home {...props} />;
       case "/applications":
-        return "Applications";
+        return <Applications {...props} />;
       case "/gateways":
         return "Gateways";
       case "/team":

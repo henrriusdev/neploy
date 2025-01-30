@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { router } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
-import { LanguageSelector } from "@/components/language-selector";
+import { LanguageSelector } from "@/components/forms/language-selector";
 import "@/i18n";
 
 const formSchema = z.object({

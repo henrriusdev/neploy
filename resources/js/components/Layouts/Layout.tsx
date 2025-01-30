@@ -24,7 +24,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link } from "@inertiajs/react";
-import { LanguageSelector } from "../language-selector";
+import { LanguageSelector } from "../forms/language-selector";
 
 interface NavItem {
   title: string;
