@@ -12,6 +12,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Applications, Home } from "../views";
 import { Gateways } from "../views/gateway";
+import { Team } from "../views/team";
 
 const defaultNavMain = [
   {
@@ -102,7 +103,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case "/gateways":
         return <Gateways {...props} />;
       case "/team":
-        return "Team";
+        return <Team {...props} />;
       case "/settings":
         return "Settings";
       default:
