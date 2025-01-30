@@ -1,24 +1,14 @@
+import { Gateway, GatewayProps } from "@/types";
 import { useState } from "react";
-import { router } from "@inertiajs/react";
-import {
-  Globe,
-  Lock,
-  Activity,
-  BarChart3,
-  PlusCircle,
-  Settings,
-} from "lucide-react";
-
-import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { GatewayTable } from "./components/gateway-table";
-import { GatewayForm } from "./components/gateway-form";
-import { Gateway } from "@/types/common";
-import { GatewayProps } from "@/types/props";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { router } from "@inertiajs/react";
+import { Button } from "../ui/button";
+import { Activity, BarChart3, Globe, Lock, PlusCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { GatewayTable } from "../gateway-table";
+import { GatewayForm } from "../forms";
 
-export default function Index({ gateways, application }: GatewayProps) {
+export function Gateways({ gateways, application }: GatewayProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<Gateway | null>(null);
   const { toast } = useToast();
@@ -182,12 +172,3 @@ export default function Index({ gateways, application }: GatewayProps) {
     </div>
   );
 }
-
-Index.layout = (page: any) => {
-  const { user, teamName, logoUrl } = page.props;
-  return (
-    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
-      {page}
-    </DashboardLayout>
-  );
-};

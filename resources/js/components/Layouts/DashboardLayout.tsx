@@ -1,4 +1,6 @@
-import * as React from "react";
+import Layout from "@/components/Layouts/Layout";
+import { Toaster } from "@/components/ui/toaster";
+import { usePage, useRemember } from "@inertiajs/react";
 import {
   AppWindowMac,
   DoorOpen,
@@ -6,11 +8,10 @@ import {
   PieChartIcon,
   Settings2,
 } from "lucide-react";
-import Layout from "@/components/Layouts/Layout";
-import { Toaster } from "@/components/ui/toaster";
-import { usePage, useRemember } from "@inertiajs/react";
+import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Applications, Home } from "../views";
+import { Gateways } from "../views/gateway";
 
 const defaultNavMain = [
   {
@@ -99,7 +100,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case "/applications":
         return <Applications {...props} />;
       case "/gateways":
-        return "Gateways";
+        return <Gateways {...props} />;
       case "/team":
         return "Team";
       case "/settings":
