@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { RolesSettingsProps } from "@/types/props";
-import { RoleIcon } from "@/components/role-icon";
+import { RoleIcon } from "@/components/icons/role-icon";
 
 const RolesTab: React.FC<RolesSettingsProps> = ({ roles }) => {
   return (

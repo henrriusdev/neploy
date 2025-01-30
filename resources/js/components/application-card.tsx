@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TechIcon } from "@/components/tech-icon";
+import { TechIcon } from "@/components/icons/tech-icon";
 import { Play, Square, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "@/i18n";

@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Controller } from "react-hook-form";
 import { InputAutoComplete } from "@/components/forms";
 import { ColorPicker } from "@/components/forms/color-picker";
-import { RoleIcon } from "@/components/role-icon";
+import { RoleIcon } from "@/components/icons/role-icon";
 import { Trash2 } from "lucide-react";
 import { icons } from "@/lib/icons";
 
