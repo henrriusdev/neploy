@@ -1,22 +1,48 @@
 import * as React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
 import { RoleIcon } from "@/components/RoleIcon";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { TeamMember } from "@/types/common";
 import { TeamProps } from "@/types/props";
-import { useTranslation } from 'react-i18next';
-import '@/i18n';
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 import { Badge } from "@/components/ui/badge";
 
 interface InviteMemberData {
@@ -24,18 +50,12 @@ interface InviteMemberData {
   role: string;
 }
 
-function Team({
-  user,
-  teamName,
-  logoUrl,
-  team,
-  roles,
-}: TeamProps) {
+function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
   const [open, setOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<InviteMemberData>({
     email: "",
-    role: "", 
+    role: "",
   });
   const [teamState, setTeam] = React.useState(team);
   const { toast } = useToast();
@@ -44,25 +64,25 @@ function Team({
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     const inviteData = {
       email: formData.email,
-      role: formData.role
+      role: formData.role,
     };
-    
+
     router.post("/users/invite", inviteData, {
       onSuccess: () => {
         toast({
-          title: t('dashboard.team.inviteSuccess'),
-          description: t('dashboard.team.inviteSuccess'),
+          title: t("dashboard.team.inviteSuccess"),
+          description: t("dashboard.team.inviteSuccess"),
         });
         setOpen(false);
         setFormData({ email: "", role: "" });
       },
       onError: () => {
         toast({
-          title: t('dashboard.team.inviteError'),
-          description: t('dashboard.team.inviteError'),
+          title: t("dashboard.team.inviteError"),
+          description: t("dashboard.team.inviteError"),
           variant: "destructive",
         });
       },
@@ -71,20 +91,20 @@ function Team({
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!confirm(t('dashboard.team.confirmRemove'))) return;
+    if (!confirm(t("dashboard.team.confirmRemove"))) return;
 
     router.delete(`/users/${memberId}`, {
       onSuccess: () => {
         toast({
-          title: t('dashboard.team.removeSuccess'),
-          description: t('dashboard.team.removeSuccess'),
+          title: t("dashboard.team.removeSuccess"),
+          description: t("dashboard.team.removeSuccess"),
         });
         setTeam(team.filter((member) => member.id !== memberId));
       },
       onError: () => {
         toast({
-          title: t('dashboard.team.removeError'),
-          description: t('dashboard.team.removeError'),
+          title: t("dashboard.team.removeError"),
+          description: t("dashboard.team.removeError"),
           variant: "destructive",
         });
       },
@@ -97,28 +117,28 @@ function Team({
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>{t('dashboard.team.title')}</CardTitle>
+              <CardTitle>{t("dashboard.team.title")}</CardTitle>
               <CardDescription>
-                {t('dashboard.team.description')}
+                {t("dashboard.team.description")}
               </CardDescription>
             </div>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  {t('dashboard.team.inviteMember')}
+                  {t("dashboard.team.inviteMember")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{t('dashboard.team.inviteMember')}</DialogTitle>
+                  <DialogTitle>{t("dashboard.team.inviteMember")}</DialogTitle>
                   <DialogDescription>
-                    {t('dashboard.team.inviteDescription')}
+                    {t("dashboard.team.inviteDescription")}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleInvite} className="space-y-4">
                   <div>
-                    <Label htmlFor="email">{t('dashboard.team.email')}</Label>
+                    <Label htmlFor="email">{t("dashboard.team.email")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -130,15 +150,16 @@ function Team({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="role">{t('dashboard.team.role')}</Label>
+                    <Label htmlFor="role">{t("dashboard.team.role")}</Label>
                     <Select
                       value={formData.role}
                       onValueChange={(value) =>
                         setFormData({ ...formData, role: value })
-                      }
-                    >
+                      }>
                       <SelectTrigger>
-                        <SelectValue placeholder={t('dashboard.team.selectRole')} />
+                        <SelectValue
+                          placeholder={t("dashboard.team.selectRole")}
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {roles.map((role) => (
@@ -150,7 +171,9 @@ function Team({
                     </Select>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? t('dashboard.team.inviting') : t('dashboard.team.invite')}
+                    {isLoading
+                      ? t("dashboard.team.inviting")
+                      : t("dashboard.team.invite")}
                   </Button>
                 </form>
               </DialogContent>
@@ -161,11 +184,11 @@ function Team({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('dashboard.team.member')}</TableHead>
-                <TableHead>{t('dashboard.team.role')}</TableHead>
-                <TableHead>{t('dashboard.team.status')}</TableHead>
+                <TableHead>{t("dashboard.team.member")}</TableHead>
+                <TableHead>{t("dashboard.team.role")}</TableHead>
+                <TableHead>{t("dashboard.team.status")}</TableHead>
                 <TableHead className="text-right">
-                  {t('dashboard.team.actions')}
+                  {t("dashboard.team.actions")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -198,20 +221,24 @@ function Team({
                   </TableCell>
                   <TableCell>
                     {member.roles.map((role) => (
-                      <Badge key={role.name} variant="default" style={{backgroundColor: role.color}}>{role.name}</Badge>
+                      <Badge
+                        key={role.name}
+                        variant="default"
+                        style={{ backgroundColor: role.color }}>
+                        {role.name}
+                      </Badge>
                     ))}
                   </TableCell>
                   <TableCell>
                     <span className="text-xs">Active</span>
                   </TableCell>
                   <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveMember(member.id)}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveMember(member.id)}>
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -223,6 +250,13 @@ function Team({
   );
 }
 
-Team.layout = (page: any) => <DashboardLayout>{page}</DashboardLayout>;
+Team.layout = (page: any) => {
+  const { user, teamName, logoUrl } = page.props;
+  return (
+    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
+      {page}
+    </DashboardLayout>
+  );
+};
 
 export default Team;

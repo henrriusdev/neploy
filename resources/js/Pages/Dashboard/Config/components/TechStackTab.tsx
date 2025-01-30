@@ -1,12 +1,27 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { TechStacksSettingsProps } from "@/types/props";
+import { TechIcon } from "@/components/TechIcon";
 
-const TechStackTab = () => {
+const TechStackTab: React.FC<TechStacksSettingsProps> = ({ techStacks }) => {
   return (
     <Card>
       <CardHeader>
@@ -33,36 +48,31 @@ const TechStackTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Logo</TableHead>
               <TableHead>Technology</TableHead>
-              <TableHead>Version</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>React</TableCell>
-              <TableCell>18.2.0</TableCell>
-              <TableCell>Framework</TableCell>
-              <TableCell>
-                <Badge>Active</Badge>
-              </TableCell>
-              <TableCell>
-                <Button variant="ghost" size="sm">Edit</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>TypeScript</TableCell>
-              <TableCell>5.0.0</TableCell>
-              <TableCell>Language</TableCell>
-              <TableCell>
-                <Badge>Active</Badge>
-              </TableCell>
-              <TableCell>
-                <Button variant="ghost" size="sm">Edit</Button>
-              </TableCell>
-            </TableRow>
+            {techStacks.map((techStack) => (
+              <TableRow key={techStack.id}>
+                <TableCell>
+                  <TechIcon name={techStack.name} size={40} />
+                </TableCell>
+                <TableCell>{techStack.name}</TableCell>
+                <TableCell>{techStack.description}</TableCell>
+                <TableCell>
+                  <Badge>Active</Badge>
+                </TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="sm">
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>

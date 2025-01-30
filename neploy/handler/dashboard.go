@@ -242,7 +242,7 @@ func (d *Dashboard) Config(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
+	provider, err := d.services.User.GetProvider(c.Request().Context(), claims.ID)
 	if err != nil {
 		logger.Error("error getting provider: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
@@ -255,9 +255,23 @@ func (d *Dashboard) Config(c echo.Context) error {
 		Provider: provider,
 	}
 
+	roles, err := d.services.Role.Get(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting roles: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	techStacks, err := d.services.TechStack.GetAll(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting tech stacks: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Config/Index", inertia.Props{
-		"user":     user,
-		"teamName": metadata.TeamName,
-		"logoUrl":  metadata.LogoURL,
+		"user":       user,
+		"teamName":   metadata.TeamName,
+		"logoUrl":    metadata.LogoURL,
+		"roles":      roles,
+		"techStacks": techStacks,
 	})
 }

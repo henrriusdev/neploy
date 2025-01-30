@@ -55,7 +55,7 @@ export interface DashboardProps {
   visitorData?: VisitorData[];
   health?: string;
   logoUrl?: string;
-  // stats?: Stats;
+  stats?: any; // TODO: add type
 }
 
 export interface TeamProps {
@@ -140,4 +140,12 @@ export interface GeneralSettingsProps {
   teamName: string;
   logoUrl: string;
   language: string;
+}
+
+export interface RolesSettingsProps {
+  roles: Roles[];
+}
+
+export interface TechStacksSettingsProps {
+  techStacks: TechStack[];
 }

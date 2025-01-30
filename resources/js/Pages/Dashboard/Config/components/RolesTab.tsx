@@ -1,12 +1,27 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { RolesSettingsProps } from "@/types/props";
+import { RoleIcon } from "@/components/RoleIcon";
 
-const RolesTab = () => {
+const RolesTab: React.FC<RolesSettingsProps> = ({ roles }) => {
   return (
     <Card>
       <CardHeader>
@@ -48,29 +63,27 @@ const RolesTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Icon</TableHead>
               <TableHead>Role Name</TableHead>
-              <TableHead>Users</TableHead>
-              <TableHead>Permissions</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>Admin</TableCell>
-              <TableCell>5</TableCell>
-              <TableCell>All</TableCell>
-              <TableCell>
-                <Button variant="ghost" size="sm">Edit</Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>User</TableCell>
-              <TableCell>12</TableCell>
-              <TableCell>Limited</TableCell>
-              <TableCell>
-                <Button variant="ghost" size="sm">Edit</Button>
-              </TableCell>
-            </TableRow>
+            {roles.map((role) => (
+              <TableRow key={role.name}>
+                <TableCell>
+                  <RoleIcon icon={role.icon} color={role.color} size={40} />
+                </TableCell>
+                <TableCell>{role.name}</TableCell>
+                <TableCell>{role.description}</TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="sm">
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>

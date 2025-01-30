@@ -1,61 +1,60 @@
-import { useState } from "react"
-import { PlusCircle, Settings } from "lucide-react"
-import { router } from "@inertiajs/react"
+import { useState } from "react";
+import { PlusCircle, Settings } from "lucide-react";
+import { router } from "@inertiajs/react";
 
-import { DashboardLayout } from "@/components/Layouts/DashboardLayout"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { GatewayTable } from "./components/gateway-table"
-import { GatewayForm } from "./components/gateway-form"
-import { GatewaySidebar } from "./components/gateway-sidebar"
-import { Gateway } from "@/types/common"
-import { GatewayProps } from "@/types/props"
-
+import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { GatewayTable } from "./components/gateway-table";
+import { GatewayForm } from "./components/gateway-form";
+import { GatewaySidebar } from "./components/gateway-sidebar";
+import { Gateway } from "@/types/common";
+import { GatewayProps } from "@/types/props";
 
 export default function Index({ gateways, application }: GatewayProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingGateway, setEditingGateway] = useState<Gateway | null>(null)
-  const { toast } = useToast()
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingGateway, setEditingGateway] = useState<Gateway | null>(null);
+  const { toast } = useToast();
 
   const handleCreate = (data: Partial<Gateway>) => {
     const { application, ...formData } = data;
     router.post("/gateways", formData, {
       onSuccess: () => {
-        setIsFormOpen(false)
+        setIsFormOpen(false);
         toast({
           title: "Success",
           description: "Gateway route created successfully",
-        })
+        });
       },
       onError: () => {
         toast({
           title: "Error",
           description: "Failed to create gateway route",
           variant: "destructive",
-        })
+        });
       },
-    })
-  }
+    });
+  };
 
   const handleUpdate = (id: string, data: Partial<Gateway>) => {
     const { application, ...formData } = data;
     router.put(`/gateways/${id}`, formData, {
       onSuccess: () => {
-        setEditingGateway(null)
+        setEditingGateway(null);
         toast({
           title: "Success",
           description: "Gateway route updated successfully",
-        })
+        });
       },
       onError: () => {
         toast({
           title: "Error",
           description: "Failed to update gateway route",
           variant: "destructive",
-        })
+        });
       },
-    })
-  }
+    });
+  };
 
   const handleDelete = (id: string) => {
     router.delete(`/gateways/${id}`, {
@@ -63,21 +62,21 @@ export default function Index({ gateways, application }: GatewayProps) {
         toast({
           title: "Success",
           description: "Gateway route deleted successfully",
-        })
+        });
       },
       onError: () => {
         toast({
           title: "Error",
           description: "Failed to delete gateway route",
           variant: "destructive",
-        })
+        });
       },
-    })
-  }
+    });
+  };
 
   const navigateToConfig = () => {
-    router.get('/gateway/config')
-  }
+    router.get("/gateway/config");
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -93,10 +92,7 @@ export default function Index({ gateways, application }: GatewayProps) {
               )}
             </div>
             <div className="space-x-2">
-              <Button
-                variant="outline"
-                onClick={navigateToConfig}
-              >
+              <Button variant="outline" onClick={navigateToConfig}>
                 <Settings className="w-4 h-4 mr-2" />
                 Configuration
               </Button>
@@ -112,10 +108,10 @@ export default function Index({ gateways, application }: GatewayProps) {
               No routes configured for this application.
             </p>
           ) : (
-          <GatewayTable
-            gateways={gateways}
-            onEdit={setEditingGateway}
-            onDelete={handleDelete}
+            <GatewayTable
+              gateways={gateways}
+              onEdit={setEditingGateway}
+              onDelete={handleDelete}
             />
           )}
         </div>
@@ -126,22 +122,24 @@ export default function Index({ gateways, application }: GatewayProps) {
       <GatewayForm
         open={isFormOpen || !!editingGateway}
         onOpenChange={(open) => {
-          setIsFormOpen(open)
-          if (!open) setEditingGateway(null)
+          setIsFormOpen(open);
+          if (!open) setEditingGateway(null);
         }}
         gateway={editingGateway}
-        onSubmit={editingGateway ? 
-          (data) => handleUpdate(editingGateway.id, data) : 
-          handleCreate
+        onSubmit={
+          editingGateway
+            ? (data) => handleUpdate(editingGateway.id, data)
+            : handleCreate
         }
       />
     </div>
-  )
+  );
 }
 
 Index.layout = (page: any) => {
+  const { user, teamName, logoUrl } = page.props;
   return (
-    <DashboardLayout>
+    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
       {page}
     </DashboardLayout>
   );
