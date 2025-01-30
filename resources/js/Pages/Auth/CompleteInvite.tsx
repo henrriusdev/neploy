@@ -4,9 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import ProviderStep from "./InviteSteps/ProviderStep";
 import UserDataStep from "./InviteSteps/UserDataStep";
 import SummaryStep from "./InviteSteps/SummaryStep";
-import axios from "axios";
 import { CompleteInviteProps } from "@/types/props";
 import { User } from "@/types/common";
+import { useCompleteInviteMutation } from "@/services/api/auth";
 
 type Step = "provider" | "data" | "summary";
 
@@ -32,6 +32,7 @@ export default function CompleteInvite({
     password: "",
   });
   const { toast } = useToast();
+  const [completeInvite, { isLoading }] = useCompleteInviteMutation();
 
   React.useEffect(() => {
     if (status === "expired") {
@@ -65,7 +66,16 @@ export default function CompleteInvite({
   };
 
   const handleDataNext = (data: User) => {
-    setUserData(data);
+    const formattedData = {
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      dob: data.dob || "",
+      phone: data.phone || "",
+      address: data.address || "",
+      email: data.email || "",
+      username: data.username || "",
+    };
+    setUserData(formattedData);
     setStep("summary");
   };
 
@@ -78,25 +88,43 @@ export default function CompleteInvite({
   };
 
   const handleSubmit = () => {
-    axios
-      .post("/users/complete-invite", {
-        token,
-        ...userData,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          toast({
-            title: "Success",
-            description: "Your account has been created successfully!",
-          });
-          window.location.replace("/");
-        }
+    if (
+      !userData.firstName ||
+      !userData.lastName ||
+      !userData.phone ||
+      !userData.address ||
+      !userData.email ||
+      !userData.username
+    ) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+      });
+      return;
+    }
+
+    const submitData = {
+      token,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phone: userData.phone,
+      address: userData.address,
+      email: userData.email,
+      username: userData.username,
+    };
+
+    completeInvite(submitData)
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Success",
+          description: "Your account has been created successfully!",
+        });
+        window.location.replace("/");
       })
       .catch((error) => {
         const errorMessage =
-          error.response?.data?.error ||
-          error.message ||
-          "Failed to complete registration";
+          error.data?.error || "Failed to complete registration";
         toast({
           title: "Error",
           description: errorMessage,

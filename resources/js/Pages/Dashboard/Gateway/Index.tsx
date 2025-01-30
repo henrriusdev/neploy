@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { PlusCircle } from "lucide-react";
 import { router } from "@inertiajs/react";
-import { Globe, Lock, Activity, BarChart3 } from "lucide-react";
+import {
+  Globe,
+  Lock,
+  Activity,
+  BarChart3,
+  PlusCircle,
+  Settings,
+} from "lucide-react";
 
 import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -18,7 +24,8 @@ export default function Index({ gateways, application }: GatewayProps) {
   const { toast } = useToast();
 
   const handleCreate = (data: Partial<Gateway>) => {
-    router.post("/gateways", data, {
+    const { application, ...formData } = data;
+    router.post("/gateways", formData, {
       onSuccess: () => {
         setIsFormOpen(false);
         toast({
@@ -37,7 +44,8 @@ export default function Index({ gateways, application }: GatewayProps) {
   };
 
   const handleUpdate = (id: string, data: Partial<Gateway>) => {
-    router.put(`/gateways/${id}`, data, {
+    const { application, ...formData } = data;
+    router.put(`/gateways/${id}`, formData, {
       onSuccess: () => {
         setEditingGateway(null);
         toast({
@@ -74,7 +82,7 @@ export default function Index({ gateways, application }: GatewayProps) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="container mx-auto p-6">
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -176,5 +184,10 @@ export default function Index({ gateways, application }: GatewayProps) {
 }
 
 Index.layout = (page: any) => {
-  return <DashboardLayout>{page}</DashboardLayout>;
+  const { user, teamName, logoUrl } = page.props;
+  return (
+    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
+      {page}
+    </DashboardLayout>
+  );
 };

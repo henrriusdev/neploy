@@ -1,5 +1,12 @@
 import { ControllerRenderProps } from "react-hook-form";
-import { Application, Gateway, TeamMember, User } from "./common";
+import {
+  Application,
+  Gateway,
+  Roles,
+  TeamMember,
+  TechStack,
+  User,
+} from "./common";
 import { DateRange } from "react-day-picker";
 
 export interface AcceptInviteProps {
@@ -19,20 +26,12 @@ export interface CompleteInviteProps {
 }
 
 export interface SummaryStepProps {
-  data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    username: string;
-    dob: Date;
-    phone: string;
-    address: string;
-  };
+  data: User;
   onBack: () => void;
   onSubmit: () => void;
 }
 
-export interface RequestData{
+export interface RequestData {
   name: string;
   successful: number;
   errors: number;
@@ -56,7 +55,7 @@ export interface DashboardProps {
   visitorData?: VisitorData[];
   health?: string;
   logoUrl?: string;
-  stats?: Stats
+  stats?: any; // TODO: add type
 }
 
 export interface TeamProps {
@@ -109,7 +108,7 @@ export interface AutoCompleteProps {
   disabled?: boolean;
   placeholder?: string;
   field?: ControllerRenderProps<any>;
-};
+}
 
 export interface DatePickerProps {
   className?: string;
@@ -119,11 +118,34 @@ export interface DatePickerProps {
   minYear?: number;
   maxYear?: number;
   field?: ControllerRenderProps<any, any>;
-};
+}
 
 export interface ApplicationsProps {
   user?: User;
   teamName: string;
   logoUrl: string;
   applications?: Application[] | null;
+}
+
+export interface SettingsProps {
+  teamName: string;
+  logoUrl: string;
+  language: string;
+  roles: Roles[];
+  techStacks: TechStack[];
+  user?: User;
+}
+
+export interface GeneralSettingsProps {
+  teamName: string;
+  logoUrl: string;
+  language: string;
+}
+
+export interface RolesSettingsProps {
+  roles: Roles[];
+}
+
+export interface TechStacksSettingsProps {
+  techStacks: TechStack[];
 }
