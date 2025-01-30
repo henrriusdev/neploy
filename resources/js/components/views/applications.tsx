@@ -1,9 +1,26 @@
-import { DynamicForm } from "@/components/DynamicForm";
-import DashboardLayout from "@/components/Layouts/DashboardLayout";
-import { ApplicationCard } from "@/components/ApplicationCard";
-import { ApplicationForm } from "@/components/ApplicationForm";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast, useWebSocket } from "@/hooks";
+import {
+  useCreateApplicationMutation,
+  useDeleteApplicationMutation,
+  useDeployApplicationMutation,
+  useGetAllApplicationsQuery,
+  useLoadBranchesQuery,
+  useStartApplicationMutation,
+  useStopApplicationMutation,
+  useUploadApplicationMutation,
+} from "@/services/api/applications";
+import {
+  ActionMessage,
+  ActionResponse,
+  ApplicationsProps,
+  Input,
+  ProgressMessage,
+} from "@/types";
+import { debounce } from "lodash";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Dialog,
   DialogContent,
@@ -11,34 +28,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import { Application } from "@/types/common";
-import type {
-  ActionMessage,
-  ActionResponse,
-  Input as InputType,
-  ProgressMessage,
-} from "@/types/websocket";
-import { debounce } from "lodash";
-import { Grid, List, PlusCircle } from "lucide-react";
-import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
-import * as z from "zod";
-import { ApplicationsProps } from "@/types/props";
-import {
-  useGetAllApplicationsQuery,
-  useLoadBranchesQuery,
-  useCreateApplicationMutation,
-  useDeployApplicationMutation,
-  useUploadApplicationMutation,
-  useStartApplicationMutation,
-  useStopApplicationMutation,
-  useDeleteApplicationMutation,
-} from "@/services/api/applications";
-import { useTranslation } from "react-i18next";
-import "@/i18n";
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { PlusCircle } from "lucide-react";
+import { ApplicationForm } from "../forms";
+import { ApplicationCard } from "../application-card";
+import { DynamicForm } from "../forms";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -65,7 +60,7 @@ const uploadFormSchema = z.object({
   branch: z.string().optional(),
 });
 
-function Applications({
+export function Applications({
   user,
   teamName,
   logoUrl,
@@ -79,7 +74,7 @@ function Applications({
     show: boolean;
     title: string;
     description: string;
-    fields: InputType[];
+    fields: Input[];
     onSubmit: (data: any) => void;
   }>({
     show: false,
@@ -299,7 +294,7 @@ function Applications({
         show: true,
         title: message.title || t("applications.actions.required"),
         description: message.message || "",
-        fields: message.inputs.map((input) => ({
+        fields: message.inputs.map((input: Input) => ({
           ...input,
           // Add validation for port number
           validate:
@@ -347,11 +342,11 @@ function Applications({
     };
   }, [onNotification, onInteractive, sendMessage, toast, t]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     refreshApplications();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const ws = new WebSocket(
       `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${
         window.location.host
@@ -480,14 +475,3 @@ function Applications({
     </div>
   );
 }
-
-Applications.layout = (page: any) => {
-  const { user, teamName, logoUrl } = page.props;
-  return (
-    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
-      {page}
-    </DashboardLayout>
-  );
-};
-
-export default Applications;

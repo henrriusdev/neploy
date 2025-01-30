@@ -20,10 +20,10 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
-import { LanguageSelector } from "@/components/LanguageSelector";
-import '@/i18n';
+import { router } from "@inertiajs/react";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "@/components/forms/language-selector";
+import "@/i18n";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -52,11 +52,11 @@ export default function Component() {
       },
       onError: (errors) => {
         console.error(errors);
-        form.setError("root", { message: t('errors.serverError') });
+        form.setError("root", { message: t("errors.serverError") });
       },
       onFinish: () => {
         setIsLoading(false);
-      }
+      },
     });
   }
 
@@ -74,15 +74,13 @@ export default function Component() {
           />
         </div>
         <h2 className="text-3xl font-bold text-white mb-4">
-          {t('auth.welcomeTitle')}
+          {t("auth.welcomeTitle")}
         </h2>
-        <p className="text-white mb-4">
-          {t('auth.welcomeDescription')}
-        </p>
+        <p className="text-white mb-4">{t("auth.welcomeDescription")}</p>
         <ul className="text-white list-disc list-inside">
-          <li>{t('auth.feature1')}</li>
-          <li>{t('auth.feature2')}</li>
-          <li>{t('auth.feature3')}</li>
+          <li>{t("auth.feature1")}</li>
+          <li>{t("auth.feature2")}</li>
+          <li>{t("auth.feature3")}</li>
         </ul>
       </div>
 
@@ -91,12 +89,10 @@ export default function Component() {
         <Card className="w-full max-w-[400px]">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>{t('auth.login')}</CardTitle>
+              <CardTitle>{t("auth.login")}</CardTitle>
               <LanguageSelector />
             </div>
-            <CardDescription>
-              {t('auth.enterEmail')}
-            </CardDescription>
+            <CardDescription>{t("auth.enterEmail")}</CardDescription>
           </CardHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -106,9 +102,9 @@ export default function Component() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.email')}</FormLabel>
+                      <FormLabel>{t("auth.email")}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('auth.enterEmail')} {...field} />
+                        <Input placeholder={t("auth.enterEmail")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -119,11 +115,11 @@ export default function Component() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('auth.password')}</FormLabel>
+                      <FormLabel>{t("auth.password")}</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder={t('auth.enterPassword')}
+                          placeholder={t("auth.enterPassword")}
                           {...field}
                         />
                       </FormControl>
@@ -139,7 +135,7 @@ export default function Component() {
               </CardContent>
               <CardFooter>
                 <Button className="w-full" type="submit" disabled={isLoading}>
-                  {isLoading ? t('auth.loggingIn') : t('auth.logIn')}
+                  {isLoading ? t("auth.loggingIn") : t("auth.logIn")}
                 </Button>
               </CardFooter>
             </form>

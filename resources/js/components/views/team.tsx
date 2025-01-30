@@ -1,23 +1,19 @@
-import * as React from "react";
+import { useToast } from "@/hooks";
+import { TeamProps } from "@/types";
+import { router } from "@inertiajs/react";
+import { PlusCircle, Trash } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2 } from "lucide-react";
-import DashboardLayout from "@/components/Layouts/DashboardLayout";
+} from "../ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,36 +21,38 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { router } from "@inertiajs/react";
-import { useToast } from "@/hooks/use-toast";
-import { TeamProps } from "@/types/props";
-import { useTranslation } from "react-i18next";
-import "@/i18n";
-import { Badge } from "@/components/ui/badge";
+} from "../ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 interface InviteMemberData {
   email: string;
   role: string;
 }
 
-function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
-  const [open, setOpen] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [formData, setFormData] = React.useState<InviteMemberData>({
+export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState<InviteMemberData>({
     email: "",
     role: "",
   });
-  const [teamState, setTeam] = React.useState(team);
+  const [teamState, setTeamState] = useState(team);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -96,7 +94,7 @@ function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
           title: t("dashboard.team.removeSuccess"),
           description: t("dashboard.team.removeSuccess"),
         });
-        setTeam(team.filter((member) => member.id !== memberId));
+        setTeamState(teamState.filter((member) => member.id !== memberId));
       },
       onError: () => {
         toast({
@@ -234,7 +232,7 @@ function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                       variant="destructive"
                       size="icon"
                       onClick={() => handleRemoveMember(member.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive-foreground" />
+                      <Trash className="h-4 w-4 text-destructive-foreground" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -246,14 +244,3 @@ function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
     </div>
   );
 }
-
-Team.layout = (page: any) => {
-  const { user, teamName, logoUrl } = page.props;
-  return (
-    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
-      {page}
-    </DashboardLayout>
-  );
-};
-
-export default Team;

@@ -51,6 +51,18 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
     }
   };
 
+  const cancelChanges = () => {
+    setTeamName(originalTeamName);
+    setLogoUrl(originalLogoUrl);
+    setLanguage(originalLanguage);
+    setDarkMode(false);
+    setEmailNotifications(false);
+  };
+
+  const saveChanges = () => {
+    setIsEdited(false);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -98,7 +110,10 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 Enable dark mode by default
               </p>
             </div>
-            <Switch />
+            <Switch
+              value={darkMode.toString()}
+              onChange={() => setDarkMode(!darkMode)}
+            />
           </div>
 
           <div className="flex items-center justify-start gap-x-14 col-span-2">
@@ -108,13 +123,18 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 Enable email notifications
               </p>
             </div>
-            <Switch />
+            <Switch
+              value={emailNotifications.toString()}
+              onChange={() => setEmailNotifications(!emailNotifications)}
+            />
           </div>
         </div>
         {isEdited && (
           <div className="flex items-center justify-end gap-x-4">
-            <Button variant="ghost">Cancel</Button>
-            <Button>Save</Button>
+            <Button variant="ghost" onClick={cancelChanges}>
+              Cancel
+            </Button>
+            <Button onClick={saveChanges}>Save</Button>
           </div>
         )}
       </CardContent>

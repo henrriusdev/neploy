@@ -102,8 +102,10 @@ export function BaseChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={config} className="h-[350px] w-full">
-          {renderChart()}
-          <ChartTooltip content={<ChartTooltipContent />} />
+          <>
+            {renderChart()}
+            <ChartTooltip content={<ChartTooltipContent />} />
+          </>
         </ChartContainer>
       </CardContent>
     </Card>

@@ -97,7 +97,11 @@ export interface GatewayTableProps {
   onDelete: (id: string) => void;
 }
 
-export type Option = Record<"value" | "label", string> & Record<string, string>;
+export interface Option {
+  value: string;
+  label: string;
+  icon?: React.ReactElement;
+}
 
 export interface AutoCompleteProps {
   options: Option[];

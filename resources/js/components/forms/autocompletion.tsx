@@ -3,7 +3,7 @@ import {
   CommandItem,
   CommandList,
   CommandInput,
-} from "./ui/command";
+} from "../ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import {
   useState,
@@ -13,9 +13,9 @@ import {
   useEffect,
   forwardRef,
 } from "react";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 import { Check } from "lucide-react";
-import { cn } from "../lib/utils";
+import { cn } from "@/lib/utils";
 import { AutoCompleteProps, Option } from "@/types/props";
 
 export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(

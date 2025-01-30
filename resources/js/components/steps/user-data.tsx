@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/DatePicker";
+import { DatePicker } from "@/components/date-picker";
 import { withMask } from "use-mask-input";
 import { User } from "@/types/common";
 
@@ -42,12 +42,7 @@ interface Props {
   onBack: () => void;
 }
 
-export default function UserDataStep({
-  email,
-  username,
-  onNext,
-  onBack,
-}: Props) {
+export function UserDataStep({ email, username, onNext, onBack }: Props) {
   const form = useForm<User>({
     resolver: zodResolver(formSchema),
     defaultValues: {

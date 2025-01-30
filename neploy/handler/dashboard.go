@@ -126,7 +126,7 @@ func (d *Dashboard) Team(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return d.i.Render(c.Response(), c.Request(), "Dashboard/Team", inertia.Props{
+	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"user":     user,
 		"teamName": metadata.TeamName,
 		"logoUrl":  metadata.LogoURL,
@@ -183,7 +183,7 @@ func (d *Dashboard) Applications(c echo.Context) error {
 		"applications": applications,
 	}
 
-	if err := d.i.Render(c.Response(), c.Request(), "Dashboard/Applications", props); err != nil {
+	if err := d.i.Render(c.Response(), c.Request(), "Dashboard/Index", props); err != nil {
 		logger.Error("error rendering applications page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
 	}
@@ -222,7 +222,7 @@ func (d *Dashboard) Gateways(c echo.Context) error {
 		Provider: provider,
 	}
 
-	return d.i.Render(c.Response(), c.Request(), "Dashboard/Gateway/Index", inertia.Props{
+	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"user":     user,
 		"teamName": metadata.TeamName,
 		"logoUrl":  metadata.LogoURL,
@@ -267,7 +267,7 @@ func (d *Dashboard) Config(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return d.i.Render(c.Response(), c.Request(), "Dashboard/Config/Index", inertia.Props{
+	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"user":       user,
 		"teamName":   metadata.TeamName,
 		"logoUrl":    metadata.LogoURL,
