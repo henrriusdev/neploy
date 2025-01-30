@@ -1,15 +1,12 @@
-import * as React from "react";
-import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, UsersRound, Boxes, GitBranch } from "lucide-react";
+import { SettingsProps } from "@/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Boxes, GitBranch, Settings, UsersRound } from "lucide-react";
+import GeneralTab from "./config-general";
+import RolesTab from "./config-roles";
+import TechStackTab from "./config-techstack";
+import TraceabilityTab from "./config-traceability";
 
-import GeneralTab from "./components/GeneralTab";
-import RolesTab from "./components/RolesTab";
-import TechStackTab from "./components/TechStackTab";
-import TraceabilityTab from "./components/TraceabilityTab";
-import { SettingsProps } from "@/types/props";
-
-const Config = ({
+export const Config = ({
   user,
   teamName,
   logoUrl,
@@ -64,14 +61,3 @@ const Config = ({
     </div>
   );
 };
-
-Config.layout = (page: any) => {
-  const { user, teamName, logoUrl } = page.props;
-  return (
-    <DashboardLayout user={user} teamName={teamName} logoUrl={logoUrl}>
-      {page}
-    </DashboardLayout>
-  );
-};
-
-export default Config;

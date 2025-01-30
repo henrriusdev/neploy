@@ -10,9 +10,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { Applications, Home } from "../views";
-import { Gateways } from "../views/gateway";
-import { Team } from "../views/team";
+import { Applications, Home, Gateways, Team, Config } from "../views";
 
 const defaultNavMain = [
   {
@@ -105,7 +103,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       case "/team":
         return <Team {...props} />;
       case "/settings":
-        return "Settings";
+        return <Config {...props} />;
       default:
         return "Dashboard";
     }
