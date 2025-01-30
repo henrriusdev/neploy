@@ -13,7 +13,7 @@ import {
   ActionMessage,
   ActionResponse,
   ApplicationsProps,
-  InputType,
+  Input,
   ProgressMessage,
 } from "@/types";
 import { debounce } from "lodash";
@@ -74,7 +74,7 @@ export function Applications({
     show: boolean;
     title: string;
     description: string;
-    fields: InputType[];
+    fields: Input[];
     onSubmit: (data: any) => void;
   }>({
     show: false,
@@ -294,7 +294,7 @@ export function Applications({
         show: true,
         title: message.title || t("applications.actions.required"),
         description: message.message || "",
-        fields: message.inputs.map((input) => ({
+        fields: message.inputs.map((input: Input) => ({
           ...input,
           // Add validation for port number
           validate:
