@@ -1,15 +1,22 @@
 import { useState } from "react";
-import { PlusCircle, Settings } from "lucide-react";
 import { router } from "@inertiajs/react";
+import {
+  Globe,
+  Lock,
+  Activity,
+  BarChart3,
+  PlusCircle,
+  Settings,
+} from "lucide-react";
 
 import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { GatewayTable } from "./components/gateway-table";
 import { GatewayForm } from "./components/gateway-form";
-import { GatewaySidebar } from "./components/gateway-sidebar";
 import { Gateway } from "@/types/common";
 import { GatewayProps } from "@/types/props";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Index({ gateways, application }: GatewayProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -74,10 +81,6 @@ export default function Index({ gateways, application }: GatewayProps) {
     });
   };
 
-  const navigateToConfig = () => {
-    router.get("/gateway/config");
-  };
-
   return (
     <div className="flex h-screen overflow-hidden">
       <div className="flex-1 overflow-auto">
@@ -92,10 +95,6 @@ export default function Index({ gateways, application }: GatewayProps) {
               )}
             </div>
             <div className="space-x-2">
-              <Button variant="outline" onClick={navigateToConfig}>
-                <Settings className="w-4 h-4 mr-2" />
-                Configuration
-              </Button>
               <Button onClick={() => setIsFormOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Route
@@ -116,8 +115,6 @@ export default function Index({ gateways, application }: GatewayProps) {
           )}
         </div>
       </div>
-
-      <GatewaySidebar />
 
       <GatewayForm
         open={isFormOpen || !!editingGateway}
