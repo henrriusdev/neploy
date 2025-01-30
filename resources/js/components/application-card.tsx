@@ -8,10 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TechIcon } from "@/components/TechIcon";
+import { TechIcon } from "@/components/tech-icon";
 import { Play, Square, Trash2 } from "lucide-react";
-import { useTranslation } from 'react-i18next';
-import '@/i18n';
+import { useTranslation } from "react-i18next";
+import "@/i18n";
 
 interface ApplicationCardProps {
   app: Application;
@@ -46,15 +46,15 @@ export function ApplicationCard({
   const translateStatus = (status: Application["status"]) => {
     switch (status) {
       case "Running":
-        return t('dashboard.applications.status.running');
+        return t("dashboard.applications.status.running");
       case "Building":
-        return t('dashboard.applications.status.building');
+        return t("dashboard.applications.status.building");
       case "Stopped":
-        return t('dashboard.applications.status.stopped');
+        return t("dashboard.applications.status.stopped");
       case "Error":
-        return t('dashboard.applications.status.error');
+        return t("dashboard.applications.status.error");
       default:
-        return t('dashboard.applications.status.unknown');
+        return t("dashboard.applications.status.unknown");
     }
   };
 
@@ -80,13 +80,13 @@ export function ApplicationCard({
           {app.status !== "Running" && (
             <Button size="sm" variant="outline" onClick={() => onStart(app.id)}>
               <Play className="h-4 w-4 mr-1" />
-              {t('dashboard.applications.start')}
+              {t("dashboard.applications.start")}
             </Button>
           )}
           {app.status === "Running" && (
             <Button size="sm" variant="outline" onClick={() => onStop(app.id)}>
               <Square className="h-4 w-4 mr-1" />
-              {t('dashboard.applications.stop')}
+              {t("dashboard.applications.stop")}
             </Button>
           )}
           <Button
@@ -94,7 +94,7 @@ export function ApplicationCard({
             variant="destructive"
             onClick={() => onDelete(app.id)}>
             <Trash2 className="h-4 w-4 mr-1" />
-            {t('dashboard.applications.delete')}
+            {t("dashboard.applications.delete")}
           </Button>
         </div>
       </CardContent>

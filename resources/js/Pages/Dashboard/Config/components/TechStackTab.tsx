@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TechStacksSettingsProps } from "@/types/props";
-import { TechIcon } from "@/components/TechIcon";
+import { TechIcon } from "@/components/tech-icon";
 
 const TechStackTab: React.FC<TechStacksSettingsProps> = ({ techStacks }) => {
   return (

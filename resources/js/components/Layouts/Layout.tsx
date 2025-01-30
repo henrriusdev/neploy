@@ -5,26 +5,26 @@ import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarProvider,
-    SidebarTrigger,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link } from "@inertiajs/react";
-import { LanguageSelector } from "./LanguageSelector";
+import { LanguageSelector } from "../language-selector";
 
 interface NavItem {
   title: string;
@@ -67,7 +67,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                                        group-data-[state=expanded]:w-10/12 group-data-[state=expanded]:mx-auto"
             />
           </SidebarHeader>
-          <SidebarContent>
+          <SidebarContent className="px-2">
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
@@ -109,7 +109,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                     forceMount>
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-sm font-medium leading-none">
+                          {user.name}
+                        </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user.email}
                         </p>
@@ -124,8 +126,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                         href="/logout"
                         method="post"
                         as="button"
-                        className="w-full flex items-center"
-                      >
+                        className="w-full flex items-center">
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Log out</span>
                       </Link>

@@ -1,45 +1,51 @@
-import * as React from 'react'
-import { AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2 } from 'lucide-react'
-import Layout from "@/components/Layout"
-import { Toaster } from '@/components/ui/toaster'
-import { usePage, useRemember } from '@inertiajs/react'
-import { useTranslation } from 'react-i18next'
+import * as React from "react";
+import {
+  AppWindowMac,
+  DoorOpen,
+  Frame,
+  PieChartIcon,
+  Settings2,
+} from "lucide-react";
+import Layout from "@/components/Layouts/Layout";
+import { Toaster } from "@/components/ui/toaster";
+import { usePage, useRemember } from "@inertiajs/react";
+import { useTranslation } from "react-i18next";
+import { Home } from "../views";
 
 const defaultNavMain = [
-    {
-        title: "sidebar.dashboard",
-        url: "/dashboard",
-        icon: PieChartIcon,
-    },
-    {
-        title: "sidebar.applications",
-        url: "/dashboard/applications",
-        icon: AppWindowMac,
-    },
-    {
-        title: "sidebar.gateways",
-        url: "/dashboard/gateways",
-        icon: DoorOpen
-    },
-    {
-        title: "sidebar.team",
-        url: "/dashboard/team",
-        icon: Frame,
-    },
-    {
-        title: "sidebar.settings",
-        url: "/dashboard/settings",
-        icon: Settings2,
-    },
-    {
-        title: "sidebar.logout",
-        url: "/logout",
-        icon: DoorOpen,
-    },
-]
+  {
+    title: "sidebar.dashboard",
+    url: "/dashboard",
+    icon: PieChartIcon,
+  },
+  {
+    title: "sidebar.applications",
+    url: "/dashboard/applications",
+    icon: AppWindowMac,
+  },
+  {
+    title: "sidebar.gateways",
+    url: "/dashboard/gateways",
+    icon: DoorOpen,
+  },
+  {
+    title: "sidebar.team",
+    url: "/dashboard/team",
+    icon: Frame,
+  },
+  {
+    title: "sidebar.settings",
+    url: "/dashboard/settings",
+    icon: Settings2,
+  },
+  {
+    title: "sidebar.logout",
+    url: "/logout",
+    icon: DoorOpen,
+  },
+];
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
   user?: {
     name?: string;
     email?: string;
@@ -49,6 +55,7 @@ interface DashboardLayoutProps {
   teamName?: string;
   logoUrl?: string;
   navItems?: NavigationItem[];
+  props?: any;
 }
 
 interface NavigationItem {
@@ -58,42 +65,73 @@ interface NavigationItem {
   isActive?: boolean;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user, teamName, logoUrl, navItems }) => {
-    const { url } = usePage()
-    const { t } = useTranslation()
-    
-    const [layoutData] = useRemember({
-        user: {
-            name: user?.name || '',
-            email: user?.email || '',
-            avatar: user?.provider === "github" 
-                ? `https://unavatar.io/github/${user?.username}` 
-                : `https://unavatar.io/${user?.email}`,
-        },
-        teamName: teamName || '',
-        logoUrl: logoUrl || '',
-    }, 'dashboard-layout-state');
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  user,
+  teamName,
+  logoUrl,
+  navItems,
+  props,
+}) => {
+  const { url } = usePage();
+  const { t } = useTranslation();
 
-    // Create navigation with active state based on current URL
-    const navigation = (navItems || defaultNavMain).map(item => ({
-        ...item,
-        title: t(item.title), // Translate the title
-        isActive: url === item.url || (url.startsWith(item.url) && item.url !== "/dashboard" && item.url !== "/logout")
-    }));
+  const [layoutData] = useRemember(
+    {
+      user: {
+        name: user?.name || "",
+        email: user?.email || "",
+        avatar:
+          user?.provider === "github"
+            ? `https://unavatar.io/github/${user?.username}`
+            : `https://unavatar.io/${user?.email}`,
+      },
+      teamName: teamName || "",
+      logoUrl: logoUrl || "",
+    },
+    "dashboard-layout-state"
+  );
 
-    return (
-        <div className="min-h-screen bg-background">
-            <Layout
-                user={layoutData.user}
-                teamName={layoutData.teamName}
-                logoUrl={layoutData.logoUrl}
-                navItems={navigation}
-            >
-                {children}
-            </Layout>
-            <Toaster />
-        </div>
-    )
-}
+  const getComponent = () => {
+    const dashboardUrl = url.replace("/dashboard", "");
+    switch (dashboardUrl) {
+      case "":
+        return <Home {...props} />;
+      case "/applications":
+        return "Applications";
+      case "/gateways":
+        return "Gateways";
+      case "/team":
+        return "Team";
+      case "/settings":
+        return "Settings";
+      default:
+        return "Dashboard";
+    }
+  };
 
-export default DashboardLayout
+  // Create navigation with active state based on current URL
+  const navigation = (navItems || defaultNavMain).map((item) => ({
+    ...item,
+    title: t(item.title), // Translate the title
+    isActive:
+      url === item.url ||
+      (url.startsWith(item.url) &&
+        item.url !== "/dashboard" &&
+        item.url !== "/logout"),
+  }));
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Layout
+        user={layoutData.user}
+        teamName={layoutData.teamName}
+        logoUrl={layoutData.logoUrl}
+        navItems={navigation}>
+        {getComponent()}
+      </Layout>
+      <Toaster />
+    </div>
+  );
+};
+
+export default DashboardLayout;
