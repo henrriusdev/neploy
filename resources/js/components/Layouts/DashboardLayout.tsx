@@ -12,7 +12,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Applications, Home, Gateways, Team, Config } from "../views";
 
-const defaultNavMain = [
+const navItems = [
   {
     title: "sidebar.dashboard",
     url: "/dashboard",
@@ -54,7 +54,6 @@ interface DashboardLayoutProps {
   };
   teamName?: string;
   logoUrl?: string;
-  navItems?: NavigationItem[];
   props?: any;
 }
 
@@ -66,30 +65,22 @@ interface NavigationItem {
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  user,
+  user: backendUser,
   teamName,
   logoUrl,
-  navItems,
   props,
 }) => {
   const { url } = usePage();
   const { t } = useTranslation();
 
-  const [layoutData] = useRemember(
-    {
-      user: {
-        name: user?.name || "",
-        email: user?.email || "",
-        avatar:
-          user?.provider === "github"
-            ? `https://unavatar.io/github/${user?.username}`
-            : `https://unavatar.io/${user?.email}`,
-      },
-      teamName: teamName || "",
-      logoUrl: logoUrl || "",
-    },
-    "dashboard-layout-state"
-  );
+  const user = {
+    name: backendUser?.name || "",
+    email: backendUser?.email || "",
+    avatar:
+      backendUser?.provider === "github"
+        ? `https://unavatar.io/github/${backendUser?.username}`
+        : `https://unavatar.io/${backendUser?.email}`,
+  };
 
   const getComponent = () => {
     const dashboardUrl = url.replace("/dashboard", "");
@@ -110,7 +101,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   // Create navigation with active state based on current URL
-  const navigation = (navItems || defaultNavMain).map((item) => ({
+  const navigation = navItems.map((item) => ({
     ...item,
     title: t(item.title), // Translate the title
     isActive:
@@ -123,9 +114,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   return (
     <div className="min-h-screen bg-background">
       <Layout
-        user={layoutData.user}
-        teamName={layoutData.teamName}
-        logoUrl={layoutData.logoUrl}
+        user={user}
+        teamName={teamName}
+        logoUrl={logoUrl}
         navItems={navigation}>
         {getComponent()}
       </Layout>
