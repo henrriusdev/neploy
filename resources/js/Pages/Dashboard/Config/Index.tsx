@@ -1,6 +1,7 @@
 import * as React from "react";
 import { DashboardLayout } from "@/components/Layouts/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Settings, UsersRound, Boxes, GitBranch } from "lucide-react";
 
 import GeneralTab from "./components/GeneralTab";
 import RolesTab from "./components/RolesTab";
@@ -22,10 +23,22 @@ const Config = ({
 
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="roles">Roles</TabsTrigger>
-          <TabsTrigger value="techstack">Tech Stack</TabsTrigger>
-          <TabsTrigger value="traceability">Traceability</TabsTrigger>
+          <TabsTrigger value="general">
+            <Settings className="h-4 w-4 mr-2" />
+            General
+          </TabsTrigger>
+          <TabsTrigger value="roles">
+            <UsersRound className="h-4 w-4 mr-2" />
+            Roles
+          </TabsTrigger>
+          <TabsTrigger value="techstack">
+            <Boxes className="h-4 w-4 mr-2" />
+            Tech Stack
+          </TabsTrigger>
+          <TabsTrigger value="traceability">
+            <GitBranch className="h-4 w-4 mr-2" />
+            Traceability
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">

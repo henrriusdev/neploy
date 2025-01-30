@@ -82,7 +82,7 @@ export default function Index({ gateways, application }: GatewayProps) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="container mx-auto p-6">
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">

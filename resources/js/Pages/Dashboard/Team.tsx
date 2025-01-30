@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/Layouts/DashboardLayout";
 import {
   Dialog,
@@ -37,9 +37,6 @@ import {
 } from "@/components/ui/select";
 import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
-import { RoleIcon } from "@/components/RoleIcon";
-import { TrashIcon } from "@radix-ui/react-icons";
-import { TeamMember } from "@/types/common";
 import { TeamProps } from "@/types/props";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
@@ -234,10 +231,10 @@ function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
-                      variant="ghost"
+                      variant="destructive"
                       size="icon"
                       onClick={() => handleRemoveMember(member.id)}>
-                      <TrashIcon className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 text-destructive-foreground" />
                     </Button>
                   </TableCell>
                 </TableRow>
