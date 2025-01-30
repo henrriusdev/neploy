@@ -13,10 +13,12 @@ import { useOnboardMutation } from "@/services/api/onboard";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
-import ProviderStep from "../Auth/InviteSteps/ProviderStep";
-import UserDataStep from "../Auth/InviteSteps/UserDataStep";
-import RolesStep from "./Steps/RolesStep";
-import ServiceStep from "./Steps/ServiceStep";
+import {
+  ProviderStep,
+  UserDataStep,
+  RolesStep,
+  ServiceStep,
+} from "@/components/steps";
 
 interface Props {
   email?: string;

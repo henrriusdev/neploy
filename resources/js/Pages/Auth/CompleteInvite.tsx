@@ -1,9 +1,7 @@
 import * as React from "react";
 import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
-import ProviderStep from "./InviteSteps/ProviderStep";
-import UserDataStep from "./InviteSteps/UserDataStep";
-import SummaryStep from "./InviteSteps/SummaryStep";
+import { ProviderStep, UserDataStep, SummaryStep } from "@/components/steps";
 import { CompleteInviteProps } from "@/types/props";
 import { User } from "@/types/common";
 import { useCompleteInviteMutation } from "@/services/api/auth";

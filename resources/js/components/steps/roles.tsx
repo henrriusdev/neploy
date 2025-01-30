@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Controller } from "react-hook-form";
-import { InputAutoComplete } from "@/components/input-autocomplete";
+import { InputAutoComplete } from "@/components/forms";
 import { ColorPicker } from "@/components/forms/color-picker";
 import { RoleIcon } from "@/components/role-icon";
 import { Trash2 } from "lucide-react";
@@ -42,7 +42,7 @@ interface Props {
   setRoles: (roles: any[]) => void;
 }
 
-export default function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
+export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
   const form = useForm<z.infer<typeof roleSchema>>({
     resolver: zodResolver(roleSchema),
     defaultValues: {
