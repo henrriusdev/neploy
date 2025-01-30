@@ -94,25 +94,75 @@ export default function Index({ gateways, application }: GatewayProps) {
                 </p>
               )}
             </div>
-            <div className="space-x-2">
-              <Button onClick={() => setIsFormOpen(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Route
-              </Button>
-            </div>
+            <Button onClick={() => setIsFormOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Route
+            </Button>
           </div>
 
-          {!gateways || gateways?.length === 0 ? (
-            <p className="text-muted-foreground">
-              No routes configured for this application.
-            </p>
-          ) : (
-            <GatewayTable
-              gateways={gateways}
-              onEdit={setEditingGateway}
-              onDelete={handleDelete}
-            />
-          )}
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="routes">
+                <Globe className="h-4 w-4 mr-2" />
+                Routes
+              </TabsTrigger>
+              <TabsTrigger value="security">
+                <Lock className="h-4 w-4 mr-2" />
+                Security
+              </TabsTrigger>
+              <TabsTrigger value="rate-limiting">
+                <Activity className="h-4 w-4 mr-2" />
+                Rate Limiting
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview">
+              <div className="rounded-md border p-4">
+                <h2 className="text-lg font-semibold mb-2">Gateway Overview</h2>
+                <p className="text-muted-foreground">
+                  Gateway statistics and metrics will be displayed here.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="routes">
+              {!gateways || gateways?.length === 0 ? (
+                <p className="text-muted-foreground">
+                  No routes configured for this application.
+                </p>
+              ) : (
+                <GatewayTable
+                  gateways={gateways}
+                  onEdit={setEditingGateway}
+                  onDelete={handleDelete}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="security">
+              <div className="rounded-md border p-4">
+                <h2 className="text-lg font-semibold mb-2">
+                  Security Settings
+                </h2>
+                <p className="text-muted-foreground">
+                  Configure security settings for your gateway here.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="rate-limiting">
+              <div className="rounded-md border p-4">
+                <h2 className="text-lg font-semibold mb-2">Rate Limiting</h2>
+                <p className="text-muted-foreground">
+                  Configure rate limiting rules for your gateway endpoints.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
