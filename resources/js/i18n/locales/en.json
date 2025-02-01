@@ -3,7 +3,10 @@
     "languageSelector": "Language",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel"
   },
   "languages": {
     "en": "English",
@@ -212,14 +215,30 @@
     },
     "settings": {
       "title": "Settings",
-      "description": "Configure your account and workspace settings"
+      "description": "Configure your account and workspace settings",
+      "general": {
+        "title": "General Settings",
+        "teamName": "Team Name",
+        "teamNamePlaceholder": "Enter team name",
+        "logoUrl": "Logo URL",
+        "logoUrlPlaceholder": "Enter logo URL",
+        "language": "Default Language",
+        "languagePlaceholder": "Select a language",
+        "darkMode": "Dark Mode",
+        "darkModeDescription": "Enable dark mode by default",
+        "emailNotifications": "Email Notifications",
+        "emailNotificationsDescription": "Enable email notifications",
+        "updateSuccess": "Settings updated successfully",
+        "updateError": "Failed to update settings. Please try again."
+      }
     }
   },
   "errors": {
     "required": "This field is required",
     "invalidEmail": "Invalid email address",
     "invalidPassword": "Password must be at least 8 characters",
-    "serverError": "An error occurred during login"
+    "invalidCredentials": "Invalid email or password",
+    "serverError": "An error occurred. Please try again later"
   },
   "sidebar": {
     "dashboard": "Dashboard",

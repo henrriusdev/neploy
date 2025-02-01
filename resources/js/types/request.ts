@@ -25,7 +25,7 @@ export interface OnboardRequest {
 
 export interface MetadataRequest {
   teamName: string;
-  logo?: string;
+  logoUrl?: string;
   language: string;
 }
 

@@ -3,15 +3,17 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Create our base query with proper CSRF handling for Laravel
 const baseQuery = fetchBaseQuery({
-  baseUrl: "/",  // Update this to match your Laravel API prefix
+  baseUrl: "/", // Update this to match your Laravel API prefix
   credentials: "include", // Important for cookies/session handling
   prepareHeaders: (headers) => {
     // Add CSRF token from meta tag if it exists
-    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const token = document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute("content");
     if (token) {
-      headers.set('X-CSRF-TOKEN', token);
+      headers.set("X-CSRF-TOKEN", token);
     }
-    headers.set('Accept', 'application/json');
+    headers.set("Accept", "application/json");
     return headers;
   },
 });
@@ -19,17 +21,9 @@ const baseQuery = fetchBaseQuery({
 export const baseApi = createApi({
   reducerPath: "base-api",
   baseQuery,
-  tagTypes: [
-    "applications",
-    "onboard",
-  ],
+  tagTypes: ["applications", "metadata", "onboard"],
   endpoints: () => ({}),
 });
 
 // Export hooks for usage in components
-export const {
-  endpoints,
-  reducerPath,
-  reducer,
-  middleware
-} = baseApi;
+export const { endpoints, reducerPath, reducer, middleware } = baseApi;

@@ -36,7 +36,13 @@
     }
   },
   "common": {
-    "languageSelector": "Sélectionner la langue"
+    "languageSelector": "Sélectionner la langue",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler"
   },
   "languages": {
     "es": "Espagnol",
@@ -60,7 +66,11 @@
     "feature3": "Surveillance des performances en temps réel"
   },
   "errors": {
-    "serverError": "Une erreur s'est produite lors de la connexion"
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Adresse e-mail invalide",
+    "invalidPassword": "Le mot de passe doit contenir au moins 8 caractères",
+    "invalidCredentials": "E-mail ou mot de passe invalide",
+    "serverError": "Une erreur s'est produite. Veuillez réessayer plus tard"
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
@@ -140,6 +150,21 @@
         "grid": "Grille",
         "list": "Liste"
       }
+    }
+  },
+  "settings": {
+    "general": {
+      "title": "Paramètres Généraux",
+      "teamName": "Nom de l'Équipe",
+      "teamNamePlaceholder": "Entrez le nom de l'équipe",
+      "logoUrl": "URL du Logo",
+      "logoUrlPlaceholder": "Entrez l'URL du logo",
+      "language": "Langue par Défaut",
+      "languagePlaceholder": "Sélectionnez une langue",
+      "darkMode": "Mode Sombre",
+      "darkModeDescription": "Activer le mode sombre par défaut",
+      "emailNotifications": "Notifications par Email",
+      "emailNotificationsDescription": "Activer les notifications par email"
     }
   }
 }

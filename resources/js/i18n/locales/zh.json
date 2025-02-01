@@ -82,7 +82,12 @@
         "fileOrRepoRequired": "请提供文件或仓库 URL",
         "branchRequired": "请选择分支",
         "portInvalid": "请输入有效的端口号（1-65535）",
-        "unknown": "发生未知错误"
+        "unknown": "发生未知错误",
+        "required": "此字段为必填项",
+        "invalidEmail": "无效的电子邮件地址",
+        "invalidPassword": "密码必须至少8个字符",
+        "invalidCredentials": "邮箱或密码无效",
+        "serverError": "发生错误。请稍后再试"
       },
       "actions": {
         "deploymentProgress": "部署进度",
@@ -193,6 +198,30 @@
     "techStacksMostUsed": "最常用的技术栈",
     "visitorCountByTime": "按时间的访问量",
     "visitors": "访问者"
+  },
+  "common": {
+    "languageSelector": "语言",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "save": "保存",
+    "saving": "保存中...",
+    "cancel": "取消"
+  },
+  "settings": {
+    "general": {
+      "title": "常规设置",
+      "teamName": "团队名称",
+      "teamNamePlaceholder": "请输入团队名称",
+      "logoUrl": "标志URL",
+      "logoUrlPlaceholder": "请输入标志URL",
+      "language": "默认语言",
+      "languagePlaceholder": "请选择语言",
+      "darkMode": "深色模式",
+      "darkModeDescription": "默认启用深色模式",
+      "emailNotifications": "邮件通知",
+      "emailNotificationsDescription": "启用邮件通知"
+    }
   },
   "sidebar": {
     "dashboard": "仪表板",

@@ -35,8 +35,9 @@ type OnboardRequest struct {
 }
 
 type MetadataRequest struct {
-	Name    string `json:"teamName" db:"team_name"`
-	LogoURL string `json:"logoUrl" db:"logo_url"`
+	Name     string `json:"teamName" db:"team_name"`
+	LogoURL  string `json:"logoUrl" db:"logo_url"`
+	Language string `json:"language" db:"language"`
 }
 
 type InviteUserRequest struct {

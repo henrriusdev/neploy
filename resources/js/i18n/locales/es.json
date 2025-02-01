@@ -53,7 +53,13 @@
     "feature3": "Monitoreo en tiempo real del rendimiento"
   },
   "common": {
-    "languageSelector": "Seleccionar idioma"
+    "languageSelector": "Idioma",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar"
   },
   "languages": {
     "es": "Español",
@@ -63,7 +69,9 @@
     "fr": "Francés"
   },
   "errors": {
-    "serverError": "Ha ocurrido un error durante el inicio de sesión"
+    "serverError": "Ha ocurrido un error durante el inicio de sesión",
+    "invalidCredentials": "Correo electrónico o contraseña inválidos",
+    "serverError": "Ocurrió un error. Por favor, inténtelo de nuevo más tarde"
   },
   "dashboard": {
     "welcome": "Bienvenido de nuevo, {{name}}",
@@ -207,6 +215,21 @@
         "totalApplications": "Total de Aplicaciones",
         "activeApplications": "Aplicaciones Activas"
       }
+    }
+  },
+  "settings": {
+    "general": {
+      "title": "Configuración General",
+      "teamName": "Nombre del Equipo",
+      "teamNamePlaceholder": "Ingrese el nombre del equipo",
+      "logoUrl": "URL del Logo",
+      "logoUrlPlaceholder": "Ingrese la URL del logo",
+      "language": "Idioma Predeterminado",
+      "languagePlaceholder": "Seleccione un idioma",
+      "darkMode": "Modo Oscuro",
+      "darkModeDescription": "Habilitar modo oscuro por defecto",
+      "emailNotifications": "Notificaciones por Email",
+      "emailNotificationsDescription": "Habilitar notificaciones por correo electrónico"
     }
   },
   "sidebar": {

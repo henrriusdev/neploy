@@ -196,6 +196,30 @@
       }
     }
   },
+  "common": {
+    "languageSelector": "Idioma",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar"
+  },
+  "settings": {
+    "general": {
+      "title": "Configurações Gerais",
+      "teamName": "Nome da Equipe",
+      "teamNamePlaceholder": "Digite o nome da equipe",
+      "logoUrl": "URL do Logo",
+      "logoUrlPlaceholder": "Digite a URL do logo",
+      "language": "Idioma Padrão",
+      "languagePlaceholder": "Selecione um idioma",
+      "darkMode": "Modo Escuro",
+      "darkModeDescription": "Ativar modo escuro por padrão",
+      "emailNotifications": "Notificações por Email",
+      "emailNotificationsDescription": "Ativar notificações por email"
+    }
+  },
   "sidebar": {
     "dashboard": "Dashboard",
     "applications": "Aplicativos",
@@ -203,5 +227,12 @@
     "team": "Equipe",
     "settings": "Configuracoes",
     "logout": "Sair"
+  },
+  "errors": {
+    "required": "Este campo é obrigatório",
+    "invalidEmail": "Endereço de e-mail inválido",
+    "invalidPassword": "A senha deve ter pelo menos 8 caracteres",
+    "invalidCredentials": "E-mail ou senha inválidos",
+    "serverError": "Ocorreu um erro. Por favor, tente novamente mais tarde"
   }
 }

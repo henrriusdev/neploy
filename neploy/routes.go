@@ -43,6 +43,11 @@ func roleRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	roleHandler.RegisterRoutes(e.Group("/roles", middleware.JWTMiddleware()))
 }
 
+func metadataRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
+	metadata := handler.NewMetadata(npy.Services.Metadata, i)
+	metadata.RegisterRoutes(e.Group("/metadata", middleware.JWTMiddleware()))
+}
+
 func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	loginRoutes(e, i, npy)
 	onboardRoutes(e, i, npy)
@@ -50,6 +55,7 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	userRoutes(e, i, npy)
 	applicationRoutes(e, i, npy)
 	roleRoutes(e, i, npy)
+	metadataRoutes(e, i, npy)
 
 	gateways, _ := npy.Services.Gateway.GetAll(context.Background())
 	for _, gateway := range gateways {
