@@ -221,6 +221,19 @@
       "darkModeDescription": "默认启用深色模式",
       "emailNotifications": "邮件通知",
       "emailNotificationsDescription": "启用邮件通知"
+    },
+    "roles": {
+      "title": "角色",
+      "add": "添加角色",
+      "edit": "编辑角色",
+      "tableIcon": "图标",
+      "tableName": "名称",
+      "tableDescription": "描述",
+      "tableUsers": "总用户数",
+      "tableActions": "操作",
+      "showAction": "显示用户",
+      "editAction": "编辑",
+      "deleteAction": "删除"
     }
   },
   "sidebar": {

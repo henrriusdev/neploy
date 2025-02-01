@@ -25,7 +25,7 @@ func NewRole(i *gonertia.Inertia, service service.Role) *Role {
 func (h *Role) RegisterRoutes(r *echo.Group) {
 	r.GET("", h.List)
 	r.POST("", h.Create)
-	r.PUT("/:id", h.Update)
+	r.PATCH("/:id", h.Update)
 	r.DELETE("/:id", h.Delete)
 	r.GET("/users/:id", h.GetUserRoles)
 }
@@ -43,12 +43,10 @@ func (h *Role) List(c echo.Context) error {
 	roles, err := h.service.Get(c.Request().Context())
 	if err != nil {
 		logger.Error("error getting roles: %v", err)
-		return h.inertia.Render(c.Response().Writer, c.Request(), "Error/500", nil)
+		return c.JSON(http.StatusInternalServerError, nil)
 	}
 
-	return h.inertia.Render(c.Response().Writer, c.Request(), "Dashboard/Roles", gonertia.Props{
-		"roles": roles,
-	})
+	return c.JSON(http.StatusOK, roles)
 }
 
 // Create godoc
@@ -90,7 +88,7 @@ func (h *Role) Create(c echo.Context) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /roles/{id} [put]
+// @Router /roles/{id} [patch]
 func (h *Role) Update(c echo.Context) error {
 	id := c.Param("id")
 	var req model.CreateRoleRequest

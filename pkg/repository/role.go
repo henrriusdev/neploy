@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/model"
@@ -101,11 +100,15 @@ func (r *role[T]) Update(ctx context.Context, id string, role model.Role) error 
 }
 
 func (r *role[T]) Delete(ctx context.Context, id string) error {
-	role, err := r.GetByID(ctx, id)
+	q := r.BaseQueryUpdate().Where(goqu.Ex{"id": id}).Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")})
+	query, args, err := q.ToSQL()
 	if err != nil {
 		return err
 	}
 
-	role.DeletedAt = &model.Date{Time: time.Now()}
-	return r.Update(ctx, id, role)
+	if _, err := r.Store.ExecContext(ctx, query, args...); err != nil {
+		return err
+	}
+
+	return nil
 }

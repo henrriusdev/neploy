@@ -69,7 +69,6 @@
     "fr": "Francés"
   },
   "errors": {
-    "serverError": "Ha ocurrido un error durante el inicio de sesión",
     "invalidCredentials": "Correo electrónico o contraseña inválidos",
     "serverError": "Ocurrió un error. Por favor, inténtelo de nuevo más tarde"
   },
@@ -230,6 +229,23 @@
       "darkModeDescription": "Habilitar modo oscuro por defecto",
       "emailNotifications": "Notificaciones por Email",
       "emailNotificationsDescription": "Habilitar notificaciones por correo electrónico"
+    },
+    "roles": {
+      "title": "Roles",
+      "add": "Agregar Rol",
+      "edit": "Editar Rol",
+      "tableIcon": "Icono",
+      "tableName": "Nombre",
+      "tableDescription": "Descripción",
+      "tableUsers": "Total Usuarios",
+      "tableActions": "Acciones",
+      "showAction": "Mostrar Usuarios",
+      "editAction": "Editar",
+      "deleteAction": "Eliminar",
+      "editDialog": "Editar Rol",
+      "editDescriptionDialog": "Aquí puedes editar tanto el nombre, como la descripción y logo/color del rol",
+      "updateSuccess": "Rol actualizado correctamente",
+      "updateSuccessDescription": "La información del rol se ha actualizado correctamente"
     }
   },
   "sidebar": {

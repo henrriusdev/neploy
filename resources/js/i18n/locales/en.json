@@ -230,6 +230,19 @@
         "emailNotificationsDescription": "Enable email notifications",
         "updateSuccess": "Settings updated successfully",
         "updateError": "Failed to update settings. Please try again."
+      },
+      "roles": {
+        "title": "Roles",
+        "add": "Add Role",
+        "edit": "Edit Role",
+        "tableIcon": "Icon",
+        "tableName": "Name",
+        "tableDescription": "Description",
+        "tableUsers": "Total Users",
+        "tableActions": "Actions",
+        "showAction": "Show Users",
+        "editAction": "Edit",
+        "deleteAction": "Delete"
       }
     }
   },

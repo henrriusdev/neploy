@@ -38,3 +38,18 @@ export interface CompleteInviteRequest {
   email: string;
   username: string;
 }
+
+export interface UpdateRoleRequest {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+export interface CreateRoleRequest {
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+}

@@ -218,6 +218,19 @@
       "darkModeDescription": "Ativar modo escuro por padrão",
       "emailNotifications": "Notificações por Email",
       "emailNotificationsDescription": "Ativar notificações por email"
+    },
+    "roles": {
+      "title": "Funções",
+      "add": "Adicionar Função",
+      "edit": "Editar Função",
+      "tableIcon": "Icone",
+      "tableName": "Nome",
+      "tableDescription": "Descrição",
+      "tableUsers": "Total de Usuários",
+      "tableActions": "Ações",
+      "showAction": "Mostrar Usuários",
+      "editAction": "Editar",
+      "deleteAction": "Excluir"
     }
   },
   "sidebar": {

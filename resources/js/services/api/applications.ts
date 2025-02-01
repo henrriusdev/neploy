@@ -29,7 +29,7 @@ export const applications = baseApi.injectEndpoints({
         method: "POST",
         body: { appName, description },
       }),
-      invalidatesTags: [{ type: 'applications', id: 'LIST' }],
+      invalidatesTags: ["applications"],
     }),
     deployApplication: builder.mutation({
       query: ({ appId, repoUrl, branch }: { appId: string; repoUrl: string; branch: string }) => ({
@@ -37,7 +37,7 @@ export const applications = baseApi.injectEndpoints({
         method: "POST",
         body: { repoUrl, branch },
       }),
-      invalidatesTags: (result, error, { appId }) => [{ type: 'applications', id: appId }],
+      invalidatesTags: ["applications"],
     }),
     uploadApplication: builder.mutation({
       query: ({ appId, file }: { appId: string; file: File }) => {
@@ -51,31 +51,28 @@ export const applications = baseApi.injectEndpoints({
           formData: true,
         };
       },
-      invalidatesTags: (result, error, { appId }) => [{ type: 'applications', id: appId }],
+      invalidatesTags: ["applications"],
     }),
     deleteApplication: builder.mutation({
       query: ({ appId }: { appId: string }) => ({
         url: `applications/${appId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { appId }) => [
-        { type: 'applications', id: appId },
-        { type: 'applications', id: 'LIST' }
-      ],
+      invalidatesTags: ["applications"],
     }),
     startApplication: builder.mutation({
       query: ({ appId }: { appId: string }) => ({
         url: `applications/${appId}/start`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { appId }) => [{ type: 'applications', id: appId }],
+      invalidatesTags: ["applications"],
     }),
     stopApplication: builder.mutation({
       query: ({ appId }: { appId: string }) => ({
         url: `applications/${appId}/stop`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { appId }) => [{ type: 'applications', id: appId }],
+      invalidatesTags: ["applications"],
     }),
   }),
 });

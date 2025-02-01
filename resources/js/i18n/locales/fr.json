@@ -165,6 +165,19 @@
       "darkModeDescription": "Activer le mode sombre par défaut",
       "emailNotifications": "Notifications par Email",
       "emailNotificationsDescription": "Activer les notifications par email"
+    },
+    "roles": {
+      "title": "Roles",
+      "add": "Ajouter un Rol",
+      "edit": "Éditer un Rol",
+      "tableIcon": "Icone",
+      "tableName": "Nom",
+      "tableDescription": "Description",
+      "tableUsers": "Total Utilisateurs",
+      "tableActions": "Actions",
+      "showAction": "Voir les Utilisateurs",
+      "editAction": "Éditer",
+      "deleteAction": "Supprimer"
     }
   }
 }

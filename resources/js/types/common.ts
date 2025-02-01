@@ -48,6 +48,7 @@ export interface Application {
 }
 
 export interface Roles {
+  id?: string;
   name: string;
   description: string;
   icon: string;
