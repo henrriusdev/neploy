@@ -15,7 +15,7 @@ import (
 type TechStack interface {
 	FindOrCreate(ctx context.Context, name string) (model.TechStack, error)
 	Insert(ctx context.Context, techStack model.TechStack) error
-	Update(ctx context.Context, techStack model.TechStack) error
+	Update(ctx context.Context, id string, techStack model.TechStack) error
 	Delete(ctx context.Context, id string) error
 	GetByID(ctx context.Context, id string) (model.TechStack, error)
 	GetAll(ctx context.Context) ([]model.TechStack, error)
@@ -78,8 +78,8 @@ func (t *techStack[T]) Insert(ctx context.Context, techStack model.TechStack) er
 	return nil
 }
 
-func (t *techStack[T]) Update(ctx context.Context, techStack model.TechStack) error {
-	query := filters.ApplyUpdateFilters(t.BaseQueryUpdate().Set(techStack), filters.IsUpdateFilter("id", techStack.ID))
+func (t *techStack[T]) Update(ctx context.Context, id string, techStack model.TechStack) error {
+	query := filters.ApplyUpdateFilters(t.BaseQueryUpdate().Set(techStack), filters.IsUpdateFilter("id", id))
 	q, args, err := query.ToSQL()
 	if err != nil {
 		logger.Error("error building update query: %v", err)

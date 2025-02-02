@@ -16,6 +16,7 @@ type Application interface {
 	Delete(ctx context.Context, id string) error
 	GetByID(ctx context.Context, id string) (model.Application, error)
 	GetAll(ctx context.Context) ([]model.Application, error)
+	GetByTechStack(ctx context.Context, techStackID string) ([]model.Application, error)
 }
 
 type application[T any] struct {
@@ -99,6 +100,23 @@ func (a *application[T]) GetByID(ctx context.Context, id string) (model.Applicat
 
 func (a *application[T]) GetAll(ctx context.Context) ([]model.Application, error) {
 	query := a.baseQuery()
+	q, args, err := query.ToSQL()
+	if err != nil {
+		logger.Error("error building select query: %v", err)
+		return nil, err
+	}
+
+	var applications []model.Application
+	if err := a.Store.SelectContext(ctx, &applications, q, args...); err != nil {
+		logger.Error("error executing select query: %v", err)
+		return nil, err
+	}
+
+	return applications, nil
+}
+
+func (a *application[T]) GetByTechStack(ctx context.Context, techStackID string) ([]model.Application, error) {
+	query := a.baseQuery().Where(goqu.Ex{"tech_stack_id": techStackID})
 	q, args, err := query.ToSQL()
 	if err != nil {
 		logger.Error("error building select query: %v", err)

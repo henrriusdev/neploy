@@ -24,17 +24,20 @@ import { router } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "@/components/forms/language-selector";
 import "@/i18n";
+import { useLoginMutation } from "@/services/api/auth";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z
     .string()
+    .min(1, "Password is required")
     .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export default function Component() {
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
+  const [login] = useLoginMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,18 +49,23 @@ export default function Component() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    router.post("/login", values, {
-      onSuccess: () => {
-        setIsLoading(false);
-      },
-      onError: (errors) => {
-        console.error(errors);
+    try {
+      // @ts-expect-error
+      await login(values).unwrap();
+      // Redirect after successful login - you might want to use router.visit here
+      router.visit("/dashboard");
+    } catch (error: any) {
+      console.log(error);
+      if (error.data?.message) {
+        form.setError("root", { message: error.data.message });
+      } else if (error.status === 401) {
+        form.setError("root", { message: t("errors.invalidCredentials") });
+      } else {
         form.setError("root", { message: t("errors.serverError") });
-      },
-      onFinish: () => {
-        setIsLoading(false);
-      },
-    });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

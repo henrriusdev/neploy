@@ -1,13 +1,16 @@
+import { LucideIcon } from "lucide-react";
+import { DateRange } from "react-day-picker";
 import { ControllerRenderProps } from "react-hook-form";
 import {
   Application,
   Gateway,
   Roles,
+  RoleWithUsers,
   TeamMember,
   TechStack,
+  TechStackWithApplications,
   User,
 } from "./common";
-import { DateRange } from "react-day-picker";
 
 export interface AcceptInviteProps {
   token: string;
@@ -135,8 +138,8 @@ export interface SettingsProps {
   teamName: string;
   logoUrl: string;
   language: string;
-  roles: Roles[];
-  techStacks: TechStack[];
+  roles: RoleWithUsers[];
+  techStacks: TechStackWithApplications[];
   user?: User;
 }
 
@@ -147,9 +150,21 @@ export interface GeneralSettingsProps {
 }
 
 export interface RolesSettingsProps {
-  roles: Roles[];
+  roles: RoleWithUsers[];
 }
 
 export interface TechStacksSettingsProps {
-  techStacks: TechStack[];
+  techStacks: TechStackWithApplications[];
+}
+
+export interface DialogButtonProps {
+  buttonText: string;
+  title?: string;
+  description?: string;
+  onOpen?: (boolean) => void;
+  open?: boolean;
+  icon?: LucideIcon;
+  className?: string;
+  variant?: "tooltip" | "text";
+  children?: React.ReactNode;
 }

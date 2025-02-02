@@ -25,7 +25,7 @@ export interface OnboardRequest {
 
 export interface MetadataRequest {
   teamName: string;
-  logo?: string;
+  logoUrl?: string;
   language: string;
 }
 
@@ -37,4 +37,19 @@ export interface CompleteInviteRequest {
   address: string;
   email: string;
   username: string;
+}
+
+export interface UpdateRoleRequest {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+export interface CreateRoleRequest {
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
 }

@@ -139,6 +139,7 @@ type Metadata struct {
 	BaseEntity
 	TeamName string `json:"team_name" db:"team_name"`
 	LogoURL  string `json:"logo_url" db:"logo_url"`
+	Language string `json:"language" db:"language"`
 }
 
 type ApplicationUser struct {

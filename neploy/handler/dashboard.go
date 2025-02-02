@@ -271,6 +271,7 @@ func (d *Dashboard) Config(c echo.Context) error {
 		"user":       user,
 		"teamName":   metadata.TeamName,
 		"logoUrl":    metadata.LogoURL,
+		"language":   metadata.Language,
 		"roles":      roles,
 		"techStacks": techStacks,
 	})

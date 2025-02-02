@@ -1,3 +1,8 @@
+export type RoleWithUsers = Roles & { users: User[] };
+export type TechStackWithApplications = TechStack & {
+  applications: Application[];
+};
+
 export interface User {
   firstName?: string;
   lastName?: string;
@@ -48,6 +53,7 @@ export interface Application {
 }
 
 export interface Roles {
+  id?: string;
   name: string;
   description: string;
   icon: string;

@@ -53,7 +53,13 @@
     "feature3": "Monitoreo en tiempo real del rendimiento"
   },
   "common": {
-    "languageSelector": "Seleccionar idioma"
+    "languageSelector": "Idioma",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar"
   },
   "languages": {
     "es": "Español",
@@ -63,7 +69,8 @@
     "fr": "Francés"
   },
   "errors": {
-    "serverError": "Ha ocurrido un error durante el inicio de sesión"
+    "invalidCredentials": "Correo electrónico o contraseña inválidos",
+    "serverError": "Ocurrió un error. Por favor, inténtelo de nuevo más tarde"
   },
   "dashboard": {
     "welcome": "Bienvenido de nuevo, {{name}}",
@@ -207,6 +214,54 @@
         "totalApplications": "Total de Aplicaciones",
         "activeApplications": "Aplicaciones Activas"
       }
+    }
+  },
+  "settings": {
+    "general": {
+      "title": "Configuración General",
+      "teamName": "Nombre del Equipo",
+      "teamNamePlaceholder": "Ingrese el nombre del equipo",
+      "logoUrl": "URL del Logo",
+      "logoUrlPlaceholder": "Ingrese la URL del logo",
+      "language": "Idioma Predeterminado",
+      "languagePlaceholder": "Seleccione un idioma",
+      "darkMode": "Modo Oscuro",
+      "darkModeDescription": "Habilitar modo oscuro por defecto",
+      "emailNotifications": "Notificaciones por Email",
+      "emailNotificationsDescription": "Habilitar notificaciones por correo electrónico"
+    },
+    "roles": {
+      "title": "Roles",
+      "add": "Agregar Rol",
+      "edit": "Editar Rol",
+      "tableIcon": "Icono",
+      "tableName": "Nombre",
+      "tableDescription": "Descripción",
+      "tableUsers": "Total Usuarios",
+      "tableActions": "Acciones",
+      "showAction": "Mostrar Usuarios",
+      "editAction": "Editar",
+      "deleteAction": "Eliminar",
+      "editDialog": "Editar Rol",
+      "editDescriptionDialog": "Aquí puedes editar tanto el nombre, como la descripción y logo/color del rol",
+      "updateSuccess": "Rol actualizado correctamente",
+      "updateSuccessDescription": "La información del rol se ha actualizado correctamente"
+    },
+    "techStack": {
+      "title": "Stack Tecnológico",
+      "add": "Agregar Tecnología",
+      "edit": "Editar Tecnología",
+      "tableLogo": "Logo",
+      "tableTechnology": "Tecnología",
+      "tableDescription": "Descripción",
+      "tableTotalApps": "Total de Aplicaciones",
+      "tableActions": "Acciones",
+      "editAction": "Editar",
+      "deleteAction": "Eliminar",
+      "editDialog": "Editar Tecnología",
+      "editDescriptionDialog": "Aquí puedes editar tanto el nombre, como la descripción y logo/color del stack",
+      "updateSuccess": "Tecnología actualizada correctamente",
+      "updateSuccessDescription": "La información de la tecnología se ha actualizado correctamente"
     }
   },
   "sidebar": {

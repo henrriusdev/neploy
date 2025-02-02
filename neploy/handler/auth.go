@@ -120,7 +120,7 @@ func (a *Auth) Login(c echo.Context) error {
 	cookie.Path = "/"
 	c.SetCookie(cookie)
 
-	return c.Redirect(http.StatusSeeOther, "/dashboard")
+	return c.JSON(http.StatusOK, res)
 }
 
 // Logout godoc

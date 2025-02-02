@@ -13,10 +13,9 @@ type Metadata interface {
 	Create(ctx context.Context, metadata model.Metadata) error
 	Update(ctx context.Context, metadata model.Metadata) error
 	Get(ctx context.Context) (model.Metadata, error)
-	GetPrimaryColor(ctx context.Context) (string, error)
-	GetSecondaryColor(ctx context.Context) (string, error)
 	GetTeamName(ctx context.Context) (string, error)
 	GetTeamLogo(ctx context.Context) (string, error)
+	GetLanguage(ctx context.Context) (string, error)
 }
 
 type metadata[T any] struct {
@@ -44,6 +43,14 @@ func (m *metadata[T]) Create(ctx context.Context, metadata model.Metadata) error
 }
 
 func (m *metadata[T]) Update(ctx context.Context, metadata model.Metadata) error {
+	// get id from Get method
+	mtdt, err := m.Get(ctx)
+	if err != nil {
+		logger.Error("error getting metadata: %v", err)
+		return err
+	}
+
+	metadata.ID = mtdt.ID
 	q := m.BaseQueryUpdate().Set(metadata).Where(goqu.C("id").Eq(metadata.ID))
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -74,40 +81,6 @@ func (m *metadata[T]) Get(ctx context.Context) (model.Metadata, error) {
 	}
 
 	return metadata, nil
-}
-
-func (m *metadata[T]) GetPrimaryColor(ctx context.Context) (string, error) {
-	q := m.baseQuery().Select("primary_color").Limit(1)
-	query, args, err := q.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return "", err
-	}
-
-	var primaryColor string
-	if err = m.Store.GetContext(ctx, &primaryColor, query, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return "", err
-	}
-
-	return primaryColor, nil
-}
-
-func (m *metadata[T]) GetSecondaryColor(ctx context.Context) (string, error) {
-	q := m.baseQuery().Select("secondary_color").Limit(1)
-	query, args, err := q.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return "", err
-	}
-
-	var secondaryColor string
-	if err = m.Store.GetContext(ctx, &secondaryColor, query, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return "", err
-	}
-
-	return secondaryColor, nil
 }
 
 func (m *metadata[T]) GetTeamName(ctx context.Context) (string, error) {
@@ -142,4 +115,21 @@ func (m *metadata[T]) GetTeamLogo(ctx context.Context) (string, error) {
 	}
 
 	return teamLogo, nil
+}
+
+func (m *metadata[T]) GetLanguage(ctx context.Context) (string, error) {
+	q := m.baseQuery().Select("language").Limit(1)
+	query, args, err := q.ToSQL()
+	if err != nil {
+		logger.Error("error building select query: %v", err)
+		return "", err
+	}
+
+	var language string
+	if err = m.Store.GetContext(ctx, &language, query, args...); err != nil {
+		logger.Error("error executing select query: %v", err)
+		return "", err
+	}
+
+	return language, nil
 }
