@@ -56,3 +56,8 @@ type RoleWithUsers struct {
 	Role
 	Users []User `json:"users"`
 }
+
+type TechStackWithApplications struct {
+	TechStack
+	Applications []Application `json:"applications"`
+}

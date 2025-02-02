@@ -71,3 +71,8 @@ type DeployApplicationRequest struct {
 type GetBranchesRequest struct {
 	RepoURL string `json:"repoUrl"`
 }
+
+type CreateTechStackRequest struct {
+	Name        string `json:"name" validate:"required,min=2,max=64"`
+	Description string `json:"description" validate:"required,min=2,max=128"`
+}

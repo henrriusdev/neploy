@@ -246,6 +246,22 @@
       "editDescriptionDialog": "Aquí puedes editar tanto el nombre, como la descripción y logo/color del rol",
       "updateSuccess": "Rol actualizado correctamente",
       "updateSuccessDescription": "La información del rol se ha actualizado correctamente"
+    },
+    "techStack": {
+      "title": "Stack Tecnológico",
+      "add": "Agregar Tecnología",
+      "edit": "Editar Tecnología",
+      "tableLogo": "Logo",
+      "tableTechnology": "Tecnología",
+      "tableDescription": "Descripción",
+      "tableTotalApps": "Total de Aplicaciones",
+      "tableActions": "Acciones",
+      "editAction": "Editar",
+      "deleteAction": "Eliminar",
+      "editDialog": "Editar Tecnología",
+      "editDescriptionDialog": "Aquí puedes editar tanto el nombre, como la descripción y logo/color del stack",
+      "updateSuccess": "Tecnología actualizada correctamente",
+      "updateSuccessDescription": "La información de la tecnología se ha actualizado correctamente"
     }
   },
   "sidebar": {

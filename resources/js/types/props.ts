@@ -5,12 +5,12 @@ import {
   Application,
   Gateway,
   Roles,
+  RoleWithUsers,
   TeamMember,
   TechStack,
+  TechStackWithApplications,
   User,
 } from "./common";
-
-export type RoleWithUsers = Roles & { users: User[] };
 
 export interface AcceptInviteProps {
   token: string;
@@ -139,7 +139,7 @@ export interface SettingsProps {
   logoUrl: string;
   language: string;
   roles: RoleWithUsers[];
-  techStacks: TechStack[];
+  techStacks: TechStackWithApplications[];
   user?: User;
 }
 
@@ -154,7 +154,7 @@ export interface RolesSettingsProps {
 }
 
 export interface TechStacksSettingsProps {
-  techStacks: TechStack[];
+  techStacks: TechStackWithApplications[];
 }
 
 export interface DialogButtonProps {
