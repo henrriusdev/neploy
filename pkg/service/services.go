@@ -3,15 +3,16 @@ package service
 import "errors"
 
 type Services struct {
-	Application Application
-	Gateway     Gateway
-	Metadata    Metadata
-	Onboard     Onboard
-	Role        Role
-	TechStack   TechStack
-	Trace       Trace
-	User        User
-	Visitor     Visitor
+	Application   Application
+	Gateway       Gateway
+	HealthChecker HealthChecker
+	Metadata      Metadata
+	Onboard       Onboard
+	Role          Role
+	TechStack     TechStack
+	Trace         Trace
+	User          User
+	Visitor       Visitor
 }
 
 func NotFound(entity string) error {

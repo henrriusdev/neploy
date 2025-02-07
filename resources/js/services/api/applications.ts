@@ -8,13 +8,7 @@ export const applications = baseApi.injectEndpoints({
         url: "applications",
         method: "GET",
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: 'applications' as const, id })),
-              { type: 'applications', id: 'LIST' },
-            ]
-          : [{ type: 'applications', id: 'LIST' }],
+      providesTags: ["applications"]
     }),
     loadBranches: builder.query({
       query: ({repoUrl}: {repoUrl: string}) => ({

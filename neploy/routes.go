@@ -53,6 +53,11 @@ func techStackRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	techStack.RegisterRoutes(e.Group("/tech-stacks", middleware.JWTMiddleware()))
 }
 
+func gatewayRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
+	gateway := handler.NewGateway(npy.Services.Gateway, npy.Services.HealthChecker, i)
+	gateway.RegisterRoutes(e.Group("/gateways", middleware.JWTMiddleware()))
+}
+
 func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	loginRoutes(e, i, npy)
 	onboardRoutes(e, i, npy)
@@ -62,6 +67,7 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	roleRoutes(e, i, npy)
 	metadataRoutes(e, i, npy)
 	techStackRoutes(e, i, npy)
+	gatewayRoutes(e, i, npy)
 
 	gateways, _ := npy.Services.Gateway.GetAll(context.Background())
 	for _, gateway := range gateways {

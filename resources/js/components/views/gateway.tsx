@@ -9,7 +9,7 @@ import { GatewayTable } from "../gateway-table";
 import { GatewayForm } from "../forms";
 import {GatewayConfig} from "@/components/views/gateway-config";
 
-export function Gateways({ gateways, application }: GatewayProps) {
+export function Gateways({ gateways, config }: GatewayProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<Gateway | null>(null);
   const { toast } = useToast();
@@ -79,11 +79,6 @@ export function Gateways({ gateways, application }: GatewayProps) {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-2xl font-bold">API Gateway</h1>
-              {application && (
-                <p className="text-muted-foreground">
-                  Application: {application.name}
-                </p>
-              )}
             </div>
             <Button onClick={() => setIsFormOpen(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -132,7 +127,7 @@ export function Gateways({ gateways, application }: GatewayProps) {
 
             <TabsContent value="config">
               <div className="rounded-md border p-4">
-                <GatewayConfig />
+                <GatewayConfig config={config} />
               </div>
             </TabsContent>
           </Tabs>

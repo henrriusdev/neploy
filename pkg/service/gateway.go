@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"neploy.dev/pkg/logger"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -20,19 +21,23 @@ type Gateway interface {
 	AddRoute(ctx context.Context, gateway model.Gateway) error
 	RemoveRoute(ctx context.Context, gateway model.Gateway) error
 	GetAll(ctx context.Context) ([]model.FullGateway, error)
+	GetConfig(ctx context.Context) (model.GatewayConfig, error)
+	SaveConfig(ctx context.Context, req model.GatewayConfigRequest) (model.GatewayConfig, error)
 }
 
 type gateway struct {
-	router  *neployway.Router
-	repo    repository.Gateway
-	appRepo repository.Application
+	router   *neployway.Router
+	repo     repository.Gateway
+	appRepo  repository.Application
+	confRepo repository.GatewayConfig
 }
 
-func NewGateway(repo repository.Gateway, appRepo repository.Application, statRepo repository.ApplicationStat) Gateway {
+func NewGateway(repo repository.Gateway, appRepo repository.Application, statRepo repository.ApplicationStat, confRepo repository.GatewayConfig) Gateway {
 	return &gateway{
-		router:  neployway.NewRouter(statRepo),
-		repo:    repo,
-		appRepo: appRepo,
+		router:   neployway.NewRouter(statRepo),
+		repo:     repo,
+		appRepo:  appRepo,
+		confRepo: confRepo,
 	}
 }
 
@@ -51,7 +56,6 @@ func (s *gateway) validateGateway(ctx context.Context, gateway model.Gateway) er
 		return errors.New("domain is required")
 	}
 
-	// Validate endpoint type specific fields
 	switch gateway.EndpointType {
 	case "subdomain":
 		if gateway.Subdomain == "" {
@@ -193,4 +197,30 @@ func (s *gateway) GetAll(ctx context.Context) ([]model.FullGateway, error) {
 	}
 
 	return fullGateways, nil
+}
+
+func (s *gateway) GetConfig(ctx context.Context) (model.GatewayConfig, error) {
+	config, err := s.confRepo.Get(ctx)
+	if err != nil {
+		logger.Error("error getting gateway config: %v", err)
+		return model.GatewayConfig{}, err
+	}
+
+	return config, err
+}
+
+func (s *gateway) SaveConfig(ctx context.Context, req model.GatewayConfigRequest) (model.GatewayConfig, error) {
+	config := model.GatewayConfig{
+		DefaultVersioningType: req.DefaultVersioning,
+		DefaultVersion:        req.DefaultVersion,
+		LoadBalancer:          req.LoadBalancer,
+	}
+
+	config, err := s.confRepo.Upsert(ctx, config)
+	if err != nil {
+		logger.Error("error saving gateway config: %v", err)
+		return model.GatewayConfig{}, err
+	}
+
+	return config, nil
 }

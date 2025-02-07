@@ -64,8 +64,6 @@ definitions:
         type: string
       description:
         type: string
-      techStack:
-        type: string
     type: object
   model.CreateRoleRequest:
     properties:
@@ -89,6 +87,20 @@ definitions:
     - color
     - description
     - icon
+    - name
+    type: object
+  model.CreateTechStackRequest:
+    properties:
+      description:
+        maxLength: 128
+        minLength: 2
+        type: string
+      name:
+        maxLength: 64
+        minLength: 2
+        type: string
+    required:
+    - description
     - name
     type: object
   model.CreateUserRequest:
@@ -147,6 +159,8 @@ definitions:
     type: object
   model.DeployApplicationRequest:
     properties:
+      branch:
+        type: string
       repoUrl:
         type: string
     type: object
@@ -189,6 +203,28 @@ definitions:
       updatedAt:
         $ref: '#/definitions/model.Date'
     type: object
+  model.GatewayConfig:
+    properties:
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      defaultVersion:
+        $ref: '#/definitions/model.VersionType'
+      defaultVersioningType:
+        $ref: '#/definitions/model.VersioningType'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      id:
+        type: string
+      loadBalancer:
+        type: boolean
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+    type: object
+  model.GetBranchesRequest:
+    properties:
+      repoUrl:
+        type: string
+    type: object
   model.InviteUserRequest:
     properties:
       email:
@@ -215,8 +251,27 @@ definitions:
       user:
         $ref: '#/definitions/model.User'
     type: object
+  model.Metadata:
+    properties:
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      id:
+        type: string
+      language:
+        type: string
+      logo_url:
+        type: string
+      team_name:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+    type: object
   model.MetadataRequest:
     properties:
+      language:
+        type: string
       logoUrl:
         type: string
       teamName:
@@ -273,6 +328,21 @@ definitions:
       updatedAt:
         $ref: '#/definitions/model.Date'
     type: object
+  model.TechStack:
+    properties:
+      createdAt:
+        $ref: '#/definitions/model.Date'
+      deletedAt:
+        $ref: '#/definitions/model.Date'
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        $ref: '#/definitions/model.Date'
+    type: object
   model.User:
     properties:
       address:
@@ -319,6 +389,22 @@ definitions:
       userId:
         type: string
     type: object
+  model.VersionType:
+    enum:
+    - latest
+    - stable
+    type: string
+    x-enum-varnames:
+    - VersionTypeLatest
+    - VersionTypeStable
+  model.VersioningType:
+    enum:
+    - header
+    - uri
+    type: string
+    x-enum-varnames:
+    - VersioningTypeHeader
+    - VersioningTypeUri
 host: localhost:8080
 info:
   contact:
@@ -559,6 +645,39 @@ paths:
             additionalProperties: true
             type: object
       summary: Stop an application
+      tags:
+      - Application
+  /applications/branches:
+    post:
+      consumes:
+      - application/json
+      description: Get list of branches from a Git repository
+      parameters:
+      - description: Repository URL
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.GetBranchesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get repository branches
       tags:
       - Application
   /auth/github:
@@ -854,6 +973,46 @@ paths:
       summary: List gateways by app ID
       tags:
       - Gateway
+  /gateways/config:
+    get:
+      description: Gets the configuration of the API Gateway
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GatewayConfig'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get API Gateway Config
+      tags:
+      - Gateway
+    post:
+      consumes:
+      - application/json
+      description: Saves API Gateway Configurations like default versioning
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GatewayConfig'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Saves config
+      tags:
+      - Gateway
   /login:
     post:
       consumes:
@@ -897,6 +1056,60 @@ paths:
       tags:
       - Auth
       - User
+  /metadata:
+    get:
+      description: Get metadata
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Metadata'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get metadata
+      tags:
+      - Metadata
+    patch:
+      consumes:
+      - application/json
+      description: Update metadata
+      parameters:
+      - description: Metadata
+        in: body
+        name: metadata
+        required: true
+        schema:
+          $ref: '#/definitions/model.MetadataRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Metadata'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update metadata
+      tags:
+      - Metadata
   /onboard:
     post:
       consumes:
@@ -1011,7 +1224,7 @@ paths:
       summary: Delete a role
       tags:
       - Role
-    put:
+    patch:
       consumes:
       - application/json
       description: Update a role by ID
@@ -1076,6 +1289,124 @@ paths:
       summary: Get user roles
       tags:
       - Role
+  /tech-stacks:
+    get:
+      consumes:
+      - application/json
+      description: List all tech stacks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.TechStack'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all tech stacks
+      tags:
+      - TechStack
+    post:
+      consumes:
+      - application/json
+      description: Create a new tech stack
+      parameters:
+      - description: Tech stack details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateTechStackRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new tech stack
+      tags:
+      - TechStack
+  /tech-stacks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a tech stack by ID
+      parameters:
+      - description: Tech stack ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete a tech stack
+      tags:
+      - TechStack
+    patch:
+      consumes:
+      - application/json
+      description: Update a tech stack by ID
+      parameters:
+      - description: Tech stack ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tech stack details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateTechStackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a tech stack
+      tags:
+      - TechStack
   /user/complete-invite:
     post:
       consumes:

@@ -30,6 +30,8 @@ func (h *Gateway) RegisterRoutes(r *echo.Group) {
 	r.GET("/:id", h.Get)
 	r.GET("/app/:appId", h.ListByApp)
 	r.GET("/:id/health", h.CheckHealth)
+	r.POST("/config", h.SaveConfig)
+	r.GET("/config", h.GetConfig)
 }
 
 // Create godoc
@@ -175,4 +177,51 @@ func (h *Gateway) CheckHealth(c echo.Context) error {
 		"status":  "healthy",
 		"message": "Gateway is healthy",
 	})
+}
+
+// SaveConfig godoc
+// @Summary Saves config
+// @Description Saves API Gateway Configurations like default versioning
+// @Tags Gateway
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.GatewayConfig
+// @Failure 400 {string} string
+// @Failure 500 {string} string
+// @Router /gateways/config [post]
+func (h *Gateway) SaveConfig(c echo.Context) error {
+	var req model.GatewayConfigRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	conf, err := h.gatewayService.SaveConfig(c.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(echo.ErrInternalServerError.Code, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, conf)
+}
+
+// GetConfig godoc
+// @Summary Get API Gateway Config
+// @Description Gets the configuration of the API Gateway
+// @Tags Gateway
+// @Produce json
+// @Success 200 {object} model.GatewayConfig
+// @Failure 500 {object} map[string]interface{}
+// @Router /gateways/config [get]
+func (h *Gateway) GetConfig(c echo.Context) error {
+	conf, err := h.gatewayService.GetConfig(c.Request().Context())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, conf)
 }

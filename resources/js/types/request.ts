@@ -53,3 +53,9 @@ export interface CreateRoleRequest {
   icon: string;
   color: string;
 }
+
+export interface GatewayConfigRequest{
+  defaultVersioning: string;
+  defaultVersion: string;
+  loadBalancer: boolean;
+}

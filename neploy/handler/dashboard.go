@@ -209,10 +209,16 @@ func (d *Dashboard) Gateways(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
+	provider, err := d.services.User.GetProvider(c.Request().Context(), claims.ID)
 	if err != nil {
 		logger.Error("error getting provider: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	conf, err := d.services.Gateway.GetConfig(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting gateway config: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	user := model.UserResponse{
@@ -227,6 +233,7 @@ func (d *Dashboard) Gateways(c echo.Context) error {
 		"teamName": metadata.TeamName,
 		"logoUrl":  metadata.LogoURL,
 		"gateways": gateways,
+		"config":   conf,
 	})
 }
 

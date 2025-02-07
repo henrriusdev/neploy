@@ -156,3 +156,18 @@ type Invitation struct {
 	ExpiresAt  Date   `json:"expires_at" db:"expires_at"`
 	AcceptedAt *Date  `json:"accepted_at,omitempty" db:"accepted_at"`
 }
+
+type GatewayConfig struct {
+	BaseEntity
+	DefaultVersioningType VersioningType `json:"defaultVersioningType" db:"default_versioning_type" json:"defaultVersioningType,omitempty"`
+	DefaultVersion        VersionType    `json:"defaultVersion" db:"default_version" json:"defaultVersion,omitempty"`
+	LoadBalancer          bool           `json:"loadBalancer" db:"load_balancer"`
+}
+
+type GatewayVersion struct {
+	BaseEntity
+	VersionName    string               `json:"versionName" db:"version_name"`
+	Status         GatewayVersionStatus `json:"status" db:"status"`
+	VersioningType VersioningType       `json:"versioningType" db:"versioning_type"`
+	GatewayID      string               `json:"gatewayId" db:"gateway_id"`
+}
