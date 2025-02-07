@@ -7,8 +7,9 @@ import { Activity, BarChart3, Globe, Lock, PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { GatewayTable } from "../gateway-table";
 import { GatewayForm } from "../forms";
+import {GatewayConfig} from "@/components/views/gateway-config";
 
-export function Gateways({ gateways, application }: GatewayProps) {
+export function Gateways({ gateways, config }: GatewayProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<Gateway | null>(null);
   const { toast } = useToast();
@@ -77,12 +78,7 @@ export function Gateways({ gateways, application }: GatewayProps) {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold">API Gateway Configuration</h1>
-              {application && (
-                <p className="text-muted-foreground">
-                  Application: {application.name}
-                </p>
-              )}
+              <h1 className="text-2xl font-bold">API Gateway</h1>
             </div>
             <Button onClick={() => setIsFormOpen(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -91,7 +87,7 @@ export function Gateways({ gateways, application }: GatewayProps) {
           </div>
 
           <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="overview">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Overview
@@ -100,13 +96,9 @@ export function Gateways({ gateways, application }: GatewayProps) {
                 <Globe className="h-4 w-4 mr-2" />
                 Routes
               </TabsTrigger>
-              <TabsTrigger value="security">
+              <TabsTrigger value="config">
                 <Lock className="h-4 w-4 mr-2" />
-                Security
-              </TabsTrigger>
-              <TabsTrigger value="rate-limiting">
-                <Activity className="h-4 w-4 mr-2" />
-                Rate Limiting
+                Config
               </TabsTrigger>
             </TabsList>
 
@@ -133,23 +125,9 @@ export function Gateways({ gateways, application }: GatewayProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="security">
+            <TabsContent value="config">
               <div className="rounded-md border p-4">
-                <h2 className="text-lg font-semibold mb-2">
-                  Security Settings
-                </h2>
-                <p className="text-muted-foreground">
-                  Configure security settings for your gateway here.
-                </p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="rate-limiting">
-              <div className="rounded-md border p-4">
-                <h2 className="text-lg font-semibold mb-2">Rate Limiting</h2>
-                <p className="text-muted-foreground">
-                  Configure rate limiting rules for your gateway endpoints.
-                </p>
+                <GatewayConfig config={config} />
               </div>
             </TabsContent>
           </Tabs>

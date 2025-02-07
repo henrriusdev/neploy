@@ -1,11 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
   BarChart,
   LineChart,
   PieChart,
@@ -15,6 +10,8 @@ import {
   Cell,
   XAxis,
   YAxis,
+  ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 
 interface BaseChartProps {
@@ -40,55 +37,59 @@ export function BaseChart({
     switch (type) {
       case "bar":
         return (
-          <BarChart data={data}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            {dataKeys.map((key, index) => (
-              <Bar
-                key={key}
-                dataKey={key}
-                fill={colors[index]}
-                stackId="a"
-                isAnimationActive={false}
-              />
-            ))}
-          </BarChart>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              {dataKeys.map((key, index) => (
+                <Bar key={key} dataKey={key} fill={colors[index]} stackId="a" />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
         );
       case "line":
         return (
-          <LineChart data={data}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            {dataKeys.map((key, index) => (
-              <Line
-                key={key}
-                type="monotone"
-                dataKey={key}
-                stroke={colors[index]}
-                strokeWidth={2}
-              />
-            ))}
-          </LineChart>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              {dataKeys.map((key, index) => (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stroke={colors[index].startsWith("var") ? `hsl(${colors[index]})` : colors[index]}
+                  strokeWidth={2}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
         );
       case "pie":
         return (
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={true}
-              outerRadius={80}
-              dataKey={dataKeys[0]}
-              nameKey="name">
-              {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
-                />
-              ))}
-            </Pie>
-          </PieChart>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Tooltip />
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                labelLine={true}
+                outerRadius={80}
+                dataKey={dataKeys[0]}
+                nameKey="name"
+              >
+                {data.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={colors[index % colors.length]}
+                  />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
         );
       default:
         return null;
@@ -101,12 +102,7 @@ export function BaseChart({
         <CardTitle className="text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={config} className="h-[350px] w-full">
-          <>
-            {renderChart()}
-            <ChartTooltip content={<ChartTooltipContent />} />
-          </>
-        </ChartContainer>
+        {renderChart()}
       </CardContent>
     </Card>
   );

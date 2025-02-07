@@ -18,6 +18,7 @@ type Repositories struct {
 	Application     Application
 	ApplicationStat ApplicationStat
 	Gateway         Gateway
+	GatewayConfig   GatewayConfig
 	Metadata        Metadata
 	Role            Role
 	TechStack       TechStack

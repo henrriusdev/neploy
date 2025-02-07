@@ -82,3 +82,10 @@ export interface Gateway {
   applicationId: string;
   application: Application;
 }
+
+export interface GatewayConfig {
+  id: string;
+  defaultVersioningType: "header" | "uri";
+  defaultVersion: "latest" | "stable";
+  loadBalancer: boolean;
+}

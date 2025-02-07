@@ -53,7 +53,6 @@ export function Home({
   user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${
     user.username
   }`;
-
   const dashboardContent = (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -225,7 +224,7 @@ export function Home({
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <BaseChart
           title={t("dashboard.requestsByTime")}
-          data={requestData}
+          data={defaultRequestsData}
           type="bar"
           dataKeys={["successful", "errors"]}
           colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
@@ -245,7 +244,7 @@ export function Home({
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <BaseChart
           title={t("dashboard.techStacksMostUsed")}
-          data={techStack}
+          data={defaultTechStackData}
           type="pie"
           dataKeys={["value"]}
           colors={techStackColors}
@@ -263,7 +262,7 @@ export function Home({
         />
         <BaseChart
           title={t("dashboard.visitorCountByTime")}
-          data={visitorData}
+          data={defaultVisitorsData}
           type="line"
           dataKeys={["visitors"]}
           colors={["var(--primary-color)"]}

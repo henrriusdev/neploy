@@ -3,7 +3,7 @@ import { DateRange } from "react-day-picker";
 import { ControllerRenderProps } from "react-hook-form";
 import {
   Application,
-  Gateway,
+  Gateway, GatewayConfig,
   Roles,
   RoleWithUsers,
   TeamMember,
@@ -80,10 +80,7 @@ export interface TeamProps {
 
 export interface GatewayProps {
   gateways: Gateway[];
-  application?: {
-    id: string;
-    name: string;
-  };
+  config?: GatewayConfig;
   user: {
     name: string;
     email: string;
@@ -167,4 +164,8 @@ export interface DialogButtonProps {
   className?: string;
   variant?: "tooltip" | "text";
   children?: React.ReactNode;
+}
+
+export interface GatewayConfigProps {
+  config?: GatewayConfig
 }

@@ -111,6 +111,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/applications/branches": {
+            "post": {
+                "description": "Get list of branches from a Git repository",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Get repository branches",
+                "parameters": [
+                    {
+                        "description": "Repository URL",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.GetBranchesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/applications/{id}": {
             "get": {
                 "description": "Get an application by ID",
@@ -595,6 +644,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/gateways/config": {
+            "get": {
+                "description": "Gets the configuration of the API Gateway",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Get API Gateway Config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GatewayConfig"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Saves API Gateway Configurations like default versioning",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Saves config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GatewayConfig"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/gateways/{id}": {
             "get": {
                 "description": "Get a gateway by ID",
@@ -860,6 +969,86 @@ const docTemplate = `{
                 }
             }
         },
+        "/metadata": {
+            "get": {
+                "description": "Get metadata",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Metadata"
+                ],
+                "summary": "Get metadata",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Metadata"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update metadata",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Metadata"
+                ],
+                "summary": "Update metadata",
+                "parameters": [
+                    {
+                        "description": "Metadata",
+                        "name": "metadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.MetadataRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Metadata"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/onboard": {
             "post": {
                 "description": "Initiate onboarding",
@@ -1032,7 +1221,45 @@ const docTemplate = `{
             }
         },
         "/roles/{id}": {
-            "put": {
+            "delete": {
+                "description": "Delete a role by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Delete a role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Role ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
                 "description": "Update a role by ID",
                 "consumes": [
                     "application/json"
@@ -1085,9 +1312,11 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete a role by ID",
+            }
+        },
+        "/tech-stacks": {
+            "get": {
+                "description": "List all tech stacks",
                 "consumes": [
                     "application/json"
                 ],
@@ -1095,13 +1324,93 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Role"
+                    "TechStack"
                 ],
-                "summary": "Delete a role",
+                "summary": "List all tech stacks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.TechStack"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new tech stack",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TechStack"
+                ],
+                "summary": "Create a new tech stack",
+                "parameters": [
+                    {
+                        "description": "Tech stack details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateTechStackRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/tech-stacks/{id}": {
+            "delete": {
+                "description": "Delete a tech stack by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TechStack"
+                ],
+                "summary": "Delete a tech stack",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Role ID",
+                        "description": "Tech stack ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1110,6 +1419,60 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update a tech stack by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TechStack"
+                ],
+                "summary": "Update a tech stack",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tech stack ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Tech stack details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateTechStackRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1314,9 +1677,6 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
-                },
-                "techStack": {
-                    "type": "string"
                 }
             }
         },
@@ -1342,6 +1702,25 @@ const docTemplate = `{
                 "icon": {
                     "type": "string",
                     "maxLength": 64,
+                    "minLength": 2
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                }
+            }
+        },
+        "model.CreateTechStackRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 128,
                     "minLength": 2
                 },
                 "name": {
@@ -1425,6 +1804,9 @@ const docTemplate = `{
         "model.DeployApplicationRequest": {
             "type": "object",
             "properties": {
+                "branch": {
+                    "type": "string"
+                },
                 "repoUrl": {
                     "type": "string"
                 }
@@ -1488,6 +1870,40 @@ const docTemplate = `{
                 }
             }
         },
+        "model.GatewayConfig": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "defaultVersion": {
+                    "$ref": "#/definitions/model.VersionType"
+                },
+                "defaultVersioningType": {
+                    "$ref": "#/definitions/model.VersioningType"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "loadBalancer": {
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "$ref": "#/definitions/model.Date"
+                }
+            }
+        },
+        "model.GetBranchesRequest": {
+            "type": "object",
+            "properties": {
+                "repoUrl": {
+                    "type": "string"
+                }
+            }
+        },
         "model.InviteUserRequest": {
             "type": "object",
             "properties": {
@@ -1527,9 +1943,38 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Metadata": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "logo_url": {
+                    "type": "string"
+                },
+                "team_name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "$ref": "#/definitions/model.Date"
+                }
+            }
+        },
         "model.MetadataRequest": {
             "type": "object",
             "properties": {
+                "language": {
+                    "type": "string"
+                },
                 "logoUrl": {
                     "type": "string"
                 },
@@ -1614,6 +2059,29 @@ const docTemplate = `{
                 }
             }
         },
+        "model.TechStack": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/model.Date"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "$ref": "#/definitions/model.Date"
+                }
+            }
+        },
         "model.User": {
             "type": "object",
             "properties": {
@@ -1683,6 +2151,28 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "model.VersionType": {
+            "type": "string",
+            "enum": [
+                "latest",
+                "stable"
+            ],
+            "x-enum-varnames": [
+                "VersionTypeLatest",
+                "VersionTypeStable"
+            ]
+        },
+        "model.VersioningType": {
+            "type": "string",
+            "enum": [
+                "header",
+                "uri"
+            ],
+            "x-enum-varnames": [
+                "VersioningTypeHeader",
+                "VersioningTypeUri"
+            ]
         }
     }
 }`

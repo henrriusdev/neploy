@@ -76,3 +76,9 @@ type CreateTechStackRequest struct {
 	Name        string `json:"name" validate:"required,min=2,max=64"`
 	Description string `json:"description" validate:"required,min=2,max=128"`
 }
+
+type GatewayConfigRequest struct {
+	DefaultVersioning VersioningType `json:"defaultVersioning" validate:"required,oneof=header uri"`
+	DefaultVersion    VersionType    `json:"defaultVersion" validate:"required,oneof=latest stable"`
+	LoadBalancer      bool           `json:"loadBalancer" validate:"required"`
+}

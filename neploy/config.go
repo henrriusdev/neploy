@@ -2,6 +2,7 @@ package neploy
 
 import (
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -88,21 +89,23 @@ func NewServices(npy Neploy) service.Services {
 	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
-	gateway := service.NewGateway(npy.Repositories.Gateway, npy.Repositories.Application, npy.Repositories.ApplicationStat)
+	gateway := service.NewGateway(npy.Repositories.Gateway, npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.GatewayConfig)
 	techStack := service.NewTechStack(npy.Repositories.TechStack, npy.Repositories.Application)
 	trace := service.NewTrace(npy.Repositories.Trace)
 	visitor := service.NewVisitor(npy.Repositories.VisitorInfo, npy.Repositories.VisitorTrace)
+	healthChecker := service.NewHealthChecker(npy.Repositories.Gateway, npy.Repositories.Application, time.Minute*5)
 
 	return service.Services{
-		Application: application,
-		Gateway:     gateway,
-		Metadata:    metadata,
-		Onboard:     onboard,
-		Role:        role,
-		TechStack:   techStack,
-		Trace:       trace,
-		User:        user,
-		Visitor:     visitor,
+		Application:   application,
+		Gateway:       gateway,
+		HealthChecker: healthChecker,
+		Metadata:      metadata,
+		Onboard:       onboard,
+		Role:          role,
+		TechStack:     techStack,
+		Trace:         trace,
+		User:          user,
+		Visitor:       visitor,
 	}
 }
 
@@ -119,11 +122,13 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	visitorTrace := repository.NewVisitorTrace(npy.DB)
 	techStack := repository.NewTechStack(npy.DB)
 	gateway := repository.NewGateway(npy.DB)
+	gatewayConf := repository.NewGatewayConfig(npy.DB)
 
 	return repository.Repositories{
 		Application:     application,
 		ApplicationStat: applicationStat,
 		Gateway:         gateway,
+		GatewayConfig:   gatewayConf,
 		Metadata:        metadata,
 		Role:            role,
 		TechStack:       techStack,
