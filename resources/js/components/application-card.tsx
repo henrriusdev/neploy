@@ -12,6 +12,7 @@ import { TechIcon } from "@/components/icons/tech-icon";
 import { Play, Square, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "@/i18n";
+import {router} from "@inertiajs/react";
 
 interface ApplicationCardProps {
   app: Application;
@@ -59,7 +60,7 @@ export function ApplicationCard({
   };
 
   return (
-    <Card>
+    <Card className={"hover:bg-[#1f408a] hover:cursor-pointer transition-colors"} onClick={() => router.visit(`/dashboard/applications/${app.id}`)}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>
           <CardTitle className="text-xl">{app.appName}</CardTitle>
