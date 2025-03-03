@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/date-picker";
 import { withMask } from "use-mask-input";
 import { User } from "@/types/common";
+import {useTranslation} from "react-i18next";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -43,6 +44,7 @@ interface Props {
 }
 
 export function UserDataStep({ email, username, onNext, onBack }: Props) {
+  const {t} = useTranslation();
   const form = useForm<User>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,7 +68,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>{t('step.user.firstName')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -79,7 +81,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name</FormLabel>
+                    <FormLabel>{t('step.user.lastName')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -94,7 +96,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
                 name="dob"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Date of Birth</FormLabel>
+                    <FormLabel>{t('step.user.dob')}</FormLabel>
                     <FormControl>
                       <DatePicker
                         field={field}
@@ -111,7 +113,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
                 name="phone"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t('step.user.phone')}</FormLabel>
                     <FormControl>
                       <Input {...field} ref={withMask("(9999) 999-99-99")} />
                     </FormControl>
@@ -125,7 +127,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>{t('step.user.address')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -138,7 +140,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('step.user.email')}</FormLabel>
                   <FormControl>
                     <Input {...field} readOnly={!!email} />
                   </FormControl>
@@ -151,7 +153,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>{t('step.user.username')}</FormLabel>
                   <FormControl>
                     <Input {...field} readOnly={!!username} />
                   </FormControl>
@@ -164,7 +166,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t('step.user.password')}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
@@ -175,9 +177,9 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button type="button" variant="outline" onClick={onBack}>
-              Back
+              {t('actions.back')}
             </Button>
-            <Button type="submit">Next</Button>
+            <Button type="submit">{t('actions.next')}</Button>
           </CardFooter>
         </form>
       </Form>
