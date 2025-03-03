@@ -43,6 +43,7 @@ export interface Application {
   storageLocation: string;
   deployLocation: string;
   techStackId: string;
+  description?: string;
   status: "Building" | "Running" | "Stopped" | "Error";
   language?: string;
   createdAt: string;

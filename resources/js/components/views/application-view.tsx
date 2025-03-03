@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Edit, StopCircle, Trash2, ChevronDown, Search, Plus } from "lucide-react"
+import {ApplicationProps} from "@/types";
 
-export function ApplicationView() {
+export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
   const [isLogsOpen, setIsLogsOpen] = useState(true)
   const [searchLogs, setSearchLogs] = useState("")
 
@@ -31,12 +32,12 @@ export function ApplicationView() {
       {/* Header Section */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-white">Hangman Game</h1>
+          <h1 className="text-2xl font-bold text-white">{application.appName}</h1>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
               Running
             </Badge>
-            <span className="text-sm text-muted-foreground">ID: app_12345</span>
+            <span className="text-sm text-muted-foreground">ID: {application.id}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -82,24 +83,16 @@ export function ApplicationView() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Created At</p>
-                <p className="text-sm font-medium">Feb 14, 2025</p>
+                <p className="text-sm font-medium">{application.createdAt}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Updated At</p>
-                <p className="text-sm font-medium">Feb 14, 2025</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Owner</p>
-                <p className="text-sm font-medium">user@example.com</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Region</p>
-                <p className="text-sm font-medium">us-east-1</p>
+                <p className="text-sm font-medium">{application.updatedAt}</p>
               </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Description</p>
-              <p className="text-sm">A simple hangman game built with Go and React.</p>
+              <p className="text-sm">{application.description}</p>
             </div>
           </CardContent>
         </Card>

@@ -208,7 +208,7 @@ func (d *Dashboard) ApplicationView(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
-	applications, err := d.services.Application.GetAll(c.Request().Context())
+	application, err := d.services.Application.Get(c.Request().Context(), c.Param("id"))
 	if err != nil {
 		logger.Error("error getting applications: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
@@ -234,10 +234,10 @@ func (d *Dashboard) ApplicationView(c echo.Context) error {
 	}
 
 	props := inertia.Props{
-		"user":         user,
-		"teamName":     metadata.TeamName,
-		"logoUrl":      metadata.LogoURL,
-		"applications": applications,
+		"user":        user,
+		"teamName":    metadata.TeamName,
+		"logoUrl":     metadata.LogoURL,
+		"application": application,
 	}
 
 	if err := d.i.Render(c.Response(), c.Request(), "Dashboard/Index", props); err != nil {

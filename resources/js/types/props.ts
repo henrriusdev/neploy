@@ -12,6 +12,17 @@ import {
   User,
 } from "./common";
 
+interface CommonProps {
+  user: {
+    name: string;
+    email: string;
+    username: string;
+    provider: string;
+  };
+  teamName: string;
+  logoUrl: string;
+}
+
 export interface AcceptInviteProps {
   token: string;
   expired?: boolean;
@@ -50,25 +61,15 @@ export interface VisitorData {
   visitors: number;
 }
 
-export interface DashboardProps {
-  teamName?: string;
+export interface DashboardProps extends CommonProps{
   requestData?: RequestData[];
   techStack?: StackData[];
-  user?: User;
   visitorData?: VisitorData[];
   health?: string;
-  logoUrl?: string;
   stats?: any; // TODO: add type
 }
 
-export interface TeamProps {
-  user?: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-  teamName?: string;
-  logoUrl?: string;
+export interface TeamProps extends CommonProps{
   team?: TeamMember[];
   roles?: Array<{
     name: string;
@@ -78,17 +79,9 @@ export interface TeamProps {
   }>;
 }
 
-export interface GatewayProps {
+export interface GatewayProps extends CommonProps{
   gateways: Gateway[];
   config?: GatewayConfig;
-  user: {
-    name: string;
-    email: string;
-    username: string;
-    provider: string;
-  };
-  teamName: string;
-  logoUrl: string;
 }
 
 export interface GatewayTableProps {
@@ -124,20 +117,14 @@ export interface DatePickerProps {
   field?: ControllerRenderProps<any, any>;
 }
 
-export interface ApplicationsProps {
-  user?: User;
-  teamName: string;
-  logoUrl: string;
+export interface ApplicationsProps extends CommonProps{
   applications?: Application[] | null;
 }
 
-export interface SettingsProps {
-  teamName: string;
-  logoUrl: string;
+export interface SettingsProps extends CommonProps{
   language: string;
   roles: RoleWithUsers[];
   techStacks: TechStackWithApplications[];
-  user?: User;
 }
 
 export interface GeneralSettingsProps {
@@ -168,4 +155,8 @@ export interface DialogButtonProps {
 
 export interface GatewayConfigProps {
   config?: GatewayConfig
+}
+
+export interface ApplicationProps extends CommonProps {
+  application: Application;
 }
