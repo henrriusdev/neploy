@@ -20,7 +20,6 @@ func getCaller() string {
 	if !ok {
 		return "???"
 	}
-	// Get only the file name without the full path
 	parts := strings.Split(file, "/")
 	file = parts[len(parts)-1]
 	return fmt.Sprintf("%s:%d", file, line)

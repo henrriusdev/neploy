@@ -109,7 +109,6 @@ func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 			}
 		}
 
-		// Create application stat
 		stat := model.ApplicationStat{
 			ApplicationID: appID,
 			Requests:      lastHourMetrics.Requests,
@@ -117,7 +116,6 @@ func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 			Date:          model.Date{Time: startTime},
 		}
 
-		// Save to repository
 		if err := m.appStatRepo.Insert(context.Background(), stat); err != nil {
 			log.Printf("ERROR: Failed to save metrics for app %s: %v", appID, err)
 		}
