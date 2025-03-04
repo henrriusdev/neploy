@@ -19,11 +19,11 @@ type Role interface {
 }
 
 type role struct {
-	roleRepo     repository.Role
-	userRoleRepo repository.UserRole
+	roleRepo     *repository.Role
+	userRoleRepo *repository.UserRole
 }
 
-func NewRole(roleRepo repository.Role, userRoleRepo repository.UserRole) Role {
+func NewRole(roleRepo *repository.Role, userRoleRepo *repository.UserRole) Role {
 	return &role{roleRepo, userRoleRepo}
 }
 

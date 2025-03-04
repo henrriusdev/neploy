@@ -17,11 +17,11 @@ type TechStack interface {
 }
 
 type techStack struct {
-	repo    repository.TechStack
-	appRepo repository.Application
+	repo    *repository.TechStack
+	appRepo *repository.Application
 }
 
-func NewTechStack(repo repository.TechStack, appRepo repository.Application) TechStack {
+func NewTechStack(repo *repository.TechStack, appRepo *repository.Application) TechStack {
 	return &techStack{repo, appRepo}
 }
 

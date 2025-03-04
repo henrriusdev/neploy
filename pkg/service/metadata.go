@@ -16,10 +16,10 @@ type Metadata interface {
 }
 
 type metadata struct {
-	repo repository.Metadata
+	repo *repository.Metadata
 }
 
-func NewMetadata(repo repository.Metadata) Metadata {
+func NewMetadata(repo *repository.Metadata) Metadata {
 	return &metadata{repo}
 }
 

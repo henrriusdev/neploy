@@ -21,11 +21,11 @@ type Visitor interface {
 }
 
 type visitor struct {
-	info  repository.VisitorInfo
-	trace repository.VisitorTrace
+	info  *repository.VisitorInfo
+	trace *repository.VisitorTrace
 }
 
-func NewVisitor(info repository.VisitorInfo, trace repository.VisitorTrace) Visitor {
+func NewVisitor(info *repository.VisitorInfo, trace *repository.VisitorTrace) Visitor {
 	return &visitor{info, trace}
 }
 
