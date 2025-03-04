@@ -1,7 +1,4 @@
 import * as React from "react";
-import { IconContext } from "react-icons";
-import * as Si from "react-icons/si"; // Simple Icons
-import * as Di from "react-icons/di"; // Devicons
 
 interface TechIconProps {
   name: string;
@@ -9,8 +6,15 @@ interface TechIconProps {
 }
 
 export function TechIcon({ name, size = 75 }: TechIconProps) {
-  // Convert name to PascalCase and try both Si and Di collections
+  const [isDarkMode, setIsDarkMode] = React.useState(
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+  name = name.replace(' ', '')
+  if (name.includes('.')){
+    name = name.replace('.', 'dot')
+  }
+  const url = isDarkMode ? `https://cdn.simpleicons.org/${name.toLowerCase()}/white` : `https://cdn.simpleicons.org/${name.toLowerCase()}/black`
   return (
-    <img className={`w-[${size}] h-${size}`} src={`https://cdn.simpleicons.org/${name.toLowerCase()}`} />
+    <img className={`w-[${size}] h-${size}`} src={url} />
   )
 }

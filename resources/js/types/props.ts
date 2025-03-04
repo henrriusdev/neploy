@@ -2,7 +2,7 @@ import { LucideIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { ControllerRenderProps } from "react-hook-form";
 import {
-  Application,
+  Application, ApplicationDockered,
   Gateway, GatewayConfig,
   Roles,
   RoleWithUsers,
@@ -158,5 +158,5 @@ export interface GatewayConfigProps {
 }
 
 export interface ApplicationProps extends CommonProps {
-  application: Application;
+  application: ApplicationDockered;
 }

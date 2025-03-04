@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -251,4 +252,83 @@ func (d *Docker) GetExposedPorts(ctx context.Context, containerId string) ([]str
 		exposedPorts = append(exposedPorts, port.Port())
 	}
 	return exposedPorts, nil
+}
+
+func (d *Docker) GetUsage(ctx context.Context, containerId string) (float64, float64, error) {
+	stats, err := d.cli.ContainerStats(ctx, containerId, false)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	defer stats.Body.Close()
+
+	// Leer y decodificar JSON
+	var statsData types.StatsJSON
+	err = json.NewDecoder(stats.Body).Decode(&statsData)
+	if err != nil && err != io.EOF {
+		return 0, 0, err
+	}
+
+	// Cálculo del uso de CPU
+	cpuDelta := float64(statsData.CPUStats.CPUUsage.TotalUsage - statsData.PreCPUStats.CPUUsage.TotalUsage)
+	systemDelta := float64(statsData.CPUStats.SystemUsage - statsData.PreCPUStats.SystemUsage)
+	var cpuPercent float64
+	if systemDelta > 0 {
+		cpuPercent = (cpuDelta / systemDelta) * float64(len(statsData.CPUStats.CPUUsage.PercpuUsage)) * 100.0
+	}
+
+	// Cálculo del uso de RAM
+	memUsage := float64(statsData.MemoryStats.Usage)
+	memLimit := float64(statsData.MemoryStats.Limit)
+	memPercent := (memUsage / memLimit) * 100.0
+
+	return cpuPercent, memPercent, nil
+}
+
+func (d *Docker) GetUptime(ctx context.Context, containerId string) (time.Duration, error) {
+	inspect, err := d.cli.ContainerInspect(ctx, containerId)
+	if err != nil {
+		return 0, err
+	}
+
+	// Parsear el tiempo de inicio del contenedor
+	startTime, err := time.Parse(time.RFC3339Nano, inspect.State.StartedAt)
+	if err != nil {
+		return 0, err
+	}
+
+	// Calcular uptime
+	uptime := time.Since(startTime)
+	return uptime, nil
+}
+
+func (d *Docker) GetLogs(ctx context.Context, containerId string, stream bool) ([]string, error) {
+	options := container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     stream,
+		Timestamps: false,
+	}
+
+	logs, err := d.cli.ContainerLogs(ctx, containerId, options)
+	if err != nil {
+		return nil, err
+	}
+	defer logs.Close()
+
+	var logLines []string
+	reader := bufio.NewReader(logs)
+
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+		logLines = append(logLines, strings.TrimSpace(line)) // Guardar cada línea en el slice
+	}
+
+	return logLines, nil
 }

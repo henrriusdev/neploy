@@ -15,7 +15,7 @@ interface OnboardingSidebarProps {
 
 
 export function OnboardingSidebar({ currentStep, className }: OnboardingSidebarProps) {
-    const {t} = useTranslation();
+    const {t, i18n} = useTranslation();
     const stepInfo: Record<string, StepInfo> = {
         provider: {
             title: t('onboarding.provider.title'),
@@ -38,6 +38,9 @@ export function OnboardingSidebar({ currentStep, className }: OnboardingSidebarP
             description: t('onboarding.summary.description'),
         },
     }
+const handleLanguageChange = (value: string) => {
+    i18n.changeLanguage(value);
+};
     return (
         <div className={cn("w-80 bg-muted p-6 flex flex-col gap-8", className)}>
             <div className="p-2">

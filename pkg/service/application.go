@@ -24,7 +24,7 @@ import (
 
 type Application interface {
 	Create(ctx context.Context, app model.Application) (string, error)
-	Get(ctx context.Context, id string) (model.Application, error)
+	Get(ctx context.Context, id string) (model.ApplicationDockered, error)
 	GetAll(ctx context.Context) ([]model.FullApplication, error)
 	Update(ctx context.Context, app model.Application) error
 	GetStat(ctx context.Context, id string) (model.ApplicationStat, error)
@@ -54,8 +54,63 @@ func (a *application) Create(ctx context.Context, app model.Application) (string
 	return a.repos.Application.Insert(ctx, app)
 }
 
-func (a *application) Get(ctx context.Context, id string) (model.Application, error) {
-	return a.repos.Application.GetByID(ctx, id)
+func (a *application) Get(ctx context.Context, id string) (model.ApplicationDockered, error) {
+	app, err := a.repos.Application.GetByID(ctx, id)
+	if err != nil {
+		logger.Error("error getting app %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
+	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
+	appName := strings.ToLower(appNameWithoutSpecialChars)
+	containerId, err := a.docker.GetContainerID(ctx, appName)
+	if err != nil {
+		logger.Error("errpr getting container ID: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	cpu, ram, err := a.docker.GetUsage(ctx, containerId)
+	if err != nil {
+		logger.Error("error getting container usage: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	uptime, err := a.docker.GetUptime(ctx, containerId)
+	if err != nil {
+		logger.Error("error getting container uptime: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
+	if err != nil {
+		logger.Error("error getting app stats: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	var requestsPerMin int
+	for _, stat := range stats {
+		requestsPerMin += stat.Requests
+	}
+
+	logs, err := a.docker.GetLogs(ctx, containerId, false)
+	if err != nil {
+		logger.Error("error getting container logs: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	upTime := uptime.String()
+
+	appDockered := model.ApplicationDockered{
+		app,
+		cpu,
+		ram,
+		upTime,
+		requestsPerMin,
+		logs,
+	}
+
+	return appDockered, nil
 }
 
 func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {

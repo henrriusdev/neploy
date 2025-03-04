@@ -411,7 +411,8 @@ export function Applications({
       </div>
 
       {/* Actions Bar */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-3 py-1">
+        <h1 className="font-bold text-3xl text-secondary-foreground">{t('dashboard.applications.title')}</h1>
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogTrigger asChild>
             <Button>

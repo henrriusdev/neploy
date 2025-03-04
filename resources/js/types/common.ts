@@ -90,3 +90,11 @@ export interface GatewayConfig {
   defaultVersion: "latest" | "stable";
   loadBalancer: boolean;
 }
+
+export interface ApplicationDockered extends Application {
+  cpuUsage: number;
+  memoryUsage: number;
+  uptime: string;
+  requestsPerMin: number;
+  logs: string[];
+}

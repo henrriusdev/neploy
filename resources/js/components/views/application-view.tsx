@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +26,16 @@ import {ApplicationProps} from "@/types";
 export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
   const [isLogsOpen, setIsLogsOpen] = useState(true)
   const [searchLogs, setSearchLogs] = useState("")
+
+  const [filteredLogs, setFilteredLogs] = useState(application.logs.slice(0, 10));
+
+  useEffect(() => {
+    setFilteredLogs(
+      application.logs.filter((item) =>
+        item.toLowerCase().includes(searchLogs.toLowerCase())
+      ).slice(0, 10)
+    );
+  }, [searchLogs, application.logs]);
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -106,25 +116,25 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm">CPU Usage</span>
-                <span className="text-sm font-medium">45%</span>
+                <span className="text-sm font-medium">{application.cpuUsage.toFixed(2)}%</span>
               </div>
               <Progress value={45} className="h-2" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Memory Usage</span>
-                <span className="text-sm font-medium">1.2GB / 2GB</span>
+                <span className="text-sm font-medium">{application.memoryUsage.toFixed(2)}%</span>
               </div>
               <Progress value={60} className="h-2" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Uptime</p>
-                <p className="text-sm font-medium">5d 12h 30m</p>
+                <p className="text-sm font-medium">{application.uptime}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Requests/min</p>
-                <p className="text-sm font-medium">250</p>
+                <p className="text-sm font-medium">{application.requestsPerMin}</p>
               </div>
             </div>
           </CardContent>
@@ -156,26 +166,15 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Timestamp</TableHead>
-                        <TableHead>Level</TableHead>
-                        <TableHead className="w-full">Message</TableHead>
+                        <TableHead>Log</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="text-xs">2025-02-14 13:45:30</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">INFO</Badge>
-                        </TableCell>
-                        <TableCell className="text-sm">Application started successfully</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="text-xs">2025-02-14 13:45:29</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">DEBUG</Badge>
-                        </TableCell>
-                        <TableCell className="text-sm">Initializing database connection</TableCell>
-                      </TableRow>
+                      {filteredLogs && filteredLogs.map((item, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="text-sm font-mono font-bold">{item}</TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>

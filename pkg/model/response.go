@@ -61,3 +61,12 @@ type TechStackWithApplications struct {
 	TechStack
 	Applications []Application `json:"applications"`
 }
+
+type ApplicationDockered struct {
+	Application
+	CpuUsage       float64  `json:"cpuUsage"`
+	MemoryUsage    float64  `json:"memoryUsage"`
+	Uptime         string   `json:"uptime"`
+	RequestsPerMin int      `json:"requestsPerMin"`
+	Logs           []string `json:"logs"`
+}

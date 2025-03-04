@@ -10,7 +10,6 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
 	neployway "neploy.dev/pkg/gateway"
-	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
@@ -58,7 +57,6 @@ func Start(npy Neploy) {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Use(neployware.OnboardingMiddleware(services.Onboard))
-	logger.SetLogger()
 
 	// Validator
 	vldtr := validator.New()

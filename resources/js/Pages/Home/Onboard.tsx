@@ -97,20 +97,11 @@ export default function Onboard({ email, username }: Props) {
 
     try {
       const response = await onboard({ data: payload });
-
-      if ("data" in response && response.data.success) {
         toast({
           title: t("common.success"),
           description: t("onboarding.success"),
         });
         window.location.replace("/");
-      } else {
-        toast({
-          title: t("common.error"),
-          description: t("onboarding.error"),
-          variant: "destructive",
-        });
-      }
     } catch (error: any) {
       toast({
         title: t("common.error"),
