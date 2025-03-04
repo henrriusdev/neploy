@@ -9,21 +9,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type UserRole interface {
-	GetByUserID(context.Context, string) ([]model.UserRoles, error)
-	GetByRoleID(context.Context, string) ([]model.UserRoles, error)
-	Insert(context.Context, model.UserRoles) (model.UserRoles, error)
+type UserRole struct {
+	Base[model.UserRoles]
 }
 
-type userRole[T any] struct {
-	Base[T]
+func NewUserRole(db store.Queryable) *UserRole {
+	return &UserRole{Base[model.UserRoles]{Store: db, Table: "user_roles"}}
 }
 
-func NewUserRole(db store.Queryable) UserRole {
-	return &userRole[model.UserRoles]{Base[model.UserRoles]{Store: db, Table: "user_roles"}}
-}
-
-func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.UserRoles, error) {
+func (u *UserRole) GetByUserID(ctx context.Context, userID string) ([]model.UserRoles, error) {
 	q := u.baseQuery("ur").
 		Select(
 			goqu.I("ur.*"),
@@ -60,7 +54,7 @@ func (u *userRole[T]) GetByUserID(ctx context.Context, userID string) ([]model.U
 	return userRoles, nil
 }
 
-func (u *userRole[T]) GetByRoleID(ctx context.Context, roleID string) ([]model.UserRoles, error) {
+func (u *UserRole) GetByRoleID(ctx context.Context, roleID string) ([]model.UserRoles, error) {
 	q := u.baseQuery("ur").
 		Select(
 			goqu.I("ur.*"),
@@ -91,7 +85,7 @@ func (u *userRole[T]) GetByRoleID(ctx context.Context, roleID string) ([]model.U
 	return userRoles, nil
 }
 
-func (u *userRole[T]) Insert(ctx context.Context, userRole model.UserRoles) (model.UserRoles, error) {
+func (u *UserRole) Insert(ctx context.Context, userRole model.UserRoles) (model.UserRoles, error) {
 	q := u.BaseQueryInsert().
 		Rows(userRole).
 		Returning("*")

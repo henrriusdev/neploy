@@ -10,24 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type VisitorTrace interface {
-	Insert(ctx context.Context, visitorTraces model.VisitorTrace) error
-	Update(ctx context.Context, visitorTraces model.VisitorTrace) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (model.VisitorTrace, error)
-	GetAll(ctx context.Context) ([]model.VisitorTrace, error)
-	GetByVisitorID(ctx context.Context, visitorID string) ([]model.VisitorTrace, error)
+type VisitorTrace struct {
+	Base[model.VisitorTrace]
 }
 
-type visitorTraces[T any] struct {
-	Base[T]
+func NewVisitorTrace(db store.Queryable) *VisitorTrace {
+	return &VisitorTrace{Base[model.VisitorTrace]{Store: db, Table: "visitor_traces"}}
 }
 
-func NewVisitorTrace(db store.Queryable) VisitorTrace {
-	return &visitorTraces[model.VisitorTrace]{Base[model.VisitorTrace]{Store: db, Table: "visitor_traces"}}
-}
-
-func (v *visitorTraces[T]) Insert(ctx context.Context, visitorTraces model.VisitorTrace) error {
+func (v *VisitorTrace) Insert(ctx context.Context, visitorTraces model.VisitorTrace) error {
 	query := v.BaseQueryInsert().Rows(visitorTraces)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -43,7 +34,7 @@ func (v *visitorTraces[T]) Insert(ctx context.Context, visitorTraces model.Visit
 	return nil
 }
 
-func (v *visitorTraces[T]) Update(ctx context.Context, visitorTraces model.VisitorTrace) error {
+func (v *VisitorTrace) Update(ctx context.Context, visitorTraces model.VisitorTrace) error {
 	query := filters.ApplyUpdateFilters(v.BaseQueryUpdate().Set(visitorTraces), filters.IsUpdateFilter("id", visitorTraces.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -59,7 +50,7 @@ func (v *visitorTraces[T]) Update(ctx context.Context, visitorTraces model.Visit
 	return nil
 }
 
-func (v *visitorTraces[T]) Delete(ctx context.Context, id string) error {
+func (v *VisitorTrace) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		v.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -80,7 +71,7 @@ func (v *visitorTraces[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (v *visitorTraces[T]) GetByID(ctx context.Context, id string) (model.VisitorTrace, error) {
+func (v *VisitorTrace) GetByID(ctx context.Context, id string) (model.VisitorTrace, error) {
 	query := v.baseQuery().Where(goqu.C("id").Eq(id))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -97,7 +88,7 @@ func (v *visitorTraces[T]) GetByID(ctx context.Context, id string) (model.Visito
 	return visitorTraces, nil
 }
 
-func (v *visitorTraces[T]) GetAll(ctx context.Context) ([]model.VisitorTrace, error) {
+func (v *VisitorTrace) GetAll(ctx context.Context) ([]model.VisitorTrace, error) {
 	query := v.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -114,7 +105,7 @@ func (v *visitorTraces[T]) GetAll(ctx context.Context) ([]model.VisitorTrace, er
 	return visitorTraces, nil
 }
 
-func (v *visitorTraces[T]) GetByVisitorID(ctx context.Context, visitorID string) ([]model.VisitorTrace, error) {
+func (v *VisitorTrace) GetByVisitorID(ctx context.Context, visitorID string) ([]model.VisitorTrace, error) {
 	query := v.baseQuery().Where(goqu.C("visitor_id").Eq(visitorID))
 	q, args, err := query.ToSQL()
 	if err != nil {

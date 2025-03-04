@@ -9,21 +9,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type UserOauth interface {
-	Insert(ctx context.Context, user model.UserOAuth) error
-	GetByOAuthID(ctx context.Context, oauthID string) (model.UserOAuth, error)
-	GetByUserID(ctx context.Context, userID string) (model.UserOAuth, error)
+type UserOAuth struct {
+	Base[model.UserOAuth]
 }
 
-type userOauth[T any] struct {
-	Base[T]
+func NewUserOauth(db store.Queryable) *UserOAuth {
+	return &UserOAuth{Base[model.UserOAuth]{Store: db, Table: "user_oauth"}}
 }
 
-func NewUserOauth(db store.Queryable) UserOauth {
-	return &userOauth[model.UserOAuth]{Base[model.UserOAuth]{Store: db, Table: "user_oauth"}}
-}
-
-func (u *userOauth[T]) Insert(ctx context.Context, user model.UserOAuth) error {
+func (u *UserOAuth) Insert(ctx context.Context, user model.UserOAuth) error {
 	query := u.BaseQueryInsert().Rows(user)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -40,7 +34,7 @@ func (u *userOauth[T]) Insert(ctx context.Context, user model.UserOAuth) error {
 	return nil
 }
 
-func (u *userOauth[T]) GetByOAuthID(ctx context.Context, oauthID string) (model.UserOAuth, error) {
+func (u *UserOAuth) GetByOAuthID(ctx context.Context, oauthID string) (model.UserOAuth, error) {
 	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("oauth_id", oauthID))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -58,7 +52,7 @@ func (u *userOauth[T]) GetByOAuthID(ctx context.Context, oauthID string) (model.
 	return user, nil
 }
 
-func (u *userOauth[T]) GetByUserID(ctx context.Context, userID string) (model.UserOAuth, error) {
+func (u *UserOAuth) GetByUserID(ctx context.Context, userID string) (model.UserOAuth, error) {
 	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("user_id", userID))
 	q, args, err := query.ToSQL()
 	if err != nil {
