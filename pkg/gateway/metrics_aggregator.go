@@ -13,12 +13,12 @@ import (
 type MetricsAggregator struct {
 	collectors  map[string]*MetricsCollector // Map of appID to collector
 	mu          sync.RWMutex
-	appStatRepo repository.ApplicationStat
+	appStatRepo *repository.ApplicationStat
 	stopChan    chan struct{}
 	wg          sync.WaitGroup
 }
 
-func NewMetricsAggregator(metricsCollector *MetricsCollector, appStatRepo repository.ApplicationStat) *MetricsAggregator {
+func NewMetricsAggregator(metricsCollector *MetricsCollector, appStatRepo *repository.ApplicationStat) *MetricsAggregator {
 	collectors := make(map[string]*MetricsCollector)
 	if metricsCollector != nil {
 		collectors[metricsCollector.applicationID] = metricsCollector

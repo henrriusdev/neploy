@@ -28,7 +28,7 @@ type Router struct {
 	metricsAggregator *MetricsAggregator
 }
 
-func NewRouter(appStatRepo repository.ApplicationStat) *Router {
+func NewRouter(appStatRepo *repository.ApplicationStat) *Router {
 	router := &Router{
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),

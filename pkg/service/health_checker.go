@@ -18,14 +18,14 @@ type HealthChecker interface {
 }
 
 type healthChecker struct {
-	gatewayRepo repository.Gateway
-	appRepo     repository.Application
+	gatewayRepo *repository.Gateway
+	appRepo     *repository.Application
 	interval    time.Duration
 	stopChan    chan struct{}
 	wg          sync.WaitGroup
 }
 
-func NewHealthChecker(gatewayRepo repository.Gateway, appRepo repository.Application, interval time.Duration) HealthChecker {
+func NewHealthChecker(gatewayRepo *repository.Gateway, appRepo *repository.Application, interval time.Duration) HealthChecker {
 	return &healthChecker{
 		gatewayRepo: gatewayRepo,
 		appRepo:     appRepo,

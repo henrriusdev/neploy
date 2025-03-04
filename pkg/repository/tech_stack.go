@@ -12,24 +12,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type TechStack interface {
-	FindOrCreate(ctx context.Context, name string) (model.TechStack, error)
-	Insert(ctx context.Context, techStack model.TechStack) error
-	Update(ctx context.Context, id string, techStack model.TechStack) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (model.TechStack, error)
-	GetAll(ctx context.Context) ([]model.TechStack, error)
+type TechStack struct {
+	Base[model.TechStack]
 }
 
-type techStack[T any] struct {
-	Base[T]
+func NewTechStack(db store.Queryable) *TechStack {
+	return &TechStack{Base[model.TechStack]{Store: db, Table: "tech_stacks"}}
 }
 
-func NewTechStack(db store.Queryable) TechStack {
-	return &techStack[model.TechStack]{Base[model.TechStack]{Store: db, Table: "tech_stacks"}}
-}
-
-func (t *techStack[T]) FindOrCreate(ctx context.Context, name string) (model.TechStack, error) {
+func (t *TechStack) FindOrCreate(ctx context.Context, name string) (model.TechStack, error) {
 	query := t.baseQuery().Where(goqu.Ex{"name": name})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -62,7 +53,7 @@ func (t *techStack[T]) FindOrCreate(ctx context.Context, name string) (model.Tec
 	return techStack, nil
 }
 
-func (t *techStack[T]) Insert(ctx context.Context, techStack model.TechStack) error {
+func (t *TechStack) Insert(ctx context.Context, techStack model.TechStack) error {
 	query := t.BaseQueryInsert().Rows(techStack)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -78,7 +69,7 @@ func (t *techStack[T]) Insert(ctx context.Context, techStack model.TechStack) er
 	return nil
 }
 
-func (t *techStack[T]) Update(ctx context.Context, id string, techStack model.TechStack) error {
+func (t *TechStack) Update(ctx context.Context, id string, techStack model.TechStack) error {
 	query := filters.ApplyUpdateFilters(t.BaseQueryUpdate().Set(techStack), filters.IsUpdateFilter("id", id))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -94,7 +85,7 @@ func (t *techStack[T]) Update(ctx context.Context, id string, techStack model.Te
 	return nil
 }
 
-func (t *techStack[T]) Delete(ctx context.Context, id string) error {
+func (t *TechStack) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		t.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -115,7 +106,7 @@ func (t *techStack[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (t *techStack[T]) GetByID(ctx context.Context, id string) (model.TechStack, error) {
+func (t *TechStack) GetByID(ctx context.Context, id string) (model.TechStack, error) {
 	query := t.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -132,7 +123,7 @@ func (t *techStack[T]) GetByID(ctx context.Context, id string) (model.TechStack,
 	return techStack, nil
 }
 
-func (t *techStack[T]) GetAll(ctx context.Context) ([]model.TechStack, error) {
+func (t *TechStack) GetAll(ctx context.Context) ([]model.TechStack, error) {
 	query := t.baseQuery().Where(goqu.Ex{"deleted_at": nil})
 	q, args, err := query.ToSQL()
 	if err != nil {

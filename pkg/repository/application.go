@@ -10,24 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type Application interface {
-	Insert(ctx context.Context, application model.Application) (string, error)
-	Update(ctx context.Context, application model.Application) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (model.Application, error)
-	GetAll(ctx context.Context) ([]model.Application, error)
-	GetByTechStack(ctx context.Context, techStackID string) ([]model.Application, error)
+type Application struct {
+	Base[model.Application]
 }
 
-type application[T any] struct {
-	Base[T]
+func NewApplication(db store.Queryable) *Application {
+	return &Application{Base[model.Application]{Store: db, Table: "applications"}}
 }
 
-func NewApplication(db store.Queryable) Application {
-	return &application[model.Application]{Base[model.Application]{Store: db, Table: "applications"}}
-}
-
-func (a *application[T]) Insert(ctx context.Context, application model.Application) (string, error) {
+func (a *Application) Insert(ctx context.Context, application model.Application) (string, error) {
 	var id string
 	query := a.BaseQueryInsert().Rows(application).Returning("id")
 	q, args, err := query.ToSQL()
@@ -44,7 +35,7 @@ func (a *application[T]) Insert(ctx context.Context, application model.Applicati
 	return id, nil
 }
 
-func (a *application[T]) Update(ctx context.Context, application model.Application) error {
+func (a *Application) Update(ctx context.Context, application model.Application) error {
 	query := filters.ApplyUpdateFilters(a.BaseQueryUpdate().Set(application), filters.IsUpdateFilter("id", application.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -60,7 +51,7 @@ func (a *application[T]) Update(ctx context.Context, application model.Applicati
 	return nil
 }
 
-func (a *application[T]) Delete(ctx context.Context, id string) error {
+func (a *Application) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		a.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -81,7 +72,7 @@ func (a *application[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (a *application[T]) GetByID(ctx context.Context, id string) (model.Application, error) {
+func (a *Application) GetByID(ctx context.Context, id string) (model.Application, error) {
 	query := a.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -98,7 +89,7 @@ func (a *application[T]) GetByID(ctx context.Context, id string) (model.Applicat
 	return application, nil
 }
 
-func (a *application[T]) GetAll(ctx context.Context) ([]model.Application, error) {
+func (a *Application) GetAll(ctx context.Context) ([]model.Application, error) {
 	query := a.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -115,7 +106,7 @@ func (a *application[T]) GetAll(ctx context.Context) ([]model.Application, error
 	return applications, nil
 }
 
-func (a *application[T]) GetByTechStack(ctx context.Context, techStackID string) ([]model.Application, error) {
+func (a *Application) GetByTechStack(ctx context.Context, techStackID string) ([]model.Application, error) {
 	query := a.baseQuery().Where(goqu.Ex{"tech_stack_id": techStackID})
 	q, args, err := query.ToSQL()
 	if err != nil {

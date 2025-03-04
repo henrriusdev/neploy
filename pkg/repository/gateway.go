@@ -10,29 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type Gateway interface {
-	Insert(ctx context.Context, gateway model.Gateway) error
-	Update(ctx context.Context, gateway model.Gateway) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (model.Gateway, error)
-	GetAll(ctx context.Context) ([]model.Gateway, error)
-	GetByHttpMethod(ctx context.Context, httpMethod string) ([]model.Gateway, error)
-	GetByEndpoint(ctx context.Context, endpoint string) ([]model.Gateway, error)
-	GetByLogLevel(ctx context.Context, logLevel string) ([]model.Gateway, error)
-	GetByStage(ctx context.Context, stage string) ([]model.Gateway, error)
-	GetByName(ctx context.Context, name string) ([]model.Gateway, error)
-	GetByApplicationID(ctx context.Context, applicationID string) ([]model.Gateway, error)
+type Gateway struct {
+	Base[model.Gateway]
 }
 
-type gateway[T any] struct {
-	Base[T]
+func NewGateway(db store.Queryable) *Gateway {
+	return &Gateway{Base[model.Gateway]{Store: db, Table: "gateways"}}
 }
 
-func NewGateway(db store.Queryable) Gateway {
-	return &gateway[model.Gateway]{Base[model.Gateway]{Store: db, Table: "gateways"}}
-}
-
-func (g *gateway[T]) Insert(ctx context.Context, gateway model.Gateway) error {
+func (g *Gateway) Insert(ctx context.Context, gateway model.Gateway) error {
 	query := g.BaseQueryInsert().Rows(gateway)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -48,7 +34,7 @@ func (g *gateway[T]) Insert(ctx context.Context, gateway model.Gateway) error {
 	return nil
 }
 
-func (g *gateway[T]) Update(ctx context.Context, gateway model.Gateway) error {
+func (g *Gateway) Update(ctx context.Context, gateway model.Gateway) error {
 	query := filters.ApplyUpdateFilters(g.BaseQueryUpdate().Set(gateway), filters.IsUpdateFilter("id", gateway.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -64,7 +50,7 @@ func (g *gateway[T]) Update(ctx context.Context, gateway model.Gateway) error {
 	return nil
 }
 
-func (g *gateway[T]) Delete(ctx context.Context, id string) error {
+func (g *Gateway) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		g.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -85,7 +71,7 @@ func (g *gateway[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (g *gateway[T]) GetByID(ctx context.Context, id string) (model.Gateway, error) {
+func (g *Gateway) GetByID(ctx context.Context, id string) (model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -102,7 +88,7 @@ func (g *gateway[T]) GetByID(ctx context.Context, id string) (model.Gateway, err
 	return gateway, nil
 }
 
-func (g *gateway[T]) GetAll(ctx context.Context) ([]model.Gateway, error) {
+func (g *Gateway) GetAll(ctx context.Context) ([]model.Gateway, error) {
 	query := g.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -119,7 +105,7 @@ func (g *gateway[T]) GetAll(ctx context.Context) ([]model.Gateway, error) {
 	return gateways, nil
 }
 
-func (g *gateway[T]) GetByHttpMethod(ctx context.Context, httpMethod string) ([]model.Gateway, error) {
+func (g *Gateway) GetByHttpMethod(ctx context.Context, httpMethod string) ([]model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"http_method": httpMethod})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -136,7 +122,7 @@ func (g *gateway[T]) GetByHttpMethod(ctx context.Context, httpMethod string) ([]
 	return gateways, nil
 }
 
-func (g *gateway[T]) GetByEndpoint(ctx context.Context, endpoint string) ([]model.Gateway, error) {
+func (g *Gateway) GetByEndpoint(ctx context.Context, endpoint string) ([]model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"endpoint": endpoint})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -153,7 +139,7 @@ func (g *gateway[T]) GetByEndpoint(ctx context.Context, endpoint string) ([]mode
 	return gateways, nil
 }
 
-func (g *gateway[T]) GetByLogLevel(ctx context.Context, logLevel string) ([]model.Gateway, error) {
+func (g *Gateway) GetByLogLevel(ctx context.Context, logLevel string) ([]model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"log_level": logLevel})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -170,7 +156,7 @@ func (g *gateway[T]) GetByLogLevel(ctx context.Context, logLevel string) ([]mode
 	return gateways, nil
 }
 
-func (g *gateway[T]) GetByStage(ctx context.Context, stage string) ([]model.Gateway, error) {
+func (g *Gateway) GetByStage(ctx context.Context, stage string) ([]model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"stage": stage})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -187,7 +173,7 @@ func (g *gateway[T]) GetByStage(ctx context.Context, stage string) ([]model.Gate
 	return gateways, nil
 }
 
-func (g *gateway[T]) GetByName(ctx context.Context, name string) ([]model.Gateway, error) {
+func (g *Gateway) GetByName(ctx context.Context, name string) ([]model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"name": name})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -204,7 +190,7 @@ func (g *gateway[T]) GetByName(ctx context.Context, name string) ([]model.Gatewa
 	return gateways, nil
 }
 
-func (g *gateway[T]) GetByApplicationID(ctx context.Context, applicationID string) ([]model.Gateway, error) {
+func (g *Gateway) GetByApplicationID(ctx context.Context, applicationID string) ([]model.Gateway, error) {
 	query := g.baseQuery().Where(goqu.Ex{"application_id": applicationID})
 	q, args, err := query.ToSQL()
 	if err != nil {
