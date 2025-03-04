@@ -9,24 +9,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type Metadata interface {
-	Create(ctx context.Context, metadata model.Metadata) error
-	Update(ctx context.Context, metadata model.Metadata) error
-	Get(ctx context.Context) (model.Metadata, error)
-	GetTeamName(ctx context.Context) (string, error)
-	GetTeamLogo(ctx context.Context) (string, error)
-	GetLanguage(ctx context.Context) (string, error)
+type Metadata struct {
+	Base[model.Metadata]
 }
 
-type metadata[T any] struct {
-	Base[T]
+func NewMetadata(db store.Queryable) *Metadata {
+	return &Metadata{Base[model.Metadata]{Store: db, Table: "metadata"}}
 }
 
-func NewMetadata(db store.Queryable) Metadata {
-	return &metadata[model.Metadata]{Base[model.Metadata]{Store: db, Table: "metadata"}}
-}
-
-func (m *metadata[T]) Create(ctx context.Context, metadata model.Metadata) error {
+func (m *Metadata) Create(ctx context.Context, metadata model.Metadata) error {
 	q := m.BaseQueryInsert().Rows(metadata)
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -42,7 +33,7 @@ func (m *metadata[T]) Create(ctx context.Context, metadata model.Metadata) error
 	return nil
 }
 
-func (m *metadata[T]) Update(ctx context.Context, metadata model.Metadata) error {
+func (m *Metadata) Update(ctx context.Context, metadata model.Metadata) error {
 	// get id from Get method
 	mtdt, err := m.Get(ctx)
 	if err != nil {
@@ -66,7 +57,7 @@ func (m *metadata[T]) Update(ctx context.Context, metadata model.Metadata) error
 	return err
 }
 
-func (m *metadata[T]) Get(ctx context.Context) (model.Metadata, error) {
+func (m *Metadata) Get(ctx context.Context) (model.Metadata, error) {
 	q := m.baseQuery().Limit(1)
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -83,7 +74,7 @@ func (m *metadata[T]) Get(ctx context.Context) (model.Metadata, error) {
 	return metadata, nil
 }
 
-func (m *metadata[T]) GetTeamName(ctx context.Context) (string, error) {
+func (m *Metadata) GetTeamName(ctx context.Context) (string, error) {
 	q := m.baseQuery().Select("team_name").Limit(1)
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -100,7 +91,7 @@ func (m *metadata[T]) GetTeamName(ctx context.Context) (string, error) {
 	return teamName, nil
 }
 
-func (m *metadata[T]) GetTeamLogo(ctx context.Context) (string, error) {
+func (m *Metadata) GetTeamLogo(ctx context.Context) (string, error) {
 	q := m.baseQuery().Select("logo_url").Limit(1)
 	query, args, err := q.ToSQL()
 	if err != nil {
@@ -117,7 +108,7 @@ func (m *metadata[T]) GetTeamLogo(ctx context.Context) (string, error) {
 	return teamLogo, nil
 }
 
-func (m *metadata[T]) GetLanguage(ctx context.Context) (string, error) {
+func (m *Metadata) GetLanguage(ctx context.Context) (string, error) {
 	q := m.baseQuery().Select("language").Limit(1)
 	query, args, err := q.ToSQL()
 	if err != nil {

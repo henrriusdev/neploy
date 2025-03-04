@@ -27,12 +27,12 @@ type Gateway interface {
 
 type gateway struct {
 	router   *neployway.Router
-	repo     repository.Gateway
-	appRepo  repository.Application
-	confRepo repository.GatewayConfig
+	repo     *repository.Gateway
+	appRepo  *repository.Application
+	confRepo *repository.GatewayConfig
 }
 
-func NewGateway(repo repository.Gateway, appRepo repository.Application, statRepo repository.ApplicationStat, confRepo repository.GatewayConfig) Gateway {
+func NewGateway(repo *repository.Gateway, appRepo *repository.Application, statRepo *repository.ApplicationStat, confRepo *repository.GatewayConfig) Gateway {
 	return &gateway{
 		router:   neployway.NewRouter(statRepo),
 		repo:     repo,

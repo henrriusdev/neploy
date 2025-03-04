@@ -10,24 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type RefreshToken interface {
-	Insert(ctx context.Context, refreshToken model.RefreshToken) error
-	Update(ctx context.Context, refreshToken model.RefreshToken) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (model.RefreshToken, error)
-	GetByUserID(ctx context.Context, userID string) (model.RefreshToken, error)
-	GetAll(ctx context.Context) ([]model.RefreshToken, error)
+type RefreshToken struct {
+	Base[model.RefreshToken]
 }
 
-type refreshToken[T any] struct {
-	Base[T]
+func NewRefreshToken(db store.Queryable) *RefreshToken {
+	return &RefreshToken{Base[model.RefreshToken]{Store: db, Table: "refresh_tokens"}}
 }
 
-func NewRefreshToken(db store.Queryable) RefreshToken {
-	return &refreshToken[model.RefreshToken]{Base[model.RefreshToken]{Store: db, Table: "refresh_tokens"}}
-}
-
-func (r *refreshToken[T]) Insert(ctx context.Context, refreshToken model.RefreshToken) error {
+func (r *RefreshToken) Insert(ctx context.Context, refreshToken model.RefreshToken) error {
 	query := r.BaseQueryInsert().Rows(refreshToken)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -43,7 +34,7 @@ func (r *refreshToken[T]) Insert(ctx context.Context, refreshToken model.Refresh
 	return nil
 }
 
-func (r *refreshToken[T]) Update(ctx context.Context, refreshToken model.RefreshToken) error {
+func (r *RefreshToken) Update(ctx context.Context, refreshToken model.RefreshToken) error {
 	query := filters.ApplyUpdateFilters(r.BaseQueryUpdate().Set(refreshToken), filters.IsUpdateFilter("id", refreshToken.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -59,7 +50,7 @@ func (r *refreshToken[T]) Update(ctx context.Context, refreshToken model.Refresh
 	return nil
 }
 
-func (r *refreshToken[T]) Delete(ctx context.Context, id string) error {
+func (r *RefreshToken) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		r.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -80,7 +71,7 @@ func (r *refreshToken[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *refreshToken[T]) GetByID(ctx context.Context, id string) (model.RefreshToken, error) {
+func (r *RefreshToken) GetByID(ctx context.Context, id string) (model.RefreshToken, error) {
 	query := r.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -97,7 +88,7 @@ func (r *refreshToken[T]) GetByID(ctx context.Context, id string) (model.Refresh
 	return refreshToken, nil
 }
 
-func (r *refreshToken[T]) GetByUserID(ctx context.Context, userID string) (model.RefreshToken, error) {
+func (r *RefreshToken) GetByUserID(ctx context.Context, userID string) (model.RefreshToken, error) {
 	query := r.baseQuery().Where(goqu.Ex{"user_id": userID})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -114,7 +105,7 @@ func (r *refreshToken[T]) GetByUserID(ctx context.Context, userID string) (model
 	return refreshToken, nil
 }
 
-func (r *refreshToken[T]) GetAll(ctx context.Context) ([]model.RefreshToken, error) {
+func (r *RefreshToken) GetAll(ctx context.Context) ([]model.RefreshToken, error) {
 	query := r.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {

@@ -10,23 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type VisitorInfo interface {
-	Insert(ctx context.Context, visitorInfo model.VisitorInfo) error
-	Update(ctx context.Context, visitorInfo model.VisitorInfo) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (model.VisitorInfo, error)
-	GetAll(ctx context.Context) ([]model.VisitorInfo, error)
+type VisitorInfo struct {
+	Base[model.VisitorInfo]
 }
 
-type visitorInfo[T any] struct {
-	Base[T]
+func NewVisitor(db store.Queryable) *VisitorInfo {
+	return &VisitorInfo{Base[model.VisitorInfo]{Store: db, Table: "visitor_info"}}
 }
 
-func NewVisitor(db store.Queryable) VisitorInfo {
-	return &visitorInfo[model.VisitorInfo]{Base[model.VisitorInfo]{Store: db, Table: "visitor_info"}}
-}
-
-func (v *visitorInfo[T]) GetByID(ctx context.Context, id string) (model.VisitorInfo, error) {
+func (v *VisitorInfo) GetByID(ctx context.Context, id string) (model.VisitorInfo, error) {
 	query := v.baseQuery().Where(goqu.Ex{"id": id})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -43,7 +35,7 @@ func (v *visitorInfo[T]) GetByID(ctx context.Context, id string) (model.VisitorI
 	return visitorInfo, nil
 }
 
-func (v *visitorInfo[T]) Insert(ctx context.Context, visitorInfo model.VisitorInfo) error {
+func (v *VisitorInfo) Insert(ctx context.Context, visitorInfo model.VisitorInfo) error {
 	query := v.BaseQueryInsert().Rows(visitorInfo)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -59,7 +51,7 @@ func (v *visitorInfo[T]) Insert(ctx context.Context, visitorInfo model.VisitorIn
 	return nil
 }
 
-func (v *visitorInfo[T]) Update(ctx context.Context, visitorInfo model.VisitorInfo) error {
+func (v *VisitorInfo) Update(ctx context.Context, visitorInfo model.VisitorInfo) error {
 	query := filters.ApplyUpdateFilters(v.BaseQueryUpdate().Set(visitorInfo), filters.IsUpdateFilter("id", visitorInfo.ID))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -75,7 +67,7 @@ func (v *visitorInfo[T]) Update(ctx context.Context, visitorInfo model.VisitorIn
 	return nil
 }
 
-func (v *visitorInfo[T]) Delete(ctx context.Context, id string) error {
+func (v *VisitorInfo) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		v.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -96,7 +88,7 @@ func (v *visitorInfo[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (v *visitorInfo[T]) GetAll(ctx context.Context) ([]model.VisitorInfo, error) {
+func (v *VisitorInfo) GetAll(ctx context.Context) ([]model.VisitorInfo, error) {
 	query := v.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {

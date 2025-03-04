@@ -10,25 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type UserTechStack interface {
-	Insert(ctx context.Context, userTechStack model.UserTechStack) error
-	Update(ctx context.Context, userTechStack model.UserTechStack) error
-	Delete(ctx context.Context, id string) error
-	GetByUserID(ctx context.Context, userID string) ([]model.UserTechStack, error)
-	GetByTechStackID(ctx context.Context, techStackID string) ([]model.UserTechStack, error)
-	GetByUserIDAndTechStackID(ctx context.Context, userID, techStackID string) (model.UserTechStack, error)
-	GetAll(ctx context.Context) ([]model.UserTechStack, error)
+type UserTechStack struct {
+	Base[model.UserTechStack]
 }
 
-type userTechStack[T any] struct {
-	Base[T]
+func NewUserTechStack(db store.Queryable) *UserTechStack {
+	return &UserTechStack{Base[model.UserTechStack]{Store: db, Table: "user_tech_stacks"}}
 }
 
-func NewUserTechStack(db store.Queryable) UserTechStack {
-	return &userTechStack[model.UserTechStack]{Base[model.UserTechStack]{Store: db, Table: "user_tech_stacks"}}
-}
-
-func (u *userTechStack[T]) Insert(ctx context.Context, userTechStack model.UserTechStack) error {
+func (u *UserTechStack) Insert(ctx context.Context, userTechStack model.UserTechStack) error {
 	query := u.BaseQueryInsert().Rows(userTechStack)
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -44,7 +34,7 @@ func (u *userTechStack[T]) Insert(ctx context.Context, userTechStack model.UserT
 	return nil
 }
 
-func (u *userTechStack[T]) Update(ctx context.Context, userTechStack model.UserTechStack) error {
+func (u *UserTechStack) Update(ctx context.Context, userTechStack model.UserTechStack) error {
 	query := filters.ApplyUpdateFilters(
 		u.BaseQueryUpdate().Set(userTechStack),
 		filters.IsUpdateFilter("user_id", userTechStack.UserID),
@@ -64,7 +54,7 @@ func (u *userTechStack[T]) Update(ctx context.Context, userTechStack model.UserT
 	return nil
 }
 
-func (u *userTechStack[T]) Delete(ctx context.Context, id string) error {
+func (u *UserTechStack) Delete(ctx context.Context, id string) error {
 	query := filters.ApplyUpdateFilters(
 		u.BaseQueryUpdate().
 			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
@@ -85,7 +75,7 @@ func (u *userTechStack[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (u *userTechStack[T]) GetByUserID(ctx context.Context, userID string) ([]model.UserTechStack, error) {
+func (u *UserTechStack) GetByUserID(ctx context.Context, userID string) ([]model.UserTechStack, error) {
 	query := u.baseQuery("ut").
 		Select(
 			goqu.I("ut.*"),
@@ -121,7 +111,7 @@ func (u *userTechStack[T]) GetByUserID(ctx context.Context, userID string) ([]mo
 	return userTechStacks, nil
 }
 
-func (u *userTechStack[T]) GetByTechStackID(ctx context.Context, techStackID string) ([]model.UserTechStack, error) {
+func (u *UserTechStack) GetByTechStackID(ctx context.Context, techStackID string) ([]model.UserTechStack, error) {
 	query := u.baseQuery("ut").
 		Select(
 			goqu.I("ut.*"),
@@ -157,7 +147,7 @@ func (u *userTechStack[T]) GetByTechStackID(ctx context.Context, techStackID str
 	return userTechStacks, nil
 }
 
-func (u *userTechStack[T]) GetByUserIDAndTechStackID(ctx context.Context, userID, techStackID string) (model.UserTechStack, error) {
+func (u *UserTechStack) GetByUserIDAndTechStackID(ctx context.Context, userID, techStackID string) (model.UserTechStack, error) {
 	query := u.baseQuery().Where(goqu.Ex{"user_id": userID, "tech_stack_id": techStackID})
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -174,7 +164,7 @@ func (u *userTechStack[T]) GetByUserIDAndTechStackID(ctx context.Context, userID
 	return userTechStack, nil
 }
 
-func (u *userTechStack[T]) GetAll(ctx context.Context) ([]model.UserTechStack, error) {
+func (u *UserTechStack) GetAll(ctx context.Context) ([]model.UserTechStack, error) {
 	query := u.baseQuery()
 	q, args, err := query.ToSQL()
 	if err != nil {

@@ -10,20 +10,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type GatewayConfig interface {
-	Upsert(ctx context.Context, gateway model.GatewayConfig) (model.GatewayConfig, error)
-	Get(ctx context.Context) (model.GatewayConfig, error)
+type GatewayConfig struct {
+	Base[model.GatewayConfig]
 }
 
-type gatewayConfig[T any] struct {
-	Base[T]
+func NewGatewayConfig(db store.Queryable) *GatewayConfig {
+	return &GatewayConfig{Base[model.GatewayConfig]{Store: db, Table: "gateway_config"}}
 }
 
-func NewGatewayConfig(db store.Queryable) GatewayConfig {
-	return &gatewayConfig[model.GatewayConfig]{Base[model.GatewayConfig]{Store: db, Table: "gateway_config"}}
-}
-
-func (g *gatewayConfig[T]) Upsert(ctx context.Context, gateway model.GatewayConfig) (model.GatewayConfig, error) {
+func (g *GatewayConfig) Upsert(ctx context.Context, gateway model.GatewayConfig) (model.GatewayConfig, error) {
 	conf, err := g.Get(ctx)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Error("error getting actual gateway: %v", err)
@@ -61,7 +56,7 @@ func (g *gatewayConfig[T]) Upsert(ctx context.Context, gateway model.GatewayConf
 	return conf, nil
 }
 
-func (g *gatewayConfig[T]) Get(ctx context.Context) (conf model.GatewayConfig, err error) {
+func (g *GatewayConfig) Get(ctx context.Context) (conf model.GatewayConfig, err error) {
 	query := filters.ApplyFilters(g.baseQuery(), filters.LimitOffsetFilter(1, 0))
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -77,7 +72,7 @@ func (g *gatewayConfig[T]) Get(ctx context.Context) (conf model.GatewayConfig, e
 	return
 }
 
-func (g *gatewayConfig[T]) createDefault(ctx context.Context) (conf model.GatewayConfig, err error) {
+func (g *GatewayConfig) createDefault(ctx context.Context) (conf model.GatewayConfig, err error) {
 	conf, err = g.InsertOne(ctx, model.GatewayConfig{
 		DefaultVersioningType: "headers",
 		DefaultVersion:        "latest",

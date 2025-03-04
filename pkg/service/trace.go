@@ -16,10 +16,10 @@ type Trace interface {
 }
 
 type trace struct {
-	repo repository.Trace
+	repo *repository.Trace
 }
 
-func NewTrace(repo repository.Trace) Trace {
+func NewTrace(repo *repository.Trace) Trace {
 	return &trace{repo}
 }
 

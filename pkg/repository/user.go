@@ -9,27 +9,15 @@ import (
 	"neploy.dev/pkg/store"
 )
 
-type User interface {
-	Create(ctx context.Context, user model.User) (model.User, error)
-	Get(ctx context.Context, id string) (model.User, error)
-	Update(ctx context.Context, user model.User) error
-	Delete(ctx context.Context, id string) error
-	List(ctx context.Context, limit, offset uint) ([]model.User, error)
-	GetByEmail(ctx context.Context, email string) (model.User, error)
-	CreateInvitation(ctx context.Context, invitation model.Invitation) error
-	GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error)
-	UpdateInvitation(ctx context.Context, invitation model.Invitation) error
+type User struct {
+	Base[model.User]
 }
 
-type user[T any] struct {
-	Base[T]
+func NewUser(db store.Queryable) *User {
+	return &User{Base: Base[model.User]{Store: db, Table: "users"}}
 }
 
-func NewUser(db store.Queryable) User {
-	return &user[model.User]{Base: Base[model.User]{Store: db, Table: "users"}}
-}
-
-func (u *user[T]) Create(ctx context.Context, user model.User) (model.User, error) {
+func (u *User) Create(ctx context.Context, user model.User) (model.User, error) {
 	query := u.BaseQueryInsert().
 		Rows(user).
 		Returning("*")
@@ -47,7 +35,7 @@ func (u *user[T]) Create(ctx context.Context, user model.User) (model.User, erro
 	return newUser, nil
 }
 
-func (u *user[T]) Get(ctx context.Context, id string) (model.User, error) {
+func (u *User) Get(ctx context.Context, id string) (model.User, error) {
 	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("id", id))
 
 	q, args, err := query.ToSQL()
@@ -63,7 +51,7 @@ func (u *user[T]) Get(ctx context.Context, id string) (model.User, error) {
 	return user, nil
 }
 
-func (u *user[T]) Update(ctx context.Context, user model.User) error {
+func (u *User) Update(ctx context.Context, user model.User) error {
 	query := u.BaseQueryUpdate().
 		Set(user).
 		Where(goqu.Ex{"id": user.ID})
@@ -80,7 +68,7 @@ func (u *user[T]) Update(ctx context.Context, user model.User) error {
 	return nil
 }
 
-func (u *user[T]) Delete(ctx context.Context, id string) error {
+func (u *User) Delete(ctx context.Context, id string) error {
 	query := u.BaseQueryUpdate().
 		Set(goqu.Record{"deleted_at": "CURRENT_TIMESTAMP"}).
 		Where(goqu.Ex{"id": id})
@@ -97,7 +85,7 @@ func (u *user[T]) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (u *user[T]) List(ctx context.Context, limit, offset uint) ([]model.User, error) {
+func (u *User) List(ctx context.Context, limit, offset uint) ([]model.User, error) {
 	query := u.baseQuery().
 		Limit(limit).
 		Offset(offset)
@@ -115,7 +103,7 @@ func (u *user[T]) List(ctx context.Context, limit, offset uint) ([]model.User, e
 	return users, nil
 }
 
-func (u *user[T]) GetByEmail(ctx context.Context, email string) (model.User, error) {
+func (u *User) GetByEmail(ctx context.Context, email string) (model.User, error) {
 	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("email", email))
 
 	q, args, err := query.ToSQL()
@@ -131,7 +119,7 @@ func (u *user[T]) GetByEmail(ctx context.Context, email string) (model.User, err
 	return user, nil
 }
 
-func (u *user[T]) CreateInvitation(ctx context.Context, invitation model.Invitation) error {
+func (u *User) CreateInvitation(ctx context.Context, invitation model.Invitation) error {
 	query := goqu.Insert("invitations").Rows(invitation)
 
 	q, args, err := query.ToSQL()
@@ -145,7 +133,7 @@ func (u *user[T]) CreateInvitation(ctx context.Context, invitation model.Invitat
 	return err
 }
 
-func (u *user[T]) GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error) {
+func (u *User) GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error) {
 	query := goqu.From("invitations").Where(goqu.Ex{"token": token})
 
 	q, args, err := query.ToSQL()
@@ -161,7 +149,7 @@ func (u *user[T]) GetInvitationByToken(ctx context.Context, token string) (model
 	return invitation, nil
 }
 
-func (u *user[T]) UpdateInvitation(ctx context.Context, invitation model.Invitation) error {
+func (u *User) UpdateInvitation(ctx context.Context, invitation model.Invitation) error {
 	query := goqu.Update("invitations").
 		Set(invitation).
 		Where(goqu.Ex{"id": invitation.ID})
