@@ -6,84 +6,84 @@
   :root[data-theme="neploy"] {
     --gradient: #0CC0E9;
 
-    --background: 220 20% 98%;
-    --foreground: 220 15% 15%;
+    --background: 220 25% 97%;
+    --foreground: 220 15% 18%;
 
-    --muted: 220 20% 90%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 220 20% 92%;
+    --muted-foreground: 220 10% 50%;
 
-    --popover: 220 25% 95%;
-    --popover-foreground: 220 15% 15%;
+    --popover: 220 25% 94%;
+    --popover-foreground: 220 15% 18%;
 
-    --card: 220 20% 97%;
-    --card-foreground: 220 15% 15%;
+    --card: 220 25% 96%;
+    --card-foreground: 220 15% 18%;
 
     --border: 220 15% 85%;
     --input: 220 15% 85%;
 
-    --primary: 220 80% 56%;
+    --primary: 220 85% 58%;
     --primary-foreground: 0 0% 100%;
     --primary-foreground-hover: 0 0% 100%;
 
-    --secondary: 210 30% 40%;
+    --secondary: 210 35% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 220 50% 60%;
+    --accent: 190 65% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --ring: 220 80% 56%;
+    --ring: 220 85% 58%;
 
-    --sidebar-background: 220 20% 95%;
-    --sidebar-foreground: 220 15% 15%;
-    --sidebar-primary: 220 80% 56%;
+    --sidebar-background: 220 25% 94%;
+    --sidebar-foreground: 220 15% 18%;
+    --sidebar-primary: 220 85% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 30% 40%;
+    --sidebar-accent: 210 35% 45%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 15% 85%;
-    --sidebar-ring: 220 80% 56%;
+    --sidebar-ring: 220 85% 58%;
   }
 
   :root[data-theme="neploy"].dark {
-    --background: 220 15% 10%;
-    --foreground: 220 15% 90%;
+    --background: 220 20% 10%;
+    --foreground: 220 20% 92%;
 
-    --muted: 220 10% 20%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 15% 60%;
 
-    --popover: 220 15% 15%;
-    --popover-foreground: 220 15% 90%;
+    --popover: 220 15% 14%;
+    --popover-foreground: 220 20% 92%;
 
     --card: 220 15% 12%;
-    --card-foreground: 220 15% 90%;
+    --card-foreground: 220 20% 92%;
 
     --border: 220 10% 30%;
     --input: 220 10% 30%;
 
-    --primary: 220 80% 60%;
+    --primary: 220 85% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 25% 50%;
+    --secondary: 210 30% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 220 50% 60%;
+    --accent: 190 65% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --ring: 220 80% 60%;
+    --ring: 220 85% 65%;
 
     --sidebar-background: 220 15% 8%;
-    --sidebar-foreground: 220 15% 90%;
-    --sidebar-primary: 220 80% 60%;
+    --sidebar-foreground: 220 20% 92%;
+    --sidebar-primary: 220 85% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 50%;
+    --sidebar-accent: 210 30% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 10% 30%;
-    --sidebar-ring: 220 80% 60%;
+    --sidebar-ring: 220 85% 65%;
   }
 
   :root[data-theme="gruvbox"] {

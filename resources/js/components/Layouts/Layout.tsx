@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Link } from "@inertiajs/react";
 import { LanguageSelector } from "../forms/language-selector";
+import {ThemeSwitcher} from "@/components/theme-switcher";
+import {useTheme} from "@/hooks";
+import {useEffect} from "react";
 
 interface NavItem {
   title: string;
@@ -54,6 +57,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   teamName,
   children,
 }: SidebarLayoutProps) => {
+  const { theme, isDark, applyTheme } = useTheme(); // <- aquí usamos applyTheme directamente
+
+  useEffect(() => {
+    applyTheme(theme, isDark);
+  }, [theme, isDark]);
+
   return (
     <SidebarProvider>
       <div className="flex !h-screen w-full">
@@ -120,6 +129,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="p-0">
                       <LanguageSelector className="w-full p-2" />
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <ThemeSwitcher />
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
