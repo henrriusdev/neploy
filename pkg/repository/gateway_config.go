@@ -65,6 +65,9 @@ func (g *GatewayConfig) Get(ctx context.Context) (conf model.GatewayConfig, err 
 	}
 
 	if err = g.Store.GetContext(ctx, &conf, q, args...); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return g.createDefault(ctx)
+		}
 		logger.Error("error running get config query: %v", err)
 		return model.GatewayConfig{}, err
 	}
