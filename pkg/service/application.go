@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"gopkg.in/src-d/go-git.v4"
+	gitconfig "gopkg.in/src-d/go-git.v4/config"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -219,26 +221,43 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 }
 
 func (a *application) Deploy(ctx context.Context, id string, repoURL string, branch string) error {
+	// 1. Obtener la app
 	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting application: %v", err)
 		return err
 	}
 
+	// 2. Generar nombre de carpeta
 	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
 	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
 	appName := strings.ToLower(appNameWithoutSpecialChars)
-	imageName := fmt.Sprintf("neploy/%s", appName)
-	containerName := fmt.Sprintf("neploy-%s", appName)
+	basePath := filepath.Join(config.Env.UploadPath, appName)
 
-	path := filepath.Join(config.Env.UploadPath, appName)
+	// 3. Obtener el último tag del repo remoto
+	versionTag, err := getLatestGitTag(repoURL)
+	if err != nil {
+		logger.Error("error fetching tags: %v", err)
+		return err
+	}
+	logger.Info("detected latest tag: %s", versionTag)
+
+	// 4. Crear subdirectorio: /apps/{app_name}/{versionTag}
+	versionPath := filepath.Join(basePath, versionTag)
+	if err := os.MkdirAll(versionPath, os.ModePerm); err != nil {
+		logger.Error("error creating version directory: %v", err)
+		return err
+	}
+
+	// 5. Clonar solo esa tag específica
 	repo := filesystem.NewGitRepo(repoURL)
-	if err := repo.Clone(path, branch); err != nil {
+	if err := repo.Clone(versionPath, versionTag); err != nil {
 		logger.Error("error cloning repository: %v", err)
 		return err
 	}
 
-	techStack, err := filesystem.DetectStack(path)
+	// 6. Detectar tech stack dentro del versionPath
+	techStack, err := filesystem.DetectStack(versionPath)
 	if err != nil {
 		logger.Error("error detecting tech stack: %v", err)
 		return err
@@ -261,7 +280,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 		wsClient = a.hub.GetNotificationClient()
 	}
 
-	dockerStatus := filesystem.HasDockerfile(path, wsClient)
+	dockerStatus := filesystem.HasDockerfile(versionPath, wsClient)
 	if !dockerStatus.Exists {
 		// Only send interactive message if hub exists
 		if a.hub != nil {
@@ -294,7 +313,7 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 			return err
 		}
 
-		dockerfilePath := filepath.Join(path, "Dockerfile")
+		dockerfilePath := filepath.Join(versionPath, "Dockerfile")
 		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
 			logger.Error("error writing dockerfile: %v", err)
 			if a.hub != nil {
@@ -308,31 +327,79 @@ func (a *application) Deploy(ctx context.Context, id string, repoURL string, bra
 		}
 	}
 
-	// Configure port
-	dockerfilePath := filepath.Join(path, "Dockerfile")
+	// 7. Configure port
+	dockerfilePath := filepath.Join(versionPath, "Dockerfile")
 	port, err := a.configurePort(dockerfilePath, true)
 	if err != nil {
 		logger.Error("error configuring port: %v", err)
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, fmt.Sprintf("Error configuring port: %v", err))
-		}
 		return err
 	}
 
-	// Update application
+	// 8. Actualizar tech stack de la app
 	app.TechStackID = &tech.ID
 	if err := a.repos.Application.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
 		return err
 	}
 
-	a.createAndStartContainer(ctx, imageName, containerName, path, app.ID, port)
+	// 9. Insertar versión en DB
+	version := &model.ApplicationVersion{
+		VersionTag:      versionTag,
+		Description:     fmt.Sprintf("Auto deployed from repo (%s)", versionTag),
+		Status:          "active",
+		StorageLocation: versionPath,
+		ApplicationID:   app.ID,
+	}
+	if err := a.repos.ApplicationVersion.Insert(ctx, version); err != nil {
+		logger.Error("error inserting application version: %v", err)
+		return err
+	}
 
-	logger.Info("application updated: %s", app.AppName)
+	// 10. Levantar contenedor
+	imageName := fmt.Sprintf("neploy/%s", appName)
+	containerName := fmt.Sprintf("neploy-%s-%s", appName, versionTag)
+	a.createAndStartContainer(ctx, imageName, containerName, versionPath, app.ID, port)
+
+	logger.Info("application deployed: %s - version %s", app.AppName, versionTag)
 	if a.hub != nil {
 		a.hub.BroadcastProgress(100, "Deployment complete!")
 	}
 	return nil
+}
+
+func getLatestGitTag(repoURL string) (string, error) {
+	repo := git.NewRemote(nil, &gitconfig.RemoteConfig{
+		Name: "origin",
+		URLs: []string{repoURL},
+	})
+
+	refs, err := repo.List(&git.ListOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	var tags []string
+	for _, ref := range refs {
+		if ref.Name().IsTag() {
+			tags = append(tags, ref.Name().Short())
+		}
+	}
+
+	// Filtrar por semver válido
+	var validTags []string
+	for _, tag := range tags {
+		if validateVersionTag(tag) == nil {
+			validTags = append(validTags, tag)
+		}
+	}
+
+	if len(validTags) == 0 {
+		return "", fmt.Errorf("no valid semver tags found")
+	}
+
+	// Aquí podrías ordenar validTags si deseas el más alto (opcional)
+	latest := validTags[len(validTags)-1] // suponiendo que el repo tiene tags ordenados cronológicamente
+	return latest, nil
 }
 
 func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string, appID string, port string) {

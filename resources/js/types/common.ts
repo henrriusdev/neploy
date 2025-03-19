@@ -44,7 +44,7 @@ export interface Application {
   deployLocation: string;
   techStackId: string;
   description?: string;
-  status: "Building" | "Running" | "Stopped" | "Error";
+  status: "Building" | "Running" | "Stopped" | "Error" | "Created";
   language?: string;
   createdAt: string;
   updatedAt: string;

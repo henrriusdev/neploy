@@ -28,6 +28,7 @@ import { LanguageSelector } from "../forms/language-selector";
 import {ThemeSwitcher} from "@/components/theme-switcher";
 import {useTheme} from "@/hooks";
 import {useEffect} from "react";
+import {router} from "@inertiajs/react";
 
 interface NavItem {
   title: string;
@@ -81,10 +82,10 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={item.isActive}>
-                    <Link href={item.url} className="flex items-center">
+                    <button onClick={() => router.visit(item.url)} className="flex items-center">
                       <item.icon className="mr-2 h-4 w-4" />
                       <span>{item.title}</span>
-                    </Link>
+                    </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

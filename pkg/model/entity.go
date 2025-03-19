@@ -164,10 +164,11 @@ type GatewayConfig struct {
 	LoadBalancer          bool           `json:"loadBalancer" db:"load_balancer"`
 }
 
-type GatewayVersion struct {
+type ApplicationVersion struct {
 	BaseEntity
-	VersionName    string               `json:"versionName" db:"version_name"`
-	Status         GatewayVersionStatus `json:"status" db:"status"`
-	VersioningType VersioningType       `json:"versioningType" db:"versioning_type"`
-	GatewayID      string               `json:"gatewayId" db:"gateway_id"`
+	VersionTag      string `json:"versionTag" db:"version_tag"`
+	Description     string `json:"description" db:"description"`
+	Status          string `json:"status" db:"status"`                    // Running, Stopped, etc.
+	StorageLocation string `json:"StorageLocation" db:"storage_location"` // Aquí va la ruta final al binario/despliegue
+	ApplicationID   string `json:"applicationId" db:"application_id"`
 }

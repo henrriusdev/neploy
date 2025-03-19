@@ -135,7 +135,8 @@
         "building": "Building",
         "stopped": "Stopped",
         "error": "Error",
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "created": "Created"
       },
       "stats": {
         "totalApplications": "Total Applications",

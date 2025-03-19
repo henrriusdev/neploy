@@ -118,14 +118,14 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
                 <span className="text-sm">CPU Usage</span>
                 <span className="text-sm font-medium">{application.cpuUsage.toFixed(2)}%</span>
               </div>
-              <Progress value={45} className="h-2" />
+              <Progress value={application.cpuUsage} className="h-2" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Memory Usage</span>
                 <span className="text-sm font-medium">{application.memoryUsage.toFixed(2)}%</span>
               </div>
-              <Progress value={60} className="h-2" />
+              <Progress value={application.memoryUsage} className="h-2" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -190,10 +190,9 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="general">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
-                <TabsTrigger value="resources">Resources</TabsTrigger>
               </TabsList>
               <TabsContent value="general" className="space-y-4">
                 <div className="space-y-4">
@@ -254,29 +253,6 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
                     </TableRow>
                   </TableBody>
                 </Table>
-              </TabsContent>
-              <TabsContent value="resources" className="space-y-4">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Resource Allocation</h3>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">CPU Limit</span>
-                          <span className="text-sm font-medium">2 cores</span>
-                        </div>
-                        <Progress value={50} className="h-2" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Memory Limit</span>
-                          <span className="text-sm font-medium">2GB</span>
-                        </div>
-                        <Progress value={60} className="h-2" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
