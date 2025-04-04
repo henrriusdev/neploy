@@ -64,7 +64,7 @@ export function ApplicationCard({
   };
 
   return (
-    <Card className={"hover:bg-[#1f408a] hover:cursor-pointer transition-colors"}
+    <Card className={"hover:!bg-primary hover:cursor-pointer transition-colors"}
           onClick={() => router.visit(`/dashboard/applications/${app.id}`)}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>

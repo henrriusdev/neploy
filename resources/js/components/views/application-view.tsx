@@ -1,39 +1,28 @@
 "use client"
 
 import {useEffect, useState} from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Edit, StopCircle, Trash2, ChevronDown, Search, Plus } from "lucide-react"
+import {Badge} from "@/components/ui/badge"
+import {Button} from "@/components/ui/button"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Input} from "@/components/ui/input"
+import {Progress} from "@/components/ui/progress"
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
+import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible"
+import {ChevronDown, Edit, Plus, Search, Trash2} from "lucide-react"
 import {ApplicationProps} from "@/types";
 
 export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
   const [isLogsOpen, setIsLogsOpen] = useState(true)
   const [searchLogs, setSearchLogs] = useState("")
 
-  const [filteredLogs, setFilteredLogs] = useState(application.logs.slice(0, 10));
+  const [filteredLogs, setFilteredLogs] = useState(application.logs?.slice(0, 10) ?? []);
 
   useEffect(() => {
     setFilteredLogs(
-      application.logs.filter((item) =>
+      application.logs?.filter((item) =>
         item.toLowerCase().includes(searchLogs.toLowerCase())
-      ).slice(0, 10)
+      )?.slice(0, 10) ?? []
     );
   }, [searchLogs, application.logs]);
 
@@ -42,7 +31,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
       {/* Header Section */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-white">{application.appName}</h1>
+          <h1 className="text-2xl font-bold ">{application.appName}</h1>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
               Running
@@ -50,42 +39,11 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
             <span className="text-sm text-muted-foreground">ID: {application.id}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
-          <Button variant="outline" size="sm" className="text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/10">
-            <StopCircle className="w-4 h-4 mr-2" />
-            Stop
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-red-400 border-red-400/30 hover:bg-red-400/10">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete your application and remove all associated
-                  data.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Overview Section */}
-        <Card className="bg-[#0F1631] border-border/50">
+        <Card className="border-border/50">
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
@@ -108,7 +66,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
         </Card>
 
         {/* Metrics Section */}
-        <Card className="bg-[#0F1631] border-border/50">
+        <Card className=" border-border/50">
           <CardHeader>
             <CardTitle>Metrics</CardTitle>
           </CardHeader>
@@ -141,7 +99,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
         </Card>
 
         {/* Logs Section */}
-        <Card className="md:col-span-2 bg-[#0F1631] border-border/50">
+        <Card className="md:col-span-2  border-border/50">
           <Collapsible open={isLogsOpen} onOpenChange={setIsLogsOpen}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle>Logs</CardTitle>
@@ -183,78 +141,54 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
           </Collapsible>
         </Card>
 
-        {/* Settings Section */}
-        <Card className="md:col-span-2 bg-[#0F1631] border-border/50">
+        {/* API Versions Section */}
+        <Card className="md:col-span-2  border-border/50">
           <CardHeader>
-            <CardTitle>Settings</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>API Versions</CardTitle>
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                New Version
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="general">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="general">General</TabsTrigger>
-                <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
-              </TabsList>
-              <TabsContent value="general" className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium">Environment Variables</h3>
-                    <Button variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Variable
-                    </Button>
-                  </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Key</TableHead>
-                        <TableHead>Value</TableHead>
-                        <TableHead className="w-24">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>DATABASE_URL</TableCell>
-                        <TableCell>postgres://user:pass@localhost:5432/db</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
-              <TabsContent value="webhooks" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">Webhook Endpoints</h3>
-                  <Button variant="outline" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Webhook
-                  </Button>
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>URL</TableHead>
-                      <TableHead>Events</TableHead>
-                      <TableHead className="w-24">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>https://api.example.com/webhook</TableCell>
-                      <TableCell>deployment.success, deployment.failure</TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Version</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created At</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {application.versions?.length ? (
+                  application.versions.map((version, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-mono">{version.versionTag}</TableCell>
+                      <TableCell>{version.description}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Edit className="h-4 w-4" />
+                        <Badge variant="outline" className="text-xs capitalize">{version.status}</Badge>
+                      </TableCell>
+                      <TableCell>{new Date(version.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-400/10">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
-                  </TableBody>
-                </Table>
-              </TabsContent>
-            </Tabs>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                      No versions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>

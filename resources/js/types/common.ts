@@ -91,10 +91,22 @@ export interface GatewayConfig {
   loadBalancer: boolean;
 }
 
+export interface ApplicationVersion {
+  id: string;
+  versionTag: string;
+  description: string;
+  status: string;
+  storageLocation: string;
+  applicationId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ApplicationDockered extends Application {
   cpuUsage: number;
   memoryUsage: number;
   uptime: string;
   requestsPerMin: number;
   logs: string[];
+  versions: ApplicationVersion[];
 }
