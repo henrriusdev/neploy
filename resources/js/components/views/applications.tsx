@@ -126,7 +126,7 @@ export function Applications({
         variant: "destructive",
       });
     }
-  }, [branchesError, t]);
+  }, [branchesError]);
 
   useEffect(() => {
     if (branchesData?.branches) {
@@ -341,10 +341,6 @@ export function Applications({
       unsubFunctions.forEach((unsub) => unsub && unsub());
     };
   }, [onNotification, onInteractive, sendMessage, toast, t]);
-
-  useEffect(() => {
-    refreshApplications();
-  }, []);
 
   useEffect(() => {
     const ws = new WebSocket(

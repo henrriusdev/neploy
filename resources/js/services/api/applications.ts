@@ -68,6 +68,13 @@ export const applications = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["applications"],
     }),
+    deleteVersion: builder.mutation({
+      query: ({ appId, versionId }: { appId: string; versionId: string }) => ({
+        url: `applications/${appId}/versions/${versionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["applications"],
+    })
   }),
 });
 
@@ -80,4 +87,5 @@ export const {
   useStartApplicationMutation,
   useStopApplicationMutation,
   useDeleteApplicationMutation,
+  useDeleteVersionMutation
 } = applications;

@@ -1,22 +1,90 @@
 "use client"
 
-import {useEffect, useState} from "react"
+import * as React from "react"
+import {useEffect, useMemo, useState} from "react"
 import {Badge} from "@/components/ui/badge"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
 import {Progress} from "@/components/ui/progress"
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible"
-import {ChevronDown, Edit, Plus, Search, Trash2} from "lucide-react"
-import {ApplicationProps} from "@/types";
+import {ChevronDown, CirclePlay, Pause, Plus, Search, Trash2} from "lucide-react"
+import {ActionMessage, ActionResponse, ApplicationProps, ProgressMessage} from "@/types";
+import {
+  useDeleteVersionMutation,
+  useDeployApplicationMutation,
+  useLoadBranchesQuery,
+  useUploadApplicationMutation
+} from "@/services/api/applications";
+import {router} from "@inertiajs/react";
+import {useToast, useWebSocket} from "@/hooks";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {DialogTrigger} from "@radix-ui/react-dialog";
+import {ApplicationForm, DynamicForm} from "@/components/forms";
+import {debounce} from "lodash";
+import {z} from "zod";
+import {useTranslation} from "react-i18next";
+import type {Input as InputInterface} from "@/types/websocket";
+
+const uploadFormSchema = z.object({
+  description: z.string().optional(),
+  repoUrl: z
+    .string()
+    .refine(
+      (value) => {
+        if (!value) return true; // Allow empty string
+        try {
+          const url = new URL(value);
+          if (!["github.com", "gitlab.com"].includes(url.hostname)) {
+            return false;
+          }
+          const parts = url.pathname.split("/").filter(Boolean);
+          return parts.length === 2; // Should have exactly user and repo
+        } catch {
+          return false;
+        }
+      },
+      {message: "Must be a valid GitHub or GitLab repository URL"}
+    )
+    .optional(),
+  branch: z.string().optional(),
+});
 
 export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
   const [isLogsOpen, setIsLogsOpen] = useState(true)
   const [searchLogs, setSearchLogs] = useState("")
-
+  const [versions, setVersions] = useState(application.versions)
+  const [currentRepoUrl, setCurrentRepoUrl] = useState("");
+  const [branches, setBranches] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const {toast} = useToast()
+  const {t} = useTranslation()
+  const {onNotification, onInteractive, sendMessage} = useWebSocket();
   const [filteredLogs, setFilteredLogs] = useState(application.logs?.slice(0, 10) ?? []);
+  const [actionDialog, setActionDialog] = useState<{
+    show: boolean;
+    title: string;
+    description: string;
+    fields: InputInterface[];
+    onSubmit: (data: any) => void;
+  }>({
+    show: false,
+    title: "",
+    description: "",
+    fields: [],
+    onSubmit: () => {
+    },
+  });
+
+  const [deleteVersion] = useDeleteVersionMutation()
+  const [deployApplication] = useDeployApplicationMutation()
+  const [uploadApplication] = useUploadApplicationMutation()
+  const {
+    data: branchesData,
+    isFetching: isLoadingBranches,
+    error: branchesError,
+  } = useLoadBranchesQuery({repoUrl: currentRepoUrl}, {skip: !currentRepoUrl});
 
   useEffect(() => {
     setFilteredLogs(
@@ -25,6 +93,174 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
       )?.slice(0, 10) ?? []
     );
   }, [searchLogs, application.logs]);
+
+  useEffect(() => {
+    application.versions && setVersions(application.versions)
+  }, [application.versions])
+
+  useEffect(() => {
+    if (branchesData?.branches) {
+      setBranches(branchesData.branches);
+    }
+  }, [branchesData]);
+
+  useEffect(() => {
+    if (branchesError) {
+      toast({
+        title: t("common.error"),
+        description: t("dashboard.applications.errors.branchesFetchFailed"),
+        variant: "destructive",
+      });
+    }
+  }, [branchesError, t]);
+
+  useEffect(() => {
+    const unsubProgress = onNotification((message: ProgressMessage) => {
+      if (message.type === "progress") {
+        toast({
+          title: t("applications.actions.deploymentProgress"),
+          description: message.message,
+        });
+      }
+    });
+
+    const unsubInteractive = onInteractive((message: ActionMessage) => {
+      console.log("Received interactive message:", message);
+      if (!message?.inputs || !Array.isArray(message.inputs)) {
+        console.error("Invalid message inputs:", message.inputs);
+        return;
+      }
+
+      setActionDialog({
+        show: true,
+        title: message.title || t("applications.actions.required"),
+        description: message.message || "",
+        fields: message.inputs.map((input) => ({
+          ...input,
+          // Add validation for port number
+          validate:
+            input.name === "port"
+              ? (value: string) => {
+                const port = parseInt(value);
+                if (isNaN(port) || port < 1 || port > 65535) {
+                  return t("applications.errors.portInvalid");
+                }
+                return true;
+              }
+              : undefined,
+        })),
+        onSubmit: (data) => {
+          console.log("Submitting form data:", data);
+          const response: ActionResponse = {
+            type: message.type,
+            action: message.action,
+            data: {
+              ...data,
+              action: message.action,
+            },
+          };
+          console.log("Sending response:", response);
+          sendMessage(response.type, response.action, response.data);
+          setActionDialog((prev) => ({...prev, show: false}));
+
+          // Show confirmation toast
+          toast({
+            title: t("applications.actions.portConfiguration"),
+            description: t("applications.actions.portExposed", {
+              port: data.port,
+            }),
+          });
+        },
+      });
+    });
+
+    // Store unsubscribe functions
+    const unsubFunctions = [unsubProgress, unsubInteractive];
+
+    return () => {
+      // Call all unsubscribe functions
+      unsubFunctions.forEach((unsub) => unsub && unsub());
+    };
+  }, [onNotification, onInteractive, sendMessage, toast, t]);
+
+
+  const handleDeleteVersion = async (appId: string, versionId: string) => {
+    try {
+      await deleteVersion({appId, versionId}).unwrap()
+      toast({
+        title: "Success",
+        description: "Version deleted successfully",
+      })
+      router.reload({only: ['application']})
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const debouncedFetchBranches = useMemo(
+    () =>
+      debounce((repoUrl: string) => {
+        if (!repoUrl) {
+          setBranches([]);
+          setCurrentRepoUrl("");
+          return;
+        }
+        setCurrentRepoUrl(repoUrl);
+      }, 1000),
+    []
+  );
+
+  const handleRepoUrlChange = (repoUrl: string) => {
+    debouncedFetchBranches(repoUrl);
+  };
+
+  const handleVersionSubmit = async (
+    values: z.infer<typeof uploadFormSchema>,
+    file: File | null
+  ) => {
+    setIsUploading(true);
+
+    try {
+      if (!values.repoUrl && !file) {
+        toast({
+          title: "Error",
+          description: "You must provide a repo URL or upload a .zip file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (values.repoUrl && values.branch) {
+        await deployApplication({
+          appId: application.id,
+          repoUrl: values.repoUrl,
+          branch: values.branch,
+        }).unwrap();
+      }
+
+      if (file) {
+        await uploadApplication({
+          appId: application.id,
+          file: file,
+        }).unwrap();
+      }
+
+      toast({
+        title: "Success",
+        description: "Version created successfully",
+      });
+
+      // refrescar app o versiones si quieres
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err?.message || "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -76,14 +312,14 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
                 <span className="text-sm">CPU Usage</span>
                 <span className="text-sm font-medium">{application.cpuUsage.toFixed(2)}%</span>
               </div>
-              <Progress value={application.cpuUsage} className="h-2" />
+              <Progress value={application.cpuUsage} className="h-2"/>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Memory Usage</span>
                 <span className="text-sm font-medium">{application.memoryUsage.toFixed(2)}%</span>
               </div>
-              <Progress value={application.memoryUsage} className="h-2" />
+              <Progress value={application.memoryUsage} className="h-2"/>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -105,14 +341,14 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
               <CardTitle>Logs</CardTitle>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isLogsOpen ? "transform rotate-180" : ""}`} />
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isLogsOpen ? "transform rotate-180" : ""}`}/>
                 </Button>
               </CollapsibleTrigger>
             </CardHeader>
             <CollapsibleContent>
               <CardContent>
                 <div className="flex items-center gap-2 mb-4">
-                  <Search className="w-4 h-4 text-muted-foreground" />
+                  <Search className="w-4 h-4 text-muted-foreground"/>
                   <Input
                     placeholder="Search logs..."
                     value={searchLogs}
@@ -146,10 +382,27 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>API Versions</CardTitle>
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                New Version
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-2"/>
+                    New Version
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Version</DialogTitle>
+                  </DialogHeader>
+                  <ApplicationForm
+                    mode="create-version"
+                    onSubmit={handleVersionSubmit}
+                    isUploading={isUploading}
+                    branches={branches}
+                    isLoadingBranches={isLoadingBranches}
+                    onRepoUrlChange={(url) => debouncedFetchBranches(url)}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>
@@ -164,8 +417,8 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {application.versions?.length ? (
-                  application.versions.map((version, i) => (
+                {versions?.length ? (
+                  versions.map((version, i) => (
                     <TableRow key={i}>
                       <TableCell className="font-mono">{version.versionTag}</TableCell>
                       <TableCell>{version.description}</TableCell>
@@ -174,8 +427,17 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
                       </TableCell>
                       <TableCell>{new Date(version.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-400/10">
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400 hover:bg-blue-400/10"
+                        >
+                          <CirclePlay className="h-4 w-4"/>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-yellow-400 hover:bg-yellow-400/10"
+                                >
+                          <Pause className="h-4 w-4"/>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-400/10"
+                                onClick={() => handleDeleteVersion(application.id, version.id)}>
+                          <Trash2 className="h-4 w-4"/>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -192,6 +454,23 @@ export const ApplicationView: React.FC<ApplicationProps> = ({application}) => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog
+        open={actionDialog.show}
+        onOpenChange={(open) =>
+          !open && setActionDialog({...actionDialog, show: false})
+        }>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{actionDialog.title}</DialogTitle>
+            <DialogDescription>{actionDialog.description}</DialogDescription>
+          </DialogHeader>
+          <DynamicForm
+            fields={actionDialog.fields}
+            onSubmit={actionDialog.onSubmit}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
