@@ -197,6 +197,23 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 	return path, nil
 }
 
+func (v *versioning) DeleteVersion(ctx context.Context, appID string, versionID string) error {
+	version, err := v.repos.ApplicationVersion.GetOneById(ctx, versionID)
+	if err != nil {
+		return fmt.Errorf("version not found: %w", err)
+	}
+	if version.ApplicationID != appID {
+		return fmt.Errorf("version does not belong to the application")
+	}
+	if version.StorageLocation != "" {
+		if err := os.RemoveAll(version.StorageLocation); err != nil {
+			logger.Error("failed to delete storage folder: %v", err)
+			// not fatal, continue
+		}
+	}
+	return v.repos.ApplicationVersion.Delete(ctx, versionID)
+}
+
 func getLatestGitTag(repoURL string) (string, error) {
 	repo := git.NewRemote(nil, &gitconfig.RemoteConfig{
 		Name: "origin",
