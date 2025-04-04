@@ -39,8 +39,8 @@ func NewDocker(repos repository.Repositories, hub *websocket.Hub, dckr *neploker
 
 func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Application, version model.ApplicationVersion, port string) error {
 	appName := sanitizeAppName(app.AppName)
-	imageName := fmt.Sprintf("neploy/%s", appName)
-	containerName := fmt.Sprintf("neploy-%s-%s", appName, version.VersionTag)
+	imageName := fmt.Sprintf("neploy/%s:%s", appName, version.VersionTag)
+	containerName := getContainerName(appName, version.VersionTag)
 
 	if d.hub != nil {
 		d.hub.BroadcastProgress(0, "Building Docker image...")
@@ -67,24 +67,24 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 		},
 	}
 
-	resp, err := d.docker.CreateContainer(ctx, cfg, hostConfig, containerName)
-	if err != nil {
+	resp, err := d.docker.CreateContainer(context.Background(), cfg, hostConfig, containerName)
+	if err != nil && !strings.Contains(err.Error(), "already in use") {
 		logger.Error("error creating container: %v", err)
 		return err
 	}
 
 	gateway := model.Gateway{
 		Name:          containerName + "-gateway",
-		EndpointType:  "subdomain",
+		EndpointType:  "path",
 		Domain:        config.Env.DefaultDomain,
-		EndpointURL:   "/" + containerName,
+		EndpointURL:   fmt.Sprintf("/%s/%s", version.VersionTag, appName),
 		Subdomain:     strings.Replace(containerName, "neploy", "", -1),
 		Port:          port,
 		Path:          "/" + containerName,
 		Status:        "inactive",
 		ApplicationID: app.ID,
 	}
-	if err := d.repos.Gateway.Insert(ctx, gateway); err != nil {
+	if _, err := d.repos.Gateway.UpsertOneDoNothing(ctx, gateway, "gateway_name"); err != nil {
 		logger.Error("error creating gateway: %v", err)
 	}
 
@@ -212,4 +212,10 @@ func (d *docker) ConfigurePort(dockerfilePath string, interactive bool) (string,
 		}
 	}
 	return port, nil
+}
+
+func getContainerName(appName, versionTag string) string {
+	safeApp := sanitizeAppName(appName)
+	safeTag := strings.ReplaceAll(versionTag, ".", "-") // Opcional: evita puntos
+	return fmt.Sprintf("neploy-%s_v%s", safeApp, strings.TrimPrefix(safeTag, "v"))
 }

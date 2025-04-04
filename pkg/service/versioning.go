@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"mime/multipart"
+	"neploy.dev/pkg/repository/filters"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -24,6 +27,7 @@ import (
 type Versioning interface {
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
+	DeleteVersion(ctx context.Context, appID string, versionID string) error
 }
 
 type versioning struct {
@@ -46,12 +50,17 @@ func (v *versioning) Deploy(ctx context.Context, id string, repoURL string, bran
 	appName := sanitizeAppName(app.AppName)
 	basePath := filepath.Join(config.Env.UploadPath, appName)
 
-	versionTag, err := getLatestGitTag(repoURL)
+	tag, err := getLatestGitTag(repoURL)
 	if err != nil {
-		logger.Error("error fetching tags for app %s, using default tag: %s", app.AppName, err)
-		versionTag = "v1.0.0"
+		logger.Error("error fetching tags for app %s, using default tag: v1.0.0", err)
+		tag = "v1.0.0"
 	}
-	logger.Info("detected latest tag: %s", versionTag)
+
+	versionTag, err := v.resolveVersionTag(ctx, app, tag)
+	if err != nil {
+		logger.Error("could not resolve version tag: %v", err)
+		return err
+	}
 
 	versionPath := filepath.Join(basePath, versionTag)
 	if err := os.MkdirAll(versionPath, os.ModePerm); err != nil {
@@ -111,15 +120,15 @@ func (v *versioning) Deploy(ctx context.Context, id string, repoURL string, bran
 		return err
 	}
 
-	version := model.ApplicationVersion{
-		VersionTag:      versionTag,
-		Description:     fmt.Sprintf("Auto deployed from repo (%s)", versionTag),
-		Status:          "active",
-		StorageLocation: versionPath,
-		ApplicationID:   app.ID,
+	version, err := v.repos.ApplicationVersion.GetOne(ctx, filters.IsSelectFilter("application_id", app.ID), filters.IsSelectFilter("version_tag", versionTag))
+	if err != nil {
+		logger.Error("error getting application version: %v", err)
+		return err
 	}
-	if err := v.repos.ApplicationVersion.Insert(ctx, version); err != nil {
-		logger.Error("error inserting application version: %v", err)
+
+	version.StorageLocation = versionPath
+	if err := v.repos.ApplicationVersion.Update(ctx, version); err != nil {
+		logger.Error("error updating application version: %v", err)
 		return err
 	}
 
@@ -143,13 +152,33 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 		return "", err
 	}
 
-	path, err := filesystem.UnzipFile(zipPath, app.AppName)
+	unzippedPath, err := filesystem.UnzipFile(zipPath, app.AppName)
 	if err != nil {
 		logger.Error("error unzipping file: %v", err)
 		return "", err
 	}
 
-	techStack, err := filesystem.DetectStack(path)
+	versionTag := "v1.0.0"
+	versionTag, err = v.resolveVersionTag(ctx, app, versionTag)
+	if err != nil {
+		logger.Error("could not resolve version tag: %v", err)
+		return "", err
+	}
+
+	// Crear directorio final
+	versionPath := filepath.Join(config.Env.UploadPath, sanitizeAppName(app.AppName), versionTag)
+	if err := os.MkdirAll(filepath.Dir(versionPath), os.ModePerm); err != nil {
+		logger.Error("error creating version directory: %v", err)
+		return "", err
+	}
+
+	// Mover carpeta descomprimida al destino final
+	if err := os.Rename(unzippedPath, versionPath); err != nil {
+		logger.Error("error moving unzipped directory: %v", err)
+		return "", err
+	}
+
+	techStack, err := filesystem.DetectStack(versionPath)
 	if err != nil {
 		logger.Error("error detecting tech stack: %v", err)
 		return "", err
@@ -169,14 +198,14 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 		v.hub.BroadcastProgress(0, "Checking for Dockerfile...")
 	}
 
-	dockerStatus := filesystem.HasDockerfile(path, v.hub.GetNotificationClient())
+	dockerStatus := filesystem.HasDockerfile(versionPath, v.hub.GetNotificationClient())
 	if !dockerStatus.Exists {
 		tmpl, ok := neploker.GetDefaultTemplate(techStack)
 		if !ok {
 			logger.Error("no default template for tech stack: %s", techStack)
 			return "", fmt.Errorf("no template for tech stack")
 		}
-		dockerfilePath := filepath.Join(path, "Dockerfile")
+		dockerfilePath := filepath.Join(versionPath, "Dockerfile")
 		if err := neploker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
 			logger.Error("error writing dockerfile: %v", err)
 			return "", err
@@ -184,9 +213,21 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 	}
 
 	app.TechStackID = &tech.ID
-	app.StorageLocation = path
+	app.StorageLocation = versionPath
 	if err := v.repos.Application.Update(ctx, app); err != nil {
 		logger.Error("error updating application: %v", err)
+		return "", err
+	}
+
+	version, err := v.repos.ApplicationVersion.GetOne(ctx, filters.IsSelectFilter("application_id", app.ID), filters.IsSelectFilter("version_tag", versionTag))
+	if err != nil {
+		logger.Error("error getting application version: %v", err)
+		return "", err
+	}
+
+	version.StorageLocation = versionPath
+	if err := v.repos.ApplicationVersion.Update(ctx, version); err != nil {
+		logger.Error("error updating application version: %v", err)
 		return "", err
 	}
 
@@ -194,7 +235,7 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 		v.hub.BroadcastProgress(100, "Deployment complete!")
 	}
 
-	return path, nil
+	return versionPath, nil
 }
 
 func (v *versioning) DeleteVersion(ctx context.Context, appID string, versionID string) error {
@@ -212,6 +253,69 @@ func (v *versioning) DeleteVersion(ctx context.Context, appID string, versionID 
 		}
 	}
 	return v.repos.ApplicationVersion.Delete(ctx, versionID)
+}
+
+func (v *versioning) resolveVersionTag(ctx context.Context, app model.Application, suggestedTag string) (string, error) {
+	exists, err := v.repos.ApplicationVersion.Exists(ctx, app.ID, suggestedTag)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return "", err
+	}
+
+	println(exists)
+
+	if !exists {
+		version := model.ApplicationVersion{
+			ApplicationID: app.ID,
+			VersionTag:    suggestedTag,
+			Description:   app.Description,
+			Status:        "Created",
+		}
+
+		if err := v.repos.ApplicationVersion.Insert(ctx, version); err != nil {
+			logger.Error("error inserting application version: %v", err)
+			return "", err
+		}
+		return suggestedTag, nil
+	}
+
+	if v.hub == nil || v.hub.GetInteractiveClient() == nil {
+		return "", fmt.Errorf("version tag %s already exists", suggestedTag)
+	}
+
+	// Interactuar con el usuario vía WebSocket
+	resp := v.hub.BroadcastInteractive(websocket.ActionMessage{
+		Type:    "critical",
+		Action:  "version_conflict",
+		Title:   "Version already exists",
+		Message: fmt.Sprintf("A version with tag %s already exists. Please enter a new version.", suggestedTag),
+		Inputs: []websocket.Input{
+			{
+				Name:        "versionTag",
+				Type:        "text",
+				Placeholder: "e.g. v2.0.0",
+				Value:       suggestedTag,
+				Required:    true,
+			},
+		},
+	})
+
+	if resp == nil || resp.Data["versionTag"] == "" {
+		return "", fmt.Errorf("no response for version conflict")
+	}
+
+	version := model.ApplicationVersion{
+		ApplicationID: app.ID,
+		VersionTag:    resp.Data["versionTag"].(string),
+		Description:   app.Description,
+		Status:        "Created",
+	}
+
+	if err := v.repos.ApplicationVersion.Insert(ctx, version); err != nil {
+		logger.Error("error inserting application version: %v", err)
+		return "", err
+	}
+
+	return resp.Data["versionTag"].(string), nil
 }
 
 func getLatestGitTag(repoURL string) (string, error) {

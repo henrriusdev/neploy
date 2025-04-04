@@ -42,3 +42,8 @@ func (a *ApplicationVersion) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (a *ApplicationVersion) Exists(ctx context.Context, appID, tag string) (bool, error) {
+	row, err := a.GetOne(ctx, filters.IsSelectFilter("application_id", appID), filters.IsSelectFilter("version_tag", tag))
+	return row.ID != "", err
+}

@@ -41,7 +41,19 @@ func (d *Docker) ListContainers(ctx context.Context) ([]types.Container, error) 
 }
 
 func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, name string) (container.CreateResponse, error) {
-	return d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, name)
+	res, err := d.cli.ContainerCreate(ctx, config, hostConfig, nil, nil, name)
+	if err != nil && strings.Contains(err.Error(), "already in use") {
+		id, _ := d.GetContainerID(ctx, name)
+		res = container.CreateResponse{ID: id}
+		println(err, id, name)
+		return res, err
+	}
+
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
 }
 
 func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
@@ -86,13 +98,9 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 		return "", err
 	}
 
-	containerName = "neploy-" + containerName
-
-	logger.Info("Container: %s", containerName)
-	for _, container := range containers {
-		logger.Info("Container: %v", container.Names)
-		if container.Names[0] == "/"+containerName {
-			return container.ID, nil
+	for _, ctnr := range containers {
+		if ctnr.Names[0] == "/"+containerName {
+			return ctnr.ID, nil
 		}
 	}
 
@@ -100,30 +108,32 @@ func (d *Docker) GetContainerID(ctx context.Context, containerName string) (stri
 }
 
 func (d *Docker) GetContainerStatus(ctx context.Context, containerName string) (string, error) {
-	containers, err := d.ListContainers(ctx)
+	cntnrs, err := d.ListContainers(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	for _, container := range containers {
-		if container.Names[0] == "/"+containerName {
-			// Use Status instead of State for more detailed information
-			if strings.HasPrefix(container.Status, "Up") {
-				return "Running", nil
-			} else if strings.HasPrefix(container.Status, "Exited") {
-				return "Stopped", nil
-			} else if strings.Contains(container.Status, "Created") {
-				return "Created", nil
-			} else if strings.Contains(container.Status, "Paused") {
-				return "Paused", nil
-			} else if strings.Contains(container.Status, "Restarting") {
-				return "Restarting", nil
-			} else if strings.Contains(container.Status, "Removing") {
-				return "Removing", nil
-			} else if strings.Contains(container.Status, "Dead") {
-				return "Error", nil
+	for _, cntnr := range cntnrs {
+		for _, name := range cntnr.Names {
+			if name == "/"+containerName {
+				// Use Status instead of State for more detailed information
+				if strings.HasPrefix(cntnr.Status, "Up") {
+					return "Running", nil
+				} else if strings.HasPrefix(cntnr.Status, "Exited") {
+					return "Stopped", nil
+				} else if strings.Contains(cntnr.Status, "Created") {
+					return "Created", nil
+				} else if strings.Contains(cntnr.Status, "Paused") {
+					return "Paused", nil
+				} else if strings.Contains(cntnr.Status, "Restarting") {
+					return "Restarting", nil
+				} else if strings.Contains(cntnr.Status, "Removing") {
+					return "Removing", nil
+				} else if strings.Contains(cntnr.Status, "Dead") {
+					return "Error", nil
+				}
+				return cntnr.Status, nil
 			}
-			return container.Status, nil
 		}
 	}
 
@@ -131,6 +141,19 @@ func (d *Docker) GetContainerStatus(ctx context.Context, containerName string) (
 }
 
 func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag string) error {
+	ctx = context.Background()
+	// check first if there is a image
+	imgs, err := d.cli.ImageList(ctx, image.ListOptions{})
+	if err != nil {
+		logger.Error("Error listing images: %v", err)
+		return err
+	}
+
+	for _, img := range imgs {
+		if len(img.RepoTags) > 0 && img.RepoTags[0] == tag {
+			return nil
+		}
+	}
 	// Use the directory containing the Dockerfile as build context
 	contextDir := filepath.Dir(dockerfilePath)
 	logger.Info("Building image from context: %s", contextDir)
@@ -141,7 +164,7 @@ func (d *Docker) BuildImage(ctx context.Context, dockerfilePath string, tag stri
 	defer tw.Close()
 
 	// Walk through the directory and add files to tar
-	err := filepath.Walk(contextDir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(contextDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			logger.Error("Error walking the path: %v", err)
 			return err
