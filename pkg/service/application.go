@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"golang.org/x/sync/semaphore"
 	"mime/multipart"
 	neploker "neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
@@ -17,6 +18,8 @@ import (
 	"regexp"
 	"strings"
 )
+
+var globalSemaphore = semaphore.NewWeighted(4)
 
 type Application interface {
 	Create(ctx context.Context, app model.Application) (string, error)
@@ -33,6 +36,7 @@ type Application interface {
 	GetRepoBranches(ctx context.Context, repoURL string) ([]string, error)
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
+	DeleteVersion(ctx context.Context, appID string, versionID string) error
 }
 
 type application struct {
@@ -113,32 +117,43 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 	return a.versioningService.Upload(ctx, id, file)
 }
 
+func (a *application) ensureContainerRunning(ctx context.Context, app model.Application, version model.ApplicationVersion) error {
+	if version.Status == "paused" || version.Status == "inactive" {
+		return nil
+	}
+
+	if err := globalSemaphore.Acquire(ctx, 1); err != nil {
+		logger.Error("semaphore timeout for version %s: %v", version.VersionTag, err)
+		return err
+	}
+	defer globalSemaphore.Release(1)
+
+	containerName := getContainerName(app.AppName, version.VersionTag)
+	status, err := a.docker.GetContainerStatus(ctx, containerName)
+	if err != nil {
+		logger.Error("error getting container status: %v", err)
+		return err
+	}
+
+	if status == "Not created" {
+		dockerfilePath := filepath.Join(version.StorageLocation, "Dockerfile")
+		port, err := a.dockerService.ConfigurePort(dockerfilePath, false)
+		if err != nil {
+			logger.Error("error configuring port: %v", err)
+			return err
+		}
+		return a.dockerService.CreateAndStartContainer(ctx, app, version, port)
+	} else if status == "Stopped" {
+		return a.dockerService.StartContainer(ctx, containerName)
+	}
+
+	return nil
+}
+
 func (a *application) Get(ctx context.Context, id string) (model.ApplicationDockered, error) {
 	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		logger.Error("error getting app %v", err)
-		return model.ApplicationDockered{}, err
-	}
-
-	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-	appName := strings.ToLower(appNameWithoutSpecialChars)
-	containerId, err := a.docker.GetContainerID(ctx, appName)
-	if err != nil {
-		logger.Error("errpr getting container ID: %v", err)
-		return model.ApplicationDockered{}, err
-	}
-
-	cpu, ram, err := a.docker.GetUsage(ctx, containerId)
-	if err != nil {
-		logger.Error("error getting container usage: %v", err)
-		return model.ApplicationDockered{}, err
-	}
-	fmt.Println(cpu, ram)
-
-	uptime, err := a.docker.GetUptime(ctx, containerId)
-	if err != nil {
-		logger.Error("error getting container uptime: %v", err)
 		return model.ApplicationDockered{}, err
 	}
 
@@ -148,36 +163,72 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 		return model.ApplicationDockered{}, err
 	}
 
-	var requestsPerMin int
-	for _, stat := range stats {
-		requestsPerMin += stat.Requests
-	}
-
-	logs, err := a.docker.GetLogs(ctx, containerId, false)
-	if err != nil {
-		logger.Error("error getting container logs: %v", err)
-		return model.ApplicationDockered{}, err
-	}
-
-	upTime := uptime.String()
-
 	versions, err := a.repos.ApplicationVersion.GetAll(ctx, filters.IsSelectFilter("application_id", app.ID))
 	if err != nil {
 		logger.Error("error getting application versions: %v", err)
 		return model.ApplicationDockered{}, err
 	}
 
-	appDockered := model.ApplicationDockered{
+	for _, version := range versions {
+		v := version
+		go func() {
+			if err := a.ensureContainerRunning(ctx, app, v); err != nil {
+				logger.Error("error ensuring container for version %s: %v", v.VersionTag, err)
+			}
+		}()
+	}
+
+	if len(versions) == 0 {
+		return model.ApplicationDockered{
+			Application:    app,
+			CpuUsage:       0,
+			MemoryUsage:    0,
+			Uptime:         "0s",
+			RequestsPerMin: 0,
+			Logs:           []string{},
+			Versions:       versions,
+		}, nil
+	}
+
+	latest := versions[len(versions)-1]
+	containerID, err := a.docker.GetContainerID(ctx, getContainerName(app.AppName, latest.VersionTag))
+	if err != nil {
+		logger.Error("error getting container ID: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	cpu, ram, err := a.docker.GetUsage(ctx, containerID)
+	if err != nil {
+		logger.Error("error getting container usage: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	uptime, err := a.docker.GetUptime(ctx, containerID)
+	if err != nil {
+		logger.Error("error getting container uptime: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	logs, err := a.docker.GetLogs(ctx, containerID, false)
+	if err != nil {
+		logger.Error("error getting container logs: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	var requestsPerMin int
+	for _, stat := range stats {
+		requestsPerMin += stat.Requests
+	}
+
+	return model.ApplicationDockered{
 		Application:    app,
 		CpuUsage:       cpu,
 		MemoryUsage:    ram,
-		Uptime:         upTime,
+		Uptime:         uptime.String(),
 		RequestsPerMin: requestsPerMin,
 		Logs:           logs,
 		Versions:       versions,
-	}
-
-	return appDockered, nil
+	}, nil
 }
 
 func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
@@ -188,6 +239,7 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 	}
 
 	var fullApps []model.FullApplication
+
 	for _, app := range apps {
 		stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
 		if err != nil {
@@ -210,49 +262,33 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 			return nil, err
 		}
 
-		var appVersion model.ApplicationVersion
-		if len(versions) > 0 {
-			appVersion = versions[0]
-		} else {
-			appVersion, err = a.repos.ApplicationVersion.InsertOne(ctx, model.ApplicationVersion{
-				ApplicationID:   app.ID,
-				VersionTag:      "v1.0.0",
-				Description:     "Initial version",
-				Status:          "active",
-				StorageLocation: filepath.Join(app.StorageLocation, "v1.0.0"),
-			})
-			if err != nil {
-				logger.Error("error inserting application version: %v", err)
-				return nil, err
-			}
-		}
-
-		appName := strings.ToLower(regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(strings.ReplaceAll(app.AppName, " ", "-"), ""))
-		containerName := "neploy-" + appName
-
-		status, err := a.docker.GetContainerStatus(ctx, containerName)
-		if err != nil {
-			logger.Error("error getting container status: %v", err)
-			return nil, err
-		}
-
-		if status == "Not created" {
-			go func() error {
-				dockerfilePath := filepath.Join(appVersion.StorageLocation, "Dockerfile")
-				port, err := a.dockerService.ConfigurePort(dockerfilePath, false)
-				if err != nil {
-					logger.Error("error configuring port: %v", err)
-					return err
+		for _, version := range versions {
+			v := version
+			go func() {
+				if err := a.ensureContainerRunning(context.Background(), app, v); err != nil {
+					logger.Error("error ensuring container for version %s: %v", v.VersionTag, err)
 				}
-				return a.dockerService.CreateAndStartContainer(ctx, app, appVersion, port)
 			}()
+		}
+
+		// Usar el status de la primera versión activa, si hay
+		appStatus := "unknown"
+		for _, v := range versions {
+			if v.Status != "paused" && v.Status != "inactive" {
+				containerName := getContainerName(app.AppName, v.VersionTag)
+				status, err := a.docker.GetContainerStatus(ctx, containerName)
+				if err == nil {
+					appStatus = status
+					break
+				}
+			}
 		}
 
 		fullApps = append(fullApps, model.FullApplication{
 			Application: app,
 			TechStack:   tech,
 			Stats:       stats,
-			Status:      status,
+			Status:      appStatus,
 		})
 	}
 
@@ -303,4 +339,8 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	a.router.RemoveRoute("/" + containerName)
 
 	return a.repos.Application.Delete(ctx, id)
+}
+
+func (a *application) DeleteVersion(ctx context.Context, appID string, versionID string) error {
+	return a.versioningService.DeleteVersion(ctx, appID, versionID)
 }

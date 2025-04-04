@@ -33,6 +33,7 @@ func (a *Application) RegisterRoutes(r *echo.Group) {
 	r.POST("/:id/start", a.Start)
 	r.POST("/:id/stop", a.Stop)
 	r.DELETE("/:id", a.Delete)
+	r.DELETE("/:id/versions/:versionID", a.DeleteVersion)
 	r.POST("/branches", a.GetRepoBranches)
 }
 
@@ -286,4 +287,33 @@ func (a *Application) GetRepoBranches(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"branches": branches,
 	})
+}
+
+// DeleteVersion godoc
+// @Summary Delete an application version
+// @Description Delete an version of a explicit app
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Param versionID path string true "Version ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/:id/versions/:versionID
+func (a *Application) DeleteVersion(c echo.Context) error {
+	var req struct {
+		AppID     string `query:"id"`
+		VersionID string `query:"versionID"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := a.service.DeleteVersion(c.Request().Context(), req.AppID, req.VersionID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.NoContent(http.StatusOK)
 }
