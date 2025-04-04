@@ -39,7 +39,6 @@ type Application struct {
 	AppName         string  `json:"appName" db:"app_name"`
 	Description     string  `json:"description" db:"description"`
 	StorageLocation string  `json:"storageLocation" db:"storage_location"`
-	DeployLocation  string  `json:"deployLocation" db:"deploy_location"`
 	TechStackID     *string `json:"techStackId" db:"tech_stack_id" goqu:"omitempty,omitnil,skipinsert"`
 }
 

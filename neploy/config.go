@@ -115,6 +115,7 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	userRole := repository.NewUserRole(npy.DB)
 	application := repository.NewApplication(npy.DB)
 	applicationStat := repository.NewApplicationStat(npy.DB)
+	appVersion := repository.NewApplicationVersion(npy.DB)
 	userTechStack := repository.NewUserTechStack(npy.DB)
 	visitorInfo := repository.NewVisitor(npy.DB)
 	visitorTrace := repository.NewVisitorTrace(npy.DB)
@@ -123,18 +124,19 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	gatewayConf := repository.NewGatewayConfig(npy.DB)
 
 	return repository.Repositories{
-		Application:     application,
-		ApplicationStat: applicationStat,
-		Gateway:         gateway,
-		GatewayConfig:   gatewayConf,
-		Metadata:        metadata,
-		Role:            role,
-		TechStack:       techStack,
-		User:            user,
-		UserOauth:       userOauth,
-		UserRole:        userRole,
-		UserTechStack:   userTechStack,
-		VisitorInfo:     visitorInfo,
-		VisitorTrace:    visitorTrace,
+		Application:        application,
+		ApplicationStat:    applicationStat,
+		ApplicationVersion: appVersion,
+		Gateway:            gateway,
+		GatewayConfig:      gatewayConf,
+		Metadata:           metadata,
+		Role:               role,
+		TechStack:          techStack,
+		User:               user,
+		UserOauth:          userOauth,
+		UserRole:           userRole,
+		UserTechStack:      userTechStack,
+		VisitorInfo:        visitorInfo,
+		VisitorTrace:       visitorTrace,
 	}
 }
