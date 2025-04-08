@@ -21,6 +21,9 @@ CREATE TABLE application_versions
             ON DELETE CASCADE
 );
 -- +goose StatementEnd
+-- +goose StatementBegin
+ALTER TABLE application_stats ADD COLUMN healthy BOOLEAN DEFAULT true;
+-- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin

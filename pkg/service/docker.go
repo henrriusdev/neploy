@@ -21,8 +21,8 @@ import (
 
 type Docker interface {
 	CreateAndStartContainer(ctx context.Context, app model.Application, version model.ApplicationVersion, port string) error
-	StartContainer(ctx context.Context, id string) error
-	StopContainer(ctx context.Context, id string) error
+	StartContainer(ctx context.Context, id, versionId string) error
+	StopContainer(ctx context.Context, id, versionId string) error
 	ConfigurePort(dockerfilePath string, interactive bool) (string, error)
 }
 
@@ -73,6 +73,11 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 		return err
 	}
 
+	if err := d.docker.StartContainer(ctx, resp.ID); err != nil {
+		logger.Error("error starting container: %v", err)
+		return err
+	}
+
 	gateway := model.Gateway{
 		Name:          containerName + "-gateway",
 		EndpointType:  "path",
@@ -81,21 +86,11 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 		Subdomain:     strings.Replace(containerName, "neploy", "", -1),
 		Port:          port,
 		Path:          "/" + containerName,
-		Status:        "inactive",
+		Status:        "active",
 		ApplicationID: app.ID,
 	}
-	if _, err := d.repos.Gateway.UpsertOneDoNothing(ctx, gateway, "gateway_name"); err != nil {
+	if _, err := d.repos.Gateway.UpsertOneDoUpdate(ctx, gateway, "gateway_name"); err != nil {
 		logger.Error("error creating gateway: %v", err)
-	}
-
-	if err := d.docker.StartContainer(ctx, resp.ID); err != nil {
-		logger.Error("error starting container: %v", err)
-		return err
-	}
-
-	gateway.Status = "active"
-	if err := d.repos.Gateway.Update(ctx, gateway); err != nil {
-		logger.Error("error updating gateway status: %v", err)
 	}
 
 	route := neployway.Route{
@@ -117,30 +112,61 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 	return nil
 }
 
-func (d *docker) StartContainer(ctx context.Context, id string) error {
+func (d *docker) StartContainer(ctx context.Context, id, versionId string) error {
 	app, err := d.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
-	appName := sanitizeAppName(app.AppName)
+
+	version, err := d.repos.ApplicationVersion.GetOneById(ctx, versionId)
+	if err != nil {
+		return err
+	}
+
+	appName := getContainerName(app.AppName, version.VersionTag)
 	containerId, err := d.docker.GetContainerID(ctx, appName)
 	if err != nil {
 		return err
 	}
-	return d.docker.StartContainer(ctx, containerId)
+	if err := d.docker.StartContainer(ctx, containerId); err != nil {
+		return err
+	}
+
+	version.Status = "active"
+	if _, err := d.repos.ApplicationVersion.UpdateOneById(ctx, version.ID, version); err != nil {
+		logger.Error("error updating application version: %v", err)
+	}
+
+	return nil
 }
 
-func (d *docker) StopContainer(ctx context.Context, id string) error {
+func (d *docker) StopContainer(ctx context.Context, id, versionId string) error {
 	app, err := d.repos.Application.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
-	appName := sanitizeAppName(app.AppName)
+
+	version, err := d.repos.ApplicationVersion.GetOneById(ctx, versionId)
+	if err != nil {
+		return err
+	}
+
+	appName := getContainerName(app.AppName, version.VersionTag)
 	containerId, err := d.docker.GetContainerID(ctx, appName)
 	if err != nil {
 		return err
 	}
-	return d.docker.StopContainer(ctx, containerId)
+	err = d.docker.StopContainer(ctx, containerId)
+	if err != nil {
+		return err
+	}
+
+	version.Status = "inactive"
+	if _, err := d.repos.ApplicationVersion.UpdateOneById(ctx, version.ID, version); err != nil {
+		logger.Error("error updating application version: %v", err)
+	}
+
+	return nil
 }
 
 func (d *docker) ConfigurePort(dockerfilePath string, interactive bool) (string, error) {

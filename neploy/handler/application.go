@@ -30,9 +30,9 @@ func (a *Application) RegisterRoutes(r *echo.Group) {
 	r.GET("", a.List)
 	r.POST("/:id/deploy", a.Deploy)
 	r.POST("/:id/upload", a.Upload)
-	r.POST("/:id/start", a.Start)
-	r.POST("/:id/stop", a.Stop)
 	r.DELETE("/:id", a.Delete)
+	r.POST("/:id/start/:versionID", a.Start)
+	r.POST("/:id/stop/:versionID", a.Stop)
 	r.DELETE("/:id/versions/:versionID", a.DeleteVersion)
 	r.POST("/branches", a.GetRepoBranches)
 }
@@ -144,11 +144,15 @@ func (a *Application) Deploy(c echo.Context) error {
 // @Router /applications/{id}/start [post]
 func (a *Application) Start(c echo.Context) error {
 	id := c.Param("id")
+	versionID := c.Param("versionID")
 	if id == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
+	if versionID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Version ID is required")
+	}
 
-	err := a.service.StartContainer(c.Request().Context(), id)
+	err := a.service.StartContainer(c.Request().Context(), id, versionID)
 	if err != nil {
 		logger.Error("error starting application: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to start application")
@@ -172,11 +176,15 @@ func (a *Application) Start(c echo.Context) error {
 // @Router /applications/{id}/stop [post]
 func (a *Application) Stop(c echo.Context) error {
 	id := c.Param("id")
+	versionID := c.Param("versionID")
 	if id == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Application ID is required")
 	}
+	if versionID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Version ID is required")
+	}
 
-	if err := a.service.StopContainer(c.Request().Context(), id); err != nil {
+	if err := a.service.StopContainer(c.Request().Context(), id, versionID); err != nil {
 		logger.Error("error stopping application: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to stop application")
 	}

@@ -31,8 +31,8 @@ type Application interface {
 	UpdateStat(ctx context.Context, stat model.ApplicationStat) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
 	Delete(ctx context.Context, id string) error
-	StartContainer(ctx context.Context, id string) error
-	StopContainer(ctx context.Context, id string) error
+	StartContainer(ctx context.Context, id, versionID string) error
+	StopContainer(ctx context.Context, id, versionID string) error
 	GetRepoBranches(ctx context.Context, repoURL string) ([]string, error)
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
@@ -96,12 +96,12 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 	return healthy, uint(len(apps)), nil
 }
 
-func (a *application) StartContainer(ctx context.Context, id string) error {
-	return a.dockerService.StartContainer(ctx, id)
+func (a *application) StartContainer(ctx context.Context, id, versionId string) error {
+	return a.dockerService.StartContainer(ctx, id, versionId)
 }
 
-func (a *application) StopContainer(ctx context.Context, id string) error {
-	return a.dockerService.StopContainer(ctx, id)
+func (a *application) StopContainer(ctx context.Context, id, versionId string) error {
+	return a.dockerService.StopContainer(ctx, id, versionId)
 }
 
 func (a *application) GetRepoBranches(ctx context.Context, repoURL string) ([]string, error) {
@@ -144,7 +144,7 @@ func (a *application) ensureContainerRunning(ctx context.Context, app model.Appl
 		}
 		return a.dockerService.CreateAndStartContainer(ctx, app, version, port)
 	} else if status == "Stopped" {
-		return a.dockerService.StartContainer(ctx, containerName)
+		return a.dockerService.StartContainer(ctx, app.ID, version.VersionTag)
 	}
 
 	return nil
