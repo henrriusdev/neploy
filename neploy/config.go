@@ -10,7 +10,6 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
 	neployway "neploy.dev/pkg/gateway"
-	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
@@ -37,7 +36,7 @@ func Start(npy Neploy) {
 	npy.Repositories = repos
 
 	// Initialize router
-	router := neployway.NewRouter(npy.Repositories.ApplicationStat)
+	router := neployway.NewRouter(npy.Repositories.ApplicationStat, npy.Repositories.ApplicationVersion, npy.Repositories.GatewayConfig)
 	npy.Router = router
 
 	// Initialize services
@@ -58,7 +57,6 @@ func Start(npy Neploy) {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Use(neployware.OnboardingMiddleware(services.Onboard))
-	logger.SetLogger()
 
 	// Validator
 	vldtr := validator.New()
@@ -89,7 +87,7 @@ func NewServices(npy Neploy) service.Services {
 	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
-	gateway := service.NewGateway(npy.Repositories.Gateway, npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.GatewayConfig)
+	gateway := service.NewGateway(npy.Repositories)
 	techStack := service.NewTechStack(npy.Repositories.TechStack, npy.Repositories.Application)
 	trace := service.NewTrace(npy.Repositories.Trace)
 	visitor := service.NewVisitor(npy.Repositories.VisitorInfo, npy.Repositories.VisitorTrace)
@@ -117,6 +115,7 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	userRole := repository.NewUserRole(npy.DB)
 	application := repository.NewApplication(npy.DB)
 	applicationStat := repository.NewApplicationStat(npy.DB)
+	appVersion := repository.NewApplicationVersion(npy.DB)
 	userTechStack := repository.NewUserTechStack(npy.DB)
 	visitorInfo := repository.NewVisitor(npy.DB)
 	visitorTrace := repository.NewVisitorTrace(npy.DB)
@@ -125,18 +124,19 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	gatewayConf := repository.NewGatewayConfig(npy.DB)
 
 	return repository.Repositories{
-		Application:     application,
-		ApplicationStat: applicationStat,
-		Gateway:         gateway,
-		GatewayConfig:   gatewayConf,
-		Metadata:        metadata,
-		Role:            role,
-		TechStack:       techStack,
-		User:            user,
-		UserOauth:       userOauth,
-		UserRole:        userRole,
-		UserTechStack:   userTechStack,
-		VisitorInfo:     visitorInfo,
-		VisitorTrace:    visitorTrace,
+		Application:        application,
+		ApplicationStat:    applicationStat,
+		ApplicationVersion: appVersion,
+		Gateway:            gateway,
+		GatewayConfig:      gatewayConf,
+		Metadata:           metadata,
+		Role:               role,
+		TechStack:          techStack,
+		User:               user,
+		UserOauth:          userOauth,
+		UserRole:           userRole,
+		UserTechStack:      userTechStack,
+		VisitorInfo:        visitorInfo,
+		VisitorTrace:       visitorTrace,
 	}
 }

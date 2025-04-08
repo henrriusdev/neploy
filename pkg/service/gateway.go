@@ -26,18 +26,14 @@ type Gateway interface {
 }
 
 type gateway struct {
-	router   *neployway.Router
-	repo     *repository.Gateway
-	appRepo  *repository.Application
-	confRepo *repository.GatewayConfig
+	router *neployway.Router
+	repos  repository.Repositories
 }
 
-func NewGateway(repo *repository.Gateway, appRepo *repository.Application, statRepo *repository.ApplicationStat, confRepo *repository.GatewayConfig) Gateway {
+func NewGateway(repos repository.Repositories) Gateway {
 	return &gateway{
-		router:   neployway.NewRouter(statRepo),
-		repo:     repo,
-		appRepo:  appRepo,
-		confRepo: confRepo,
+		router: neployway.NewRouter(repos.ApplicationStat, repos.ApplicationVersion, repos.GatewayConfig),
+		repos:  repos,
 	}
 }
 
@@ -70,7 +66,7 @@ func (s *gateway) validateGateway(ctx context.Context, gateway model.Gateway) er
 	}
 
 	// Check if application exists
-	_, err := s.appRepo.GetByID(ctx, gateway.ApplicationID)
+	_, err := s.repos.Application.GetByID(ctx, gateway.ApplicationID)
 	if err != nil {
 		return errors.Wrap(err, "application not found")
 	}
@@ -86,7 +82,7 @@ func (s *gateway) Create(ctx context.Context, gateway model.Gateway) error {
 	gateway.ID = uuid.New().String()
 	gateway.Status = "active"
 
-	if err := s.repo.Insert(ctx, gateway); err != nil {
+	if err := s.repos.Gateway.Insert(ctx, gateway); err != nil {
 		return err
 	}
 
@@ -113,7 +109,7 @@ func (s *gateway) Update(ctx context.Context, gateway model.Gateway) error {
 		return err
 	}
 
-	return s.repo.Update(ctx, gateway)
+	return s.repos.Gateway.Update(ctx, gateway)
 }
 
 func (s *gateway) Delete(ctx context.Context, id string) error {
@@ -126,11 +122,11 @@ func (s *gateway) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	return s.repo.Delete(ctx, id)
+	return s.repos.Gateway.Delete(ctx, id)
 }
 
 func (s *gateway) Get(ctx context.Context, id string) (model.Gateway, error) {
-	gateway, err := s.repo.GetByID(ctx, id)
+	gateway, err := s.repos.Gateway.GetByID(ctx, id)
 	if err != nil {
 		return model.Gateway{}, errors.Wrap(err, "failed to get gateway")
 	}
@@ -138,7 +134,7 @@ func (s *gateway) Get(ctx context.Context, id string) (model.Gateway, error) {
 }
 
 func (s *gateway) ListByApp(ctx context.Context, appID string) ([]model.Gateway, error) {
-	gateways, err := s.repo.GetByApplicationID(ctx, appID)
+	gateways, err := s.repos.Gateway.GetByApplicationID(ctx, appID)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list gateways")
 	}
@@ -156,12 +152,12 @@ func (s *gateway) AddRoute(ctx context.Context, gateway model.Gateway) error {
 
 	if err := s.router.AddRoute(route); err != nil {
 		gateway.Status = "error"
-		s.repo.Update(ctx, gateway)
+		s.repos.Gateway.Update(ctx, gateway)
 		return fmt.Errorf("failed to add route: %v", err)
 	}
 
 	gateway.Status = "active"
-	return s.repo.Update(ctx, gateway)
+	return s.repos.Gateway.Update(ctx, gateway)
 }
 
 func (s *gateway) RemoveRoute(ctx context.Context, gateway model.Gateway) error {
@@ -177,14 +173,14 @@ func (s *gateway) RemoveRoute(ctx context.Context, gateway model.Gateway) error 
 }
 
 func (s *gateway) GetAll(ctx context.Context) ([]model.FullGateway, error) {
-	gateways, err := s.repo.GetAll(ctx)
+	gateways, err := s.repos.Gateway.GetAll(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get gateways")
 	}
 
 	var fullGateways []model.FullGateway
 	for _, gateway := range gateways {
-		application, err := s.appRepo.GetByID(ctx, gateway.ApplicationID)
+		application, err := s.repos.Application.GetByID(ctx, gateway.ApplicationID)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get application")
 		}
@@ -200,7 +196,7 @@ func (s *gateway) GetAll(ctx context.Context) ([]model.FullGateway, error) {
 }
 
 func (s *gateway) GetConfig(ctx context.Context) (model.GatewayConfig, error) {
-	config, err := s.confRepo.Get(ctx)
+	config, err := s.repos.GatewayConfig.Get(ctx)
 	if err != nil {
 		logger.Error("error getting gateway config: %v", err)
 		return model.GatewayConfig{}, err
@@ -216,7 +212,7 @@ func (s *gateway) SaveConfig(ctx context.Context, req model.GatewayConfigRequest
 		LoadBalancer:          req.LoadBalancer,
 	}
 
-	config, err := s.confRepo.Upsert(ctx, config)
+	config, err := s.repos.GatewayConfig.Upsert(ctx, config)
 	if err != nil {
 		logger.Error("error saving gateway config: %v", err)
 		return model.GatewayConfig{}, err

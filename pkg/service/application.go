@@ -3,130 +3,67 @@ package service
 import (
 	"context"
 	"fmt"
+	"golang.org/x/sync/semaphore"
 	"mime/multipart"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
-	"time"
-
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
-	"neploy.dev/config"
-	"neploy.dev/pkg/docker"
+	neploker "neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
 	neployway "neploy.dev/pkg/gateway"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
+	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/websocket"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
 )
+
+var globalSemaphore = semaphore.NewWeighted(4)
 
 type Application interface {
 	Create(ctx context.Context, app model.Application) (string, error)
-	Get(ctx context.Context, id string) (model.Application, error)
+	Get(ctx context.Context, id string) (model.ApplicationDockered, error)
 	GetAll(ctx context.Context) ([]model.FullApplication, error)
 	Update(ctx context.Context, app model.Application) error
 	GetStat(ctx context.Context, id string) (model.ApplicationStat, error)
 	CreateStat(ctx context.Context, stat model.ApplicationStat) error
 	UpdateStat(ctx context.Context, stat model.ApplicationStat) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
+	Delete(ctx context.Context, id string) error
+	StartContainer(ctx context.Context, id, versionID string) error
+	StopContainer(ctx context.Context, id, versionID string) error
+	GetRepoBranches(ctx context.Context, repoURL string) ([]string, error)
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
-	Delete(ctx context.Context, id string) error
-	StartContainer(ctx context.Context, id string) error
-	StopContainer(ctx context.Context, id string) error
-	GetRepoBranches(ctx context.Context, repoURL string) ([]string, error)
+	DeleteVersion(ctx context.Context, appID string, versionID string) error
 }
 
 type application struct {
-	repos  repository.Repositories
-	router *neployway.Router
-	hub    *websocket.Hub
-	docker *docker.Docker
+	repos             repository.Repositories
+	hub               *websocket.Hub
+	docker            *neploker.Docker
+	router            *neployway.Router
+	versioningService Versioning
+	dockerService     Docker
 }
 
 func NewApplication(repos repository.Repositories, router *neployway.Router) Application {
-	return &application{repos, router, websocket.GetHub(), docker.NewDocker()}
+	hub := websocket.GetHub()
+	dockerClient := neploker.NewDocker()
+	return &application{
+		repos:             repos,
+		hub:               hub,
+		docker:            dockerClient,
+		router:            router,
+		versioningService: NewVersioning(repos, hub, dockerClient),
+		dockerService:     NewDocker(repos, hub, dockerClient, router),
+	}
 }
 
 func (a *application) Create(ctx context.Context, app model.Application) (string, error) {
 	return a.repos.Application.Insert(ctx, app)
-}
-
-func (a *application) Get(ctx context.Context, id string) (model.Application, error) {
-	return a.repos.Application.GetByID(ctx, id)
-}
-
-func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
-	apps, err := a.repos.Application.GetAll(ctx)
-	if err != nil {
-		logger.Error("error getting applications: %v", err)
-		return nil, err
-	}
-
-	var fullApps []model.FullApplication
-	for _, app := range apps {
-		stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
-		if err != nil {
-			logger.Error("error getting application stat: %v", err)
-			return nil, err
-		}
-
-		var tech model.TechStack
-		if app.TechStackID != nil {
-			tech, err = a.repos.TechStack.GetByID(ctx, *app.TechStackID)
-			if err != nil {
-				logger.Error("error getting tech stack: %v", err)
-				return nil, err
-			}
-		}
-
-		appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-		appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-		appName := strings.ToLower(appNameWithoutSpecialChars)
-		containerName := "neploy-" + strings.ToLower(appName)
-		imageName := "neploy/" + strings.ToLower(appName)
-
-		status, err := a.docker.GetContainerStatus(ctx, containerName)
-		if err != nil {
-			logger.Error("error getting container status: %v", err)
-			return nil, err
-		}
-		logger.Info("Container status: %s", status)
-
-		if status == "Not created" {
-			// get port from dockerfile
-			go func() error {
-				dockerfilePath := filepath.Join(app.StorageLocation, "Dockerfile")
-				port, err := a.configurePort(dockerfilePath, false)
-				if err != nil {
-					logger.Error("error configuring port: %v", err)
-					return err
-				}
-
-				// create container
-				a.createAndStartContainer(ctx, imageName, containerName, app.StorageLocation, app.ID, port)
-
-				status, err = a.docker.GetContainerStatus(ctx, containerName)
-				if err != nil {
-					logger.Error("error getting container status: %v", err)
-					return err
-				}
-
-				return nil
-			}()
-		}
-
-		fullApps = append(fullApps, model.FullApplication{
-			Application: app,
-			TechStack:   tech,
-			Stats:       stats,
-			Status:      status,
-		})
-	}
-
-	return fullApps, nil
 }
 
 func (a *application) Update(ctx context.Context, app model.Application) error {
@@ -148,504 +85,221 @@ func (a *application) UpdateStat(ctx context.Context, stat model.ApplicationStat
 func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 	apps, err := a.repos.ApplicationStat.GetAll(ctx)
 	if err != nil {
-		logger.Error("error getting all application stats: %v", err)
 		return 0, 0, err
 	}
 
-	var healthy uint = 3
+	var healthy uint
 	for _, app := range apps {
 		if app.Healthy {
 			healthy++
 		}
 	}
+	return healthy, uint(len(apps)), nil
+}
 
-	totalApps := uint(len(apps))
-	return healthy, totalApps, nil
+func (a *application) StartContainer(ctx context.Context, id, versionId string) error {
+	return a.dockerService.StartContainer(ctx, id, versionId)
+}
+
+func (a *application) StopContainer(ctx context.Context, id, versionId string) error {
+	return a.dockerService.StopContainer(ctx, id, versionId)
+}
+
+func (a *application) GetRepoBranches(ctx context.Context, repoURL string) ([]string, error) {
+	repo := filesystem.NewGitRepo(repoURL)
+	return repo.GetBranches()
 }
 
 func (a *application) Deploy(ctx context.Context, id string, repoURL string, branch string) error {
-	app, err := a.repos.Application.GetByID(ctx, id)
-	if err != nil {
-		logger.Error("error getting application: %v", err)
-		return err
-	}
-
-	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-	appName := strings.ToLower(appNameWithoutSpecialChars)
-	imageName := fmt.Sprintf("neploy/%s", appName)
-	containerName := fmt.Sprintf("neploy-%s", appName)
-
-	path := filepath.Join(config.Env.UploadPath, appName)
-	repo := filesystem.NewGitRepo(repoURL)
-	if err := repo.Clone(path, branch); err != nil {
-		logger.Error("error cloning repository: %v", err)
-		return err
-	}
-
-	techStack, err := filesystem.DetectStack(path)
-	if err != nil {
-		logger.Error("error detecting tech stack: %v", err)
-		return err
-	}
-
-	tech, err := a.repos.TechStack.FindOrCreate(ctx, techStack)
-	if err != nil {
-		logger.Error("error finding or creating tech stack: %v", err)
-		return err
-	}
-
-	// Broadcast progress if hub exists
-	if a.hub != nil {
-		a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
-	}
-
-	// Get notification client (may be nil)
-	var wsClient *websocket.Client
-	if a.hub != nil {
-		wsClient = a.hub.GetNotificationClient()
-	}
-
-	dockerStatus := filesystem.HasDockerfile(path, wsClient)
-	if !dockerStatus.Exists {
-		// Only send interactive message if hub exists
-		if a.hub != nil {
-			actionInput := websocket.NewSelectInput("action", []string{
-				"create",
-				"skip",
-			})
-
-			actionMsg := websocket.NewActionMessage(
-				websocket.ActionTypeCritical,
-				"Dockerfile Required",
-				"No Dockerfile found for application. Would you like to create one?",
-				[]websocket.Input{actionInput},
-			)
-
-			a.hub.BroadcastInteractive(actionMsg)
-		}
-
-		// Only broadcast progress if hub exists
-		if a.hub != nil {
-			a.hub.BroadcastProgress(50, "Creating Dockerfile...")
-		}
-
-		tmpl, ok := docker.GetDefaultTemplate(techStack)
-		if !ok {
-			logger.Error("no default template for tech stack: %s", techStack)
-			if a.hub != nil {
-				a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
-			}
-			return err
-		}
-
-		dockerfilePath := filepath.Join(path, "Dockerfile")
-		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
-			logger.Error("error writing dockerfile: %v", err)
-			if a.hub != nil {
-				a.hub.BroadcastProgress(100, "Error creating Dockerfile")
-			}
-			return err
-		}
-
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, "Created default Dockerfile")
-		}
-	}
-
-	// Configure port
-	dockerfilePath := filepath.Join(path, "Dockerfile")
-	port, err := a.configurePort(dockerfilePath, true)
-	if err != nil {
-		logger.Error("error configuring port: %v", err)
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, fmt.Sprintf("Error configuring port: %v", err))
-		}
-		return err
-	}
-
-	// Update application
-	app.TechStackID = &tech.ID
-	if err := a.repos.Application.Update(ctx, app); err != nil {
-		logger.Error("error updating application: %v", err)
-		return err
-	}
-
-	a.createAndStartContainer(ctx, imageName, containerName, path, app.ID, port)
-
-	logger.Info("application updated: %s", app.AppName)
-	if a.hub != nil {
-		a.hub.BroadcastProgress(100, "Deployment complete!")
-	}
-	return nil
-}
-
-func (a *application) createAndStartContainer(ctx context.Context, imageName, containerName, projectPath string, appID string, port string) {
-	// First, build the Docker image
-	if a.hub != nil {
-		a.hub.BroadcastProgress(0, "Building Docker image...")
-	}
-
-	if err := a.docker.BuildImage(context.Background(), filepath.Join(projectPath, "Dockerfile"), imageName); err != nil {
-		logger.Error("error building image: %v", err)
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, "Error building Docker image")
-		}
-		return
-	}
-
-	if a.hub != nil {
-		a.hub.BroadcastProgress(50, "Docker image built successfully")
-	}
-
-	// Get a free port for the container
-	hostConfig := &container.HostConfig{
-		AutoRemove: true,
-		PortBindings: nat.PortMap{
-			nat.Port(port + "/tcp"): []nat.PortBinding{
-				{
-					HostIP:   "0.0.0.0",
-					HostPort: port,
-				},
-			},
-		},
-	}
-
-	// Create container config with exposed port
-	cfg := &container.Config{
-		Image: imageName,
-		Tty:   true,
-		ExposedPorts: nat.PortSet{
-			nat.Port(port + "/tcp"): struct{}{},
-		},
-	}
-
-	if a.hub != nil {
-		a.hub.BroadcastProgress(70, "Creating container...")
-	}
-
-	resp, err := a.docker.CreateContainer(context.Background(), cfg, hostConfig, containerName)
-	if err != nil {
-		logger.Error("error creating container: %v", err)
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, "Error creating container")
-		}
-		return
-	}
-
-	// Create default gateway for the application
-	gateway := model.Gateway{
-		Name:          containerName + "-gateway",
-		EndpointType:  "subdomain",
-		Domain:        config.Env.DefaultDomain,
-		EndpointURL:   "/" + containerName,
-		Subdomain:     strings.Replace(containerName, "neploy", "", -1),
-		Port:          port,
-		Path:          "/" + containerName,
-		Status:        "inactive",
-		ApplicationID: appID,
-	}
-
-	if err := a.repos.Gateway.Insert(ctx, gateway); err != nil {
-		logger.Error("error creating gateway: %v", err)
-		// Continue even if gateway creation fails
-	}
-
-	if a.hub != nil {
-		a.hub.BroadcastProgress(90, "Starting container...")
-	}
-
-	if err := a.docker.StartContainer(ctx, resp.ID); err != nil {
-		logger.Error("error starting container: %v", err)
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, "Error starting container")
-		}
-		return
-	}
-
-	// Update gateway status to active
-	gateway.Status = "active"
-	if err := a.repos.Gateway.Update(ctx, gateway); err != nil {
-		logger.Error("error updating gateway status: %v", err)
-	}
-
-	route := neployway.Route{
-		AppID:     appID,
-		Port:      port,
-		Domain:    config.Env.DefaultDomain,
-		Path:      "/" + containerName,
-		Subdomain: "",
-	}
-	if err := a.router.AddRoute(route); err != nil {
-		logger.Error("Failed to add route: %v", err)
-		return
-	}
-
-	if a.hub != nil {
-		a.hub.BroadcastProgress(100, fmt.Sprintf("Container %s started successfully!", resp.ID[:12]))
-	}
-}
-
-func (a *application) configurePort(dockerfilePath string, interactive bool) (string, error) {
-	logger.Info("configuring port for Dockerfile: %s", dockerfilePath)
-	content, err := os.ReadFile(dockerfilePath)
-	if err != nil {
-		logger.Error("error reading dockerfile: %v", err)
-		return "", err
-	}
-
-	// Find EXPOSE directive and ask user for port
-	port := "3000" // Default port if not found
-	lines := strings.Split(string(content), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "EXPOSE") {
-			parts := strings.Fields(line)
-			if len(parts) > 1 {
-				port = parts[1]
-				break
-			}
-		}
-	}
-
-	// Ask user to confirm or change port
-	if a.hub != nil && interactive {
-		// Wait for interactive client to be available
-		for i := 0; i < 5; i++ {
-			if a.hub.GetInteractiveClient() != nil {
-				break
-			}
-			logger.Info("waiting for interactive client to be available...")
-			time.Sleep(2 * time.Second)
-		}
-
-		if a.hub.GetInteractiveClient() == nil {
-			return "", fmt.Errorf("no interactive client available")
-		}
-
-		response := a.hub.BroadcastInteractive(websocket.ActionMessage{
-			Type:    "critical",
-			Action:  "expose",
-			Title:   "Port Configuration",
-			Message: fmt.Sprintf("The application wants to expose port %s. You can change this if needed.", port),
-			Inputs: []websocket.Input{
-				{
-					Name:        "port",
-					Type:        "text",
-					Placeholder: "Enter port number",
-					Value:       port,
-					Required:    true,
-					Order:       1,
-				},
-			},
-		})
-
-		if response != nil && response.Data["port"] != "" {
-			port = response.Data["port"].(string)
-			logger.Info("using user-specified port: %s", port)
-
-			// Update Dockerfile with new port
-			newContent := ""
-			foundExpose := false
-			for _, line := range lines {
-				if strings.HasPrefix(strings.TrimSpace(line), "EXPOSE") {
-					newContent += fmt.Sprintf("EXPOSE %s\n", port)
-					foundExpose = true
-				} else {
-					newContent += line + "\n"
-				}
-			}
-
-			// Add EXPOSE if it wasn't found
-			if !foundExpose {
-				newContent += fmt.Sprintf("\nEXPOSE %s\n", port)
-			}
-
-			// Write updated Dockerfile
-			if err := os.WriteFile(dockerfilePath, []byte(newContent), 0o644); err != nil {
-				logger.Error("error updating dockerfile: %v", err)
-				return "", err
-			}
-		} else {
-			return "", fmt.Errorf("no response received from interactive client")
-		}
-	}
-
-	return port, nil
+	return a.versioningService.Deploy(ctx, id, repoURL, branch)
 }
 
 func (a *application) Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error) {
+	return a.versioningService.Upload(ctx, id, file)
+}
+
+func (a *application) ensureContainerRunning(ctx context.Context, app model.Application, version model.ApplicationVersion) error {
+	if version.Status == "paused" {
+		return nil
+	}
+
+	if err := globalSemaphore.Acquire(ctx, 1); err != nil {
+		logger.Error("semaphore timeout for version %s: %v", version.VersionTag, err)
+		return err
+	}
+	defer globalSemaphore.Release(1)
+
+	containerName := getContainerName(app.AppName, version.VersionTag)
+	status, err := a.docker.GetContainerStatus(ctx, containerName)
+	if err != nil {
+		logger.Error("error getting container status: %v", err)
+		return err
+	}
+	if status == "Not created" {
+		dockerfilePath := filepath.Join(version.StorageLocation, "Dockerfile")
+		port, err := a.dockerService.ConfigurePort(dockerfilePath, false)
+		if err != nil {
+			logger.Error("error configuring port: %v", err)
+			return err
+		}
+		if err := a.dockerService.CreateAndStartContainer(ctx, app, version, port); err != nil {
+			logger.Error("error creating and starting container: %v", err)
+			return err
+		}
+	} else {
+		if err := a.dockerService.StartContainer(ctx, app.ID, version.ID); err != nil {
+			logger.Error("error starting container: %v", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a *application) Get(ctx context.Context, id string) (model.ApplicationDockered, error) {
 	app, err := a.repos.Application.GetByID(ctx, id)
 	if err != nil {
-		logger.Error("error getting application: %v", err)
-		return "", err
+		logger.Error("error getting app %v", err)
+		return model.ApplicationDockered{}, err
 	}
 
-	zipPath, err := filesystem.UploadFile(file, app.AppName)
+	stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
 	if err != nil {
-		logger.Error("error uploading file: %v", err)
-		return "", err
+		logger.Error("error getting app stats: %v", err)
+		return model.ApplicationDockered{}, err
 	}
 
-	path, err := filesystem.UnzipFile(zipPath, app.AppName)
+	versions, err := a.repos.ApplicationVersion.GetAll(ctx, filters.IsSelectFilter("application_id", app.ID))
 	if err != nil {
-		logger.Error("error unzipping file: %v", err)
-		return "", err
+		logger.Error("error getting application versions: %v", err)
+		return model.ApplicationDockered{}, err
 	}
 
-	techStack, err := filesystem.DetectStack(path)
-	if err != nil {
-		logger.Error("error detecting tech stack: %v", err)
-		return "", err
-	}
-
-	tech, err := a.repos.TechStack.FindOrCreate(ctx, techStack)
-	if err != nil {
-		logger.Error("error finding or creating tech stack: %v", err)
-		return "", err
-	}
-
-	// Delete zip file
-	if err := os.Remove(zipPath); err != nil {
-		logger.Error("error deleting zip file: %v", err)
-		return "", err
-	}
-
-	if a.hub != nil {
-		a.hub.BroadcastProgress(0, "Checking for Docker Compose...")
-	}
-
-	if filesystem.HasDockerCompose(path) {
-		logger.Error("docker-compose file found, not supported")
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, "Error: Docker Compose files are not supported")
-		}
-
-		// Delete the application and notify
-		if err := a.Delete(ctx, id); err != nil {
-			logger.Error("error deleting application: %v", err)
-		}
-
-		if a.hub != nil {
-			actionMsg := websocket.NewActionMessage(
-				websocket.ActionTypeError,
-				"Docker Compose Not Supported",
-				"Docker Compose files are not supported. The application has been deleted.",
-				nil,
-			)
-			a.hub.BroadcastInteractive(actionMsg)
-		}
-		return "", err
-	}
-
-	if a.hub != nil {
-		a.hub.BroadcastProgress(0, "Checking for Dockerfile...")
-	}
-
-	var wsClient *websocket.Client
-	if a.hub != nil {
-		wsClient = a.hub.GetNotificationClient()
-	}
-
-	dockerStatus := filesystem.HasDockerfile(path, wsClient)
-	if !dockerStatus.Exists {
-		if a.hub != nil {
-			actionInput := websocket.NewSelectInput("action", []string{
-				"create",
-				"skip",
-			})
-
-			actionMsg := websocket.NewActionMessage(
-				websocket.ActionTypeCritical,
-				"Dockerfile Required",
-				"No Dockerfile found for application. Would you like to create one?",
-				[]websocket.Input{actionInput},
-			)
-
-			a.hub.BroadcastInteractive(actionMsg)
-		}
-
-		if a.hub != nil {
-			a.hub.BroadcastProgress(50, "Creating Dockerfile...")
-		}
-
-		tmpl, ok := docker.GetDefaultTemplate(techStack)
-		if !ok {
-			logger.Error("no default template for tech stack: %s", techStack)
-			if a.hub != nil {
-				a.hub.BroadcastProgress(100, "Error: No default template available for "+techStack)
+	for _, version := range versions {
+		v := version
+		go func() {
+			if err := a.ensureContainerRunning(ctx, app, v); err != nil {
+				logger.Error("error ensuring container for version %s: %v", v.VersionTag, err)
 			}
-			return "", err
-		}
-
-		dockerfilePath := filepath.Join(path, "Dockerfile")
-		if err := docker.WriteDockerfile(dockerfilePath, tmpl); err != nil {
-			logger.Error("error writing dockerfile: %v", err)
-			if a.hub != nil {
-				a.hub.BroadcastProgress(100, "Error creating Dockerfile")
-			}
-			return "", err
-		}
-
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, "Created default Dockerfile")
-		}
+		}()
 	}
 
-	// Configure port
-	dockerfilePath := filepath.Join(path, "Dockerfile")
-	port, err := a.configurePort(dockerfilePath, true)
+	if len(versions) == 0 {
+		return model.ApplicationDockered{
+			Application:    app,
+			CpuUsage:       0,
+			MemoryUsage:    0,
+			Uptime:         "0s",
+			RequestsPerMin: 0,
+			Logs:           []string{},
+			Versions:       versions,
+		}, nil
+	}
+
+	latest := versions[len(versions)-1]
+	containerID, err := a.docker.GetContainerID(ctx, getContainerName(app.AppName, latest.VersionTag))
 	if err != nil {
-		logger.Error("error configuring port: %v", err)
-		if a.hub != nil {
-			a.hub.BroadcastProgress(100, fmt.Sprintf("Error configuring port: %v", err))
+		logger.Error("error getting container ID: %v", err)
+		return model.ApplicationDockered{}, err
+	}
+
+	cpu, ram, err := a.docker.GetUsage(ctx, containerID)
+	if err != nil {
+		logger.Error("error getting container usage: %v", err)
+		cpu = 0
+		ram = 0
+	}
+
+	uptime, err := a.docker.GetUptime(ctx, containerID)
+	if err != nil {
+		logger.Error("error getting container uptime: %v", err)
+		uptime = time.Duration(0)
+	}
+
+	logs, err := a.docker.GetLogs(ctx, containerID, false)
+	if err != nil {
+		logger.Error("error getting container logs: %v", err)
+		logs = []string{}
+	}
+
+	var requestsPerMin int
+	for _, stat := range stats {
+		requestsPerMin += stat.Requests
+	}
+
+	return model.ApplicationDockered{
+		Application:    app,
+		CpuUsage:       cpu,
+		MemoryUsage:    ram,
+		Uptime:         uptime.String(),
+		RequestsPerMin: requestsPerMin,
+		Logs:           logs,
+		Versions:       versions,
+	}, nil
+}
+
+func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
+	apps, err := a.repos.Application.GetAll(ctx)
+	if err != nil {
+		logger.Error("error getting applications: %v", err)
+		return nil, err
+	}
+
+	var fullApps []model.FullApplication
+
+	for _, app := range apps {
+		stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
+		if err != nil {
+			logger.Error("error getting application stat: %v", err)
+			return nil, err
 		}
-		return "", err
+
+		var tech model.TechStack
+		if app.TechStackID != nil {
+			tech, err = a.repos.TechStack.GetByID(ctx, *app.TechStackID)
+			if err != nil {
+				logger.Error("error getting tech stack: %v", err)
+				return nil, err
+			}
+		}
+
+		versions, err := a.repos.ApplicationVersion.GetAll(ctx, filters.IsSelectFilter("application_id", app.ID))
+		if err != nil {
+			logger.Error("error getting application versions: %v", err)
+			return nil, err
+		}
+
+		for _, version := range versions {
+			v := version
+			go func() {
+				if err := a.ensureContainerRunning(context.Background(), app, v); err != nil {
+					logger.Error("error ensuring container for version %s: %v", v.VersionTag, err)
+				}
+			}()
+		}
+
+		// Usar el status de la primera versión activa, si hay
+		appStatus := "unknown"
+		for _, v := range versions {
+			if v.Status != "paused" && v.Status != "inactive" {
+				containerName := getContainerName(app.AppName, v.VersionTag)
+				status, err := a.docker.GetContainerStatus(ctx, containerName)
+				if err == nil {
+					appStatus = status
+					break
+				}
+			}
+		}
+
+		fullApps = append(fullApps, model.FullApplication{
+			Application: app,
+			TechStack:   tech,
+			Stats:       stats,
+			Status:      appStatus,
+		})
 	}
 
-	// Update application
-	app.TechStackID = &tech.ID
-	if err := a.repos.Application.Update(ctx, app); err != nil {
-		logger.Error("error updating application: %v", err)
-		return "", err
-	}
-
-	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-	appName := strings.ToLower(appNameWithoutSpecialChars)
-
-	// Create Docker image name with neploy prefix
-	imageName := fmt.Sprintf("neploy/%s", appName)
-	containerName := fmt.Sprintf("neploy-%s", appName)
-
-	// Start container creation in a separate goroutine
-	go a.createAndStartContainer(ctx, imageName, containerName, path, app.ID, port)
-
-	logger.Info("application updated: %s", app.AppName)
-	if a.hub != nil {
-		a.hub.BroadcastProgress(100, "Deployment complete!")
-	}
-
-	app.StorageLocation = path
-	app.TechStackID = &tech.ID
-	if err := a.repos.Application.Update(ctx, app); err != nil {
-		logger.Error("error updating application: %v", err)
-		return "", err
-	}
-
-	route := neployway.Route{
-		AppID:     app.ID,
-		Port:      port,
-		Domain:    config.Env.DefaultDomain,
-		Path:      "/" + containerName,
-		Subdomain: "",
-	}
-	if err := a.router.AddRoute(route); err != nil {
-		logger.Error("Failed to add route: %v", err)
-		return "", err
-	}
-
-	return path, nil
+	return fullApps, nil
 }
 
 func (a *application) Delete(ctx context.Context, id string) error {
@@ -694,46 +348,6 @@ func (a *application) Delete(ctx context.Context, id string) error {
 	return a.repos.Application.Delete(ctx, id)
 }
 
-func (a *application) StartContainer(ctx context.Context, id string) error {
-	app, err := a.repos.Application.GetByID(ctx, id)
-	if err != nil {
-		logger.Error("error getting application: %v", err)
-		return err
-	}
-
-	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-	appName := strings.ToLower(appNameWithoutSpecialChars)
-	containerId, err := a.docker.GetContainerID(ctx, appName)
-	if err != nil {
-		logger.Error("error getting container ID: %v", err)
-		return err
-	}
-
-	return a.docker.StartContainer(ctx, containerId)
-}
-
-func (a *application) StopContainer(ctx context.Context, id string) error {
-	app, err := a.repos.Application.GetByID(ctx, id)
-	if err != nil {
-		logger.Error("error getting application: %v", err)
-		return err
-	}
-
-	appNameWithoutSpace := strings.ReplaceAll(app.AppName, " ", "-")
-	appNameWithoutSpecialChars := regexp.MustCompile(`[^a-zA-Z0-9-]`).ReplaceAllString(appNameWithoutSpace, "")
-	appName := strings.ToLower(appNameWithoutSpecialChars)
-
-	containerId, err := a.docker.GetContainerID(ctx, appName)
-	if err != nil {
-		logger.Error("error getting container ID: %v", err)
-		return err
-	}
-
-	return a.docker.StopContainer(ctx, containerId)
-}
-
-func (a *application) GetRepoBranches(ctx context.Context, repoURL string) ([]string, error) {
-	repo := filesystem.NewGitRepo(repoURL)
-	return repo.GetBranches()
+func (a *application) DeleteVersion(ctx context.Context, appID string, versionID string) error {
+	return a.versioningService.DeleteVersion(ctx, appID, versionID)
 }

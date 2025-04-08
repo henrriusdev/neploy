@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {
   Card,
   CardContent,
@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "@/components/forms/language-selector";
 import "@/i18n";
 import { useLoginMutation } from "@/services/api/auth";
+import {useTheme} from "@/hooks";
 
 const formSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -38,6 +39,12 @@ export default function Component() {
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
   const [login] = useLoginMutation();
+
+  const { theme, isDark, applyTheme } = useTheme(); // <- aquí usamos applyTheme directamente
+
+  useEffect(() => {
+    applyTheme(theme, isDark);
+  }, [theme, isDark]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,9 +76,9 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row bg-gradient-to-r from-[#2b354c] to-background from-30% to-70%">
       {/* Side Content */}
-      <div className="md:w-2/5 bg-gradient-to-r from-[#2b354c] to-background from-30% to-100% p-8 flex flex-col justify-center">
+      <div className="md:w-2/5 p-8 flex flex-col justify-center">
         <div className="mb-8">
           <img
             src="/placeholder.svg?height=80&width=80"

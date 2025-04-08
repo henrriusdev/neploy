@@ -1,6 +1,6 @@
 import Layout from "@/components/Layouts/Layout";
 import { Toaster } from "@/components/ui/toaster";
-import { usePage, useRemember } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import {
   AppWindowMac,
   DoorOpen,
@@ -11,6 +11,7 @@ import {
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Applications, Home, Gateways, Team, Config } from "../views";
+import {ApplicationView} from "@/components/views/application-view";
 
 const navItems = [
   {
@@ -57,13 +58,6 @@ interface DashboardLayoutProps {
   props?: any;
 }
 
-interface NavigationItem {
-  title: string;
-  url: string;
-  icon: any;
-  isActive?: boolean;
-}
-
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   user: backendUser,
   teamName,
@@ -84,6 +78,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const getComponent = () => {
     const dashboardUrl = url.replace("/dashboard", "");
+    if (dashboardUrl.startsWith("/applications/") && dashboardUrl.split("/").length === 3) {
+      return <ApplicationView {...props} />;
+    }
+
     switch (dashboardUrl) {
       case "":
         return <Home {...props} />;

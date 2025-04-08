@@ -126,7 +126,7 @@ export function Applications({
         variant: "destructive",
       });
     }
-  }, [branchesError, t]);
+  }, [branchesError]);
 
   useEffect(() => {
     if (branchesData?.branches) {
@@ -158,29 +158,20 @@ export function Applications({
   const [stopApplication] = useStopApplicationMutation();
   const [deleteApplication] = useDeleteApplicationMutation();
 
-  const handleApplicationAction = async (
-    appId: string,
-    action: "start" | "stop" | "delete"
-  ) => {
+  const handleApplicationAction = async (appId: string) => {
     try {
-      if (action === "delete") {
-        await deleteApplication({ appId });
-      } else if (action === "start") {
-        await startApplication({ appId });
-      } else if (action === "stop") {
-        await stopApplication({ appId });
-      }
-
+      await deleteApplication({ appId });
+      
       toast({
         title: t("common.success"),
-        description: t(`applications.actions.${action}Success`),
+        description: t(`applications.actions.deleteSuccess`),
       });
 
       refreshApplications();
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description: error.message || t(`applications.errors.${action}Failed`),
+        description: error.message || t(`applications.errors.deleteFailed`),
         variant: "destructive",
       });
     }
@@ -343,10 +334,6 @@ export function Applications({
   }, [onNotification, onInteractive, sendMessage, toast, t]);
 
   useEffect(() => {
-    refreshApplications();
-  }, []);
-
-  useEffect(() => {
     const ws = new WebSocket(
       `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${
         window.location.host
@@ -411,7 +398,8 @@ export function Applications({
       </div>
 
       {/* Actions Bar */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-3 py-1">
+        <h1 className="font-bold text-3xl">{t('dashboard.applications.title')}</h1>
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -449,9 +437,7 @@ export function Applications({
           <ApplicationCard
             key={app.id}
             app={app}
-            onStart={() => handleApplicationAction(app.id, "start")}
-            onStop={() => handleApplicationAction(app.id, "stop")}
-            onDelete={() => handleApplicationAction(app.id, "delete")}
+            onDelete={() => handleApplicationAction(app.id)}
           />
         ))}
       </div>

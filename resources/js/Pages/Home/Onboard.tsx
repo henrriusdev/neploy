@@ -97,20 +97,11 @@ export default function Onboard({ email, username }: Props) {
 
     try {
       const response = await onboard({ data: payload });
-
-      if ("data" in response && response.data.success) {
         toast({
           title: t("common.success"),
           description: t("onboarding.success"),
         });
         window.location.replace("/");
-      } else {
-        toast({
-          title: t("common.error"),
-          description: t("onboarding.error"),
-          variant: "destructive",
-        });
-      }
     } catch (error: any) {
       toast({
         title: t("common.error"),
@@ -226,7 +217,7 @@ export default function Onboard({ email, username }: Props) {
   return (
     <div className="flex min-h-screen">
       <OnboardingSidebar currentStep={step} className="w-1/4" />
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 flex justify-center items-center flex-col">
         <h1 className="text-3xl font-bold mb-6 text-center">
           {t("onboarding.setupAccount")}
         </h1>

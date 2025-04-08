@@ -1,6 +1,4 @@
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   Card,
@@ -11,23 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Controller } from "react-hook-form";
-import { InputAutoComplete } from "@/components/forms";
-import { ColorPicker } from "@/components/forms/color-picker";
 import { RoleIcon } from "@/components/icons/role-icon";
 import { Trash2 } from "lucide-react";
-import { icons } from "@/lib/icons";
 import { RoleForm } from "@/components/forms";
+import {useTranslation} from "react-i18next";
 
 const roleSchema = z.object({
   name: z.string().min(1, "Role name is required"),
@@ -44,6 +29,7 @@ interface Props {
 }
 
 export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
+  const {t} = useTranslation();
   const onSubmit = (data: z.infer<typeof roleSchema>) => {
     setRoles([...roles, data]);
   };
@@ -51,8 +37,8 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
   return (
     <Card className="w-full max-w-screen-md mx-auto">
       <CardHeader>
-        <CardTitle>Create Roles</CardTitle>
-        <CardDescription>Define roles for your organization</CardDescription>
+        <CardTitle>{t('step.role.title')}</CardTitle>
+        <CardDescription>{t('step.role.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <RoleForm 
@@ -60,15 +46,15 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
           renderFooter={(form) => (
             <div className="flex justify-between mt-6">
               <Button type="button" variant="outline" onClick={onBack}>
-                Back
+                {t('actions.back')}
               </Button>
               <div className="space-x-2">
-                <Button type="submit">Add Role</Button>
+                <Button type="submit">{t('step.role.add')}</Button>
                 <Button 
                   type="button" 
                   onClick={onNext}
                   disabled={roles.length === 0}>
-                  Next
+                  {t('actions.back')}
                 </Button>
               </div>
             </div>
@@ -76,7 +62,7 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
         />
         {roles.length > 0 && (
           <div className="mt-6">
-            <h3 className="font-semibold text-xl">Roles Selected</h3>
+            <h3 className="font-semibold text-xl">{t('step.role.selected')}</h3>
             <ul>
               {roles.map((role, index) => (
                 <li

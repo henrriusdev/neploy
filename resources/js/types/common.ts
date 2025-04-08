@@ -43,7 +43,8 @@ export interface Application {
   storageLocation: string;
   deployLocation: string;
   techStackId: string;
-  status: "Building" | "Running" | "Stopped" | "Error";
+  description?: string;
+  status: "Building" | "Running" | "Stopped" | "Error" | "Created";
   language?: string;
   createdAt: string;
   updatedAt: string;
@@ -88,4 +89,24 @@ export interface GatewayConfig {
   defaultVersioningType: "header" | "uri";
   defaultVersion: "latest" | "stable";
   loadBalancer: boolean;
+}
+
+export interface ApplicationVersion {
+  id: string;
+  versionTag: string;
+  description: string;
+  status: string;
+  storageLocation: string;
+  applicationId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApplicationDockered extends Application {
+  cpuUsage: number;
+  memoryUsage: number;
+  uptime: string;
+  requestsPerMin: number;
+  logs: string[];
+  versions: ApplicationVersion[];
 }

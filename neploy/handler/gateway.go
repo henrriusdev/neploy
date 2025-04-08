@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"neploy.dev/pkg/logger"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -196,6 +197,7 @@ func (h *Gateway) SaveConfig(c echo.Context) error {
 	}
 
 	if err := c.Validate(req); err != nil {
+		logger.Debug("invalid: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 

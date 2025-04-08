@@ -2,7 +2,10 @@ package neploy
 
 import (
 	"context"
+	"fmt"
+	"neploy.dev/pkg/repository/filters"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"neploy.dev/neploy/handler"
@@ -70,16 +73,50 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	gatewayRoutes(e, i, npy)
 
 	gateways, _ := npy.Services.Gateway.GetAll(context.Background())
+
 	for _, gateway := range gateways {
+		// 🔄 Traer todas las versiones de esta app
+		versions, err := npy.Repositories.ApplicationVersion.GetAll(context.Background(), filters.IsSelectFilter("application_id", gateway.ApplicationID))
+		if err != nil {
+			logger.Error("Failed to get versions for app %s: %v", gateway.ApplicationID, err)
+			continue
+		}
+
+		for i, v := range versions {
+			// Ruta con versión incluida: /vX.Y.Z/app
+			versionedPath := fmt.Sprintf("/%s%s", v.VersionTag, gateway.EndpointURL)
+
+			port := 4001
+			port -= i
+
+			route := neployway.Route{
+				AppID:     gateway.ApplicationID,
+				Port:      strconv.Itoa(int(port)),
+				Domain:    gateway.Domain,
+				Path:      versionedPath,
+				Subdomain: gateway.Subdomain,
+			}
+
+			println("Registering default route:", route.Path, route.Port)
+
+			if err := npy.Router.AddRoute(route); err != nil {
+				logger.Error("Failed to add route: %v", err)
+			}
+		}
+
+		// ➕ Registrar ruta sin versión para la versión por defecto
 		route := neployway.Route{
 			AppID:     gateway.ApplicationID,
 			Port:      gateway.Port,
 			Domain:    gateway.Domain,
-			Path:      gateway.Path,
+			Path:      gateway.EndpointURL, // sin versión
 			Subdomain: gateway.Subdomain,
 		}
+
+		println("Registering default route:", route.Path)
+
 		if err := npy.Router.AddRoute(route); err != nil {
-			logger.Error("Failed to add route: %v", err)
+			logger.Error("Failed to add default route: %v", err)
 		}
 	}
 

@@ -18,6 +18,7 @@ import { icons } from "@/lib/icons";
 import { roleSchema } from "@/lib/validations/role";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
+import {useTranslation} from "react-i18next";
 
 interface RoleFormProps {
   defaultValues?: z.infer<typeof roleSchema>;
@@ -27,6 +28,7 @@ interface RoleFormProps {
 }
 
 export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: RoleFormProps) {
+  const {t} = useTranslation();
   const form = useForm<z.infer<typeof roleSchema>>({
     resolver: zodResolver(roleSchema),
     defaultValues: defaultValues || {
@@ -45,7 +47,7 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Role Name</FormLabel>
+              <FormLabel>{t('step.role.name')}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -58,7 +60,7 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t('step.role.description')}</FormLabel>
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
@@ -71,7 +73,7 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
           name="icon"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Icon</FormLabel>
+              <FormLabel>{t('step.role.icon')}</FormLabel>
               <FormControl>
                 <div className="flex gap-2 items-center">
                   <div className="flex-grow">
@@ -92,7 +94,7 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
                               />
                             ),
                           }))}
-                          placeholder="Search for an icon..."
+                          placeholder={t('step.role.placeholder')}
                         />
                       )}
                     />
@@ -108,7 +110,7 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
           name="color"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Color</FormLabel>
+              <FormLabel>{t('step.role.color')}</FormLabel>
               <FormControl>
                 <Controller
                   control={form.control}
@@ -121,7 +123,7 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
           )}
         />
         <div className="flex items-start flex-col space-y-2">
-          <h2 className="font-semibold text-lg">Icon Preview</h2>
+          <h2 className="font-semibold text-lg">{t('step.role.icon preview')}</h2>
           <RoleIcon icon={form.watch("icon")} color={form.watch("color")} />
         </div>
         {renderFooter ? (
@@ -129,9 +131,9 @@ export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: Ro
         ) : (
           <DialogFooter>
             <Button variant="outline" type="button" onClick={onCancel}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit">{t('actions.save')}</Button>
           </DialogFooter>
         )}
       </form>

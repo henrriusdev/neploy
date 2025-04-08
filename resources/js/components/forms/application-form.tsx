@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import {Input} from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,32 +16,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import {Textarea} from "@/components/ui/textarea";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useForm} from "react-hook-form";
 import * as z from "zod";
-import { useDropzone } from "react-dropzone";
+import {useDropzone} from "react-dropzone";
 import React from "react";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
 import "@/i18n";
 
-const uploadFormSchema = z.object({
-  appName: z.string().min(1, "Application name is required"),
-  description: z.string().optional(),
+const baseFields = {
   repoUrl: z
     .string()
     .refine(
       (value) => {
-        if (!value) return true; // Allow empty string
+        if (!value) return true;
         try {
           const url = new URL(value);
-          // Check if it's GitHub or GitLab
-          if (!["github.com", "gitlab.com"].includes(url.hostname)) {
-            return false;
-          }
-          // Check if it has the pattern: hostname/user/repo
           const parts = url.pathname.split("/").filter(Boolean);
-          return parts.length === 2; // Should have exactly user and repo
+          return ["github.com", "gitlab.com"].includes(url.hostname) && parts.length === 2;
         } catch {
           return false;
         }
@@ -53,9 +46,25 @@ const uploadFormSchema = z.object({
     )
     .optional(),
   branch: z.string().optional(),
-});
+  description: z.string().optional(),
+};
+
+const uploadFormSchema = z.discriminatedUnion("mode", [
+  z.object({
+    mode: z.literal("create-app"),
+    appName: z.string().min(1, "Application name is required"),
+    ...baseFields,
+  }),
+  z.object({
+    mode: z.literal("create-version"),
+    appName: z.string().optional(), // No requerido
+    ...baseFields,
+  }),
+]);
 
 interface ApplicationFormProps {
+  mode?: "create-app" | "create-version";
+  applicationId?: string;
   onSubmit: (
     values: z.infer<typeof uploadFormSchema>,
     file: File | null
@@ -67,17 +76,19 @@ interface ApplicationFormProps {
 }
 
 export function ApplicationForm({
-  onSubmit,
-  isUploading,
-  branches,
-  isLoadingBranches,
-  onRepoUrlChange,
-}: ApplicationFormProps) {
+                                  mode = "create-app",
+                                  onSubmit,
+                                  isUploading,
+                                  branches,
+                                  isLoadingBranches,
+                                  onRepoUrlChange,
+                                }: ApplicationFormProps) {
   const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
 
   const form = useForm<z.infer<typeof uploadFormSchema>>({
     resolver: zodResolver(uploadFormSchema),
     defaultValues: {
+      mode,
       appName: "",
       description: "",
       repoUrl: "",
@@ -85,7 +96,7 @@ export function ApplicationForm({
     },
   });
 
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -94,7 +105,7 @@ export function ApplicationForm({
     }
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({
     onDrop,
     accept: {
       "application/zip": [".zip"],
@@ -107,7 +118,7 @@ export function ApplicationForm({
   });
 
   React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
+    const subscription = form.watch((value, {name}) => {
       if (name === "repoUrl") {
         onRepoUrlChange(value.repoUrl || "");
       }
@@ -117,45 +128,50 @@ export function ApplicationForm({
   }, [form, onRepoUrlChange]);
 
   const handleSubmit = (values: z.infer<typeof uploadFormSchema>) => {
+    console.log(values);
     onSubmit(values, uploadedFile);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="appName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("dashboard.applications.createNew.name")}</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder={t("dashboard.applications.createNew.namePlaceholder")} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("dashboard.applications.createNew.description")}</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder={t("dashboard.applications.createNew.descriptionPlaceholder")}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {mode === "create-app" && (
+          <>
+            <FormField
+              control={form.control}
+              name="appName"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{t("dashboard.applications.createNew.name")}</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t("dashboard.applications.createNew.namePlaceholder")}/>
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{t("dashboard.applications.createNew.description")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t("dashboard.applications.createNew.descriptionPlaceholder")}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+          </>
+        )}
         <FormField
           control={form.control}
           name="repoUrl"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>{t("dashboard.applications.createNew.fileOrRepo")}</FormLabel>
               <FormControl>
@@ -167,7 +183,7 @@ export function ApplicationForm({
               <FormDescription>
                 {t("dashboard.applications.createNew.repoUrlDescription")}
               </FormDescription>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
@@ -175,7 +191,7 @@ export function ApplicationForm({
           <FormField
             control={form.control}
             name="branch"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>{t("dashboard.applications.createNew.branch")}</FormLabel>
                 <Select
@@ -201,7 +217,7 @@ export function ApplicationForm({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage/>
               </FormItem>
             )}
           />

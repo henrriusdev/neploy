@@ -17,7 +17,7 @@ export function LanguageSelector({ className = '' }: Props) {
         <div className={className}>
             <Select value={i18n.language} onValueChange={handleLanguageChange}>
                 <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder={t('common.languageSelector')} />
+                    <SelectValue className='!text-black dark:!text-white' placeholder={t('common.languageSelector')} />
                 </SelectTrigger>
                 <SelectContent>
                     {SUPPORTED_LANGUAGES.map((lang) => (

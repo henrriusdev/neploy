@@ -14,21 +14,22 @@ import (
 )
 
 type Repositories struct {
-	ApplicationUser *ApplicationUser
-	Application     *Application
-	ApplicationStat *ApplicationStat
-	Gateway         *Gateway
-	GatewayConfig   *GatewayConfig
-	Metadata        *Metadata
-	Role            *Role
-	TechStack       *TechStack
-	Trace           *Trace
-	User            *User
-	UserOauth       *UserOAuth
-	UserRole        *UserRole
-	UserTechStack   *UserTechStack
-	VisitorInfo     *VisitorInfo
-	VisitorTrace    *VisitorTrace
+	ApplicationUser    *ApplicationUser
+	Application        *Application
+	ApplicationStat    *ApplicationStat
+	ApplicationVersion *ApplicationVersion
+	Gateway            *Gateway
+	GatewayConfig      *GatewayConfig
+	Metadata           *Metadata
+	Role               *Role
+	TechStack          *TechStack
+	Trace              *Trace
+	User               *User
+	UserOauth          *UserOAuth
+	UserRole           *UserRole
+	UserTechStack      *UserTechStack
+	VisitorInfo        *VisitorInfo
+	VisitorTrace       *VisitorTrace
 }
 
 var (

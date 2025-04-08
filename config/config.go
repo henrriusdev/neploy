@@ -15,7 +15,7 @@ type EnvVar struct {
 	Port                string `env:"PORT" envDefault:"3000"`
 	DBName              string `env:"DB_NAME" envDefault:"neploy"`
 	DBUser              string `env:"DB_USER" envDefault:"henrrius"`
-	DBPass              string `env:"DB_PASS" envDefault:"Reyshell"`
+	DBPass              string `env:"DB_PASSWORD" envDefault:"Reyshell"`
 	DBHost              string `env:"DB_HOST" envDefault:"localhost"`
 	DBPort              string `env:"DB_PORT" envDefault:"5432"`
 	DBSSLMode           string `env:"DB_SSL_MODE" envDefault:"disable"`
