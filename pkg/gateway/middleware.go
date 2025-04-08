@@ -3,9 +3,13 @@ package gateway
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
+	"neploy.dev/pkg/model"
+	"neploy.dev/pkg/repository"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -44,9 +48,9 @@ func LoggingMiddleware(next http.Handler, metrics *MetricsCollector) http.Handle
 		// Create a response writer that captures the response
 		rw := &responseWriter{
 			ResponseWriter: w,
-			buf:           buf,
-			tee:           io.MultiWriter(w, buf),
-			status:        http.StatusOK, // Default status
+			buf:            buf,
+			tee:            io.MultiWriter(w, buf),
+			status:         http.StatusOK, // Default status
 		}
 
 		// Read and store the request body
@@ -146,24 +150,40 @@ func RateLimitMiddleware(next http.Handler, rateLimit int) http.Handler {
 	return next
 }
 
-// AuthMiddleware implements authentication checking for gateway routes
-func AuthMiddleware(next http.Handler, requiresAuth bool) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !requiresAuth {
+// VersionRoutingMiddleware enruta a la versión correcta según el header o la ruta
+func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *repository.ApplicationVersion) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			pathSegments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+			var resolvedVersion string
+
+			println(config.DefaultVersioningType)
+			if config.DefaultVersioningType == model.VersioningTypeHeader {
+				resolvedVersion = r.Header.Get("X-API-Version")
+				url := pathSegments[0]
+				r.URL.Path = fmt.Sprintf("/%s/%s", resolvedVersion, url)
+			} else {
+				if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {
+					resolvedVersion = pathSegments[0]
+				}
+			}
+
+			if resolvedVersion == "" {
+				resolvedVersion = string(config.DefaultVersion)
+			}
+
+			// Validar si la versión existe para la app actual
+			if len(pathSegments) > 1 {
+				appName := pathSegments[1] // se asume /vX/app-name
+				exists, err := appVersionRepo.ExistsByName(r.Context(), appName, resolvedVersion)
+				if err != nil || !exists {
+					http.Error(w, "API version not found", http.StatusNotFound)
+					return
+				}
+			}
+
+			r.Header.Set("Resolved-Version", resolvedVersion)
 			next.ServeHTTP(w, r)
-			return
-		}
-
-		// Check for Authorization header
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Unauthorized - No token provided", http.StatusUnauthorized)
-			return
-		}
-
-		// TODO: Implement token validation logic here
-		// This should validate the token format, expiration, and signature
-
-		next.ServeHTTP(w, r)
-	})
+		})
+	}
 }

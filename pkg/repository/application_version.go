@@ -47,3 +47,26 @@ func (a *ApplicationVersion) Exists(ctx context.Context, appID, tag string) (boo
 	row, err := a.GetOne(ctx, filters.IsSelectFilter("application_id", appID), filters.IsSelectFilter("version_tag", tag))
 	return row.ID != "", err
 }
+
+func (a *ApplicationVersion) ExistsByName(ctx context.Context, name, tag string) (bool, error) {
+	q := a.baseQuery("v").
+		Select(goqu.I("v.*")).
+		LeftJoin(
+			goqu.T("applications").As("a"),
+			goqu.On(goqu.I("a.id").Eq(goqu.I("v.application_id"))),
+		).Where(goqu.I("a.app_name").Eq(name)).Where(goqu.I("v.version_tag").Eq(tag))
+
+	query, args, err := q.ToSQL()
+	if err != nil {
+		logger.Error("error building select query: %v", err)
+		return false, err
+	}
+
+	var row model.ApplicationVersion
+	if err := a.Store.GetContext(ctx, &row, query, args...); err != nil {
+		logger.Error("error executing select query: %v", err)
+		return false, err
+	}
+
+	return row.ID != "", err
+}

@@ -79,17 +79,17 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 	}
 
 	gateway := model.Gateway{
-		Name:          containerName + "-gateway",
+		Name:          appName + "-gateway",
 		EndpointType:  "path",
 		Domain:        config.Env.DefaultDomain,
-		EndpointURL:   fmt.Sprintf("/%s/%s", version.VersionTag, appName),
+		EndpointURL:   "/" + appName,
 		Subdomain:     strings.Replace(containerName, "neploy", "", -1),
 		Port:          port,
-		Path:          "/" + containerName,
+		Path:          "/" + appName,
 		Status:        "active",
 		ApplicationID: app.ID,
 	}
-	if _, err := d.repos.Gateway.UpsertOneDoUpdate(ctx, gateway, "gateway_name"); err != nil {
+	if _, err := d.repos.Gateway.UpsertOneDoUpdate(ctx, gateway, "name"); err != nil {
 		logger.Error("error creating gateway: %v", err)
 	}
 
@@ -97,7 +97,7 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 		AppID:     app.ID,
 		Port:      port,
 		Domain:    config.Env.DefaultDomain,
-		Path:      "/" + containerName,
+		Path:      "/" + appName,
 		Subdomain: "",
 	}
 	if err := d.router.AddRoute(route); err != nil {

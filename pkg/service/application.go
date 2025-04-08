@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var globalSemaphore = semaphore.NewWeighted(4)
@@ -118,7 +119,7 @@ func (a *application) Upload(ctx context.Context, id string, file *multipart.Fil
 }
 
 func (a *application) ensureContainerRunning(ctx context.Context, app model.Application, version model.ApplicationVersion) error {
-	if version.Status == "paused" || version.Status == "inactive" {
+	if version.Status == "paused" {
 		return nil
 	}
 
@@ -134,7 +135,6 @@ func (a *application) ensureContainerRunning(ctx context.Context, app model.Appl
 		logger.Error("error getting container status: %v", err)
 		return err
 	}
-
 	if status == "Not created" {
 		dockerfilePath := filepath.Join(version.StorageLocation, "Dockerfile")
 		port, err := a.dockerService.ConfigurePort(dockerfilePath, false)
@@ -142,9 +142,15 @@ func (a *application) ensureContainerRunning(ctx context.Context, app model.Appl
 			logger.Error("error configuring port: %v", err)
 			return err
 		}
-		return a.dockerService.CreateAndStartContainer(ctx, app, version, port)
-	} else if status == "Stopped" {
-		return a.dockerService.StartContainer(ctx, app.ID, version.VersionTag)
+		if err := a.dockerService.CreateAndStartContainer(ctx, app, version, port); err != nil {
+			logger.Error("error creating and starting container: %v", err)
+			return err
+		}
+	} else {
+		if err := a.dockerService.StartContainer(ctx, app.ID, version.ID); err != nil {
+			logger.Error("error starting container: %v", err)
+			return err
+		}
 	}
 
 	return nil
@@ -200,19 +206,20 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 	cpu, ram, err := a.docker.GetUsage(ctx, containerID)
 	if err != nil {
 		logger.Error("error getting container usage: %v", err)
-		return model.ApplicationDockered{}, err
+		cpu = 0
+		ram = 0
 	}
 
 	uptime, err := a.docker.GetUptime(ctx, containerID)
 	if err != nil {
 		logger.Error("error getting container uptime: %v", err)
-		return model.ApplicationDockered{}, err
+		uptime = time.Duration(0)
 	}
 
 	logs, err := a.docker.GetLogs(ctx, containerID, false)
 	if err != nil {
 		logger.Error("error getting container logs: %v", err)
-		return model.ApplicationDockered{}, err
+		logs = []string{}
 	}
 
 	var requestsPerMin int

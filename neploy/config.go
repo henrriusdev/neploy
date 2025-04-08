@@ -36,7 +36,7 @@ func Start(npy Neploy) {
 	npy.Repositories = repos
 
 	// Initialize router
-	router := neployway.NewRouter(npy.Repositories.ApplicationStat)
+	router := neployway.NewRouter(npy.Repositories.ApplicationStat, npy.Repositories.ApplicationVersion, npy.Repositories.GatewayConfig)
 	npy.Router = router
 
 	// Initialize services
@@ -87,7 +87,7 @@ func NewServices(npy Neploy) service.Services {
 	user := service.NewUser(npy.Repositories)
 	role := service.NewRole(npy.Repositories.Role, npy.Repositories.UserRole)
 	onboard := service.NewOnboard(user, role, metadata)
-	gateway := service.NewGateway(npy.Repositories.Gateway, npy.Repositories.Application, npy.Repositories.ApplicationStat, npy.Repositories.GatewayConfig)
+	gateway := service.NewGateway(npy.Repositories)
 	techStack := service.NewTechStack(npy.Repositories.TechStack, npy.Repositories.Application)
 	trace := service.NewTrace(npy.Repositories.Trace)
 	visitor := service.NewVisitor(npy.Repositories.VisitorInfo, npy.Repositories.VisitorTrace)
