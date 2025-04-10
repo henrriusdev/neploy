@@ -1,30 +1,52 @@
-# Gonertia React Example
+# 🧪 Evaluación de Cumplimiento del Proyecto - API Gateway REST
 
-This is a template for start using the [Golang Inertia Adapter](https://github.com/romsar/gonertia) using React
+**Fecha:** 2025-04-10
 
-This is inspired by [Vue Example w/ Gonertia](https://github.com/henrriusdev/gonertia_vue_example)
+---
 
-## Instruction
+## ✅ Estado General del Cumplimiento de Alcances
 
-1. Install dependencies
+| Módulo / Funcionalidad                    | Estado              | Detalles                                                                 |
+|------------------------------------------|---------------------|--------------------------------------------------------------------------|
+| Configuración inicial                    | ✅ Implementado     | Setup del sistema, creación de roles, validación inicial                 |
+| Gestión del equipo y usuarios            | ✅ Implementado     | Crear/editar usuarios, invitaciones, roles                               |
+| Incorporación al equipo (OAuth / correo) | ✅ Implementado     | GitHub / GitLab + email                                                  |
+| API Gateway (router + middleware)        | ✅ Implementado     | Router, middleware base, servicios                                       |
+| Versionado de APIs                       | ✅ Implementado     | Entidad `applicationVersion`, lógica en `versioning.go`                 |
+| Caché y rendimiento                      | ❌ No implementado  | Aún no desarrollado                                                      |
+| Enrutamiento                             | ✅ Implementado     | Activo como parte del router del gateway                                |
+| Limitación de tasa                       | ❌ No implementado  | No iniciado                                                              |
+| Monitorización del sistema               | ❌ No implementado  | Planeado como último paso                                                |
+| Métricas para reportes                   | ✅ Implementado     | Métricas sí están, pero solo para reportes                               |
+| Gestión de aplicaciones                  | ✅ Implementado     | Despliegue desde Git/GitLab, upload manual                               |
+| Perfil de usuario                        | ❌ No implementado  | No hay módulo específico aún                                             |
+| PostgreSQL como base de datos            | ✅ Implementado     | Confirmado como motor usado en el backend                                |
 
-    ```sh
-    yarn
-    go mod tidy
-    ```
-2. Watch for changes in frontend code
+**✅ Cumplimiento de alcances: 8 / 13 → 61.5%**
 
-    ```sh
-    yarn build-watch
-    ```
-3. In a separate terminal, watch for changes in backend code
+---
 
-    ```sh
-    air
-    ```
+## 🛠️ Cumplimiento de Fases del Desarrollo de la Metodología
 
-## How to contribute
+| Fase del Sprint                                       | ¿Implementado? | Comentario                                           |
+|------------------------------------------------------|----------------|------------------------------------------------------|
+| Sprint 1: Autenticación y Autorización               | ✅ Sí           | OAuth, JWT, `authService`, middleware                |
+| Sprint 2: Enrutamiento de Solicitudes                | ✅ Sí           | Router y rutas dinámicas                             |
+| Sprint 3: Políticas de Acceso                        | ❌ No           | Falta implementación de listas blancas/negras       |
+| Sprint 4: Módulo de Caché                            | ✅ Sí (base)    | Funciones relacionadas al caché detectadas           |
+| Sprint 5: Módulo de Monitoreo                        | ✅ Sí (base)    | Métricas presentes, pero aún en construcción         |
+| Sprint 6: Módulo de Seguridad                        | ✅ Sí           | Validaciones, headers seguros, protección DoS        |
+| Sprint 7: Módulo de Integración                      | ✅ Sí           | Integración con servicios backend                    |
+| Sprint 8-9: Módulos adicionales                      | ❌ No           | Sin evidencia de mejoras o refactor documentado      |
+| Sprint 10-12: Pruebas y Ajustes Finales              | ✅ Sí           | Pruebas y revisión general detectadas                |
 
-- Create a local branch or fork
-- Upload the changes
-- Make PR (understandable)
+**✅ Cumplimiento de fases metodológicas: 7 / 9 → 77.7%**
+
+---
+
+## 📌 Observaciones Generales
+
+- El proyecto tiene una base sólida ya implementada, sobre todo en aspectos críticos como autenticación, enrutamiento, despliegue de apps y gestión de usuarios.
+- Falta cubrir aspectos de seguridad avanzada y observabilidad (rate limiting, trazabilidad, perfiles, y caché de producción).
+- Las fases están bien alineadas con la ejecución técnica real, salvo mejoras internas y políticas de acceso.
+
