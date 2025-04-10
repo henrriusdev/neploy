@@ -37,6 +37,7 @@ type Application interface {
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	DeleteVersion(ctx context.Context, appID string, versionID string) error
+	GetHealthy(ctx context.Context) (uint, uint, error)
 }
 
 type application struct {
@@ -334,4 +335,39 @@ func (a *application) Delete(ctx context.Context, id string) error {
 
 func (a *application) DeleteVersion(ctx context.Context, appID string, versionID string) error {
 	return a.versioningService.DeleteVersion(ctx, appID, versionID)
+}
+
+func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
+	// Filtro para versiones activas
+	fltrs := filters.IsSelectFilter("status", "active")
+
+	// Obtener todas las versiones activas
+	versions, err := a.repos.ApplicationVersion.GetAll(ctx, fltrs)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	var healthy uint
+
+	for _, version := range versions {
+		// Buscar la app correspondiente
+		app, err := a.repos.Application.GetOneById(ctx, version.ApplicationID)
+		if err != nil {
+			continue // o manejar error según tu lógica
+		}
+
+		// Construir nombre del contenedor
+		containerName := getContainerName(app.AppName, version.VersionTag)
+
+		// Consultar estado del contenedor
+		status, err := a.docker.GetContainerStatus(ctx, containerName)
+		if err != nil {
+			continue
+		}
+		if status == "running" {
+			healthy++
+		}
+	}
+
+	return healthy, uint(len(versions)), nil
 }
