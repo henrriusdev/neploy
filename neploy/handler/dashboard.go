@@ -53,11 +53,7 @@ func (d *Dashboard) Index(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	healthyApps, _, err := d.services.Application.GetHealthy(context.Background())
-	if err != nil {
-		logger.Error("error getting healthy apps: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
+	healthyApps := 2
 
 	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 	if err != nil {

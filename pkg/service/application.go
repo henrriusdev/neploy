@@ -30,7 +30,6 @@ type Application interface {
 	GetStat(ctx context.Context, id string) (model.ApplicationStat, error)
 	CreateStat(ctx context.Context, stat model.ApplicationStat) error
 	UpdateStat(ctx context.Context, stat model.ApplicationStat) error
-	GetHealthy(ctx context.Context) (uint, uint, error)
 	Delete(ctx context.Context, id string) error
 	StartContainer(ctx context.Context, id, versionID string) error
 	StopContainer(ctx context.Context, id, versionID string) error
@@ -80,21 +79,6 @@ func (a *application) CreateStat(ctx context.Context, stat model.ApplicationStat
 
 func (a *application) UpdateStat(ctx context.Context, stat model.ApplicationStat) error {
 	return a.repos.ApplicationStat.Update(ctx, stat)
-}
-
-func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
-	apps, err := a.repos.ApplicationStat.GetAll(ctx)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	var healthy uint
-	for _, app := range apps {
-		if app.Healthy {
-			healthy++
-		}
-	}
-	return healthy, uint(len(apps)), nil
 }
 
 func (a *application) StartContainer(ctx context.Context, id, versionId string) error {
