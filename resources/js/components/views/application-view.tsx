@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import {useEffect, useMemo, useState} from "react";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {Progress} from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -42,8 +42,8 @@ import {
   useStopApplicationMutation,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import { router } from "@inertiajs/react";
-import { useToast, useWebSocket } from "@/hooks";
+import {router} from "@inertiajs/react";
+import {useToast, useWebSocket} from "@/hooks";
 import {
   Dialog,
   DialogContent,
@@ -51,12 +51,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DialogTrigger } from "@radix-ui/react-dialog";
-import { ApplicationForm, DynamicForm } from "@/components/forms";
-import { debounce } from "lodash";
-import { z } from "zod";
-import { useTranslation } from "react-i18next";
-import type { Input as InputInterface } from "@/types/websocket";
+import {DialogTrigger} from "@radix-ui/react-dialog";
+import {ApplicationForm, DynamicForm} from "@/components/forms";
+import {debounce} from "lodash";
+import {z} from "zod";
+import {useTranslation} from "react-i18next";
+import type {Input as InputInterface} from "@/types/websocket";
+import {sanitizeAppName} from "@/lib/utils";
 
 const uploadFormSchema = z.object({
   description: z.string().optional(),
@@ -76,24 +77,24 @@ const uploadFormSchema = z.object({
           return false;
         }
       },
-      { message: "Must be a valid GitHub or GitLab repository URL" }
+      {message: "Must be a valid GitHub or GitLab repository URL"}
     )
     .optional(),
   branch: z.string().optional(),
 });
 
 export const ApplicationView: React.FC<ApplicationProps> = ({
-  application,
-}) => {
+                                                              application,
+                                                            }) => {
   const [isLogsOpen, setIsLogsOpen] = useState(true);
   const [searchLogs, setSearchLogs] = useState("");
   const [versions, setVersions] = useState(application.versions);
   const [currentRepoUrl, setCurrentRepoUrl] = useState("");
   const [branches, setBranches] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
-  const { t } = useTranslation();
-  const { onNotification, onInteractive, sendMessage } = useWebSocket();
+  const {toast} = useToast();
+  const {t} = useTranslation();
+  const {onNotification, onInteractive, sendMessage} = useWebSocket();
   const [filteredLogs, setFilteredLogs] = useState(
     application.logs?.slice(0, 10) ?? []
   );
@@ -108,7 +109,8 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
     title: "",
     description: "",
     fields: [],
-    onSubmit: () => {},
+    onSubmit: () => {
+    },
   });
 
   const [deleteVersion] = useDeleteVersionMutation();
@@ -121,8 +123,8 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
     isFetching: isLoadingBranches,
     error: branchesError,
   } = useLoadBranchesQuery(
-    { repoUrl: currentRepoUrl },
-    { skip: !currentRepoUrl }
+    {repoUrl: currentRepoUrl},
+    {skip: !currentRepoUrl}
   );
 
   useEffect(() => {
@@ -182,12 +184,12 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
           validate:
             input.name === "port"
               ? (value: string) => {
-                  const port = parseInt(value);
-                  if (isNaN(port) || port < 1 || port > 65535) {
-                    return t("applications.errors.portInvalid");
-                  }
-                  return true;
+                const port = parseInt(value);
+                if (isNaN(port) || port < 1 || port > 65535) {
+                  return t("applications.errors.portInvalid");
                 }
+                return true;
+              }
               : undefined,
         })),
         onSubmit: (data) => {
@@ -202,7 +204,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
           };
           console.log("Sending response:", response);
           sendMessage(response.type, response.action, response.data);
-          setActionDialog((prev) => ({ ...prev, show: false }));
+          setActionDialog((prev) => ({...prev, show: false}));
 
           // Show confirmation toast
           toast({
@@ -231,9 +233,9 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
   ) => {
     try {
       if (action === "start") {
-        await startApplication({ appId, versionId }).unwrap();
+        await startApplication({appId, versionId}).unwrap();
       } else if (action === "stop") {
-        await stopApplication({ appId, versionId }).unwrap();
+        await stopApplication({appId, versionId}).unwrap();
       }
 
       toast({
@@ -241,7 +243,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
         description: t(`applications.actions.${action}Success`),
       });
 
-      router.reload({ only: ["application"] });
+      router.reload({only: ["application"]});
     } catch (error: any) {
       toast({
         title: t("common.error"),
@@ -253,12 +255,12 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
 
   const handleDeleteVersion = async (appId: string, versionId: string) => {
     try {
-      await deleteVersion({ appId, versionId }).unwrap();
+      await deleteVersion({appId, versionId}).unwrap();
       toast({
         title: "Success",
         description: "Version deleted successfully",
       });
-      router.reload({ only: ["application"] });
+      router.reload({only: ["application"]});
     } catch (error) {
       console.error(error);
     }
@@ -386,7 +388,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                   {application.cpuUsage.toFixed(2)}%
                 </span>
               </div>
-              <Progress value={application.cpuUsage} className="h-2" />
+              <Progress value={application.cpuUsage} className="h-2"/>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -395,7 +397,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                   {application.memoryUsage.toFixed(2)}%
                 </span>
               </div>
-              <Progress value={application.memoryUsage} className="h-2" />
+              <Progress value={application.memoryUsage} className="h-2"/>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -430,7 +432,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
             <CollapsibleContent>
               <CardContent>
                 <div className="flex items-center gap-2 mb-4">
-                  <Search className="w-4 h-4 text-muted-foreground" />
+                  <Search className="w-4 h-4 text-muted-foreground"/>
                   <Input
                     placeholder="Search logs..."
                     value={searchLogs}
@@ -470,7 +472,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-4 h-4 mr-2"/>
                     New Version
                   </Button>
                 </DialogTrigger>
@@ -496,6 +498,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                 <TableRow>
                   <TableHead>Version</TableHead>
                   <TableHead>Description</TableHead>
+                  <TableHead>Path</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -509,6 +512,9 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                         {version.versionTag}
                       </TableCell>
                       <TableCell>{version.description}</TableCell>
+                      <TableCell>
+                        <a target="_blank"
+                           href={`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}>{`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}</a></TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs capitalize">
                           {version.status}
@@ -531,7 +537,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                           }
                           disabled={version.status === "active"}
                         >
-                          <CirclePlay className="h-4 w-4" />
+                          <CirclePlay className="h-4 w-4"/>
                         </Button>
                         <Button
                           variant="ghost"
@@ -546,7 +552,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                           }
                           disabled={version.status !== "active"}
                         >
-                          <Pause className="h-4 w-4" />
+                          <Pause className="h-4 w-4"/>
                         </Button>
                         <Button
                           variant="ghost"
@@ -557,7 +563,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
                           }
                           disabled={version.status === "Running"}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4"/>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -581,7 +587,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
       <Dialog
         open={actionDialog.show}
         onOpenChange={(open) =>
-          !open && setActionDialog({ ...actionDialog, show: false })
+          !open && setActionDialog({...actionDialog, show: false})
         }
       >
         <DialogContent>
@@ -596,5 +602,6 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
+    ;
 };

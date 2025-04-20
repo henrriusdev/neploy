@@ -157,11 +157,10 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 			pathSegments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 			var resolvedVersion string
 
-			println(config.DefaultVersioningType)
 			if config.DefaultVersioningType == model.VersioningTypeHeader {
 				resolvedVersion = r.Header.Get("X-API-Version")
 				url := pathSegments[0]
-				r.URL.Path = fmt.Sprintf("/%s/%s", resolvedVersion, url)
+				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, url)
 			} else {
 				if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {
 					resolvedVersion = pathSegments[0]

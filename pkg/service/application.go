@@ -160,15 +160,6 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 		return model.ApplicationDockered{}, err
 	}
 
-	for _, version := range versions {
-		v := version
-		go func() {
-			if err := a.ensureContainerRunning(ctx, app, v); err != nil {
-				logger.Error("error ensuring container for version %s: %v", v.VersionTag, err)
-			}
-		}()
-	}
-
 	if len(versions) == 0 {
 		return model.ApplicationDockered{
 			Application:    app,
@@ -181,27 +172,40 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 		}, nil
 	}
 
-	latest := versions[len(versions)-1]
-	containerID, err := a.docker.GetContainerID(ctx, getContainerName(app.AppName, latest.VersionTag))
-	if err != nil {
-		logger.Error("error getting container ID: %v", err)
-		return model.ApplicationDockered{}, err
+	globalCpu, globalRam := 0.0, 0.0
+	latestContainerID := ""
+	for _, version := range versions {
+		go func() {
+			if err := a.ensureContainerRunning(ctx, app, version); err != nil {
+				logger.Error("error ensuring container for version %s: %v", version.VersionTag, err)
+			}
+		}()
+
+		containerID, err := a.docker.GetContainerID(ctx, getContainerName(app.AppName, version.VersionTag))
+		if err != nil {
+			logger.Error("error getting container ID: %v", err)
+			return model.ApplicationDockered{}, err
+		}
+
+		cpu, ram, err := a.docker.GetUsage(ctx, containerID)
+		if err != nil {
+			logger.Error("error getting container usage: %v", err)
+			cpu = 0
+			ram = 0
+		}
+
+		globalCpu += cpu
+		globalRam += ram
+		latestContainerID = containerID
 	}
 
-	cpu, ram, err := a.docker.GetUsage(ctx, containerID)
-	if err != nil {
-		logger.Error("error getting container usage: %v", err)
-		cpu = 0
-		ram = 0
-	}
-
-	uptime, err := a.docker.GetUptime(ctx, containerID)
+	uptime, err := a.docker.GetUptime(ctx, latestContainerID)
 	if err != nil {
 		logger.Error("error getting container uptime: %v", err)
 		uptime = time.Duration(0)
 	}
 
-	logs, err := a.docker.GetLogs(ctx, containerID, false)
+	logs, err := a.docker.GetLogs(ctx, latestContainerID, false)
 	if err != nil {
 		logger.Error("error getting container logs: %v", err)
 		logs = []string{}
@@ -214,8 +218,8 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 
 	return model.ApplicationDockered{
 		Application:    app,
-		CpuUsage:       cpu,
-		MemoryUsage:    ram,
+		CpuUsage:       globalCpu,
+		MemoryUsage:    globalRam,
 		Uptime:         uptime.String(),
 		RequestsPerMin: requestsPerMin,
 		Logs:           logs,
