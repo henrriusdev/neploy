@@ -82,17 +82,29 @@ func (r *Router) AddRoute(route Route) error {
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
 		req.Host = req.URL.Host
+
 		if route.Path != "" {
 			versionPrefix := req.Header.Get("Resolved-Version")
-			if versionPrefix != "" {
-				expectedPrefix := "/" + versionPrefix + route.Path
-				req.URL.Path = strings.TrimPrefix(req.URL.Path, expectedPrefix)
-			} else {
-				req.URL.Path = strings.TrimPrefix(req.URL.Path, route.Path)
+			basePath := "/" + versionPrefix + route.Path
+
+			trimmed := strings.TrimPrefix(req.URL.Path, basePath)
+
+			// Fallback si no coincide completamente
+			if trimmed == req.URL.Path {
+				trimmed = strings.TrimPrefix(req.URL.Path, route.Path)
 			}
-			if !strings.HasPrefix(req.URL.Path, "/") {
-				req.URL.Path = "/" + req.URL.Path
+
+			if trimmed == "" {
+				trimmed = "/" // fallback para evitar path vacío
 			}
+
+			// Asegurar que comienza con /
+			if !strings.HasPrefix(trimmed, "/") {
+				trimmed = "/" + trimmed
+			}
+			println(trimmed)
+
+			req.URL.Path = trimmed
 		}
 	}
 
@@ -135,7 +147,6 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		defer r.mu.RUnlock()
 
 		for routeKey, proxy := range r.routes {
-			println(routeKey, req.URL.Path)
 			route := r.routeInfo[routeKey]
 			if r.matchesRoute(req, route) {
 				var handler http.Handler = proxy
@@ -146,12 +157,15 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 					log.Printf("WARN: Metrics collector not available")
 				}
 
+				handler = CacheMiddleware(handler)
+
 				handler.ServeHTTP(w, req)
 				return
 			}
 		}
 
 		log.Printf("WARN: No matching route found for path: %s, host: %s", req.URL.Path, req.Host)
+
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "404 Not Found")
 	})).ServeHTTP(w, req)

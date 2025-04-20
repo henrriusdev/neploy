@@ -37,6 +37,7 @@ type Application interface {
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	DeleteVersion(ctx context.Context, appID string, versionID string) error
+	GetHealthy(ctx context.Context) (uint, uint, error)
 }
 
 type application struct {
@@ -159,15 +160,6 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 		return model.ApplicationDockered{}, err
 	}
 
-	for _, version := range versions {
-		v := version
-		go func() {
-			if err := a.ensureContainerRunning(ctx, app, v); err != nil {
-				logger.Error("error ensuring container for version %s: %v", v.VersionTag, err)
-			}
-		}()
-	}
-
 	if len(versions) == 0 {
 		return model.ApplicationDockered{
 			Application:    app,
@@ -180,27 +172,40 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 		}, nil
 	}
 
-	latest := versions[len(versions)-1]
-	containerID, err := a.docker.GetContainerID(ctx, getContainerName(app.AppName, latest.VersionTag))
-	if err != nil {
-		logger.Error("error getting container ID: %v", err)
-		return model.ApplicationDockered{}, err
+	globalCpu, globalRam := 0.0, 0.0
+	latestContainerID := ""
+	for _, version := range versions {
+		go func() {
+			if err := a.ensureContainerRunning(ctx, app, version); err != nil {
+				logger.Error("error ensuring container for version %s: %v", version.VersionTag, err)
+			}
+		}()
+
+		containerID, err := a.docker.GetContainerID(ctx, getContainerName(app.AppName, version.VersionTag))
+		if err != nil {
+			logger.Error("error getting container ID: %v", err)
+			return model.ApplicationDockered{}, err
+		}
+
+		cpu, ram, err := a.docker.GetUsage(ctx, containerID)
+		if err != nil {
+			logger.Error("error getting container usage: %v", err)
+			cpu = 0
+			ram = 0
+		}
+
+		globalCpu += cpu
+		globalRam += ram
+		latestContainerID = containerID
 	}
 
-	cpu, ram, err := a.docker.GetUsage(ctx, containerID)
-	if err != nil {
-		logger.Error("error getting container usage: %v", err)
-		cpu = 0
-		ram = 0
-	}
-
-	uptime, err := a.docker.GetUptime(ctx, containerID)
+	uptime, err := a.docker.GetUptime(ctx, latestContainerID)
 	if err != nil {
 		logger.Error("error getting container uptime: %v", err)
 		uptime = time.Duration(0)
 	}
 
-	logs, err := a.docker.GetLogs(ctx, containerID, false)
+	logs, err := a.docker.GetLogs(ctx, latestContainerID, false)
 	if err != nil {
 		logger.Error("error getting container logs: %v", err)
 		logs = []string{}
@@ -213,8 +218,8 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 
 	return model.ApplicationDockered{
 		Application:    app,
-		CpuUsage:       cpu,
-		MemoryUsage:    ram,
+		CpuUsage:       globalCpu,
+		MemoryUsage:    globalRam,
 		Uptime:         uptime.String(),
 		RequestsPerMin: requestsPerMin,
 		Logs:           logs,
@@ -334,4 +339,39 @@ func (a *application) Delete(ctx context.Context, id string) error {
 
 func (a *application) DeleteVersion(ctx context.Context, appID string, versionID string) error {
 	return a.versioningService.DeleteVersion(ctx, appID, versionID)
+}
+
+func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
+	// Filtro para versiones activas
+	fltrs := filters.IsSelectFilter("status", "active")
+
+	// Obtener todas las versiones activas
+	versions, err := a.repos.ApplicationVersion.GetAll(ctx, fltrs)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	var healthy uint
+
+	for _, version := range versions {
+		// Buscar la app correspondiente
+		app, err := a.repos.Application.GetOneById(ctx, version.ApplicationID)
+		if err != nil {
+			continue // o manejar error según tu lógica
+		}
+
+		// Construir nombre del contenedor
+		containerName := getContainerName(app.AppName, version.VersionTag)
+
+		// Consultar estado del contenedor
+		status, err := a.docker.GetContainerStatus(ctx, containerName)
+		if err != nil {
+			continue
+		}
+		if status == "running" {
+			healthy++
+		}
+	}
+
+	return healthy, uint(len(versions)), nil
 }

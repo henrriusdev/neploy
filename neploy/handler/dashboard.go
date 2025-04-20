@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -53,7 +54,11 @@ func (d *Dashboard) Index(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	healthyApps := 2
+	healthyApps, _, err := d.services.Application.GetHealthy(context.Background())
+	if err != nil {
+		log.Println("error retrieving app health:", err)
+		// manejar fallback si hace falta
+	}
 
 	provider, err := d.services.User.GetProvider(context.Background(), claims.ID)
 	if err != nil {
