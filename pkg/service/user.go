@@ -99,7 +99,13 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID 
 }
 
 func (u *user) Get(ctx context.Context, id string) (model.User, error) {
-	return u.repos.User.Get(ctx, id)
+	user, err := u.repos.User.Get(ctx, id)
+	if err != nil {
+		logger.Error("failed to get user: user_id=%s, error=%v", id, err)
+		return model.User{}, err
+	}
+	user.Password = ""
+	return user, nil
 }
 
 func (u *user) Update(ctx context.Context, user model.User) error {

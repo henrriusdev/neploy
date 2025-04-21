@@ -56,6 +56,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 
     React.useEffect(() => {
       setSelectedDate(isFormContext ? field.value : date);
+      setMonth(isFormContext ? field?.value : date)
     }, [isFormContext, field?.value, date]);
 
     React.useEffect(() => {
@@ -64,6 +65,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 
     const handleDateSelect = (newDate: Date | DateRange | undefined) => {
       setSelectedDate(newDate);
+      setMonth(newDate)
       if (isFormContext) {
         field.onChange(newDate);
       } else {
