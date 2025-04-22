@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   Card,
@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -19,10 +19,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/date-picker";
-import { withMask } from "use-mask-input";
-import { User } from "@/types/common";
+import {Input} from "@/components/ui/input";
+import {DatePicker} from "@/components/forms/date-picker";
+import {withMask} from "use-mask-input";
+import {User} from "@/types/common";
 import {useTranslation} from "react-i18next";
 
 const formSchema = z.object({
@@ -43,7 +43,7 @@ interface Props {
   onBack: () => void;
 }
 
-export function UserDataStep({ email, username, onNext, onBack }: Props) {
+export function UserDataStep({email, username, onNext, onBack}: Props) {
   const {t} = useTranslation();
   const form = useForm<User>({
     resolver: zodResolver(formSchema),
@@ -66,26 +66,26 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
               <FormField
                 control={form.control}
                 name="firstName"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>{t('step.user.firstName')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="lastName"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>{t('step.user.lastName')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
@@ -94,7 +94,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
               <FormField
                 control={form.control}
                 name="dob"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t('step.user.dob')}</FormLabel>
                     <FormControl>
@@ -104,20 +104,20 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
                         minYear={new Date().getFullYear() - 90}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="phone"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t('step.user.phone')}</FormLabel>
                     <FormControl>
-                      <Input {...field} ref={withMask("(9999) 999-99-99")} />
+                      <Input {...field} ref={withMask("(9999) 999-99-99")}/>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
@@ -125,52 +125,52 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
             <FormField
               control={form.control}
               name="address"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>{t('step.user.address')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="email"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>{t('step.user.email')}</FormLabel>
                   <FormControl>
-                    <Input {...field} readOnly={!!email} />
+                    <Input {...field} readOnly={!!email}/>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="username"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>{t('step.user.username')}</FormLabel>
                   <FormControl>
-                    <Input {...field} readOnly={!!username} />
+                    <Input {...field} readOnly={!!username}/>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="password"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>{t('step.user.password')}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
               )}
             />

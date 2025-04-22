@@ -1,9 +1,9 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import {LogOut} from "lucide-react";
 import * as React from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +23,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Link } from "@inertiajs/react";
-import { LanguageSelector } from "../forms/language-selector";
+import {Link} from "@inertiajs/react";
+import {LanguageSelector} from "../forms/language-selector";
 import {ThemeSwitcher} from "@/components/theme-switcher";
 import {useTheme} from "@/hooks";
 import {useEffect} from "react";
 import {router} from "@inertiajs/react";
+import {useTranslation} from "react-i18next";
 
 interface NavItem {
   title: string;
@@ -52,17 +53,18 @@ interface SidebarLayoutProps {
 }
 
 export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
-  navItems,
-  user,
-  logoUrl,
-  teamName,
-  children,
-}: SidebarLayoutProps) => {
-  const { theme, isDark, applyTheme } = useTheme(); // <- aquí usamos applyTheme directamente
+                                                              navItems,
+                                                              user,
+                                                              logoUrl,
+                                                              teamName,
+                                                              children,
+                                                            }: SidebarLayoutProps) => {
+  const {theme, isDark, applyTheme} = useTheme(); // <- aquí usamos applyTheme directamente
 
   useEffect(() => {
     applyTheme(theme, isDark);
   }, [theme, isDark]);
+  const {t} = useTranslation();
 
   return (
     <SidebarProvider>
@@ -73,8 +75,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
               src={logoUrl}
               alt={teamName}
               className="h-full w-auto transition-all duration-300 ease-in-out
-                                       group-data-[collapsible=icon]:w-10/12 group-data-[collapsible=icon]:h-full
-                                       group-data-[state=expanded]:w-10/12 group-data-[state=expanded]:mx-auto"
+                   group-data-[collapsible=icon]:w-10/12 group-data-[collapsible=icon]:h-full
+                   group-data-[state=expanded]:w-10/12 group-data-[state=expanded]:mx-auto"
             />
           </SidebarHeader>
           <SidebarContent className="px-2">
@@ -83,7 +85,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={item.isActive}>
                     <button onClick={() => router.visit(item.url)} className="flex items-center">
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className="mr-2 h-4 w-4"/>
                       <span>{item.title}</span>
                     </button>
                   </SidebarMenuButton>
@@ -101,7 +103,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                       variant="outline"
                       className="w-full justify-start gap-2 !bg-transparent hover:text-foreground">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage src={user.avatar} alt={user.name}/>
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start text-left">
@@ -127,21 +129,19 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                         </p>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator/>
                     <DropdownMenuItem className="p-0">
-                      <LanguageSelector className="w-full p-2" />
+                      <LanguageSelector className="w-full p-2"/>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <ThemeSwitcher />
+                      <ThemeSwitcher/>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/logout"
-                        method="post"
+                        href="/users/profile"
                         as="button"
                         className="w-full flex items-center">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
+                        <span>{t("profile")}</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -154,10 +154,10 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           <div className="h-screen">
             <div className="!w-full py-6">
               <div className="flex items-center justify-start gap-x-4 mb-4 pl-3">
-                <SidebarTrigger />
+                <SidebarTrigger/>
                 {teamName && (
                   <span className="text-base lg:text-xl font-semibold">
-                    {teamName} Dashboard
+                    {teamName} API Gateway
                   </span>
                 )}
               </div>

@@ -8,8 +8,6 @@ definitions:
         $ref: '#/definitions/model.Date'
       deletedAt:
         $ref: '#/definitions/model.Date'
-      deployLocation:
-        type: string
       description:
         type: string
       id:
@@ -476,6 +474,43 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a new application
+      tags:
+      - Application
+  /applications/:id/versions/:versionID:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an version of a explicit app
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Version ID
+        in: path
+        name: versionID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete an application version
       tags:
       - Application
   /applications/{id}:
@@ -1471,6 +1506,26 @@ paths:
             additionalProperties: true
             type: object
       summary: Invite a user
+      tags:
+      - User
+  /users/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get user profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user profile
       tags:
       - User
 swagger: "2.0"

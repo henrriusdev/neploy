@@ -32,7 +32,7 @@ func dashboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 }
 
 func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	user := handler.NewUser(npy.Services.User, i)
+	user := handler.NewUser(npy.Services.User, npy.Services.Metadata, i)
 	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware()))
 }
 
