@@ -16,6 +16,7 @@ import * as React from "react";
 import {useTranslation} from "react-i18next";
 import {withMask} from "use-mask-input";
 import {parse} from "date-fns"
+import {useUpdatePasswordMutation, useUpdateProfileMutation} from "@/services/api/users";
 
 const profileFormSchema = z.object({
   email: z.string().email({
@@ -78,14 +79,28 @@ export function UserProfile({user}: { user: User }) {
     },
   })
 
-  function onProfileSubmit(data: ProfileFormValues) {
-    console.log("Profile data submitted:", data)
-    // Here you would typically send the data to your API
+  const [updateProfile] = useUpdateProfileMutation()
+  const [updatePassword] = useUpdatePasswordMutation()
+
+  async function onProfileSubmit(data: ProfileFormValues) {
+    try {
+      await updateProfile({
+        ...data,
+        dob: data.dob.toISOString(),
+      }).unwrap()
+      console.log("Perfil actualizado exitosamente")
+    } catch (error) {
+      console.error("Error al actualizar perfil:", error)
+    }
   }
 
-  function onPasswordSubmit(data: PasswordFormValues) {
-    console.log("Password data submitted:", data)
-    // Here you would typically send the data to your API
+  async function onPasswordSubmit(data: PasswordFormValues) {
+    try {
+      await updatePassword(data).unwrap()
+      console.log("Contraseña actualizada exitosamente")
+    } catch (error) {
+      console.error("Error al actualizar contraseña:", error)
+    }
   }
 
   const avatarUrl =

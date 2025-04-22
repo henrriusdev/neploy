@@ -32,6 +32,8 @@ type User interface {
 	AcceptInvitation(ctx context.Context, token string) (model.Invitation, error)
 	GetInvitationByToken(ctx context.Context, token string) (model.Invitation, error)
 	AddUserRole(ctx context.Context, email, roleID string) error
+	UpdateProfile(ctx context.Context, profileReq model.ProfileRequest, userID string) error
+	UpdatePassword(ctx context.Context, req model.PasswordRequest, userID string) error
 }
 
 type user struct {
@@ -395,4 +397,61 @@ func (u *user) GetUser(ctx context.Context, userId string) (model.FullUser, erro
 		Roles:      roles,
 		TechStacks: techStacks,
 	}, nil
+}
+
+func (s *user) UpdateProfile(ctx context.Context, profileReq model.ProfileRequest, userID string) error {
+	// Validate the ProfileRequest struct fields (You can enhance this as per your needs)
+	if profileReq.Email == "" || profileReq.FirstName == "" || profileReq.LastName == "" {
+		return errors.New("missing required fields: email, first name, last name")
+	}
+
+	// Create User model from ProfileRequest
+	user := model.User{
+		Email:     profileReq.Email,
+		FirstName: profileReq.FirstName,
+		LastName:  profileReq.LastName,
+		DOB:       profileReq.Dob,
+		Address:   profileReq.Address,
+		Phone:     profileReq.Phone,
+	}
+
+	// Update the user profile in the repository
+	_, err := s.repos.User.UpdateOneById(ctx, userID, user)
+	if err != nil {
+		return err
+	}
+
+	// Success
+	return nil
+}
+
+// UpdatePassword updates the user's password
+func (s *user) UpdatePassword(ctx context.Context, req model.PasswordRequest, userID string) error {
+	// Fetch the user from the repository
+	user, err := s.repos.User.Get(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	// Compare the current password with the stored password hash
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword))
+	if err != nil {
+		return errors.New("current password is incorrect")
+	}
+
+	// Hash the new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// Update the password in the repository
+	user.Password = string(hashedPassword)
+	err = s.repos.User.Update(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	// Success
+	return nil
 }

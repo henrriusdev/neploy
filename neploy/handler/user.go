@@ -27,6 +27,8 @@ func (u *User) RegisterRoutes(r *echo.Group) {
 	r.GET("/invite/:token", u.AcceptInvite)
 	r.POST("/complete-invite", u.CompleteInvite)
 	r.GET("/profile", u.Profile)
+	r.PUT("/profile/update", u.UpdateProfile)
+	r.PUT("/profile/update-password", u.UpdatePassword)
 }
 
 // InviteUser godoc
@@ -237,4 +239,64 @@ func (u *User) Profile(c echo.Context) error {
 	user.Provider = provider
 
 	return u.i.Render(c.Response(), c.Request(), "Auth/Profile", inertia.Props{"userData": user, "user": userSidebar, "teamName": metadata.TeamName, "logoUrl": metadata.LogoURL})
+}
+
+// UpdateProfile godoc
+// @Summary Update user profile
+// @Description Update user profile
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.User
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/profile/update [put]
+func (u *User) UpdateProfile(c echo.Context) error {
+	claims, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		logger.Error("error getting claims")
+		return c.Redirect(http.StatusSeeOther, "/")
+	}
+
+	req := model.ProfileRequest{}
+	if err := c.Bind(&req); err != nil {
+		logger.Error("error binding request: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := u.user.UpdateProfile(c.Request().Context(), req, claims.ID); err != nil {
+		logger.Error("error updating profile: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, req)
+}
+
+// UpdatePassword godoc
+// @Summary Update user password
+// @Description Update user password
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.PasswordRequest
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/profile/update-password [put]
+func (u *User) UpdatePassword(c echo.Context) error {
+	claims, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		logger.Error("error getting claims")
+		return c.Redirect(http.StatusSeeOther, "/")
+	}
+
+	req := model.PasswordRequest{}
+	if err := c.Bind(&req); err != nil {
+		logger.Error("error binding request: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := u.user.UpdatePassword(c.Request().Context(), req, claims.ID); err != nil {
+		logger.Error("error updating password: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, req)
 }

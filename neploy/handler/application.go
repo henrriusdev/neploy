@@ -308,7 +308,7 @@ func (a *Application) GetRepoBranches(c echo.Context) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /applications/:id/versions/:versionID
+// @Router /applications/:id/versions/:versionID [delete]
 func (a *Application) DeleteVersion(c echo.Context) error {
 	var req struct {
 		AppID     string `query:"id"`

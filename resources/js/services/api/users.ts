@@ -10,5 +10,22 @@ export const users = baseApi.injectEndpoints({
         body: { token, ...userData },
       }),
     }),
+    updateProfile: builder.mutation({
+      query: (profileData) => ({
+        url: "users/profile/update",
+        method: "PUT",
+        body: profileData,
+      }),
+    }),
+
+    updatePassword: builder.mutation({
+      query: (passwordData) => ({
+        url: "users/profile/update-password",
+        method: "PUT",
+        body: passwordData,
+      }),
+    }),
   }),
 });
+
+export const {useCompleteInviteMutation, useUpdateProfileMutation, useUpdatePasswordMutation} = users;

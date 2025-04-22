@@ -82,3 +82,19 @@ type GatewayConfigRequest struct {
 	DefaultVersion    VersionType    `json:"defaultVersion" validate:"required,oneof=latest stable"`
 	LoadBalancer      bool           `json:"loadBalancer" `
 }
+
+type ProfileRequest struct {
+	Email         string `json:"email" validate:"required,email"`
+	FirstName     string `json:"firstName" validate:"required,min=2"`
+	LastName      string `json:"lastName" validate:"required,min=2"`
+	Dob           Date   `json:"dob" validate:"required"`
+	Address       string `json:"address" validate:"required,min=5"`
+	Phone         string `json:"phone" validate:"required,min=5"`
+	Notifications bool   `json:"notifications"`
+}
+
+type PasswordRequest struct {
+	CurrentPassword string `json:"currentPassword" validate:"required,min=8"`
+	NewPassword     string `json:"newPassword" validate:"required,min=8"`
+	ConfirmPassword string `json:"confirmPassword" validate:"required,min=8"`
+}
