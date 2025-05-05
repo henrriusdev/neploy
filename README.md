@@ -19,12 +19,12 @@
 | Monitorización del sistema               | ✅ Parcial         | Backend completo (`metrics.go`, `aggregator.go`), falta UI/alertas |
 | Métricas para reportes                   | ✅ Implementado    | Métricas registradas por app/hora                                  |
 | Gestión de aplicaciones                  | ✅ Implementado    | Despliegue desde Git/GitLab, upload manual                         |
-| Perfil de usuario                        | ❌ No implementado | Módulo descrito pero sin frontend/backend                          |
+| Perfil de usuario                        | ✅ Implementado    | Módulo descrito pero sin frontend/backend                          |
 | Notificaciones (alertas y preferencias)  | ❌ No implementado | Mencionadas en perfil y monitoreo, sin lógica aún                  |
 | Sistema de reportes                      | ❌ No implementado | No existen vistas ni exportación de métricas detalladas            |
 | PostgreSQL como base de datos            | ✅ Implementado    | Confirmado como motor usado en el backend                          |
 
-**✅ Cumplimiento de alcances: 11 / 15 → 73.3%**
+**✅ Cumplimiento de alcances: 12 / 15 → 0.8%**
 
 ---
 

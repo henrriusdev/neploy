@@ -1,8 +1,8 @@
 import { useToast } from "@/hooks";
-import { TeamProps } from "@/types";
+import {TeamProps, TechStack} from "@/types";
 import { router } from "@inertiajs/react";
 import { PlusCircle, Trash } from "lucide-react";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -39,6 +39,13 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import {TechAssignmentDialog} from "@/components/forms/tech-assignment-dialog";
+import {
+  useCreateTechStackMutation,
+  useDeleteTechStackMutation,
+  useGetTechStacksQuery,
+  useUpdateTechStackMutation
+} from "@/services/api/tech-stack";
 
 interface InviteMemberData {
   email: string;
@@ -55,6 +62,9 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
   const [teamState, setTeamState] = useState(team);
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const getTechStacks = useGetTechStacksQuery();
+  const [techStacks, setTechStacks] = useState<TechStack[]>([]);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +115,22 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
       },
     });
   };
+
+  const handleSaveTechs = (userId: strng, techIds: string[]) => {
+    // In a real app, you would make an API call here
+    console.log(`Saving technologies for user ${userId}:`, techIds)
+
+    toast({
+      title: "Technologies updated",
+      description: "The team member's technologies have been updated successfully.",
+    })
+  }
+
+  useEffect(() => {
+    if (getTechStacks.currentData && getTechStacks.status === "fulfilled") {
+      setTechStacks(getTechStacks.currentData);
+    }
+  }, [getTechStacks.data]);
 
   return (
     <div className="container mx-auto py-6">
@@ -228,9 +254,16 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                     <span className="text-xs">Active</span>
                   </TableCell>
                   <TableCell className="text-right">
+                    <TechAssignmentDialog
+                      userId={member.id}
+                      allTechStacks={techStacks}
+                      selectedTechIds={member.techStacks?.map((t) => t.id) ?? []}
+                      onSave={handleSaveTechs}
+                    />
                     <Button
                       variant="destructive"
                       size="icon"
+                      className="ml-3"
                       onClick={() => handleRemoveMember(member.id)}>
                       <Trash className="h-4 w-4 text-destructive-foreground" />
                     </Button>

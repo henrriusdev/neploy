@@ -103,11 +103,10 @@ export default function Component() {
       <div className="md:w-1/2 flex items-center justify-center p-8">
         <Card className="w-full max-w-[400px]">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>{t("auth.login")}</CardTitle>
+            <div className="flex justify-between items-center pb-3">
+              <CardTitle className="text-4xl">{t("auth.login")}</CardTitle>
               <LanguageSelector />
             </div>
-            <CardDescription>{t("auth.enterEmail")}</CardDescription>
           </CardHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

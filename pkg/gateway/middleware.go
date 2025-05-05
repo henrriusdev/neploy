@@ -9,6 +9,7 @@ import (
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 )
@@ -156,6 +157,12 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			pathSegments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 			var resolvedVersion string
+
+			if slices.Contains(pathSegments, ".well-known") {
+				w.Header().Set("Content-Type", "application/json")
+				next.ServeHTTP(w, r)
+				return
+			}
 
 			if config.DefaultVersioningType == model.VersioningTypeHeader {
 				resolvedVersion = r.Header.Get("X-API-Version")
