@@ -153,7 +153,7 @@ func (d *Dashboard) Applications(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
-	applications, err := d.services.Application.GetAll(c.Request().Context())
+	applications, err := d.services.Application.GetAll(c.Request().Context(), claims.ID)
 	if err != nil {
 		logger.Error("error getting applications: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")

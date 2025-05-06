@@ -54,12 +54,8 @@ func (u *UserTechStack) Update(ctx context.Context, userTechStack model.UserTech
 	return nil
 }
 
-func (u *UserTechStack) Delete(ctx context.Context, id string) error {
-	query := filters.ApplyUpdateFilters(
-		u.BaseQueryUpdate().
-			Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}),
-		filters.IsUpdateFilter("id", id),
-	)
+func (u *UserTechStack) Delete(ctx context.Context, userId, techId string) error {
+	query := dialect.Delete(u.Table).Where(goqu.I("user_id").Eq(userId), goqu.I("tech_stack_id").Eq(techId))
 
 	q, args, err := query.ToSQL()
 	if err != nil {
@@ -76,29 +72,10 @@ func (u *UserTechStack) Delete(ctx context.Context, id string) error {
 }
 
 func (u *UserTechStack) GetByUserID(ctx context.Context, userID string) ([]model.UserTechStack, error) {
-	query := u.baseQuery("ut").
-		Select(
-			goqu.I("ut.*"),
-			goqu.L(`"u"."id" AS "user.id"`),
-			goqu.L(`"u"."first_name" AS "user.first_name"`),
-			goqu.L(`"u"."last_name" AS "user.last_name"`),
-			goqu.L(`"u"."email" AS "user.email"`),
-			goqu.L(`"t"."id" AS "tech_stack.id"`),
-			goqu.L(`"t"."name" AS "tech_stack.name"`),
-			goqu.L(`"t"."description" AS "tech_stack.description"`),
-		).
-		LeftJoin(
-			goqu.T("users").As("u"),
-			goqu.On(goqu.I("u.id").Eq(goqu.I("ut.user_id"))),
-		).
-		LeftJoin(
-			goqu.T("tech_stacks").As("t"),
-			goqu.On(goqu.I("t.id").Eq(goqu.I("ut.tech_stack_id"))),
-		).
-		Where(goqu.I("u.id").Eq(userID))
+	query := filters.ApplyFilters(u.baseQuery(), filters.IsSelectFilter("user_id", userID))
 	q, args, err := query.ToSQL()
 	if err != nil {
-		logger.Error("error building select query: %v", err)
+		logger.Error("error building select query for usertechstack: %v", err)
 		return nil, err
 	}
 

@@ -34,6 +34,7 @@ type User interface {
 	AddUserRole(ctx context.Context, email, roleID string) error
 	UpdateProfile(ctx context.Context, profileReq model.ProfileRequest, userID string) error
 	UpdatePassword(ctx context.Context, req model.PasswordRequest, userID string) error
+	UpdateTechStacks(ctx context.Context, req model.SelectUserTechStacksRequest) error
 }
 
 type user struct {
@@ -148,6 +149,7 @@ func (u *user) List(ctx context.Context, limit, offset uint) ([]model.TeamMember
 			logger.Error("failed to get tech stacks for user: user_id=%s, error=%v", user.ID, err)
 			continue
 		}
+		println(len(userTechStacks))
 
 		var roles []model.Role
 
@@ -366,39 +368,6 @@ func ValidateJWT(token string) (model.JWTClaims, bool, error) {
 	return claims, t.Valid, nil
 }
 
-func (u *user) GetUser(ctx context.Context, userId string) (model.FullUser, error) {
-	user, err := u.repos.User.Get(ctx, userId)
-	if err != nil {
-		return model.FullUser{}, err
-	}
-
-	userRoles, err := u.repos.UserRole.GetByUserID(ctx, userId)
-	if err != nil {
-		return model.FullUser{}, err
-	}
-
-	userTechStacks, err := u.repos.UserTechStack.GetByUserID(ctx, userId)
-	if err != nil {
-		return model.FullUser{}, err
-	}
-
-	var roles []model.Role
-	for _, userRole := range userRoles {
-		roles = append(roles, *userRole.Role)
-	}
-
-	var techStacks []model.TechStack
-	for _, userTechStack := range userTechStacks {
-		techStacks = append(techStacks, *userTechStack.TechStack)
-	}
-
-	return model.FullUser{
-		User:       user,
-		Roles:      roles,
-		TechStacks: techStacks,
-	}, nil
-}
-
 func (s *user) UpdateProfile(ctx context.Context, profileReq model.ProfileRequest, userID string) error {
 	// Validate the ProfileRequest struct fields (You can enhance this as per your needs)
 	if profileReq.Email == "" || profileReq.FirstName == "" || profileReq.LastName == "" {
@@ -453,5 +422,35 @@ func (s *user) UpdatePassword(ctx context.Context, req model.PasswordRequest, us
 	}
 
 	// Success
+	return nil
+}
+
+func (u *user) UpdateTechStacks(ctx context.Context, req model.SelectUserTechStacksRequest) error {
+	userTStacks, err := u.repos.UserTechStack.GetByUserID(ctx, req.UserId)
+	if err != nil {
+		logger.Error("error getting user tech stacks %v", err)
+		return err
+	}
+
+	for _, stack := range userTStacks {
+		if err := u.repos.UserTechStack.Delete(ctx, stack.UserID, stack.TechStackID); err != nil {
+			logger.Error("error deleting existing user tech stacks")
+			return err
+		}
+	}
+
+	newStacks := []model.UserTechStack{}
+	for _, stack := range req.TechStackIDs {
+		newStacks = append(newStacks, model.UserTechStack{
+			TechStackID: stack,
+			UserID:      req.UserId,
+		})
+	}
+
+	if _, err := u.repos.UserTechStack.InsertMany(ctx, newStacks); err != nil {
+		logger.Error("error creating user tech stacks %v", err)
+		return err
+	}
+
 	return nil
 }

@@ -25,7 +25,7 @@ var globalSemaphore = semaphore.NewWeighted(4)
 type Application interface {
 	Create(ctx context.Context, app model.Application) (string, error)
 	Get(ctx context.Context, id string) (model.ApplicationDockered, error)
-	GetAll(ctx context.Context) ([]model.FullApplication, error)
+	GetAll(ctx context.Context, userId string) ([]model.FullApplication, error)
 	Update(ctx context.Context, app model.Application) error
 	GetStat(ctx context.Context, id string) (model.ApplicationStat, error)
 	CreateStat(ctx context.Context, stat model.ApplicationStat) error
@@ -227,16 +227,54 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 	}, nil
 }
 
-func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, error) {
+func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullApplication, error) {
 	apps, err := a.repos.Application.GetAll(ctx)
 	if err != nil {
 		logger.Error("error getting applications: %v", err)
 		return nil, err
 	}
 
+	techStacks, err := a.repos.UserTechStack.GetByUserID(ctx, userId)
+	if err != nil {
+		logger.Error("error getting user tech stacks %v", err)
+		return nil, err
+	}
+
+	roles, err := a.repos.UserRole.GetByUserID(ctx, userId)
+	if err != nil {
+		logger.Error("error getting user %v", err)
+		return nil, err
+	}
+
+	role := model.Role{}
+	for _, r := range roles {
+		if r.Role != nil && r.Role.Name == "Administrator" {
+			role = *r.Role
+			break
+		}
+	}
+	role = role
+
 	var fullApps []model.FullApplication
 
 	for _, app := range apps {
+		if app.TechStackID == nil {
+			continue
+		}
+
+		hasTechStack := false
+		for _, ut := range techStacks {
+			if *app.TechStackID == ut.TechStackID || role.ID != "" {
+				//if *app.TechStackID == ut.TechStackID {
+				hasTechStack = true
+				break
+			}
+		}
+
+		if !hasTechStack {
+			continue
+		}
+
 		stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
 		if err != nil {
 			logger.Error("error getting application stat: %v", err)
@@ -244,12 +282,10 @@ func (a *application) GetAll(ctx context.Context) ([]model.FullApplication, erro
 		}
 
 		var tech model.TechStack
-		if app.TechStackID != nil {
-			tech, err = a.repos.TechStack.GetByID(ctx, *app.TechStackID)
-			if err != nil {
-				logger.Error("error getting tech stack: %v", err)
-				return nil, err
-			}
+		tech, err = a.repos.TechStack.GetByID(ctx, *app.TechStackID)
+		if err != nil {
+			logger.Error("error getting tech stack: %v", err)
+			return nil, err
 		}
 
 		versions, err := a.repos.ApplicationVersion.GetAll(ctx, filters.IsSelectFilter("application_id", app.ID))

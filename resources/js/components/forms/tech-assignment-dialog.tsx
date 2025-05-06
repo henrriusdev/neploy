@@ -66,7 +66,7 @@ export function TechAssignmentDialog({ userId, allTechStacks, selectedTechIds, o
           <DialogDescription>Select the technologies this team member is proficient with.</DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] mt-4 pr-4">
-          <div className="space-y-4">
+          <div className="gap-4 grid grid-cols-3 pb-4">
             {allTechStacks.map((tech) => (
               <div key={tech.id} className="flex items-center space-x-2">
                 <Checkbox

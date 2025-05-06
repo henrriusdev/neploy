@@ -1,58 +1,28 @@
-import { useToast } from "@/hooks";
+import {useToast} from "@/hooks";
 import {TeamProps, TechStack} from "@/types";
-import { router } from "@inertiajs/react";
-import { PlusCircle, Trash } from "lucide-react";
+import {router} from "@inertiajs/react";
+import {PlusCircle, Trash} from "lucide-react";
 import {useEffect, useState} from "react";
-import { useTranslation } from "react-i18next";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import {useTranslation} from "react-i18next";
+import {Avatar, AvatarFallback, AvatarImage} from "../ui/avatar";
+import {Badge} from "../ui/badge";
+import {Button} from "../ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "../ui/card";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "../ui/dialog";
+import {Input} from "../ui/input";
+import {Label} from "../ui/label";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "../ui/select";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "../ui/table";
 import {TechAssignmentDialog} from "@/components/forms/tech-assignment-dialog";
-import {
-  useCreateTechStackMutation,
-  useDeleteTechStackMutation,
-  useGetTechStacksQuery,
-  useUpdateTechStackMutation
-} from "@/services/api/tech-stack";
+import {useGetTechStacksQuery} from "@/services/api/tech-stack";
+import {useUpdateUserTechStacksMutation} from "@/services/api/users";
 
 interface InviteMemberData {
   email: string;
   role: string;
 }
 
-export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
+export function Team({team, roles}: TeamProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<InviteMemberData>({
@@ -60,9 +30,10 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
     role: "",
   });
   const [teamState, setTeamState] = useState(team);
-  const { toast } = useToast();
-  const { t } = useTranslation();
+  const {toast} = useToast();
+  const {t} = useTranslation();
 
+  const [updateUserTechStacks] = useUpdateUserTechStacksMutation(); // o usarlo fuera de la función si estás en un componente
   const getTechStacks = useGetTechStacksQuery();
   const [techStacks, setTechStacks] = useState<TechStack[]>([]);
 
@@ -82,7 +53,7 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
           description: t("dashboard.team.inviteSuccess"),
         });
         setOpen(false);
-        setFormData({ email: "", role: "" });
+        setFormData({email: "", role: ""});
       },
       onError: () => {
         toast({
@@ -116,15 +87,28 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
     });
   };
 
-  const handleSaveTechs = (userId: strng, techIds: string[]) => {
-    // In a real app, you would make an API call here
-    console.log(`Saving technologies for user ${userId}:`, techIds)
+  const handleSaveTechs = async (userId: string, techIds: string[]) => {
+    setIsLoading(true);
+    try {
+      await updateUserTechStacks({userId, techIds}).unwrap();
 
-    toast({
-      title: "Technologies updated",
-      description: "The team member's technologies have been updated successfully.",
-    })
-  }
+      toast({
+        title: t('dashboard.team.inviteSuccess'),
+        description: t('dashboard.team.inviteSuccess'),
+      });
+      setOpen(false);
+      setFormData({email: '', role: ''});
+    } catch (err) {
+      console.error(err)
+      toast({
+        title: t('dashboard.team.inviteError'),
+        description: t('dashboard.team.inviteError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (getTechStacks.currentData && getTechStacks.status === "fulfilled") {
@@ -146,7 +130,7 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
+                  <PlusCircle className="mr-2 h-4 w-4"/>
                   {t("dashboard.team.inviteMember")}
                 </Button>
               </DialogTrigger>
@@ -165,7 +149,7 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                       type="email"
                       value={formData.email}
                       onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
+                        setFormData({...formData, email: e.target.value})
                       }
                       required
                     />
@@ -175,7 +159,7 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                     <Select
                       value={formData.role}
                       onValueChange={(value) =>
-                        setFormData({ ...formData, role: value })
+                        setFormData({...formData, role: value})
                       }>
                       <SelectTrigger>
                         <SelectValue
@@ -245,7 +229,7 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                       <Badge
                         key={role.name}
                         variant="default"
-                        style={{ backgroundColor: role.color }}>
+                        style={{backgroundColor: role.color}}>
                         {role.name}
                       </Badge>
                     ))}
@@ -265,7 +249,7 @@ export function Team({ user, teamName, logoUrl, team, roles }: TeamProps) {
                       size="icon"
                       className="ml-3"
                       onClick={() => handleRemoveMember(member.id)}>
-                      <Trash className="h-4 w-4 text-destructive-foreground" />
+                      <Trash className="h-4 w-4 text-destructive-foreground"/>
                     </Button>
                   </TableCell>
                 </TableRow>

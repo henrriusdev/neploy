@@ -250,7 +250,12 @@ func (a *Application) Upload(c echo.Context) error {
 // @Failure 500 {object} map[string]interface{}
 // @Router /applications [get]
 func (a *Application) List(c echo.Context) error {
-	apps, err := a.service.GetAll(c.Request().Context())
+	claims, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	apps, err := a.service.GetAll(c.Request().Context(), claims.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch applications")
 	}
