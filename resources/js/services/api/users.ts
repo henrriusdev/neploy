@@ -25,7 +25,14 @@ export const users = baseApi.injectEndpoints({
         body: passwordData,
       }),
     }),
+    updateUserTechStacks: builder.mutation<void, { userId: string; techIds: string[] }>({
+      query: ({ userId, techIds }) => ({
+        url: '/users/update-techstacks',
+        method: 'PUT',
+        body: { userId, techIds },
+      }),
+    }),
   }),
 });
 
-export const {useCompleteInviteMutation, useUpdateProfileMutation, useUpdatePasswordMutation} = users;
+export const {useUpdateUserTechStacksMutation, useUpdateProfileMutation, useUpdatePasswordMutation} = users;

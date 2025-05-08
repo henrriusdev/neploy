@@ -52,6 +52,7 @@ interface DashboardLayoutProps {
     email?: string;
     username?: string;
     provider?: string;
+    roles?: string[];
   };
   teamName?: string;
   logoUrl?: string;
@@ -74,6 +75,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       backendUser?.provider === "github"
         ? `https://unavatar.io/github/${backendUser?.username}`
         : `https://unavatar.io/${backendUser?.email}`,
+    roles: backendUser.roles || [],
   };
 
   const getComponent = () => {

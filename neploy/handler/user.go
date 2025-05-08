@@ -29,6 +29,7 @@ func (u *User) RegisterRoutes(r *echo.Group) {
 	r.GET("/profile", u.Profile)
 	r.PUT("/profile/update", u.UpdateProfile)
 	r.PUT("/profile/update-password", u.UpdatePassword)
+	r.PUT("/update-techstacks", u.SelectTechStacks)
 }
 
 // InviteUser godoc
@@ -299,4 +300,39 @@ func (u *User) UpdatePassword(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, req)
+}
+
+// SelectTechStacks godoc
+// @Summary Select user tech stacks
+// @Description Select user tech stacks
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /users/update-techstacks [put]
+func (u *User) SelectTechStacks(c echo.Context) error {
+	_, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		logger.Error("error getting claims")
+		return c.Redirect(http.StatusSeeOther, "/dashboard/team")
+	}
+
+	req := model.SelectUserTechStacksRequest{}
+	if err := c.Bind(&req); err != nil {
+		logger.Error("error binding request: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(req); err != nil {
+		logger.Error("error validating request: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := u.user.UpdateTechStacks(c.Request().Context(), req); err != nil {
+		logger.Error("error updating user tech stacks %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
 }

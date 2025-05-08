@@ -80,10 +80,6 @@ export function Gateways({ gateways, config }: GatewayProps) {
             <div>
               <h1 className="text-2xl font-bold">API Gateway</h1>
             </div>
-            <Button onClick={() => setIsFormOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Route
-            </Button>
           </div>
 
           <Tabs defaultValue="overview" className="space-y-4">
@@ -133,20 +129,6 @@ export function Gateways({ gateways, config }: GatewayProps) {
           </Tabs>
         </div>
       </div>
-
-      <GatewayForm
-        open={isFormOpen || !!editingGateway}
-        onOpenChange={(open) => {
-          setIsFormOpen(open);
-          if (!open) setEditingGateway(null);
-        }}
-        gateway={editingGateway}
-        onSubmit={
-          editingGateway
-            ? (data) => handleUpdate(editingGateway.id, data)
-            : handleCreate
-        }
-      />
     </div>
   );
 }

@@ -98,3 +98,8 @@ type PasswordRequest struct {
 	NewPassword     string `json:"newPassword" validate:"required,min=8"`
 	ConfirmPassword string `json:"confirmPassword" validate:"required,min=8"`
 }
+
+type SelectUserTechStacksRequest struct {
+	TechStackIDs []string `json:"techIds" validate:"required"`
+	UserId       string   `json:"userId" validate:"required"`
+}

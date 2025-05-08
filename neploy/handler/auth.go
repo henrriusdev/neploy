@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
 	"golang.org/x/oauth2"
@@ -95,27 +94,9 @@ func (a *Auth) Login(c echo.Context) error {
 		})
 	}
 
-	// Generate JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
-		ID:       res.User.ID,
-		Email:    res.User.Email,
-		Name:     res.User.FirstName + " " + res.User.LastName,
-		Username: res.User.Username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-		},
-	})
-
-	tokenString, err := token.SignedString([]byte(config.Env.JWTSecret))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "Failed to generate token",
-		})
-	}
-
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
-	cookie.Value = tokenString
+	cookie.Value = res.Token
 	cookie.HttpOnly = true
 	cookie.Path = "/"
 	c.SetCookie(cookie)

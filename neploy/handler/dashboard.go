@@ -3,16 +3,16 @@ package handler
 import (
 	"context"
 	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
+	"log"
 	"neploy.dev/config"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
+	"net/http"
+	"slices"
 )
 
 type Dashboard struct {
@@ -70,6 +70,7 @@ func (d *Dashboard) Index(c echo.Context) error {
 		Email:    claims.Email,
 		Username: claims.Username,
 		Name:     claims.Name,
+		Roles:    claims.RolesLower,
 		Provider: provider,
 	}
 
@@ -107,6 +108,7 @@ func (d *Dashboard) Team(c echo.Context) error {
 		Email:    claims.Email,
 		Username: claims.Username,
 		Name:     claims.Name,
+		Roles:    claims.RolesLower,
 		Provider: provider,
 	}
 
@@ -153,7 +155,7 @@ func (d *Dashboard) Applications(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
-	applications, err := d.services.Application.GetAll(c.Request().Context())
+	applications, err := d.services.Application.GetAll(c.Request().Context(), claims.ID)
 	if err != nil {
 		logger.Error("error getting applications: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
@@ -175,6 +177,7 @@ func (d *Dashboard) Applications(c echo.Context) error {
 		Email:    claims.Email,
 		Username: claims.Username,
 		Name:     claims.Name,
+		Roles:    claims.RolesLower,
 		Provider: provider,
 	}
 
@@ -231,6 +234,7 @@ func (d *Dashboard) ApplicationView(c echo.Context) error {
 		Email:    claims.Email,
 		Username: claims.Username,
 		Name:     claims.Name,
+		Roles:    claims.RolesLower,
 		Provider: provider,
 	}
 
@@ -283,6 +287,7 @@ func (d *Dashboard) Gateways(c echo.Context) error {
 		Email:    claims.Email,
 		Username: claims.Username,
 		Name:     claims.Name,
+		Roles:    claims.RolesLower,
 		Provider: provider,
 	}
 
@@ -301,6 +306,10 @@ func (d *Dashboard) Config(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
+	if !slices.Contains(claims.RolesLower, "administrator") || !slices.Contains(claims.RolesLower, "settings") {
+		return c.Redirect(http.StatusSeeOther, "/dashboard")
+	}
+
 	metadata, err := d.services.Metadata.Get(c.Request().Context())
 	if err != nil {
 		logger.Error("error getting metadata: %v", err)
@@ -317,6 +326,7 @@ func (d *Dashboard) Config(c echo.Context) error {
 		Email:    claims.Email,
 		Username: claims.Username,
 		Name:     claims.Name,
+		Roles:    claims.RolesLower,
 		Provider: provider,
 	}
 

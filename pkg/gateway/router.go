@@ -164,6 +164,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 
+		if strings.Contains(req.URL.Path, ".well-known") {
+			w.WriteHeader(http.StatusContinue)
+			return
+		}
+
 		log.Printf("WARN: No matching route found for path: %s, host: %s", req.URL.Path, req.Host)
 
 		w.WriteHeader(http.StatusNotFound)

@@ -64,7 +64,7 @@ func (a *ApplicationVersion) ExistsByName(ctx context.Context, name, tag string)
 
 	var row model.ApplicationVersion
 	if err := a.Store.GetContext(ctx, &row, query, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
+		logger.Error("error executing exists by name %s: %v", name, err)
 		return false, err
 	}
 

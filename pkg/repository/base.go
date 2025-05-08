@@ -279,10 +279,10 @@ func (b *Base[T]) InsertMany(ctx context.Context, models []T, filters ...filters
 	if err != nil {
 		return *new([]T), err
 	}
-	var results []T
-	err = b.Store.QueryRowxContext(ctx, sql, args...).StructScan(results)
+	err = b.Store.QueryRowxContext(ctx, sql, args...).Err()
 	if err != nil {
 		return *new([]T), err
 	}
-	return results, nil
+
+	return nil, nil
 }
