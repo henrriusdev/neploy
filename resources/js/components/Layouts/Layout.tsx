@@ -42,6 +42,7 @@ interface User {
   name: string;
   email: string;
   avatar: string;
+  roles: string[];
 }
 
 interface SidebarLayoutProps {
@@ -81,13 +82,16 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           </SidebarHeader>
           <SidebarContent className="px-2">
             <SidebarMenu>
-              {navItems.map((item) => (
+              {navItems.filter(item =>
+                item.url !== '/dashboard/settings' ||
+                user.roles.includes("administrator") || user.roles.includes("settings")
+              ).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={item.isActive}>
-                    <button onClick={() => router.visit(item.url)} className="flex items-center">
+                    <Link href={item.url} className="flex items-center">
                       <item.icon className="mr-2 h-4 w-4"/>
                       <span>{item.title}</span>
-                    </button>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

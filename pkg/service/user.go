@@ -241,8 +241,10 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 	}
 
 	return model.LoginResponse{
-		Token: t,
-		User:  user,
+		Token:     t,
+		User:      user,
+		RoleIDs:   roleIDs,
+		RoleNames: roleNamesLower,
 	}, nil
 }
 

@@ -1,8 +1,10 @@
 package model
 
 type LoginResponse struct {
-	Token string `json:"token"`
-	User  User   `json:"user"`
+	Token     string   `json:"token"`
+	User      User     `json:"user"`
+	RoleIDs   []string `json:"roles"`
+	RoleNames []string `json:"roleNames"`
 }
 
 type OAuthResponse struct {
@@ -12,10 +14,11 @@ type OAuthResponse struct {
 }
 
 type UserResponse struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Provider string `json:"provider"`
+	Email    string   `json:"email"`
+	Username string   `json:"username"`
+	Name     string   `json:"name"`
+	Provider string   `json:"provider"`
+	Roles    []string `json:"roles"`
 }
 
 type TeamMemberResponse struct {

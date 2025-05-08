@@ -36,7 +36,6 @@ export function GatewayTable({
             <TableHead>Auth Required</TableHead>
             <TableHead>Rate Limit</TableHead>
             <TableHead>Application</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,26 +68,6 @@ export function GatewayTable({
                   className="text-primary hover:underline">
                   {gateway.application.appName}
                 </Link>
-              </TableCell>
-              <TableCell className="text-right space-x-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(gateway)}>
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => {
-                    if (
-                      confirm("Are you sure you want to delete this route?")
-                    ) {
-                      onDelete(gateway.id);
-                    }
-                  }}>
-                  <Trash2 className="h-4 w-4 text-destructive-foreground" />
-                </Button>
               </TableCell>
             </TableRow>
           ))}
