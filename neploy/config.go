@@ -122,6 +122,7 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	techStack := repository.NewTechStack(npy.DB)
 	gateway := repository.NewGateway(npy.DB)
 	gatewayConf := repository.NewGatewayConfig(npy.DB)
+	trace := repository.NewTrace(npy.DB)
 
 	return repository.Repositories{
 		Application:        application,
@@ -132,6 +133,7 @@ func NewRepositories(npy Neploy) repository.Repositories {
 		Metadata:           metadata,
 		Role:               role,
 		TechStack:          techStack,
+		Trace:              trace,
 		User:               user,
 		UserOauth:          userOauth,
 		UserRole:           userRole,

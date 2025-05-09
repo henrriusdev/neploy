@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -32,6 +33,7 @@ func (v *VisitorInfo) GetByID(ctx context.Context, id string) (model.VisitorInfo
 		return model.VisitorInfo{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return visitorInfo, nil
 }
 
@@ -48,6 +50,7 @@ func (v *VisitorInfo) Insert(ctx context.Context, visitorInfo model.VisitorInfo)
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -64,6 +67,7 @@ func (v *VisitorInfo) Update(ctx context.Context, visitorInfo model.VisitorInfo)
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -85,6 +89,7 @@ func (v *VisitorInfo) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -102,5 +107,6 @@ func (v *VisitorInfo) GetAll(ctx context.Context) ([]model.VisitorInfo, error) {
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return visitorInfos, nil
 }

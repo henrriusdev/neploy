@@ -306,7 +306,7 @@ func (d *Dashboard) Config(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	if !slices.Contains(claims.RolesLower, "administrator") || !slices.Contains(claims.RolesLower, "settings") {
+	if !slices.Contains(claims.RolesLower, "administrator") && !slices.Contains(claims.RolesLower, "settings") {
 		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	}
 
@@ -342,6 +342,12 @@ func (d *Dashboard) Config(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	traces, err := d.services.Trace.GetAll(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting traces: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"user":       user,
 		"teamName":   metadata.TeamName,
@@ -349,5 +355,6 @@ func (d *Dashboard) Config(c echo.Context) error {
 		"language":   metadata.Language,
 		"roles":      roles,
 		"techStacks": techStacks,
+		"traces":     traces,
 	})
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -32,6 +33,8 @@ func (a *Application) Insert(ctx context.Context, application model.Application)
 		return "", err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
+
 	return id, nil
 }
 
@@ -47,6 +50,8 @@ func (a *Application) Update(ctx context.Context, application model.Application)
 		logger.Error("error executing update query: %v", err)
 		return err
 	}
+
+	common.AttachSQLToTrace(ctx, q)
 
 	return nil
 }
@@ -69,6 +74,8 @@ func (a *Application) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
+
 	return nil
 }
 
@@ -86,6 +93,7 @@ func (a *Application) GetByID(ctx context.Context, id string) (model.Application
 		return model.Application{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return application, nil
 }
 
@@ -103,6 +111,8 @@ func (a *Application) GetAll(ctx context.Context) ([]model.Application, error) {
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
+
 	return applications, nil
 }
 
@@ -119,6 +129,8 @@ func (a *Application) GetByTechStack(ctx context.Context, techStackID string) ([
 		logger.Error("error executing select query: %v", err)
 		return nil, err
 	}
+
+	common.AttachSQLToTrace(ctx, q)
 
 	return applications, nil
 }

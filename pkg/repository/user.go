@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/model"
@@ -32,6 +33,7 @@ func (u *User) Create(ctx context.Context, user model.User) (model.User, error) 
 		return model.User{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return newUser, nil
 }
 
@@ -48,6 +50,7 @@ func (u *User) Get(ctx context.Context, id string) (model.User, error) {
 		return model.User{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return user, nil
 }
 
@@ -65,6 +68,7 @@ func (u *User) Update(ctx context.Context, user model.User) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -82,6 +86,7 @@ func (u *User) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -100,6 +105,7 @@ func (u *User) List(ctx context.Context, limit, offset uint) ([]model.User, erro
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return users, nil
 }
 
@@ -116,6 +122,7 @@ func (u *User) GetByEmail(ctx context.Context, email string) (model.User, error)
 		return model.User{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return user, nil
 }
 
@@ -130,6 +137,7 @@ func (u *User) CreateInvitation(ctx context.Context, invitation model.Invitation
 	println(q)
 
 	_, err = u.Store.ExecContext(ctx, q, args...)
+	common.AttachSQLToTrace(ctx, q)
 	return err
 }
 
@@ -146,6 +154,7 @@ func (u *User) GetInvitationByToken(ctx context.Context, token string) (model.In
 		return model.Invitation{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return invitation, nil
 }
 
@@ -160,5 +169,6 @@ func (u *User) UpdateInvitation(ctx context.Context, invitation model.Invitation
 	}
 
 	_, err = u.Store.ExecContext(ctx, q, args...)
+	common.AttachSQLToTrace(ctx, q)
 	return err
 }

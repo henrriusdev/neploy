@@ -28,37 +28,37 @@ func onboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 
 func dashboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	dashboard := handler.NewDashboard(npy.Services, i)
-	dashboard.RegisterRoutes(e.Group("/dashboard", middleware.JWTMiddleware()))
+	dashboard.RegisterRoutes(e.Group("/dashboard", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	user := handler.NewUser(npy.Services.User, npy.Services.Metadata, i)
-	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware()))
+	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	application := handler.NewApplication(npy.Services.Application, i)
-	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware()))
+	application.RegisterRoutes(e.Group("/applications", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func roleRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	roleHandler := handler.NewRole(i, npy.Services.Role)
-	roleHandler.RegisterRoutes(e.Group("/roles", middleware.JWTMiddleware()))
+	roleHandler.RegisterRoutes(e.Group("/roles", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func metadataRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	metadata := handler.NewMetadata(npy.Services.Metadata, i)
-	metadata.RegisterRoutes(e.Group("/metadata", middleware.JWTMiddleware()))
+	metadata.RegisterRoutes(e.Group("/metadata", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func techStackRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	techStack := handler.NewTechStack(i, npy.Services.TechStack)
-	techStack.RegisterRoutes(e.Group("/tech-stacks", middleware.JWTMiddleware()))
+	techStack.RegisterRoutes(e.Group("/tech-stacks", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func gatewayRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	gateway := handler.NewGateway(npy.Services.Gateway, npy.Services.HealthChecker, i)
-	gateway.RegisterRoutes(e.Group("/gateways", middleware.JWTMiddleware()))
+	gateway.RegisterRoutes(e.Group("/gateways", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {

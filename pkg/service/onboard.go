@@ -70,6 +70,18 @@ func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error 
 			logger.Error("error creating default role: %v", err)
 		}
 	}
+
+	if _, err := o.roleService.GetByName(ctx, "Configurator"); err != nil && errors.Is(err, sql.ErrNoRows) {
+		role := model.CreateRoleRequest{
+			Name:        "Configurator",
+			Description: "Gives access to the system configuration for other users without the admin role",
+			Icon:        "User",
+			Color:       "#ff0000",
+		}
+		if err := o.roleService.Create(ctx, role); err != nil {
+			logger.Error("error creating default role: %v", err)
+		}
+	}
 	// create the admin user
 
 	req.AdminUser.Roles = []string{"Administrator"}

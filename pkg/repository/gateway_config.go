@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"neploy.dev/pkg/common"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
@@ -38,6 +39,7 @@ func (g *GatewayConfig) Upsert(ctx context.Context, gateway model.GatewayConfig)
 			return model.GatewayConfig{}, err
 		}
 
+		common.AttachSQLToTrace(ctx, q)
 		return conf, nil
 	}
 
@@ -53,6 +55,7 @@ func (g *GatewayConfig) Upsert(ctx context.Context, gateway model.GatewayConfig)
 		return model.GatewayConfig{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return conf, nil
 }
 
@@ -72,6 +75,7 @@ func (g *GatewayConfig) Get(ctx context.Context) (conf model.GatewayConfig, err 
 		return model.GatewayConfig{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return
 }
 

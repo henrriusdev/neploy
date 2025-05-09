@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -31,6 +32,7 @@ func (g *Gateway) Insert(ctx context.Context, gateway model.Gateway) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -47,6 +49,7 @@ func (g *Gateway) Update(ctx context.Context, gateway model.Gateway) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -68,6 +71,7 @@ func (g *Gateway) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -85,6 +89,7 @@ func (g *Gateway) GetByID(ctx context.Context, id string) (model.Gateway, error)
 		return model.Gateway{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return gateway, nil
 }
 
@@ -102,91 +107,7 @@ func (g *Gateway) GetAll(ctx context.Context) ([]model.Gateway, error) {
 		return nil, err
 	}
 
-	return gateways, nil
-}
-
-func (g *Gateway) GetByHttpMethod(ctx context.Context, httpMethod string) ([]model.Gateway, error) {
-	query := g.baseQuery().Where(goqu.Ex{"http_method": httpMethod})
-	q, args, err := query.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return nil, err
-	}
-
-	var gateways []model.Gateway
-	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return nil, err
-	}
-
-	return gateways, nil
-}
-
-func (g *Gateway) GetByEndpoint(ctx context.Context, endpoint string) ([]model.Gateway, error) {
-	query := g.baseQuery().Where(goqu.Ex{"endpoint": endpoint})
-	q, args, err := query.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return nil, err
-	}
-
-	var gateways []model.Gateway
-	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return nil, err
-	}
-
-	return gateways, nil
-}
-
-func (g *Gateway) GetByLogLevel(ctx context.Context, logLevel string) ([]model.Gateway, error) {
-	query := g.baseQuery().Where(goqu.Ex{"log_level": logLevel})
-	q, args, err := query.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return nil, err
-	}
-
-	var gateways []model.Gateway
-	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return nil, err
-	}
-
-	return gateways, nil
-}
-
-func (g *Gateway) GetByStage(ctx context.Context, stage string) ([]model.Gateway, error) {
-	query := g.baseQuery().Where(goqu.Ex{"stage": stage})
-	q, args, err := query.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return nil, err
-	}
-
-	var gateways []model.Gateway
-	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return nil, err
-	}
-
-	return gateways, nil
-}
-
-func (g *Gateway) GetByName(ctx context.Context, name string) ([]model.Gateway, error) {
-	query := g.baseQuery().Where(goqu.Ex{"name": name})
-	q, args, err := query.ToSQL()
-	if err != nil {
-		logger.Error("error building select query: %v", err)
-		return nil, err
-	}
-
-	var gateways []model.Gateway
-	if err := g.Store.SelectContext(ctx, &gateways, q, args...); err != nil {
-		logger.Error("error executing select query: %v", err)
-		return nil, err
-	}
-
+	common.AttachSQLToTrace(ctx, q)
 	return gateways, nil
 }
 
@@ -204,5 +125,6 @@ func (g *Gateway) GetByApplicationID(ctx context.Context, applicationID string) 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return gateways, nil
 }

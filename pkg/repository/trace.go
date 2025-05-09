@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -31,6 +32,7 @@ func (t *Trace) Insert(ctx context.Context, trace model.Trace) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -47,6 +49,7 @@ func (t *Trace) Update(ctx context.Context, trace model.Trace) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -68,6 +71,7 @@ func (t *Trace) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -85,6 +89,7 @@ func (t *Trace) GetByID(ctx context.Context, id string) (model.Trace, error) {
 		return model.Trace{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return trace, nil
 }
 
@@ -102,6 +107,7 @@ func (t *Trace) GetAll(ctx context.Context) ([]model.Trace, error) {
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return traces, nil
 }
 
@@ -119,6 +125,7 @@ func (t *Trace) GetByUserID(ctx context.Context, userID string) ([]model.Trace, 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return traces, nil
 }
 
@@ -136,6 +143,7 @@ func (t *Trace) GetByType(ctx context.Context, traceType string) ([]model.Trace,
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return traces, nil
 }
 
@@ -153,6 +161,7 @@ func (t *Trace) GetByAction(ctx context.Context, action string) ([]model.Trace, 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return traces, nil
 }
 
@@ -170,5 +179,6 @@ func (t *Trace) GetByActionTimestamp(ctx context.Context, timestamp model.Date) 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return traces, nil
 }

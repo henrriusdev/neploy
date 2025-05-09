@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
@@ -31,6 +32,7 @@ func (u *UserOAuth) Insert(ctx context.Context, user model.UserOAuth) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -67,5 +69,6 @@ func (u *UserOAuth) GetByUserID(ctx context.Context, userID string) (model.UserO
 		return model.UserOAuth{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return user, nil
 }

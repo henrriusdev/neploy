@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -51,6 +52,7 @@ func (u *UserRole) GetByUserID(ctx context.Context, userID string) ([]model.User
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return userRoles, nil
 }
 
@@ -82,6 +84,7 @@ func (u *UserRole) GetByRoleID(ctx context.Context, roleID string) ([]model.User
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return userRoles, nil
 }
 
@@ -101,5 +104,6 @@ func (u *UserRole) Insert(ctx context.Context, userRole model.UserRoles) (model.
 		return model.UserRoles{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return userRole, nil
 }
