@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/model"
@@ -28,6 +29,7 @@ func (r *Role) Insert(ctx context.Context, role model.Role) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return nil
 }
 
@@ -43,6 +45,7 @@ func (r *Role) GetByID(ctx context.Context, id string) (model.Role, error) {
 		return role, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return role, nil
 }
 
@@ -58,6 +61,7 @@ func (r *Role) GetByName(ctx context.Context, name string) (model.Role, error) {
 		return role, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return role, nil
 }
 
@@ -73,6 +77,7 @@ func (r *Role) Get(ctx context.Context) ([]model.Role, error) {
 		return roles, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return roles, nil
 }
 
@@ -87,6 +92,7 @@ func (r *Role) Update(ctx context.Context, id string, role model.Role) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return nil
 }
 
@@ -101,5 +107,6 @@ func (r *Role) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return nil
 }

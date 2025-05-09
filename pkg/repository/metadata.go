@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -30,6 +31,7 @@ func (m *Metadata) Create(ctx context.Context, metadata model.Metadata) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return nil
 }
 
@@ -54,6 +56,7 @@ func (m *Metadata) Update(ctx context.Context, metadata model.Metadata) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return err
 }
 
@@ -71,6 +74,7 @@ func (m *Metadata) Get(ctx context.Context) (model.Metadata, error) {
 		return model.Metadata{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return metadata, nil
 }
 
@@ -88,6 +92,7 @@ func (m *Metadata) GetTeamName(ctx context.Context) (string, error) {
 		return "", err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return teamName, nil
 }
 
@@ -105,6 +110,7 @@ func (m *Metadata) GetTeamLogo(ctx context.Context) (string, error) {
 		return "", err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return teamLogo, nil
 }
 
@@ -122,5 +128,6 @@ func (m *Metadata) GetLanguage(ctx context.Context) (string, error) {
 		return "", err
 	}
 
+	common.AttachSQLToTrace(ctx, query)
 	return language, nil
 }

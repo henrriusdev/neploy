@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/doug-martin/goqu/v9"
+	"neploy.dev/pkg/common"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/repository/filters"
@@ -40,6 +41,7 @@ func (a *ApplicationVersion) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -49,24 +51,25 @@ func (a *ApplicationVersion) Exists(ctx context.Context, appID, tag string) (boo
 }
 
 func (a *ApplicationVersion) ExistsByName(ctx context.Context, name, tag string) (bool, error) {
-	q := a.baseQuery("v").
+	query := a.baseQuery("v").
 		Select(goqu.I("v.*")).
 		LeftJoin(
 			goqu.T("applications").As("a"),
 			goqu.On(goqu.I("a.id").Eq(goqu.I("v.application_id"))),
 		).Where(goqu.I("a.app_name").Eq(name)).Where(goqu.I("v.version_tag").Eq(tag))
 
-	query, args, err := q.ToSQL()
+	q, args, err := query.ToSQL()
 	if err != nil {
 		logger.Error("error building select query: %v", err)
 		return false, err
 	}
 
 	var row model.ApplicationVersion
-	if err := a.Store.GetContext(ctx, &row, query, args...); err != nil {
+	if err := a.Store.GetContext(ctx, &row, q, args...); err != nil {
 		logger.Error("error executing exists by name %s: %v", name, err)
 		return false, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return row.ID != "", err
 }

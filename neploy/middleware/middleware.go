@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"context"
+	"neploy.dev/pkg/model"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"neploy.dev/pkg/common"
@@ -74,6 +77,63 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			// Store claims in context
 			c.Set("claims", claims)
 			return next(c)
+		}
+	}
+}
+
+func TraceMiddleware(traceService service.Trace) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			claims, ok := c.Get("claims").(model.JWTClaims)
+			if !ok {
+				return next(c)
+			}
+
+			trace := &model.Trace{
+				UserID:          claims.ID,
+				Type:            "panel", // o dinámico según ruta
+				Action:          c.Request().Method + " " + c.Path(),
+				ActionTimestamp: model.NewDateNow(),
+			}
+
+			println("LLEGANDO")
+
+			// Inyectar en contexto
+			ctx := common.InjectTrace(c.Request().Context(), trace)
+			c.SetRequest(c.Request().WithContext(ctx))
+
+			err := next(c)
+
+			// Guardar al final
+			go traceService.Create(context.Background(), *trace)
+			return err
+		}
+	}
+}
+
+func VisitorTraceMiddleware(visitorTraceService service.Visitor) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			start := time.Now()
+			err := next(c)
+			duration := int(time.Since(start).Milliseconds())
+
+			visitorID := c.Request().Header.Get("X-Visitor-ID")
+			if visitorID == "" {
+				visitorID = c.RealIP()
+			}
+
+			appID := c.Request().Header.Get("X-Application-ID") // asegúrate de inyectarlo
+			trace := model.VisitorTrace{
+				ApplicationID: appID,
+				VisitorID:     visitorID,
+				PageVisited:   c.Path(),
+				VisitDuration: duration,
+				VisitedAt:     model.NewDateNow(),
+			}
+
+			go visitorTraceService.CreateTrace(c.Request().Context(), trace)
+			return err
 		}
 	}
 }

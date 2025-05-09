@@ -42,6 +42,14 @@ type Date struct {
 	time.Time
 }
 
+func NewDate(t time.Time) Date {
+	return Date{Time: t}
+}
+
+func NewDateNow() Date {
+	return Date{Time: time.Now()}
+}
+
 type DateRange struct {
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9/exp"
 
@@ -14,7 +15,6 @@ import (
 )
 
 type Repositories struct {
-	ApplicationUser    *ApplicationUser
 	Application        *Application
 	ApplicationStat    *ApplicationStat
 	ApplicationVersion *ApplicationVersion
@@ -116,6 +116,8 @@ func (b *Base[T]) GetAll(ctx context.Context, queryFilters ...filters.SelectFilt
 	if err = b.Store.SelectContext(ctx, &results, q, args...); err != nil {
 		return results, err
 	}
+
+	common.AttachSQLToTrace(ctx, q)
 	return results, nil
 }
 
@@ -135,6 +137,7 @@ func (b *Base[T]) GetOne(ctx context.Context, filter ...filters.SelectFilterBuil
 		return *new(T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return result, nil
 }
 
@@ -154,6 +157,7 @@ func (b *Base[T]) GetOneById(ctx context.Context, id string) (T, error) {
 		return *new(T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return result, nil
 }
 
@@ -175,6 +179,7 @@ func (b *Base[T]) UpdateOneById(ctx context.Context, id string, model T, updateF
 		return *new(T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return updated, nil
 }
 
@@ -194,6 +199,7 @@ func (b *Base[T]) UpdateOne(ctx context.Context, model T, updateFilters ...filte
 		return *new(T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return updated, nil
 }
 
@@ -218,6 +224,7 @@ func (b *Base[T]) UpsertOneDoUpdate(ctx context.Context, model T, conflictColumn
 		return *new(T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return upserted, nil
 }
 
@@ -240,6 +247,7 @@ func (b *Base[T]) UpsertOneDoNothing(ctx context.Context, model T, conflictColum
 		return *new(T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return upserted, nil
 }
 
@@ -256,33 +264,37 @@ func (b *Base[T]) Update(ctx context.Context, model T, updateFilters ...filters.
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
 func (b *Base[T]) InsertOne(ctx context.Context, model T, filters ...filters.SelectFilterBuilder) (T, error) {
 	insert := b.BaseQueryInsert().Rows(model).Returning("*")
-	sql, args, err := insert.ToSQL()
+	q, args, err := insert.ToSQL()
 	if err != nil {
 		return *new(T), err
 	}
 
-	err = b.Store.QueryRowxContext(ctx, sql, args...).StructScan(&model)
+	err = b.Store.QueryRowxContext(ctx, q, args...).StructScan(&model)
 	if err != nil {
 		return *new(T), err
 	}
+
+	common.AttachSQLToTrace(ctx, q)
 	return model, nil
 }
 
 func (b *Base[T]) InsertMany(ctx context.Context, models []T, filters ...filters.SelectFilterBuilder) ([]T, error) {
 	insert := b.BaseQueryInsert().Rows(models).Returning("*")
-	sql, args, err := insert.ToSQL()
+	q, args, err := insert.ToSQL()
 	if err != nil {
 		return *new([]T), err
 	}
-	err = b.Store.QueryRowxContext(ctx, sql, args...).Err()
+	err = b.Store.QueryRowxContext(ctx, q, args...).Err()
 	if err != nil {
 		return *new([]T), err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil, nil
 }

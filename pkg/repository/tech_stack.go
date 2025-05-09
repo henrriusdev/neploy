@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
 	"neploy.dev/pkg/logger"
@@ -34,6 +35,8 @@ func (t *TechStack) FindOrCreate(ctx context.Context, name string) (model.TechSt
 		return model.TechStack{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
+
 	if techStack.ID != "" {
 		return techStack, nil
 	}
@@ -50,6 +53,7 @@ func (t *TechStack) FindOrCreate(ctx context.Context, name string) (model.TechSt
 		return model.TechStack{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return techStack, nil
 }
 
@@ -66,6 +70,7 @@ func (t *TechStack) Insert(ctx context.Context, techStack model.TechStack) error
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -82,6 +87,7 @@ func (t *TechStack) Update(ctx context.Context, id string, techStack model.TechS
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -103,6 +109,7 @@ func (t *TechStack) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -120,6 +127,7 @@ func (t *TechStack) GetByID(ctx context.Context, id string) (model.TechStack, er
 		return model.TechStack{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return techStack, nil
 }
 
@@ -137,5 +145,6 @@ func (t *TechStack) GetAll(ctx context.Context) ([]model.TechStack, error) {
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return techStacks, nil
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"neploy.dev/pkg/common"
 	"time"
 
 	"github.com/doug-martin/goqu/v9"
@@ -32,6 +33,7 @@ func (a *ApplicationStat) Insert(ctx context.Context, applicationStat model.Appl
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -48,6 +50,7 @@ func (a *ApplicationStat) Update(ctx context.Context, applicationStat model.Appl
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -69,6 +72,7 @@ func (a *ApplicationStat) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return nil
 }
 
@@ -86,6 +90,7 @@ func (a *ApplicationStat) GetByID(ctx context.Context, id string) (model.Applica
 		return model.ApplicationStat{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return applicationStat, nil
 }
 
@@ -103,6 +108,7 @@ func (a *ApplicationStat) GetByApplicationID(ctx context.Context, applicationID 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return applicationStats, nil
 }
 
@@ -120,6 +126,7 @@ func (a *ApplicationStat) GetByEnvironmentID(ctx context.Context, environmentID 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return applicationStats, nil
 }
 
@@ -137,6 +144,7 @@ func (a *ApplicationStat) GetByDate(ctx context.Context, date time.Time) ([]mode
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return applicationStats, nil
 }
 
@@ -154,6 +162,7 @@ func (a *ApplicationStat) GetAll(ctx context.Context) ([]model.ApplicationStat, 
 		return nil, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return applicationStats, nil
 }
 
@@ -171,6 +180,7 @@ func (a *ApplicationStat) GetUniqueVisitors(ctx context.Context, applicationID, 
 		return 0, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return count, nil
 }
 
@@ -188,6 +198,7 @@ func (a *ApplicationStat) GetDataTransfered(ctx context.Context, applicationID, 
 		return 0, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return sum, nil
 }
 
@@ -205,6 +216,7 @@ func (a *ApplicationStat) GetRequests(ctx context.Context, applicationID, enviro
 		return 0, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return sum, nil
 }
 
@@ -222,6 +234,7 @@ func (a *ApplicationStat) GetAverageResponseTime(ctx context.Context, applicatio
 		return 0, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return avg, nil
 }
 
@@ -239,6 +252,7 @@ func (a *ApplicationStat) GetErrorRate(ctx context.Context, applicationID, envir
 		return 0, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return avg, nil
 }
 
@@ -256,5 +270,6 @@ func (a *ApplicationStat) GetByApplicationIDAndEnvironmentID(ctx context.Context
 		return model.ApplicationStat{}, err
 	}
 
+	common.AttachSQLToTrace(ctx, q)
 	return applicationStat, nil
 }

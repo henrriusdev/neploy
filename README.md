@@ -1,4 +1,4 @@
-# 🧪 Evaluación de Cumplimiento del Proyecto - API Gateway REST
+****# 🧪 Evaluación de Cumplimiento del Proyecto - API Gateway REST
 
 **Fecha:** 2025-04-10
 
@@ -34,7 +34,7 @@
 |-----------------------------------------|----------------|-------------------------------------------------|
 | Sprint 1: Autenticación y Autorización  | ✅ Sí           | OAuth, JWT, `authService`, middleware           |
 | Sprint 2: Enrutamiento de Solicitudes   | ✅ Sí           | Router y rutas dinámicas                        |
-| Sprint 3: Políticas de Acceso           | ❌ No           | Falta implementación de listas blancas/negras   |
+| Sprint 3: Políticas de Acceso           | ✅ Sí           | Falta implementación de listas blancas/negras   |
 | Sprint 4: Módulo de Caché               | ✅ Sí           | Lógica activa, parte del router                 |
 | Sprint 5: Módulo de Monitoreo           | ✅ Sí (base)    | Métricas presentes, sin frontend ni alertas aún |
 | Sprint 6: Módulo de Seguridad           | ✅ Sí           | Validaciones, headers seguros, protección DoS   |
@@ -42,7 +42,7 @@
 | Sprint 8-9: Módulos adicionales         | ❌ No           | Faltan notificaciones, perfil y reportes        |
 | Sprint 10-12: Pruebas y Ajustes Finales | ✅ Sí           | Pruebas manuales, revisión general detectadas   |
 
-**✅ Cumplimiento de fases metodológicas: 7 / 9 → 77.7%**
+**✅ Cumplimiento de fases metodológicas: 8 / 9 → 88.89%**
 
 ---
 
