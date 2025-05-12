@@ -85,7 +85,7 @@ func (m *MetricsAggregator) run() {
 func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-
+ 	
 	for appID, collector := range m.collectors {
 		// 🔥 Cargar todos los logs disponibles
 		metrics, err := collector.GetMetrics(30) // últimos 30 días
