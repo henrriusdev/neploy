@@ -17,14 +17,29 @@ type Trace interface {
 
 type trace struct {
 	repo *repository.Trace
+	user *repository.User
 }
 
-func NewTrace(repo *repository.Trace) Trace {
-	return &trace{repo}
+func NewTrace(repo *repository.Trace, user *repository.User) Trace {
+	return &trace{repo, user}
 }
 
 func (t *trace) GetAll(ctx context.Context) ([]model.Trace, error) {
-	return t.repo.GetAll(ctx)
+	traces, err := t.repo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, trace := range traces {
+		user, err := t.user.GetOneById(ctx, trace.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		traces[i].Email = user.Email
+	}
+
+	return traces, nil
 }
 
 func (t *trace) GetByID(ctx context.Context, id string) (model.Trace, error) {

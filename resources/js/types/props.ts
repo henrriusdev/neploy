@@ -8,7 +8,7 @@ import {
   RoleWithUsers,
   TeamMember,
   TechStack,
-  TechStackWithApplications,
+  TechStackWithApplications, Trace,
   User,
 } from "./common";
 
@@ -125,6 +125,7 @@ export interface SettingsProps extends CommonProps{
   language: string;
   roles: RoleWithUsers[];
   techStacks: TechStackWithApplications[];
+  traces: Trace[]
 }
 
 export interface GeneralSettingsProps {
@@ -139,6 +140,10 @@ export interface RolesSettingsProps {
 
 export interface TechStacksSettingsProps {
   techStacks: TechStackWithApplications[];
+}
+
+export interface TracesSettingsProps {
+  traces: Trace[]
 }
 
 export interface DialogButtonProps {

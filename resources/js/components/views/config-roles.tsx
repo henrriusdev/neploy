@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RoleIcon } from "@/components/icons/role-icon";
-import { Eye, Pencil, PlusCircle, Trash2 } from "lucide-react";
+import {Eye, Pencil, PlusCircle, Trash2, Users} from "lucide-react";
 import { TooltipButton } from "@/components/ui/tooltip-button";
 import { useTranslation } from "react-i18next";
 import { DialogButton } from "../forms/dialog-button";
@@ -30,6 +30,7 @@ import {
   useGetRolesQuery,
   useUpdateRoleMutation,
 } from "@/services/api/role";
+import {RoleUserManagerDialog} from "@/components/role-user-manager-dialog";
 
 const RolesTab: React.FC<RolesSettingsProps> = ({ roles: initialRoles }) => {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({ roles: initialRoles }) => {
   const [deleteRole] = useDeleteRoleMutation();
   const [openRoleId, setOpenRoleId] = useState<string | null>(null);
   const [roles, setRoles] = useState<RoleWithUsers[]>(initialRoles);
+  const [openManageUsersRole, setOpenManageUsersRole] = useState("")
 
   const [open, setOpen] = useState(false);
 
@@ -163,10 +165,18 @@ const RolesTab: React.FC<RolesSettingsProps> = ({ roles: initialRoles }) => {
                   <div className="flex items-center gap-2">
                     <TooltipButton
                       tooltip={t("settings.roles.showAction")}
-                      icon={Eye}
+                      icon={Users}
                       variant="ghost"
                       size="icon"
+                      onClick={() => setOpenManageUsersRole(role.id)}
                     />
+                    <RoleUserManagerDialog
+                      open={openManageUsersRole === role.id}
+                      onOpenChange={() => setOpenManageUsersRole(null)}
+                      roleId={role.id}
+                      roleName={role.name}
+                      assignedUsers={role.users}
+                      />
                     <DialogButton
                       buttonText={t("settings.roles.editAction")}
                       title={t("settings.roles.editDialog")}
