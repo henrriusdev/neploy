@@ -83,41 +83,40 @@ func (m *MetricsAggregator) run() {
 }
 
 func (m *MetricsAggregator) aggregateAndSaveMetrics() {
-	// Get metrics for the last hour
-	endTime := time.Now()
-	startTime := endTime.Add(-time.Hour)
-
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-
-	// Aggregate metrics for each collector
+ 	
 	for appID, collector := range m.collectors {
-		metrics, err := collector.GetMetrics(1) // Get last 24 hours of metrics
+		// 🔥 Cargar todos los logs disponibles
+		metrics, err := collector.GetMetrics(30) // últimos 30 días
 		if err != nil {
 			log.Printf("ERROR: Failed to get metrics for app %s: %v", appID, err)
 			continue
 		}
 
-		// Find metrics for the previous hour
-		var lastHourMetrics LastHourMetrics
-
-		targetHour := startTime.Format("2006-01-02 15:04")
-		for _, m := range metrics {
-			if m.Hour == targetHour {
-				lastHourMetrics = m
-				break
+		for _, metric := range metrics {
+			// Convertir string a time.Time
+			timestamp, err := time.Parse("2006-01-02 15:00", metric.Hour)
+			if err != nil {
+				log.Printf("WARN: Invalid time format in metrics: %s", metric.Hour)
+				continue
 			}
-		}
 
-		stat := model.ApplicationStat{
-			ApplicationID: appID,
-			Requests:      lastHourMetrics.Requests,
-			Errors:        lastHourMetrics.Errors,
-			Date:          model.Date{Time: startTime},
-		}
+			// Construir el stat para guardar
+			stat := model.ApplicationStat{
+				ApplicationID: appID,
+				Requests:      metric.Requests,
+				Errors:        metric.Errors,
+				Date:          model.Date{Time: timestamp},
+			}
 
-		if err := m.appStatRepo.Insert(context.Background(), stat); err != nil {
-			log.Printf("ERROR: Failed to save metrics for app %s: %v", appID, err)
+			// Guardar en base de datos
+			if err := m.appStatRepo.Insert(context.Background(), stat); err != nil {
+				log.Printf("ERROR: Failed to save metrics for app %s: %v", appID, err)
+			}
+
+			// Reescribir la línea de log (una vez por hora)
+			collector.writeMetrics(metric.Hour, metric.Requests, metric.Errors)
 		}
 	}
 }

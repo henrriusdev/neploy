@@ -2486,6 +2486,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:^8.21.3":
+  version: 8.21.3
+  resolution: "@tanstack/react-table@npm:8.21.3"
+  dependencies:
+    "@tanstack/table-core": "npm:8.21.3"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: 10c0/85d1d0fcb690ecc011f68a5a61c96f82142e31a0270dcf9cbc699a6f36715b1653fe6ff1518302a6d08b7093351fc4cabefd055a7db3cd8ac01e068956b0f944
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.21.3":
+  version: 8.21.3
+  resolution: "@tanstack/table-core@npm:8.21.3"
+  checksum: 10c0/40e3560e6d55e07cc047024aa7f83bd47a9323d21920d4adabba8071fd2d21230c48460b26cedf392588f8265b9edc133abb1b0d6d0adf4dae0970032900a8c9
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.20.5":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -4175,6 +4194,7 @@ __metadata:
     "@radix-ui/react-tooltip": "npm:^1.1.3"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@tailwindcss/forms": "npm:^0.5.3"
+    "@tanstack/react-table": "npm:^8.21.3"
     "@types/lodash": "npm:^4.17.13"
     "@types/node": "npm:^22.7.8"
     "@types/react-redux": "npm:^7.1.34"

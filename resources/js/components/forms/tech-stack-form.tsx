@@ -1,20 +1,13 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, UseFormReturn } from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useForm, UseFormReturn} from "react-hook-form";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { InputAutoComplete } from "@/components/forms/input-autocomplete";
-import { techIcons } from "@/lib/icons";
-import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { useTranslation } from "react-i18next";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {InputAutoComplete} from "@/components/forms/input-autocomplete";
+import {techIcons} from "@/lib/icons";
+import {Button} from "@/components/ui/button";
+import {DialogFooter} from "@/components/ui/dialog";
+import {useTranslation} from "react-i18next";
 
 const techStackSchema = z.object({
   name: z.string().min(2).max(64),
@@ -28,9 +21,9 @@ interface TechStackFormProps {
   renderFooter?: (form: UseFormReturn<z.infer<typeof techStackSchema>>) => React.ReactNode;
 }
 
-export function TechStackForm({ defaultValues, onSubmit, onCancel, renderFooter }: TechStackFormProps) {
-  const { t } = useTranslation();
-  
+export function TechStackForm({defaultValues, onSubmit, onCancel, renderFooter}: TechStackFormProps) {
+  const {t} = useTranslation();
+
   const form = useForm<z.infer<typeof techStackSchema>>({
     resolver: zodResolver(techStackSchema),
     defaultValues: defaultValues || {
@@ -45,7 +38,7 @@ export function TechStackForm({ defaultValues, onSubmit, onCancel, renderFooter 
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>{t("settings.techStack.name")}</FormLabel>
               <FormControl>
@@ -58,21 +51,21 @@ export function TechStackForm({ defaultValues, onSubmit, onCancel, renderFooter 
                   placeholder={t("settings.techStack.name")}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="description"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>{t("settings.techStack.description")}</FormLabel>
               <FormControl>
-                <Input {...field} placeholder={t("settings.techStack.description")} />
+                <Input {...field} placeholder={t("settings.techStack.description")}/>
               </FormControl>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />

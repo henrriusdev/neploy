@@ -273,3 +273,28 @@ func (a *ApplicationStat) GetByApplicationIDAndEnvironmentID(ctx context.Context
 	common.AttachSQLToTrace(ctx, q)
 	return applicationStat, nil
 }
+
+func (a *ApplicationStat) GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error) {
+	query := goqu.
+		From("application_stats").
+		Select(
+			goqu.L("to_char(date, 'HH24:00')").As("hour"),
+			goqu.SUM("requests").As("successful"),
+			goqu.SUM("errors").As("errors"),
+		).
+		GroupBy(goqu.L("hour")).
+		Order(goqu.L("hour").Desc()).
+		Limit(24)
+
+	sql, args, err := query.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
+	var stats []model.RequestStat
+	if err := a.Store.SelectContext(ctx, &stats, sql, args...); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}

@@ -96,8 +96,6 @@ func TraceMiddleware(traceService service.Trace) echo.MiddlewareFunc {
 				ActionTimestamp: model.NewDateNow(),
 			}
 
-			println("LLEGANDO")
-
 			// Inyectar en contexto
 			ctx := common.InjectTrace(c.Request().Context(), trace)
 			c.SetRequest(c.Request().WithContext(ctx))

@@ -1,18 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Pencil1Icon } from "@radix-ui/react-icons";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { ControllerRenderProps } from "react-hook-form";
-import { techStackColors } from "@/lib/colors";
+import {Pencil1Icon} from "@radix-ui/react-icons";
+import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {cn} from "@/lib/utils";
+import {ControllerRenderProps} from "react-hook-form";
+import {techStackColors} from "@/lib/colors";
 
 export interface ColorPickerProps
   extends React.InputHTMLAttributes<HTMLInputElement> {

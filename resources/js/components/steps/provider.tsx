@@ -1,12 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {GitHubLogoIcon} from "@radix-ui/react-icons";
 import {useTranslation} from "react-i18next";
 
 interface Props {
@@ -14,7 +8,7 @@ interface Props {
   token?: string;
 }
 
-export function ProviderStep({ token, onNext }: Props) {
+export function ProviderStep({token, onNext}: Props) {
   const {t} = useTranslation();
   const getOAuthUrl = (provider: string) => {
     if (token) {
@@ -36,7 +30,7 @@ export function ProviderStep({ token, onNext }: Props) {
           variant="outline"
           className="w-full"
           onClick={() => window.location.replace(getOAuthUrl("github"))}>
-          <GitHubLogoIcon className="mr-2 h-4 w-4" />
+          <GitHubLogoIcon className="mr-2 h-4 w-4"/>
           {t('step.provider.link')} GitHub
         </Button>
         <Button
@@ -53,7 +47,7 @@ export function ProviderStep({ token, onNext }: Props) {
         </Button>
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+            <span className="w-full border-t"/>
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">

@@ -149,8 +149,6 @@ func (u *user) List(ctx context.Context, limit, offset uint) ([]model.TeamMember
 			logger.Error("failed to get tech stacks for user: user_id=%s, error=%v", user.ID, err)
 			continue
 		}
-		println(len(userTechStacks))
-
 		var roles []model.Role
 
 		for _, userRole := range userRoles {

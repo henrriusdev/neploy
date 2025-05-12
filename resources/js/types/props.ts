@@ -8,7 +8,7 @@ import {
   RoleWithUsers,
   TeamMember,
   TechStack,
-  TechStackWithApplications,
+  TechStackWithApplications, Trace,
   User,
 } from "./common";
 
@@ -62,7 +62,7 @@ export interface VisitorData {
 }
 
 export interface DashboardProps extends CommonProps{
-  requestData?: RequestData[];
+  requests?: RequestData[];
   techStack?: StackData[];
   visitorData?: VisitorData[];
   health?: string;
@@ -86,8 +86,6 @@ export interface GatewayProps extends CommonProps{
 
 export interface GatewayTableProps {
   gateways: Gateway[];
-  onEdit: (gateway: Gateway) => void;
-  onDelete: (id: string) => void;
 }
 
 export interface Option {
@@ -125,6 +123,7 @@ export interface SettingsProps extends CommonProps{
   language: string;
   roles: RoleWithUsers[];
   techStacks: TechStackWithApplications[];
+  traces: Trace[]
 }
 
 export interface GeneralSettingsProps {
@@ -139,6 +138,10 @@ export interface RolesSettingsProps {
 
 export interface TechStacksSettingsProps {
   techStacks: TechStackWithApplications[];
+}
+
+export interface TracesSettingsProps {
+  traces: Trace[]
 }
 
 export interface DialogButtonProps {

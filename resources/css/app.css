@@ -63,7 +63,7 @@
         --input: 220 10% 30%;
 
         --primary: 193 90% 50%; /* #0bc0eb */
-        --primary-foreground: 0 0% 100%;
+        --primary-foreground: 0 0% 0%;
 
         --secondary: 210 30% 55%;
         --secondary-foreground: 0 0% 100%;
@@ -223,7 +223,7 @@
         --input: 250 15% 32%;
 
         --primary: 340 70% 65%;
-        --primary-foreground: 250 35% 88%;
+        --primary-foreground: 250 35% 0%;
 
         --secondary: 256 20% 40%;
         --secondary-foreground: 250 35% 88%;
@@ -303,7 +303,7 @@
         --input: 222 20% 30%;
 
         --primary: 222 90% 72%;
-        --primary-foreground: 0 0% 100%;
+        --primary-foreground: 0 0% 0%;
 
         --secondary: 265 65% 70%;
         --secondary-foreground: 0 0% 100%;

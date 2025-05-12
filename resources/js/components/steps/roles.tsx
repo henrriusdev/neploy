@@ -1,17 +1,10 @@
 import * as React from "react";
 import * as z from "zod";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { RoleIcon } from "@/components/icons/role-icon";
-import { Trash2 } from "lucide-react";
-import { RoleForm } from "@/components/forms";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {RoleIcon} from "@/components/icons/role-icon";
+import {Trash2} from "lucide-react";
+import {RoleForm} from "@/components/forms";
 import {useTranslation} from "react-i18next";
 
 const roleSchema = z.object({
@@ -28,7 +21,7 @@ interface Props {
   setRoles: (roles: any[]) => void;
 }
 
-export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
+export function RolesStep({onNext, onBack, roles, setRoles}: Props) {
   const {t} = useTranslation();
   const onSubmit = (data: z.infer<typeof roleSchema>) => {
     setRoles([...roles, data]);
@@ -41,7 +34,7 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
         <CardDescription>{t('step.role.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <RoleForm 
+        <RoleForm
           onSubmit={onSubmit}
           renderFooter={(form) => (
             <div className="flex justify-between mt-6">
@@ -50,8 +43,8 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
               </Button>
               <div className="space-x-2">
                 <Button type="submit">{t('step.role.add')}</Button>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={onNext}
                   disabled={roles.length === 0}>
                   {t('actions.back')}
@@ -69,7 +62,7 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
                   key={index}
                   className="flex justify-between items-center space-x-2 my-1">
                   <div className="flex items-center space-x-2 space-y-2">
-                    <RoleIcon icon={role.icon} color={role.color} />
+                    <RoleIcon icon={role.icon} color={role.color}/>
                     <div>
                       <p className="font-semibold">{role.name}</p>
                       <p>{role.description}</p>
@@ -83,7 +76,7 @@ export function RolesStep({ onNext, onBack, roles, setRoles }: Props) {
                     onClick={() => {
                       setRoles(roles.filter((r, i) => i !== index));
                     }}>
-                    <Trash2 className="!w-7 !h-7" />
+                    <Trash2 className="!w-7 !h-7"/>
                   </Button>
                 </li>
               ))}

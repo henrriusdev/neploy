@@ -23,10 +23,6 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
     },
   });
   const {toast} = useToast();
-
-  const getConfig = useGetGatewayConfigQuery(null, {
-    skip: true
-  });
   const [setConfig] = useSaveGatewayConfigMutation();
 
   // 2. Define a submit handler.

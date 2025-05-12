@@ -1,30 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { TechStacksSettingsProps } from "@/types/props";
-import { TechIcon } from "@/components/icons/tech-icon";
-import { useTranslation } from "react-i18next";
-import { DialogButton } from "../forms/dialog-button";
-import { TechStackForm } from "../forms/tech-stack-form";
-import { useToast } from "@/hooks";
-import { z } from "zod";
+import React, {useEffect, useState} from "react";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Badge} from "@/components/ui/badge";
+import {TechStacksSettingsProps} from "@/types/props";
+import {TechIcon} from "@/components/icons/tech-icon";
+import {useTranslation} from "react-i18next";
+import {DialogButton} from "../forms/dialog-button";
+import {TechStackForm} from "../forms/tech-stack-form";
+import {useToast} from "@/hooks";
+import {z} from "zod";
 import {
   useCreateTechStackMutation,
   useDeleteTechStackMutation,
   useGetTechStacksQuery,
   useUpdateTechStackMutation,
 } from "@/services/api/tech-stack";
-import { Pencil, PlusCircle, Trash2 } from "lucide-react";
-import { TooltipButton } from "../ui/tooltip-button";
+import {Pencil, PlusCircle, Trash2} from "lucide-react";
+import {TooltipButton} from "../ui/tooltip-button";
 
 const techStackSchema = z.object({
   name: z.string().min(2).max(64),
@@ -32,10 +24,10 @@ const techStackSchema = z.object({
 });
 
 const TechStackTab: React.FC<TechStacksSettingsProps> = ({
-  techStacks: initialTechStacks,
-}) => {
-  const { t } = useTranslation();
-  const { toast } = useToast();
+                                                           techStacks: initialTechStacks,
+                                                         }) => {
+  const {t} = useTranslation();
+  const {toast} = useToast();
   const getTechStacks = useGetTechStacksQuery();
   const [createTechStack] = useCreateTechStackMutation();
   const [updateTechStack] = useUpdateTechStackMutation();
@@ -124,7 +116,7 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
           description={t("settings.techStack.editDescriptionDialog")}
           icon={PlusCircle}
           buttonText={t("settings.techStack.add")}>
-          <TechStackForm onSubmit={create} />
+          <TechStackForm onSubmit={create}/>
         </DialogButton>
       </div>
 
@@ -149,7 +141,7 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
               {techStacks.map((techStack) => (
                 <TableRow key={techStack.id}>
                   <TableCell>
-                    <TechIcon name={techStack.name} size={40} />
+                    <TechIcon name={techStack.name} size={40}/>
                   </TableCell>
                   <TableCell>{techStack.name}</TableCell>
                   <TableCell>{techStack.description}</TableCell>

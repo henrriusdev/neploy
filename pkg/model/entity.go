@@ -71,6 +71,7 @@ type Trace struct {
 	Action          string `json:"action" db:"action"`
 	ActionTimestamp Date   `json:"actionTimestamp" db:"action_timestamp"`
 	SqlStatement    string `json:"sqlStatement" db:"sql_statement"`
+	Email           string `json:"email" db:"-"`
 }
 
 type Gateway struct {

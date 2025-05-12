@@ -1,17 +1,17 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {
-  BarChart,
-  LineChart,
-  PieChart,
   Bar,
-  Line,
-  Pie,
+  BarChart,
   Cell,
-  XAxis,
-  YAxis,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 interface BaseChartProps {
@@ -25,25 +25,25 @@ interface BaseChartProps {
 }
 
 export function BaseChart({
-  title,
-  data,
-  type,
-  dataKeys,
-  colors,
-  className,
-  config,
-}: BaseChartProps) {
+                            title,
+                            data,
+                            type,
+                            dataKeys,
+                            colors,
+                            className,
+                            config,
+                          }: BaseChartProps) {
   const renderChart = () => {
     switch (type) {
       case "bar":
         return (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
+              <XAxis dataKey="name"/>
+              <YAxis/>
+              <Tooltip/>
               {dataKeys.map((key, index) => (
-                <Bar key={key} dataKey={key} fill={colors[index]} stackId="a" />
+                <Bar key={key} dataKey={key} fill={colors[index]} stackId="a"/>
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -52,9 +52,9 @@ export function BaseChart({
         return (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
+              <XAxis dataKey="name"/>
+              <YAxis/>
+              <Tooltip/>
               {dataKeys.map((key, index) => (
                 <Line
                   key={key}
@@ -71,7 +71,7 @@ export function BaseChart({
         return (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Tooltip />
+              <Tooltip/>
               <Pie
                 data={data}
                 cx="50%"

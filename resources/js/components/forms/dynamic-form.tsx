@@ -1,23 +1,11 @@
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import type { InputType, Input as InputInterface } from "@/types/websocket";
+import {useForm} from "react-hook-form";
+import {Form, FormControl, FormField, FormItem, FormLabel,} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import type {Input as InputInterface} from "@/types/websocket";
 
 interface FormInput extends InputInterface {
   label?: string;

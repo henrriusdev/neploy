@@ -1,15 +1,15 @@
 import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/hooks";
-import { Moon, Sun, Check } from "lucide-react";
+import {useTheme} from "@/hooks";
+import {Check, Moon, Sun} from "lucide-react";
 
 export const ThemeSwitcher = () => {
-  const { theme, isDark, changeTheme, toggleDark, themes } = useTheme();
+  const {theme, isDark, changeTheme, toggleDark, themes} = useTheme();
 
   return (
     <DropdownMenuSub>
@@ -25,18 +25,18 @@ export const ThemeSwitcher = () => {
             className="flex items-center justify-between"
           >
             <span className="capitalize">{t}</span>
-            {theme === t && <Check className="h-4 w-4" />}
+            {theme === t && <Check className="h-4 w-4"/>}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator/>
         <DropdownMenuItem onClick={toggleDark}>
           {isDark ? (
             <>
-              <Sun className="mr-2 h-4 w-4" /> Light
+              <Sun className="mr-2 h-4 w-4"/> Light
             </>
           ) : (
             <>
-              <Moon className="mr-2 h-4 w-4" /> Dark
+              <Moon className="mr-2 h-4 w-4"/> Dark
             </>
           )}
         </DropdownMenuItem>

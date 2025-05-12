@@ -1,7 +1,7 @@
 "use client";
 
-import {LogOut} from "lucide-react";
 import * as React from "react";
+import {useEffect} from "react";
 
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
@@ -24,11 +24,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {Link} from "@inertiajs/react";
-import {LanguageSelector} from "../forms/language-selector";
+import {LanguageSelector} from "@/components/forms";
 import {ThemeSwitcher} from "@/components/theme-switcher";
 import {useTheme} from "@/hooks";
-import {useEffect} from "react";
-import {router} from "@inertiajs/react";
 import {useTranslation} from "react-i18next";
 
 interface NavItem {

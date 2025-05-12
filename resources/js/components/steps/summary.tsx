@@ -1,16 +1,9 @@
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { SummaryStepProps } from "@/types/props";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {SummaryStepProps} from "@/types/props";
 
-export function SummaryStep({ data, onBack, onSubmit }: SummaryStepProps) {
+export function SummaryStep({data, onBack, onSubmit}: SummaryStepProps) {
   return (
     <Card className="w-full max-w-screen-md mx-auto">
       <CardHeader>

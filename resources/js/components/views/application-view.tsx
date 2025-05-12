@@ -7,33 +7,10 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Progress} from "@/components/ui/progress";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  ChevronDown,
-  CirclePlay,
-  Pause,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
-import {
-  ActionMessage,
-  ActionResponse,
-  ApplicationProps,
-  ProgressMessage,
-} from "@/types";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Collapsible, CollapsibleContent, CollapsibleTrigger,} from "@/components/ui/collapsible";
+import {ChevronDown, CirclePlay, Pause, Plus, Search, Trash2,} from "lucide-react";
+import {ActionMessage, ActionResponse, ApplicationProps, ProgressMessage,} from "@/types";
 import {
   useDeleteVersionMutation,
   useDeployApplicationMutation,
@@ -44,13 +21,7 @@ import {
 } from "@/services/api/applications";
 import {router} from "@inertiajs/react";
 import {useToast, useWebSocket} from "@/hooks";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
 import {DialogTrigger} from "@radix-ui/react-dialog";
 import {ApplicationForm, DynamicForm} from "@/components/forms";
 import {debounce} from "lodash";

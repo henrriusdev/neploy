@@ -1,16 +1,10 @@
 import Layout from "@/components/Layouts/Layout";
-import { Toaster } from "@/components/ui/toaster";
-import { usePage } from "@inertiajs/react";
-import {
-  AppWindowMac,
-  DoorOpen,
-  Frame,
-  PieChartIcon,
-  Settings2,
-} from "lucide-react";
+import {Toaster} from "@/components/ui/toaster";
+import {usePage} from "@inertiajs/react";
+import {AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2,} from "lucide-react";
 import * as React from "react";
-import { useTranslation } from "react-i18next";
-import { Applications, Home, Gateways, Team, Config } from "../views";
+import {useTranslation} from "react-i18next";
+import {Applications, Config, Gateways, Home, Team} from "../views";
 import {ApplicationView} from "@/components/views/application-view";
 
 const navItems = [
@@ -60,13 +54,13 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  user: backendUser,
-  teamName,
-  logoUrl,
-  props,
-}) => {
-  const { url } = usePage();
-  const { t } = useTranslation();
+                                                                  user: backendUser,
+                                                                  teamName,
+                                                                  logoUrl,
+                                                                  props,
+                                                                }) => {
+  const {url} = usePage();
+  const {t} = useTranslation();
 
   const user = {
     name: backendUser?.name || "",
@@ -120,7 +114,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         navItems={navigation}>
         {getComponent()}
       </Layout>
-      <Toaster />
+      <Toaster/>
     </div>
   );
 };

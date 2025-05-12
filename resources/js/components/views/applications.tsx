@@ -1,4 +1,4 @@
-import { useToast, useWebSocket } from "@/hooks";
+import {useToast, useWebSocket} from "@/hooks";
 import {
   useCreateApplicationMutation,
   useDeleteApplicationMutation,
@@ -9,31 +9,17 @@ import {
   useStopApplicationMutation,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import {
-  ActionMessage,
-  ActionResponse,
-  ApplicationsProps,
-  Input,
-  ProgressMessage,
-} from "@/types";
-import { debounce } from "lodash";
-import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { Button } from "../ui/button";
-import { PlusCircle } from "lucide-react";
-import { ApplicationForm } from "../forms";
-import { ApplicationCard } from "../application-card";
-import { DynamicForm } from "../forms";
+import {ActionMessage, ActionResponse, ApplicationsProps, Input, ProgressMessage,} from "@/types";
+import {debounce} from "lodash";
+import {useEffect, useMemo, useState} from "react";
+import {useTranslation} from "react-i18next";
+import {z} from "zod";
+import {Card, CardContent, CardHeader, CardTitle} from "../ui/card";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "../ui/dialog";
+import {Button} from "../ui/button";
+import {PlusCircle} from "lucide-react";
+import {ApplicationForm, DynamicForm} from "../forms";
+import {ApplicationCard} from "../application-card";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -54,18 +40,15 @@ const uploadFormSchema = z.object({
           return false;
         }
       },
-      { message: "Must be a valid GitHub or GitLab repository URL" }
+      {message: "Must be a valid GitHub or GitLab repository URL"}
     )
     .optional(),
   branch: z.string().optional(),
 });
 
 export function Applications({
-  user,
-  teamName,
-  logoUrl,
-  applications: initialApplications = null,
-}: ApplicationsProps) {
+                               applications: initialApplications = null,
+                             }: ApplicationsProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -81,12 +64,13 @@ export function Applications({
     title: "",
     description: "",
     fields: [],
-    onSubmit: () => {},
+    onSubmit: () => {
+    },
   });
   const [currentRepoUrl, setCurrentRepoUrl] = useState("");
-  const { toast } = useToast();
-  const { t } = useTranslation();
-  const { onNotification, onInteractive, sendMessage } = useWebSocket();
+  const {toast} = useToast();
+  const {t} = useTranslation();
+  const {onNotification, onInteractive, sendMessage} = useWebSocket();
 
   const {
     data: applications,
@@ -104,8 +88,8 @@ export function Applications({
     isFetching: isLoadingBranches,
     error: branchesError,
   } = useLoadBranchesQuery(
-    { repoUrl: currentRepoUrl },
-    { skip: !currentRepoUrl }
+    {repoUrl: currentRepoUrl},
+    {skip: !currentRepoUrl}
   );
 
   useEffect(() => {
@@ -160,8 +144,8 @@ export function Applications({
 
   const handleApplicationAction = async (appId: string) => {
     try {
-      await deleteApplication({ appId });
-      
+      await deleteApplication({appId});
+
       toast({
         title: t("common.success"),
         description: t(`applications.actions.deleteSuccess`),
@@ -291,12 +275,12 @@ export function Applications({
           validate:
             input.name === "port"
               ? (value: string) => {
-                  const port = parseInt(value);
-                  if (isNaN(port) || port < 1 || port > 65535) {
-                    return t("applications.errors.portInvalid");
-                  }
-                  return true;
+                const port = parseInt(value);
+                if (isNaN(port) || port < 1 || port > 65535) {
+                  return t("applications.errors.portInvalid");
                 }
+                return true;
+              }
               : undefined,
         })),
         onSubmit: (data) => {
@@ -311,7 +295,7 @@ export function Applications({
           };
           console.log("Sending response:", response);
           sendMessage(response.type, response.action, response.data);
-          setActionDialog((prev) => ({ ...prev, show: false }));
+          setActionDialog((prev) => ({...prev, show: false}));
 
           // Show confirmation toast
           toast({
@@ -403,7 +387,7 @@ export function Applications({
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle className="mr-2 h-4 w-4"/>
               {t("dashboard.applications.create")}
             </Button>
           </DialogTrigger>
@@ -445,7 +429,7 @@ export function Applications({
       <Dialog
         open={actionDialog.show}
         onOpenChange={(open) =>
-          !open && setActionDialog({ ...actionDialog, show: false })
+          !open && setActionDialog({...actionDialog, show: false})
         }>
         <DialogContent>
           <DialogHeader>
