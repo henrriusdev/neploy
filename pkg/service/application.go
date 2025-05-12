@@ -38,6 +38,7 @@ type Application interface {
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	DeleteVersion(ctx context.Context, appID string, versionID string) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
+	GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error)
 }
 
 type application struct {
@@ -410,4 +411,8 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 	}
 
 	return healthy, uint(len(versions)), nil
+}
+
+func (a *application) GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error) {
+	return a.repos.ApplicationStat.GetHourlyRequests(ctx)
 }

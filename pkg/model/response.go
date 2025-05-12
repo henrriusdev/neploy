@@ -74,3 +74,9 @@ type ApplicationDockered struct {
 	Logs           []string             `json:"logs"`
 	Versions       []ApplicationVersion `json:"versions"`
 }
+
+type RequestStat struct {
+	Hour       string `db:"hour" json:"name"`
+	Successful int    `db:"successful" json:"successful"`
+	Errors     int    `db:"errors" json:"errors"`
+}

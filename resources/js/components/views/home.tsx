@@ -11,17 +11,7 @@ import { Button } from "../ui/button";
 import { DashboardCard } from "../dashboard-card";
 import { BaseChart } from "../base-chart";
 import { techStackColors } from "@/lib/colors";
-
-const defaultRequestsData = [
-  { name: "00:00", successful: 165, errors: 5 },
-  { name: "04:00", successful: 193, errors: 5 },
-  { name: "08:00", successful: 165, errors: 5 },
-  { name: "20:00", successful: 369, errors: 1 },
-  { name: "12:00", successful: 250, errors: 15 },
-  { name: "16:00", successful: 402, errors: 15 },
-  { name: "20:00", successful: 958, errors: 203 },
-  { name: "24:00", successful: 165, errors: 5 },
-];
+import {useEffect, useState} from "react";
 
 const defaultVisitorsData = [
   { name: "Mon", visitors: 2400 },
@@ -41,18 +31,43 @@ export function Home({
   teamName,
   logoUrl,
   stats,
-  requestData = defaultRequestsData,
+  requests,
   techStack = defaultTechStackData,
   visitorData = defaultVisitorsData,
   health = "4/10",
 }: DashboardProps) {
   const { t } = useTranslation();
+  const [totalRequests, setTotalRequests] = useState(0);
+  const [totalErrors, setTotalErrors] = useState(0);
 
   const healthPercentage =
     (parseInt(health?.split("/")[0]) / parseInt(health?.split("/")[1])) * 100;
   user.avatar = `https://unavatar.io/${user?.provider ?? "github"}/${
     user.username
   }`;
+
+  requests = requests?.map((request) => ({
+    ...request,
+    total: request.successful + request.errors,
+    successful: request.successful - request.errors,
+    errors: request.errors ?? 0,
+  }));
+
+  useEffect(() => {
+    if (requests) {
+      const totalSuccessful = requests.reduce(
+        (acc, request) => acc + request.total,
+        0
+      );
+      const totalErrors = requests.reduce(
+        (acc, request) => acc + request.errors,
+        0
+      );
+      setTotalRequests(totalSuccessful);
+      setTotalErrors(totalErrors);
+    }
+  }, [requests]);
+
   const dashboardContent = (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -166,7 +181,7 @@ export function Home({
         />
         <DashboardCard
           title={t("dashboard.totalRequests")}
-          value="1,675,234"
+          value={totalRequests}
           description={t("dashboard.requestsLastMonth")}
           icon={
             <svg
@@ -204,7 +219,7 @@ export function Home({
         />
         <DashboardCard
           title={t("dashboard.totalErrors")}
-          value="78"
+          value={totalErrors}
           description={t("dashboard.errorsLastHour")}
           icon={
             <svg
@@ -224,7 +239,7 @@ export function Home({
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <BaseChart
           title={t("dashboard.requestsByTime")}
-          data={defaultRequestsData}
+          data={requests}
           type="bar"
           dataKeys={["successful", "errors"]}
           colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
@@ -232,7 +247,7 @@ export function Home({
           config={{
             successful: {
               label: t("dashboard.successful"),
-              color: "hsl(var(--primary))",
+              color: "hsl(var(--primary-foreground))",
             },
             errors: {
               label: t("dashboard.errors"),

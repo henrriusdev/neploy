@@ -74,12 +74,19 @@ func (d *Dashboard) Index(c echo.Context) error {
 		Provider: provider,
 	}
 
+	requestData, err := d.services.Application.GetHourlyRequests(context.Background())
+	if err != nil {
+		logger.Error("error getting requests: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"teamName": metadata.TeamName,
 		"logoUrl":  metadata.LogoURL,
 		"roles":    roles,
 		"health":   fmt.Sprintf("%d/%d", healthyApps, 4),
 		"user":     user,
+		"requests": requestData,
 	})
 }
 

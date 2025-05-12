@@ -42,22 +42,15 @@ func (m *MetricsCollector) RecordRequest(timestamp time.Time, isError bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	// Format the hour key: "2024-12-26 11:00"
 	hourKey := timestamp.Format("2006-01-02 15:00")
 
-	// Get current metrics for this hour
 	metrics := m.hourlyMetrics[hourKey]
-
-	// Update metrics
 	metrics.requests++
 	if isError {
 		metrics.errors++
 	}
 
 	m.hourlyMetrics[hourKey] = metrics
-
-	// Write to file
-	m.writeMetrics(hourKey, metrics.requests, metrics.errors)
 }
 
 func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {

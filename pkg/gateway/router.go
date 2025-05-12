@@ -72,6 +72,8 @@ func (r *Router) AddRoute(route Route) error {
 			r.metrics[route.AppID] = metrics
 			if r.metricsAggregator != nil {
 				r.metricsAggregator.AddCollector(metrics)
+				r.metricsAggregator.aggregateAndSaveMetrics()
+
 			}
 		}
 	}
@@ -102,7 +104,6 @@ func (r *Router) AddRoute(route Route) error {
 			if !strings.HasPrefix(trimmed, "/") {
 				trimmed = "/" + trimmed
 			}
-			println(trimmed)
 
 			req.URL.Path = trimmed
 		}

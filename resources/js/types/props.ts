@@ -62,7 +62,7 @@ export interface VisitorData {
 }
 
 export interface DashboardProps extends CommonProps{
-  requestData?: RequestData[];
+  requests?: RequestData[];
   techStack?: StackData[];
   visitorData?: VisitorData[];
   health?: string;
