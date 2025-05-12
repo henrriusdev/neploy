@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { useTranslation } from "react-i18next"
-import { Search, UserPlus, X } from "lucide-react"
+import {useEffect, useMemo, useState} from "react"
+import {useTranslation} from "react-i18next"
+import {Search, UserPlus, X} from "lucide-react"
 
 import {
   Dialog,
@@ -12,13 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Checkbox} from "@/components/ui/checkbox"
+import {ScrollArea} from "@/components/ui/scroll-area"
+import {Badge} from "@/components/ui/badge"
+import {useToast} from "@/hooks"
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {User} from "@/types";
 
 interface RoleUserManagerDialogProps {
@@ -36,8 +36,8 @@ export function RoleUserManagerDialog({
                                         roleName,
                                         assignedUsers,
                                       }: RoleUserManagerDialogProps) {
-  const { t } = useTranslation()
-  const { toast } = useToast()
+  const {t} = useTranslation()
+  const {toast} = useToast()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTab, setSelectedTab] = useState("add")
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
@@ -170,7 +170,7 @@ export function RoleUserManagerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("settings.roles.manageUsers", { role: roleName })}</DialogTitle>
+          <DialogTitle>{t("settings.roles.manageUsers", {role: roleName})}</DialogTitle>
           <DialogDescription>{t("settings.roles.manageUsersDescription")}</DialogDescription>
         </DialogHeader>
 
@@ -184,7 +184,7 @@ export function RoleUserManagerDialog({
 
           <TabsContent value="add" className="mt-4">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
               <Input
                 placeholder={t("settings.roles.searchUsers")}
                 className="pl-8"
@@ -195,16 +195,16 @@ export function RoleUserManagerDialog({
 
             {isLoadingUsers ? (
               <div className="flex justify-center py-8">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"/>
               </div>
             ) : usersError ? (
               <div className="py-4 text-center text-destructive">{t("settings.roles.errorLoadingUsers")}</div>
             ) : (
               <>
                 <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{t("settings.roles.usersFound", { count: filteredUsers.length })}</span>
+                  <span>{t("settings.roles.usersFound", {count: filteredUsers.length})}</span>
                   {selectedUserIds.size > 0 && (
-                    <span>{t("settings.roles.usersSelected", { count: selectedUserIds.size })}</span>
+                    <span>{t("settings.roles.usersSelected", {count: selectedUserIds.size})}</span>
                   )}
                 </div>
 
@@ -233,7 +233,8 @@ export function RoleUserManagerDialog({
                               >
                                 <div>
                                   <div className="font-medium">{user.email}</div>
-                                  {user.firstName && <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>}
+                                  {user.firstName &&
+                                      <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>}
                                 </div>
                                 {isAssigned && (
                                   <Badge variant="outline" className="ml-2">
@@ -254,7 +255,7 @@ export function RoleUserManagerDialog({
 
           <TabsContent value="remove" className="mt-4">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
               <Input
                 placeholder={t("settings.roles.searchAssignedUsers")}
                 className="pl-8"
@@ -264,9 +265,9 @@ export function RoleUserManagerDialog({
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-              <span>{t("settings.roles.assignedUsers", { count: assignedUsers.length })}</span>
+              <span>{t("settings.roles.assignedUsers", {count: assignedUsers.length})}</span>
               {usersToRemove.size > 0 && (
-                <span>{t("settings.roles.usersToRemove", { count: usersToRemove.size })}</span>
+                <span>{t("settings.roles.usersToRemove", {count: usersToRemove.size})}</span>
               )}
             </div>
 
@@ -295,7 +296,8 @@ export function RoleUserManagerDialog({
                           <label htmlFor={`remove-user-${user.email}`} className="flex flex-1 cursor-pointer text-sm">
                             <div>
                               <div className="font-medium">{user.email}</div>
-                              {user.firstName && <div className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</div>}
+                              {user.firstName &&
+                                  <div className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</div>}
                             </div>
                           </label>
                         </div>
@@ -320,11 +322,11 @@ export function RoleUserManagerDialog({
               className="gap-2"
             >
               {isAddingUsers ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"/>
               ) : (
-                <UserPlus className="h-4 w-4" />
+                <UserPlus className="h-4 w-4"/>
               )}
-              {t("settings.roles.addSelectedUsers", { count: selectedUserIds.size })}
+              {t("settings.roles.addSelectedUsers", {count: selectedUserIds.size})}
             </Button>
           ) : (
             <Button
@@ -335,11 +337,11 @@ export function RoleUserManagerDialog({
               className="gap-2"
             >
               {isRemovingUser ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"/>
               ) : (
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4"/>
               )}
-              {t("settings.roles.removeSelectedUsers", { count: usersToRemove.size })}
+              {t("settings.roles.removeSelectedUsers", {count: usersToRemove.size})}
             </Button>
           )}
         </DialogFooter>

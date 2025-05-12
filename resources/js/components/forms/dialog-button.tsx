@@ -1,15 +1,8 @@
-import { DialogButtonProps } from "@/types";
+import {DialogButtonProps} from "@/types";
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import { TooltipButton } from "../ui/tooltip-button";
-import { Button } from "../ui/button";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "../ui/dialog";
+import {TooltipButton} from "../ui/tooltip-button";
+import {Button} from "../ui/button";
 
 export const DialogButton = React.forwardRef<
   HTMLButtonElement,

@@ -1,77 +1,13 @@
-import { Gateway, GatewayProps } from "@/types";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { router } from "@inertiajs/react";
-import { Button } from "../ui/button";
-import { Activity, BarChart3, Globe, Lock, PlusCircle } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { GatewayTable } from "../gateway-table";
-import { GatewayForm } from "../forms";
+import {Gateway, GatewayProps} from "@/types";
+import {useState} from "react";
+import {useToast} from "@/hooks/use-toast";
+import {router} from "@inertiajs/react";
+import {BarChart3, Globe, Lock} from "lucide-react";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "../ui/tabs";
+import {GatewayTable} from "../gateway-table";
 import {GatewayConfig} from "@/components/views/gateway-config";
 
 export function Gateways({ gateways, config }: GatewayProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingGateway, setEditingGateway] = useState<Gateway | null>(null);
-  const { toast } = useToast();
-
-  const handleCreate = (data: Partial<Gateway>) => {
-    const { application, ...formData } = data;
-    router.post("/gateways", formData, {
-      onSuccess: () => {
-        setIsFormOpen(false);
-        toast({
-          title: "Success",
-          description: "Gateway route created successfully",
-        });
-      },
-      onError: () => {
-        toast({
-          title: "Error",
-          description: "Failed to create gateway route",
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
-  const handleUpdate = (id: string, data: Partial<Gateway>) => {
-    const { application, ...formData } = data;
-    router.put(`/gateways/${id}`, formData, {
-      onSuccess: () => {
-        setEditingGateway(null);
-        toast({
-          title: "Success",
-          description: "Gateway route updated successfully",
-        });
-      },
-      onError: () => {
-        toast({
-          title: "Error",
-          description: "Failed to update gateway route",
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
-  const handleDelete = (id: string) => {
-    router.delete(`/gateways/${id}`, {
-      onSuccess: () => {
-        toast({
-          title: "Success",
-          description: "Gateway route deleted successfully",
-        });
-      },
-      onError: () => {
-        toast({
-          title: "Error",
-          description: "Failed to delete gateway route",
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
   return (
     <div className="container mx-auto p-6">
       <div className="flex-1 overflow-auto">
@@ -115,8 +51,6 @@ export function Gateways({ gateways, config }: GatewayProps) {
               ) : (
                 <GatewayTable
                   gateways={gateways}
-                  onEdit={setEditingGateway}
-                  onDelete={handleDelete}
                 />
               )}
             </TabsContent>

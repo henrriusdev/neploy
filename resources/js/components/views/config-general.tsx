@@ -1,31 +1,17 @@
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { GeneralSettingsProps } from "@/types/props";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Switch} from "@/components/ui/switch";
+import {Input} from "@/components/ui/input";
+import {GeneralSettingsProps} from "@/types/props";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Button} from "@/components/ui/button";
+import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "../ui/form";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useTranslation } from "react-i18next";
-import { useUpdateMetadataMutation } from "@/services/api/metadata";
-import { useToast } from "@/hooks";
+import {useTranslation} from "react-i18next";
+import {useUpdateMetadataMutation} from "@/services/api/metadata";
+import {useToast} from "@/hooks";
 
 const formSchema = z.object({
   teamName: z.string().min(1, "Team name is required"),
@@ -38,12 +24,12 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const GeneralTab: React.FC<GeneralSettingsProps> = ({
-  teamName: originalTeamName,
-  logoUrl: originalLogoUrl,
-  language: originalLanguage,
-}) => {
-  const { t } = useTranslation();
-  const { toast } = useToast();
+                                                      teamName: originalTeamName,
+                                                      logoUrl: originalLogoUrl,
+                                                      language: originalLanguage,
+                                                    }) => {
+  const {t} = useTranslation();
+  const {toast} = useToast();
   const [updateMetadata] = useUpdateMetadataMutation();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -94,7 +80,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
               <FormField
                 control={form.control}
                 name="teamName"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="space-y-2 col-span-3">
                     <FormLabel>{t("settings.general.teamName")}</FormLabel>
                     <FormControl>
@@ -103,14 +89,14 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="logoUrl"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="space-y-2 col-span-3">
                     <FormLabel>{t("settings.general.logoUrl")}</FormLabel>
                     <FormControl>
@@ -119,14 +105,14 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="language"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="space-y-2 col-span-2">
                     <FormLabel>{t("settings.general.language")}</FormLabel>
                     <Select
@@ -149,14 +135,14 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         <SelectItem value="zh">{t("languages.zh")}</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="darkMode"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-start gap-x-14 col-span-2">
                     <div>
                       <FormLabel>{t("settings.general.darkMode")}</FormLabel>
@@ -170,14 +156,14 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="emailNotifications"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-start gap-x-14 col-span-2">
                     <div>
                       <FormLabel>
@@ -193,7 +179,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage/>
                   </FormItem>
                 )}
               />

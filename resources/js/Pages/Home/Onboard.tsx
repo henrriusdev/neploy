@@ -1,24 +1,12 @@
-import { OnboardingSidebar } from "@/components/onboarding-sidebar";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { useOnboardMutation } from "@/services/api/onboard";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import {OnboardingSidebar} from "@/components/onboarding-sidebar";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
+import {useToast} from "@/hooks/use-toast";
+import {useOnboardMutation} from "@/services/api/onboard";
+import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import "@/i18n";
-import {
-  ProviderStep,
-  UserDataStep,
-  RolesStep,
-  ServiceStep,
-} from "@/components/steps";
+import {ProviderStep, RolesStep, ServiceStep, UserDataStep,} from "@/components/steps";
 
 interface Props {
   email?: string;
@@ -27,14 +15,14 @@ interface Props {
 
 type Step = "provider" | "data" | "roles" | "service" | "summary";
 
-export default function Onboard({ email, username }: Props) {
+export default function Onboard({email, username}: Props) {
   const [step, setStep] = useState<Step>("provider");
   const [adminData, setAdminData] = useState<any>(null);
   const [roles, setRoles] = useState<any[]>([]);
   const [serviceData, setServiceData] = useState<any>(null);
-  const { toast } = useToast();
+  const {toast} = useToast();
   const [onboard] = useOnboardMutation();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -43,7 +31,7 @@ export default function Onboard({ email, username }: Props) {
     const email = params.get("email");
 
     if (provider && username && email) {
-      setAdminData({ provider, username, email });
+      setAdminData({provider, username, email});
       setStep("data");
     }
   }, []);
@@ -96,12 +84,12 @@ export default function Onboard({ email, username }: Props) {
     };
 
     try {
-      const response = await onboard({ data: payload });
-        toast({
-          title: t("common.success"),
-          description: t("onboarding.success"),
-        });
-        window.location.replace("/");
+      const response = await onboard({data: payload});
+      toast({
+        title: t("common.success"),
+        description: t("onboarding.success"),
+      });
+      window.location.replace("/");
     } catch (error: any) {
       toast({
         title: t("common.error"),
@@ -114,7 +102,7 @@ export default function Onboard({ email, username }: Props) {
   const renderStep = () => {
     switch (step) {
       case "provider":
-        return <ProviderStep onNext={handleProviderNext} />;
+        return <ProviderStep onNext={handleProviderNext}/>;
       case "data":
         return (
           <UserDataStep
@@ -135,7 +123,7 @@ export default function Onboard({ email, username }: Props) {
         );
       case "service":
         return (
-          <ServiceStep onNext={handleServiceNext} onBack={handleServiceBack} />
+          <ServiceStep onNext={handleServiceNext} onBack={handleServiceBack}/>
         );
       case "summary":
         return (
@@ -216,7 +204,7 @@ export default function Onboard({ email, username }: Props) {
 
   return (
     <div className="flex min-h-screen">
-      <OnboardingSidebar currentStep={step} className="w-1/4" />
+      <OnboardingSidebar currentStep={step} className="w-1/4"/>
       <div className="flex-1 p-6 flex justify-center items-center flex-col">
         <h1 className="text-3xl font-bold mb-6 text-center">
           {t("onboarding.setupAccount")}

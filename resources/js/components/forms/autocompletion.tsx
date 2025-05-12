@@ -1,22 +1,10 @@
-import {
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandInput,
-} from "../ui/command";
-import { Command as CommandPrimitive } from "cmdk";
-import {
-  useState,
-  useRef,
-  useCallback,
-  type KeyboardEvent,
-  useEffect,
-  forwardRef,
-} from "react";
-import { Skeleton } from "../ui/skeleton";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { AutoCompleteProps, Option } from "@/types/props";
+import {CommandGroup, CommandInput, CommandItem, CommandList,} from "../ui/command";
+import {Command as CommandPrimitive} from "cmdk";
+import {forwardRef, type KeyboardEvent, useCallback, useEffect, useRef, useState,} from "react";
+import {Skeleton} from "../ui/skeleton";
+import {Check} from "lucide-react";
+import {cn} from "@/lib/utils";
+import {AutoCompleteProps, Option} from "@/types/props";
 
 export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
   (

@@ -1,27 +1,17 @@
 "use client";
 
-import { addDays, format, lastDayOfYear } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import {addDays, format, lastDayOfYear} from "date-fns";
+import {Calendar as CalendarIcon} from "lucide-react";
 import * as React from "react";
-import { DateRange } from "react-day-picker";
-import { useFormContext } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { FormControl } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { DatePickerProps } from "@/types/props";
+import {DateRange} from "react-day-picker";
+import {useFormContext} from "react-hook-form";
+import {Button} from "@/components/ui/button";
+import {Calendar} from "@/components/ui/calendar";
+import {FormControl} from "@/components/ui/form";
+import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {cn} from "@/lib/utils";
+import {DatePickerProps} from "@/types/props";
 
 export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
   (

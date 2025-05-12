@@ -1,0 +1,42 @@
+name: Deploy to Linode
+
+on:
+  push:
+    branches:
+      - main  # Se ejecutará cuando haya un push a la rama 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Clonar el código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Paso 2: Configurar la clave SSH para la conexión al VPS
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LINODE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # Verificación de conexión SSH
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }} 'echo "SSH conexión exitosa"'
+
+      # Paso 3: Desplegar la aplicación en Linode
+      - name: Deploy to Linode via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USER }}
+          key: ${{ secrets.LINODE_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.LINODE_PORT }}
+          script: |
+            # Ir a la carpeta donde tienes la app en el servidor
+            cd /root/neploy
+            # Obtener los últimos cambios del repositorio
+            git pull origin main
+            # Compilar la aplicación Go
+            go build -o neploy ./cmd/app
+            # Reiniciar el servicio si es que tienes un systemd configurado
+            systemctl restart neploy.service

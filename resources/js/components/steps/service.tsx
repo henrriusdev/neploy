@@ -1,35 +1,14 @@
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {Controller, useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Controller } from "react-hook-form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useTranslation } from "react-i18next";
-import { SUPPORTED_LANGUAGES } from "@/i18n";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {useTranslation} from "react-i18next";
+import {SUPPORTED_LANGUAGES} from "@/i18n";
 
 const serviceSchema = z.object({
   teamName: z.string().min(1, "Team name is required"),
@@ -43,8 +22,8 @@ interface Props {
   initialData?: z.infer<typeof serviceSchema>;
 }
 
-export function ServiceStep({ onNext, onBack, initialData }: Props) {
-  const { t, i18n } = useTranslation();
+export function ServiceStep({onNext, onBack, initialData}: Props) {
+  const {t, i18n} = useTranslation();
   const form = useForm<z.infer<typeof serviceSchema>>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
@@ -77,34 +56,34 @@ export function ServiceStep({ onNext, onBack, initialData }: Props) {
             <FormField
               control={form.control}
               name="teamName"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Team Name</FormLabel>
                   <FormControl>
                     <Controller
                       control={form.control}
                       name="teamName"
-                      render={({ field }) => <Input {...field} />}
+                      render={({field}) => <Input {...field} />}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="logo"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Logo URL</FormLabel>
                   <FormControl>
                     <Controller
                       control={form.control}
                       name="logo"
-                      render={({ field }) => <Input {...field} />}
+                      render={({field}) => <Input {...field} />}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage/>
                 </FormItem>
               )}
             />

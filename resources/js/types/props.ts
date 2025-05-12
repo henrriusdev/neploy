@@ -86,8 +86,6 @@ export interface GatewayProps extends CommonProps{
 
 export interface GatewayTableProps {
   gateways: Gateway[];
-  onEdit: (gateway: Gateway) => void;
-  onDelete: (id: string) => void;
 }
 
 export interface Option {

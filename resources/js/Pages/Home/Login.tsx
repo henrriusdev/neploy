@@ -1,30 +1,16 @@
 import {useEffect, useState} from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {Card, CardContent, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { router } from "@inertiajs/react";
-import { useTranslation } from "react-i18next";
-import { LanguageSelector } from "@/components/forms/language-selector";
+import {router} from "@inertiajs/react";
+import {useTranslation} from "react-i18next";
+import {LanguageSelector} from "@/components/forms/language-selector";
 import "@/i18n";
-import { useLoginMutation } from "@/services/api/auth";
+import {useLoginMutation} from "@/services/api/auth";
 import {useTheme} from "@/hooks";
 
 const formSchema = z.object({
@@ -32,15 +18,15 @@ const formSchema = z.object({
   password: z
     .string()
     .min(1, "Password is required")
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .min(6, {message: "Password must be at least 6 characters"}),
 });
 
 export default function Component() {
   const [isLoading, setIsLoading] = useState(false);
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [login] = useLoginMutation();
 
-  const { theme, isDark, applyTheme } = useTheme(); // <- aquí usamos applyTheme directamente
+  const {theme, isDark, applyTheme} = useTheme(); // <- aquí usamos applyTheme directamente
 
   useEffect(() => {
     applyTheme(theme, isDark);
@@ -64,11 +50,11 @@ export default function Component() {
     } catch (error: any) {
       console.log(error);
       if (error.data?.message) {
-        form.setError("root", { message: error.data.message });
+        form.setError("root", {message: error.data.message});
       } else if (error.status === 401) {
-        form.setError("root", { message: t("errors.invalidCredentials") });
+        form.setError("root", {message: t("errors.invalidCredentials")});
       } else {
-        form.setError("root", { message: t("errors.serverError") });
+        form.setError("root", {message: t("errors.serverError")});
       }
     } finally {
       setIsLoading(false);
@@ -76,7 +62,8 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row bg-gradient-to-r from-[#2b354c] to-background from-30% to-70%">
+    <div
+      className="min-h-screen bg-background flex flex-col md:flex-row bg-gradient-to-r from-[#2b354c] to-background from-30% to-70%">
       {/* Side Content */}
       <div className="md:w-2/5 p-8 flex flex-col justify-center">
         <div className="mb-8">
@@ -105,7 +92,7 @@ export default function Component() {
           <CardHeader>
             <div className="flex justify-between items-center pb-3">
               <CardTitle className="text-4xl">{t("auth.login")}</CardTitle>
-              <LanguageSelector />
+              <LanguageSelector/>
             </div>
           </CardHeader>
           <Form {...form}>
@@ -114,20 +101,20 @@ export default function Component() {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormLabel>{t("auth.email")}</FormLabel>
                       <FormControl>
                         <Input placeholder={t("auth.enterEmail")} {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage/>
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
                   name="password"
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormLabel>{t("auth.password")}</FormLabel>
                       <FormControl>
@@ -137,7 +124,7 @@ export default function Component() {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage/>
                     </FormItem>
                   )}
                 />

@@ -9,31 +9,17 @@ import {
   useStopApplicationMutation,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import {
-  ActionMessage,
-  ActionResponse,
-  ApplicationsProps,
-  Input,
-  ProgressMessage,
-} from "@/types";
+import {ActionMessage, ActionResponse, ApplicationsProps, Input, ProgressMessage,} from "@/types";
 import {debounce} from "lodash";
 import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {z} from "zod";
 import {Card, CardContent, CardHeader, CardTitle} from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "../ui/dialog";
 import {Button} from "../ui/button";
 import {PlusCircle} from "lucide-react";
-import {ApplicationForm} from "../forms";
+import {ApplicationForm, DynamicForm} from "../forms";
 import {ApplicationCard} from "../application-card";
-import {DynamicForm} from "../forms";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
