@@ -35,6 +35,7 @@ type User interface {
 	UpdateProfile(ctx context.Context, profileReq model.ProfileRequest, userID string) error
 	UpdatePassword(ctx context.Context, req model.PasswordRequest, userID string) error
 	UpdateTechStacks(ctx context.Context, req model.SelectUserTechStacksRequest) error
+	GetAll(ctx context.Context) ([]model.User, error)
 }
 
 type user struct {
@@ -453,4 +454,18 @@ func (u *user) UpdateTechStacks(ctx context.Context, req model.SelectUserTechSta
 	}
 
 	return nil
+}
+
+func (u *user) GetAll(ctx context.Context) ([]model.User, error) {
+	users, err := u.repos.User.GetAll(ctx)
+	if err != nil {
+		logger.Error("error getting all users %v", err)
+		return nil, err
+	}
+
+	for i := range users {
+		users[i].Password = ""
+	}
+
+	return users, nil
 }

@@ -103,3 +103,7 @@ type SelectUserTechStacksRequest struct {
 	TechStackIDs []string `json:"techIds" validate:"required"`
 	UserId       string   `json:"userId" validate:"required"`
 }
+
+type UserRoleRequest struct {
+	UserIds []string `json:"userIds" validate:"required"`
+}

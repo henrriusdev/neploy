@@ -107,3 +107,26 @@ func (u *UserRole) Insert(ctx context.Context, userRole model.UserRoles) (model.
 	common.AttachSQLToTrace(ctx, query)
 	return userRole, nil
 }
+
+func (u *UserRole) Delete(ctx context.Context, userRole model.UserRoles) error {
+	q := u.BaseQueryUpdate().
+		Set(goqu.Record{"deleted_at": goqu.L("CURRENT_TIMESTAMP")}).
+		Where(
+			goqu.I("user_id").Eq(userRole.UserID),
+			goqu.I("role_id").Eq(userRole.RoleID),
+		)
+
+	query, args, err := q.ToSQL()
+	if err != nil {
+		logger.Error("Failed to create delete query user role: %v", err)
+		return err
+	}
+
+	if _, err := u.Store.ExecContext(ctx, query, args...); err != nil {
+		logger.Error("Failed to delete user role: %v", err)
+		return err
+	}
+
+	common.AttachSQLToTrace(ctx, query)
+	return nil
+}

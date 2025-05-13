@@ -1,13 +1,13 @@
-import { User } from "@/types/common";
-import { baseApi } from "./api";
+import {User} from "@/types/common";
+import {baseApi} from "./api";
 
 export const users = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     completeInvite: builder.mutation({
-      query: ({ token, userData }: { token: string; userData: User }) => ({
+      query: ({token, userData}: { token: string; userData: User }) => ({
         url: "users/complete-invite",
         method: "POST",
-        body: { token, ...userData },
+        body: {token, ...userData},
       }),
     }),
     updateProfile: builder.mutation({
@@ -26,13 +26,24 @@ export const users = baseApi.injectEndpoints({
       }),
     }),
     updateUserTechStacks: builder.mutation<void, { userId: string; techIds: string[] }>({
-      query: ({ userId, techIds }) => ({
+      query: ({userId, techIds}) => ({
         url: '/users/update-techstacks',
         method: 'PUT',
-        body: { userId, techIds },
+        body: {userId, techIds},
+      }),
+    }),
+    getUsers: builder.query({
+      query: () => ({
+        url: 'users',
+        method: 'GET',
       }),
     }),
   }),
 });
 
-export const {useUpdateUserTechStacksMutation, useUpdateProfileMutation, useUpdatePasswordMutation} = users;
+export const {
+  useUpdateUserTechStacksMutation,
+  useUpdateProfileMutation,
+  useUpdatePasswordMutation,
+  useGetUsersQuery
+} = users;

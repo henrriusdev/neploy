@@ -23,6 +23,7 @@ func NewUser(user service.User, metadata service.Metadata, i *inertia.Inertia) *
 }
 
 func (u *User) RegisterRoutes(r *echo.Group) {
+	r.GET("", u.GetUsers)
 	r.POST("/invite", u.InviteUser)
 	r.GET("/invite/:token", u.AcceptInvite)
 	r.POST("/complete-invite", u.CompleteInvite)
@@ -335,4 +336,29 @@ func (u *User) SelectTechStacks(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"success": true})
+}
+
+// GetUsers godoc
+// @Summary Get all users
+// @Description Get all users
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 200 {object} []model.User
+// @Failure 500 {object} map[string]interface{}
+// @Router /users [get]
+func (u *User) GetUsers(c echo.Context) error {
+	_, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		logger.Error("error getting claims")
+		return c.Redirect(http.StatusSeeOther, "/")
+	}
+
+	users, err := u.user.GetAll(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting users: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, users)
 }
