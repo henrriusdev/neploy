@@ -16,6 +16,8 @@ type Role interface {
 	Update(context.Context, string, model.CreateRoleRequest) error
 	Delete(context.Context, string) error
 	GetUserRoles(context.Context, string) ([]model.UserRoles, error)
+	AddUserRole(ctx context.Context, id string, req model.UserRoleRequest) error
+	RemoveUserRole(ctx context.Context, id string, req model.UserRoleRequest) error
 }
 
 type role struct {
@@ -86,4 +88,35 @@ func (r *role) Delete(ctx context.Context, id string) error {
 
 func (r *role) GetUserRoles(ctx context.Context, userID string) ([]model.UserRoles, error) {
 	return r.userRoleRepo.GetByUserID(ctx, userID)
+}
+
+func (r *role) AddUserRole(ctx context.Context, id string, req model.UserRoleRequest) error {
+	userRoles := []model.UserRoles{}
+	for _, user := range req.UserIds {
+		userRole := model.UserRoles{
+			UserID: user,
+			RoleID: id,
+		}
+		userRoles = append(userRoles, userRole)
+	}
+
+	_, err := r.userRoleRepo.InsertMany(ctx, userRoles)
+	return err
+}
+
+func (r *role) RemoveUserRole(ctx context.Context, id string, req model.UserRoleRequest) error {
+	for _, user := range req.UserIds {
+		userRole := model.UserRoles{
+			UserID: user,
+			RoleID: id,
+		}
+
+		err := r.userRoleRepo.Delete(ctx, userRole)
+		if err != nil {
+			logger.Error("Failed to remove user role: %v", err)
+			return err
+		}
+	}
+
+	return nil
 }

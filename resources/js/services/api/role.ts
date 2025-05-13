@@ -7,10 +7,6 @@ export const roles = baseApi.injectEndpoints({
       query: () => "/roles",
       providesTags: ["roles"],
     }),
-    getRole: builder.query<any, { id: string }>({
-      query: ({ id }) => `/roles/${id}`,
-      providesTags: ["roles"],
-    }),
     createRole: builder.mutation<any, CreateRoleRequest>({
       query: ({ name, description, icon, color }) => ({
         url: "/roles",
@@ -34,13 +30,30 @@ export const roles = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["roles"],
     }),
+    addUsersToRole: builder.mutation<any, { roleId: string; userIds: string[] }>({
+      query: ({ roleId, userIds }) => ({
+        url: `/roles/${roleId}/users`,
+        method: "POST",
+        body: { userIds },
+      }),
+      invalidatesTags: ["roles"],
+    }),
+    deleteUsersFromRole: builder.mutation<any, { roleId: string; userIds: string[] }>({
+      query: ({roleId, userIds}) => ({
+        url: `/roles/${roleId}/users`,
+        method: "DELETE",
+        body: {userIds},
+      }),
+      invalidatesTags: ["roles"],
+    }),
   }),
 });
 
 export const {
   useGetRolesQuery,
-  useGetRoleQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useDeleteRoleMutation,
+  useAddUsersToRoleMutation,
+  useDeleteUsersFromRoleMutation
 } = roles;

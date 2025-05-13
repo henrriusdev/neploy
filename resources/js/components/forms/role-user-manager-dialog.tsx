@@ -20,6 +20,8 @@ import {Badge} from "@/components/ui/badge"
 import {useToast} from "@/hooks"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {User} from "@/types";
+import {useGetUsersQuery} from "@/services/api/users";
+import {useAddUsersToRoleMutation, useDeleteUsersFromRoleMutation} from "@/services/api/role";
 
 interface RoleUserManagerDialogProps {
   open: boolean
@@ -42,25 +44,12 @@ export function RoleUserManagerDialog({
   const [selectedTab, setSelectedTab] = useState("add")
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
   const [usersToRemove, setUsersToRemove] = useState<Set<string>>(new Set())
-
-  // API integration points
-  // Replace these with your actual API hooks
-
-  // 1. Hook to fetch available users
-  // const { data: availableUsers = [], isLoading: isLoadingUsers, error: usersError } = useGetAvailableUsersQuery()
-
-  // For demo purposes, we'll use a placeholder array
-  const availableUsers: User[] = []
-  const isLoadingUsers = false
-  const usersError = null
-
-  // 2. Hook to add users to a role
-  // const [addUsersToRole, { isLoading: isAddingUsers }] = useAddUsersToRoleMutation()
-  const isAddingUsers = false
-
-  // 3. Hook to remove users from a role
-  // const [removeUserFromRole, { isLoading: isRemovingUser }] = useRemoveUserFromRoleMutation()
-  const isRemovingUser = false
+  const [availableUsers, setAvailableUsers] = useState<User[]>([])
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false)
+  const [usersError, setUsersError] = useState(null)
+  const getUsers = useGetUsersQuery(null)
+  const [addUsersToRole, {isLoading: isAddingUsers}] = useAddUsersToRoleMutation()
+  const [removeUserFromRole, {isLoading: isRemovingUser}] = useDeleteUsersFromRoleMutation()
 
   // Reset state when dialog opens/closes
   useEffect(() => {
@@ -71,6 +60,19 @@ export function RoleUserManagerDialog({
       setSelectedTab("add")
     }
   }, [open])
+
+  useEffect(() => {
+    setIsLoadingUsers(true)
+    if (getUsers.data && getUsers.status === "fulfilled") {
+      setAvailableUsers(getUsers.data)
+      setIsLoadingUsers(false)
+    }
+
+    if (getUsers.error) {
+      setUsersError(getUsers.error)
+      setIsLoadingUsers(false)
+    }
+  }, [getUsers.data, getUsers.status])
 
   // Filter users based on search query
   const filteredUsers = useMemo(() => {
@@ -109,12 +111,10 @@ export function RoleUserManagerDialog({
     if (selectedUserIds.size === 0) return
 
     try {
-      // Call your API to add users to the role
-      // await addUsersToRole({
-      //   roleId,
-      //   userIds: Array.from(selectedUserIds),
-      // })
-
+      await addUsersToRole({
+        roleId,
+        userIds: Array.from(selectedUserIds),
+      })
       toast({
         title: t("settings.roles.addUsersSuccess"),
         description: t("settings.roles.addUsersSuccessDescription", {
@@ -122,7 +122,6 @@ export function RoleUserManagerDialog({
           role: roleName,
         }),
       })
-
       onOpenChange(false)
     } catch (error) {
       toast({
@@ -138,14 +137,10 @@ export function RoleUserManagerDialog({
     if (usersToRemove.size === 0) return
 
     try {
-      // Process each removal sequentially
-      // for (const userId of usersToRemove) {
-      //   await removeUserFromRole({
-      //     roleId,
-      //     userId,
-      //   })
-      // }
-
+      await removeUserFromRole({
+        roleId,
+        userIds: Array.from(usersToRemove),
+      })
       toast({
         title: t("settings.roles.removeUsersSuccess"),
         description: t("settings.roles.removeUsersSuccessDescription", {
@@ -153,7 +148,6 @@ export function RoleUserManagerDialog({
           role: roleName,
         }),
       })
-
       onOpenChange(false)
     } catch (error) {
       toast({

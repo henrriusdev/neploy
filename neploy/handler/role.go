@@ -28,6 +28,8 @@ func (h *Role) RegisterRoutes(r *echo.Group) {
 	r.PATCH("/:id", h.Update)
 	r.DELETE("/:id", h.Delete)
 	r.GET("/users/:id", h.GetUserRoles)
+	r.POST("/:id/users", h.AddUserRole)
+	r.DELETE("/:id/users", h.RemoveUserRole)
 }
 
 // List godoc
@@ -149,5 +151,65 @@ func (h *Role) GetUserRoles(c echo.Context) error {
 
 	return h.inertia.Render(c.Response().Writer, c.Request(), "Dashboard/UserRoles", gonertia.Props{
 		"roles": roles,
+	})
+}
+
+// AddUserRole godoc
+// @Summary Add a role to users
+// @Description Add a role to users by ID
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Param id path string true "Role ID"
+// @Param request body model.UserRoleRequest true "User IDs"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /roles/{id}/users [post]
+func (h *Role) AddUserRole(c echo.Context) error {
+	id := c.Param("id")
+	var req model.UserRoleRequest
+	if err := c.Bind(&req); err != nil {
+		logger.Error("error binding request: %v", err)
+		return h.inertia.Render(c.Response().Writer, c.Request(), "Error/400", nil)
+	}
+
+	if err := h.service.AddUserRole(c.Request().Context(), id, req); err != nil {
+		logger.Error("error adding user role: %v", err)
+		return h.inertia.Render(c.Response().Writer, c.Request(), "Error/500", nil)
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "User role added successfully",
+	})
+}
+
+// RemoveUserRole godoc
+// @Summary Remove a role from users
+// @Description Remove a role from users by ID
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Param id path string true "Role ID"
+// @Param request body model.UserRoleRequest true "User IDs"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /roles/{id}/users [delete]
+func (h *Role) RemoveUserRole(c echo.Context) error {
+	id := c.Param("id")
+	var req model.UserRoleRequest
+	if err := c.Bind(&req); err != nil {
+		logger.Error("error binding request: %v", err)
+		return h.inertia.Render(c.Response().Writer, c.Request(), "Error/400", nil)
+	}
+
+	if err := h.service.RemoveUserRole(c.Request().Context(), id, req); err != nil {
+		logger.Error("error removing user role: %v", err)
+		return h.inertia.Render(c.Response().Writer, c.Request(), "Error/500", nil)
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "User role removed successfully",
 	})
 }
