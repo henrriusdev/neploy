@@ -75,7 +75,6 @@ func Start(npy Neploy) {
 
 	// Static files
 	e.Static("/build/assets", "./public/build/assets")
-
 	e.Start(":" + npy.Port)
 }
 
