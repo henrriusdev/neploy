@@ -25,5 +25,6 @@ jobs:
       # Paso 3: Copiar y ejecutar el script desde GitHub runner al VPS
       - name: Run deploy.sh remotely
         run: |
-          scp -i ~/.ssh/id_rsa -P ${{ secrets.LINODE_PORT }} scripts/deploy.sh ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}:/tmp/deploy.sh
-          ssh -i ~/.ssh/id_rsa -p ${{ secrets.LINODE_PORT }} -o StrictHostKeyChecking=no ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }} "bash /tmp/deploy.sh"
+          scp -P 22 -i ~/.ssh/id_rsa scripts/deploy.sh ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}:/tmp/deploy.sh
+          ssh -p 22 -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }} "bash /tmp/deploy.sh"
+
