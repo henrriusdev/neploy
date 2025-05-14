@@ -1,7 +1,6 @@
 package neploy
 
 import (
-	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -10,6 +9,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
 	neployway "neploy.dev/pkg/gateway"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
@@ -47,7 +47,15 @@ func Start(npy Neploy) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "[${remote_ip}]:${port} ${status} - ${method} ${path} ${latency}\n",
 	}))
-	e.Use(echo.WrapMiddleware(i.Middleware))
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			err := echo.WrapMiddleware(i.Middleware)(next)(c)
+			if err != nil {
+				logger.Debug("[INERTIA MIDDLEWARE ERROR] %v", err)
+			}
+			return err
+		}
+	})
 
 	// WebSocket routes with specialized handlers
 	e.GET("/ws/notifications", websocket.UpgradeProgressWS())
@@ -66,18 +74,7 @@ func Start(npy Neploy) {
 	RegisterRoutes(e, i, npy)
 
 	// Static files
-	e.GET("/build/assets/:filename", func(c echo.Context) error {
-		filename := c.Param("filename")
-
-		if strings.HasSuffix(filename, ".js") {
-			c.Response().Header().Set("Content-Type", "application/javascript")
-		} else if strings.HasSuffix(filename, ".css") {
-			c.Response().Header().Set("Content-Type", "text/css")
-		}
-
-		return c.File("./public/build/assets/" + filename)
-	})
-
+	e.Static("/build/assets", "./public/build/assets")
 	e.Start(":" + npy.Port)
 }
 
