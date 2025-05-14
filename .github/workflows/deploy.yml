@@ -3,51 +3,27 @@ name: Deploy to Linode
 on:
   push:
     branches:
-      - main  # Se ejecutará cuando haya un push a la rama 'main'
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso 1: Clonar el código del repositorio
+      # Paso 1: Clonar el repo en el runner
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Paso 2: Configurar la clave SSH para la conexión al VPS
+      # Paso 2: Configurar la clave SSH
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.LINODE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Verificación de conexión SSH
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }} 'echo "SSH conexión exitosa"'
 
-      # Paso 3: Subir y ejecutar el script remoto
-      - name: Deploy to Linode via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.LINODE_HOST }}
-          username: ${{ secrets.LINODE_USER }}
-          key: ${{ secrets.LINODE_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.LINODE_PORT }}
-          script: |
-            # Crear carpeta temporal para el script si no existe
-            mkdir -p /tmp/deploy-script
-
-            # Escribir el contenido del script desde el repo
-            cat > /tmp/deploy-script/deploy.sh <<'EOF'
-            #!/bin/bash
-            set -e
-
-            cd /root/neploy
-            git pull origin main
-            go build -o neploy ./cmd/app
-            sudo mv neploy /opt/neploy/
-            sudo chmod +x /opt/neploy/neploy
-            sudo systemctl restart neploy.service
-            EOF
-
-            # Darle permisos y ejecutarlo
-            chmod +x /tmp/deploy-script/deploy.sh
-            /tmp/deploy-script/deploy.sh
+      # Paso 3: Copiar y ejecutar el script desde GitHub runner al VPS
+      - name: Run deploy.sh remotely
+        run: |
+          scp -i ~/.ssh/id_rsa -P ${{ secrets.LINODE_PORT }} scripts/deploy.sh ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }}:/tmp/deploy.sh
+          ssh -i ~/.ssh/id_rsa -p ${{ secrets.LINODE_PORT }} -o StrictHostKeyChecking=no ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }} "bash /tmp/deploy.sh"
