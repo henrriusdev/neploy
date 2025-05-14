@@ -244,6 +244,14 @@ definitions:
     type: object
   model.LoginResponse:
     properties:
+      roleNames:
+        items:
+          type: string
+        type: array
+      roles:
+        items:
+          type: string
+        type: array
       token:
         type: string
       user:
@@ -298,6 +306,22 @@ definitions:
     - adminUser
     - metadata
     - roles
+    type: object
+  model.PasswordRequest:
+    properties:
+      confirmPassword:
+        minLength: 8
+        type: string
+      currentPassword:
+        minLength: 8
+        type: string
+      newPassword:
+        minLength: 8
+        type: string
+    required:
+    - confirmPassword
+    - currentPassword
+    - newPassword
     type: object
   model.Provider:
     enum:
@@ -369,6 +393,15 @@ definitions:
         $ref: '#/definitions/model.Date'
       username:
         type: string
+    type: object
+  model.UserRoleRequest:
+    properties:
+      userIds:
+        items:
+          type: string
+        type: array
+    required:
+    - userIds
     type: object
   model.UserRoles:
     properties:
@@ -1296,6 +1329,81 @@ paths:
       summary: Update a role
       tags:
       - Role
+  /roles/{id}/users:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a role from users by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Remove a role from users
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: Add a role to users by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add a role to users
+      tags:
+      - Role
   /roles/users/{id}:
     get:
       consumes:
@@ -1508,6 +1616,28 @@ paths:
       summary: Invite a user
       tags:
       - User
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all users
+      tags:
+      - User
   /users/profile:
     get:
       consumes:
@@ -1526,6 +1656,67 @@ paths:
             additionalProperties: true
             type: object
       summary: Get user profile
+      tags:
+      - User
+  /users/profile/update:
+    put:
+      consumes:
+      - application/json
+      description: Update user profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update user profile
+      tags:
+      - User
+  /users/profile/update-password:
+    put:
+      consumes:
+      - application/json
+      description: Update user password
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PasswordRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update user password
+      tags:
+      - User
+  /users/update-techstacks:
+    put:
+      consumes:
+      - application/json
+      description: Select user tech stacks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Select user tech stacks
       tags:
       - User
 swagger: "2.0"
