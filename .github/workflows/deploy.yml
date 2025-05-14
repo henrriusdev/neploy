@@ -23,7 +23,7 @@ jobs:
           # Verificación de conexión SSH
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.LINODE_USER }}@${{ secrets.LINODE_HOST }} 'echo "SSH conexión exitosa"'
 
-      # Paso 3: Desplegar la aplicación en Linode
+      # Paso 3: Subir y ejecutar el script remoto
       - name: Deploy to Linode via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -32,13 +32,22 @@ jobs:
           key: ${{ secrets.LINODE_SSH_PRIVATE_KEY }}
           port: ${{ secrets.LINODE_PORT }}
           script: |
-            # Ir a la carpeta donde tienes la app en el servidor
-            cd ${{ secrets.LINODE_APP_DIR }}
-            # Obtener los últimos cambios del repositorio
+            # Crear carpeta temporal para el script si no existe
+            mkdir -p /tmp/deploy-script
+
+            # Escribir el contenido del script desde el repo
+            cat > /tmp/deploy-script/deploy.sh <<'EOF'
+            #!/bin/bash
+            set -e
+
+            cd /root/neploy
             git pull origin main
-            # Compilar la aplicación Go
             go build -o neploy ./cmd/app
             sudo mv neploy /opt/neploy/
             sudo chmod +x /opt/neploy/neploy
-            # Reiniciar el servicio si es que tienes un systemd configurado
-            systemctl restart neploy.service
+            sudo systemctl restart neploy.service
+            EOF
+
+            # Darle permisos y ejecutarlo
+            chmod +x /tmp/deploy-script/deploy.sh
+            /tmp/deploy-script/deploy.sh
