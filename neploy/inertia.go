@@ -78,6 +78,7 @@ func initInertia() *inertia.Inertia {
 	}
 
 	i.ShareTemplateFunc("vite", vite(manifestPath, "/build/"))
+	i.ShareProp("IsDev", isDevMode)
 	return i
 }
 

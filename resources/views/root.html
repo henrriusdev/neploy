@@ -9,7 +9,9 @@
 
 <body class="font-sans antialiased">
 {{ .inertia }}"
-<script type="module" src='{{ vite "resources/js/vite-preamble.jsx" }}' type="text/javascript"></script>
+{{ if .IsDev }}
+<script type="module" src="/resources/js/vite-preamble.jsx"></script>
+{{ end }}
 <script type="module" src='{{ vite "resources/js/app.jsx" }}' type="text/javascript"></script>
 </body>
 </html>

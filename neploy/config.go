@@ -10,6 +10,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 	neployware "neploy.dev/neploy/middleware"
 	neployway "neploy.dev/pkg/gateway"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/service"
 	"neploy.dev/pkg/store"
@@ -47,7 +48,15 @@ func Start(npy Neploy) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "[${remote_ip}]:${port} ${status} - ${method} ${path} ${latency}\n",
 	}))
-	e.Use(echo.WrapMiddleware(i.Middleware))
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			err := echo.WrapMiddleware(i.Middleware)(next)(c)
+			if err != nil {
+				logger.Debug("[INERTIA MIDDLEWARE ERROR] %v", err)
+			}
+			return err
+		}
+	})
 
 	// WebSocket routes with specialized handlers
 	e.GET("/ws/notifications", websocket.UpgradeProgressWS())
