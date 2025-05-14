@@ -38,5 +38,7 @@ jobs:
             git pull origin main
             # Compilar la aplicación Go
             go build -o neploy ./cmd/app
+            sudo mv neploy /opt/neploy/
+            sudo chmod +x /opt/neploy/neploy
             # Reiniciar el servicio si es que tienes un systemd configurado
             systemctl restart neploy.service
