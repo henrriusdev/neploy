@@ -33,7 +33,7 @@ jobs:
           port: ${{ secrets.LINODE_PORT }}
           script: |
             # Ir a la carpeta donde tienes la app en el servidor
-            cd /root/neploy
+            cd ${{ secrets.LINODE_APP_DIR }}
             # Obtener los últimos cambios del repositorio
             git pull origin main
             # Compilar la aplicación Go
