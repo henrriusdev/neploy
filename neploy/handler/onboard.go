@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -43,6 +44,9 @@ func (o *Onboard) Initiate(c echo.Context) error {
 			"error": "Invalid request",
 		})
 	}
+
+	// print request as json with fmt.Printf
+	fmt.Printf("Request: %+v\n", req)
 
 	oauthID, err := c.Cookie("oauth_id")
 	if err != nil || oauthID.Value == "" {

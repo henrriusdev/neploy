@@ -2,7 +2,6 @@
 
 import {addDays, format, lastDayOfYear} from "date-fns";
 import {Calendar as CalendarIcon} from "lucide-react";
-import * as React from "react";
 import {DateRange} from "react-day-picker";
 import {useFormContext} from "react-hook-form";
 import {Button} from "@/components/ui/button";
@@ -12,8 +11,9 @@ import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {cn} from "@/lib/utils";
 import {DatePickerProps} from "@/types/props";
+import {forwardRef, useEffect, useState} from "react";
 
-export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
+export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
   (
     {
       className,
@@ -29,29 +29,35 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     const formContext = useFormContext();
     const isFormContext = !!formContext && !!field;
 
-    const [selectedDate, setSelectedDate] = React.useState<
+    const [selectedDate, setSelectedDate] = useState<
       Date | DateRange | undefined
     >(isFormContext ? field.value : date);
-    const [isRange, setIsRange] = React.useState<boolean>(isRangePicker);
-    const [month, setMonth] = React.useState<Date>(() => {
+    const [isRange, setIsRange] = useState<boolean>(isRangePicker);
+    const [month, setMonth] = useState<Date>(() => {
       if (maxYear) {
         return lastDayOfYear(new Date(maxYear, 0, 1));
       }
       return selectedDate instanceof Date
         ? selectedDate
         : selectedDate && "from" in selectedDate
-        ? selectedDate.from
-        : new Date();
+          ? selectedDate.from
+          : new Date();
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
       setSelectedDate(isFormContext ? field.value : date);
       setMonth(isFormContext ? field?.value : date)
     }, [isFormContext, field?.value, date]);
 
-    React.useEffect(() => {
+    useEffect(() => {
       setIsRange(isRangePicker);
     }, [isRangePicker]);
+
+    useEffect(() => {
+      if (month instanceof Date && !isNaN(month.getTime())) {
+        setMonth(new Date(maxYear, new Date().getMonth(), new Date().getDate()));
+      }
+    }, []);
 
     const handleDateSelect = (newDate: Date | DateRange | undefined) => {
       setSelectedDate(newDate);
@@ -92,7 +98,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
                   !selectedDate && "text-muted-foreground"
                 )}
                 {...buttonProps}>
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4"/>
                 {formatDate(selectedDate)}
               </Button>
             </FormControl>
@@ -101,15 +107,16 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
             <div className="w-[350px] p-3 space-y-3 flex items-center justify-between">
               <div className="flex space-x-1">
                 <Select
-                  value={format(month, "MMMM")}
+                  value={month instanceof Date && !isNaN(month.getTime()) ? format(month, "MMMM") : ""}
+
                   onValueChange={(value) =>
                     setMonth(new Date(month.getFullYear(), parseInt(value), 1))
                   }>
                   <SelectTrigger className="w-[160px] text-white">
-                    <SelectValue>{format(month, "MMMM")}</SelectValue>
+                    <SelectValue>{month instanceof Date && !isNaN(month.getTime()) ? format(month, "MMMM") : ""}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 12 }, (_, i) => (
+                    {Array.from({length: 12}, (_, i) => (
                       <SelectItem key={i} value={i.toString()}>
                         {format(new Date(0, i), "MMMM")}
                       </SelectItem>
@@ -117,15 +124,15 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
                   </SelectContent>
                 </Select>
                 <Select
-                  value={month.getFullYear().toString()}
+                  value={month?.getFullYear().toString() ?? new Date(maxYear).getFullYear().toString()}
                   onValueChange={(value) =>
                     setMonth(new Date(parseInt(value), month.getMonth(), 1))
                   }>
                   <SelectTrigger className="w-[160px] text-white">
-                    <SelectValue>{month.getFullYear()}</SelectValue>
+                    <SelectValue>{month?.getFullYear().toString() ?? new Date(maxYear, 1, 1).getFullYear().toString()}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: maxYear - minYear + 1 }, (_, i) => (
+                    {Array.from({length: maxYear - minYear + 1}, (_, i) => (
                       <SelectItem key={i} value={(minYear + i).toString()}>
                         {minYear + i}
                       </SelectItem>

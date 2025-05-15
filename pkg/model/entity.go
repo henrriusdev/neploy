@@ -15,7 +15,7 @@ type BaseRelation struct {
 
 type User struct {
 	BaseEntity
-	Username  string `json:"username" db:"username" goqu:"skipinsert,skipupdate"`
+	Username  string `json:"username" db:"username" goqu:"skipupdate"`
 	Password  string `json:"password" db:"password" goqu:"omitempty"`
 	Email     string `json:"email" db:"email"`
 	FirstName string `json:"firstName" db:"first_name"`

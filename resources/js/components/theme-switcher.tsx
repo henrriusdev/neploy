@@ -1,20 +1,29 @@
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {useTheme} from "@/hooks";
-import {Check, Moon, Sun} from "lucide-react";
+import {Check, Moon, Palette, Sun} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {Button} from "@/components/ui/button";
+import {cn} from "@/lib/utils";
 
-export const ThemeSwitcher = () => {
+export const ThemeSwitcher = ({className = ''}: {className?: string}) => {
   const {theme, isDark, changeTheme, toggleDark, themes} = useTheme();
+  const {t} = useTranslation()
 
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Apariencia</DropdownMenuSubTrigger>
-      <DropdownMenuSubContent>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className={cn("px-4 py-2 flex justify-center items-center !rounded-md text-lg", className)}>
+          <Palette className="mr-2 h-7 w-7"/>
+          {t("theme")}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
         <div className="px-2 py-1.5 text-xs text-muted-foreground font-semibold">
           Tema
         </div>
@@ -40,7 +49,7 @@ export const ThemeSwitcher = () => {
             </>
           )}
         </DropdownMenuItem>
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
