@@ -135,8 +135,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                     <DropdownMenuItem className="p-0">
                       <LanguageSelector className="w-full p-2"/>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <ThemeSwitcher/>
+                    <DropdownMenuItem>
+                      <ThemeSwitcher className={"!w-full"}/>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link

@@ -64,10 +64,11 @@ func initInertia() *inertia.Inertia {
 			return url + entry, nil
 		})
 
+		i.ShareProp("IsDev", isDevMode)
+
 		return i
 	}
 
-	// Si no está en modo dev, entonces cargamos desde el archivo manifest en producción
 	i, err := inertia.NewFromFile(
 		rootViewFile,
 		inertia.WithVersionFromFile(manifestPath),
@@ -78,6 +79,7 @@ func initInertia() *inertia.Inertia {
 	}
 
 	i.ShareTemplateFunc("vite", vite(manifestPath, "/build/"))
+
 	i.ShareProp("IsDev", isDevMode)
 	return i
 }

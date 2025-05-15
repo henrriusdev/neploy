@@ -2,6 +2,7 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import {LanguageSelector} from "@/components/forms";
 import {useTranslation} from "react-i18next";
+import {ThemeSwitcher} from "@/components/theme-switcher";
 
 interface StepInfo {
     title: string;
@@ -95,6 +96,7 @@ const handleLanguageChange = (value: string) => {
                 </p>
                 <p className="text-sm text-muted-foreground capitalize mt-5 mb-1">{t('language')}</p>
                 <LanguageSelector />
+                <ThemeSwitcher className="mt-2" />
             </div>
         </div>
     )
