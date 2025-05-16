@@ -1,0 +1,371 @@
+{
+  "language": "语言",
+  "profile": "轮廓",
+  "common": {
+    "languageSelector": "语言",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "save": "节省",
+    "saving": "保存...",
+    "cancel": "取消"
+  },
+  "actions": {
+    "back": "后退",
+    "cancel": "取消",
+    "next": "下一个",
+    "save": "节省"
+  },
+  "languages": {
+    "en": "英语",
+    "es": "西班牙语",
+    "pt": "葡萄牙语",
+    "zh": "中国人",
+    "fr": "法语"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "注销",
+    "email": "电子邮件",
+    "password": "密码",
+    "forgotPassword": "忘记密码？",
+    "rememberMe": "记住账号",
+    "loginWith": "登录 {{provider}}",
+    "noAccount": "没有帐户？",
+    "createAccount": "创建账户",
+    "orContinueWith": "或继续",
+    "welcomeTitle": "欢迎来到我们的平台",
+    "welcomeDescription": "发现一种管理您的云应用程序和服务的更聪明的方法",
+    "feature1": "简单而快速的应用程序部署",
+    "feature2": "直观的云资源管理",
+    "feature3": "实时性能监控",
+    "enterEmail": "输入您的电子邮件",
+    "enterPassword": "输入您的密码",
+    "loggingIn": "登录...",
+    "logIn": "登录"
+  },
+  "onboarding": {
+    "welcome": "欢迎来到新雇用",
+    "description": "让我们开始部署旅程",
+    "administratorAccount": "管理员用户",
+    "email": "电子邮件",
+    "error": "进行设置时有错误，请重试",
+    "name": "姓名",
+    "reviewSetup": "查看提供的数据",
+    "roles": "角色",
+    "setupAccount": "设置Neploy！",
+    "verifyInformation": "请验证您的信息",
+    "success": "成功！",
+    "teamInformation": "团队信息",
+    "provider": {
+      "title": "选择开发人员",
+      "description": "选择是否要使用github，gitlab或手动输入作为用户名和头像"
+    },
+    "steps": {
+      "personal": "个人信息",
+      "team": "团队设置",
+      "project": "项目详细信息",
+      "summary": "概括"
+    },
+    "personalInfo": {
+      "title": "个人信息",
+      "description": "告诉我们一些关于你自己的",
+      "firstName": "名",
+      "lastName": "姓",
+      "email": "电子邮件",
+      "language": "首选语言"
+    },
+    "teamSetup": {
+      "title": "团队设置",
+      "description": "配置您的团队设置",
+      "teamName": "团队名称",
+      "language": {
+        "label": "语言",
+        "placeholder": "为应用程序选择一种语言"
+      }
+    },
+    "summary": {
+      "title": "概括",
+      "description": "查看您的信息",
+      "personalSection": "个人信息",
+      "teamSection": "团队信息",
+      "projectSection": "项目信息"
+    },
+    "completeSetup": "完成初始设置"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "welcome": "欢迎回来， {{name}}",
+    "stats": {
+      "totalApps": "总应用程序",
+      "totalAppsDescription": "部署的申请总数",
+      "runningApps": "运行应用程序",
+      "runningAppsDescription": "当前正在运行的应用程序",
+      "teamMembers": "团队成员",
+      "teamMembersDescription": "活跃的团队成员",
+      "deployments": "部署",
+      "deploymentsDescription": "本月总部署"
+    },
+    "recentActivity": {
+      "title": "最近的活动",
+      "description": "您团队最近的行动"
+    },
+    "resources": {
+      "title": "资源",
+      "description": "有用的资源和文档",
+      "documentation": "文档",
+      "apiReference": "API参考",
+      "guides": "向导",
+      "examples": "例子"
+    },
+    "healthApps": "健康应用程序",
+    "fullyHealthy": "完全健康",
+    "totalRequests": "总请求",
+    "requestsLastMonth": "+上个月的18％",
+    "totalVisitors": "访客总数",
+    "visitorsLastHour": "自上小时以来+201",
+    "totalErrors": "总错误",
+    "errorsLastHour": "从最后一个小时起-5％",
+    "requestsByTime": "按时间要求",
+    "successful": "成功的",
+    "errors": "错误",
+    "techStacksMostUsed": "技术堆栈应用最常使用",
+    "visitorCountByTime": "乘坐访客数量",
+    "visitors": "访客",
+    "applications": {
+      "title": "申请",
+      "create": "创建应用程序",
+      "description": "部署和管理您的应用程序",
+      "name": "申请名称",
+      "deploy": "部署",
+      "start": "开始",
+      "stop": "停止",
+      "delete": "删除",
+      "deleteFailed": "删除失败了",
+      "confirmDelete": "您确定要删除此应用程序吗？",
+      "status": {
+        "running": "跑步",
+        "building": "建筑",
+        "stopped": "停了下来",
+        "error": "错误",
+        "unknown": "未知",
+        "created": "创建"
+      },
+      "stats": {
+        "totalApplications": "总申请",
+        "runningApplications": "运行应用程序",
+        "failedApplications": "应用程序失败"
+      },
+      "errors": {
+        "fetchFailed": "无法获取应用程序",
+        "branchesFetchFailed": "无法获取存储库分支",
+        "nameRequired": "申请名称是必需的",
+        "fileOrRepoRequired": "请提供文件或存储库URL",
+        "branchRequired": "请选择一个分支",
+        "portInvalid": "请输入有效的端口号（1-65535）",
+        "unknown": "发生意外错误",
+        "deleteFailed": "无法删除应用程序。"
+      },
+      "actions": {
+        "deploymentProgress": "部署进度",
+        "required": "需要采取行动",
+        "portConfiguration": "端口配置",
+        "portExposed": "港口 {{port}} 将暴露在此申请中",
+        "deploySuccess": "申请部署开始",
+        "uploadSuccess": "应用程序成功上传",
+        "startSuccess": "应用程序成功开始",
+        "stopSuccess": "应用程序成功停止",
+        "deleteSuccess": "应用程序成功删除"
+      },
+      "createNew": {
+        "title": "创建新应用程序",
+        "description": "填写详细信息以创建新应用程序",
+        "name": "申请名称",
+        "namePlaceholder": "输入应用程序名称",
+        "descriptionField": "申请说明",
+        "descriptionPlaceholder": "输入申请说明",
+        "fileOrRepo": "github/gitlab存储库URL（可选）",
+        "repoUrlDescription": "输入有效的github或gitlab存储库URL（例如https://github.com/user/repo）",
+        "branch": "分支",
+        "branchPlaceholder": "选择分支",
+        "loadingBranches": "加载分支...",
+        "port": "港口",
+        "portPlaceholder": "输入端口号",
+        "dropzoneActive": "在这里放下zip文件...",
+        "dropzoneInactive": "拖放zip文件",
+        "deploying": "部署...",
+        "deploy": "部署应用程序"
+      },
+      "empty": {
+        "title": "找不到申请",
+        "description": "通过创建第一个应用程序开始"
+      },
+      "views": {
+        "grid": "网格视图",
+        "list": "列表视图"
+      }
+    },
+    "gateways": {
+      "title": "网关",
+      "description": "管理您的应用程序网关"
+    },
+    "team": {
+      "title": "团队",
+      "description": "管理您的团队成员及其角色",
+      "inviteMember": "邀请会员",
+      "inviteDescription": "向新团队成员发送邀请",
+      "email": "电子邮件",
+      "role": "角色",
+      "selectRole": "选择角色",
+      "member": "成员",
+      "status": "地位",
+      "actions": "动作",
+      "inviting": "诱人...",
+      "invite": "发送邀请",
+      "inviteSuccess": "邀请成功发送",
+      "inviteError": "未能发送邀请",
+      "confirmRemove": "您确定要删除此成员吗？",
+      "removeSuccess": "成员成功地删除了",
+      "removeError": "无法删除成员"
+    },
+    "settings": {
+      "title": "设置",
+      "description": "配置您的帐户和工作区设置",
+      "general": {
+        "title": "一般设置",
+        "teamName": "团队名称",
+        "teamNamePlaceholder": "输入团队名称",
+        "logoUrl": "徽标URL",
+        "logoUrlPlaceholder": "输入徽标URL",
+        "language": "默认语言",
+        "languagePlaceholder": "选择一种语言",
+        "darkMode": "黑暗模式",
+        "darkModeDescription": "默认启用黑暗模式",
+        "emailNotifications": "电子邮件通知",
+        "emailNotificationsDescription": "启用电子邮件通知",
+        "updateSuccess": "设置成功更新",
+        "updateError": "无法更新设置。"
+      },
+      "roles": {
+        "title": "角色",
+        "add": "添加角色",
+        "edit": "编辑角色",
+        "tableIcon": "图标",
+        "tableName": "姓名",
+        "tableDescription": "描述",
+        "tableUsers": "总用户",
+        "tableActions": "动作",
+        "showAction": "向用户显示",
+        "editAction": "编辑",
+        "deleteAction": "删除",
+        "addUsers": "添加用户",
+        "addUsersError": "未能将用户添加到角色中。",
+        "addUsersSuccess": "用户成功添加了。",
+        "alreadyAssigned": "用户已经分配给此角色。",
+        "createError": "无法创建角色。",
+        "createSuccess": "角色成功创造了。",
+        "createSuccessDescription": "新角色已经创建并现在可用。",
+        "deleteError": "未能删除角色。",
+        "deleteSuccess": "角色成功删除。",
+        "deleteSuccessDescription": "从系统中删除了选定的角色。",
+        "editDescriptionDialog": "编辑角色名称，图标或描述。",
+        "editDialog": "编辑角色细节",
+        "errorLoadingUsers": "错误加载用户。",
+        "manageUsers": "管理角色用户",
+        "manageUsersDescription": "将分配给此角色的用户添加或删除。",
+        "noAssignedUsers": "没有用户分配给此角色。",
+        "noUsersFound": "没有用户发现与您的搜索相匹配。",
+        "removeUsers": "删除用户",
+        "removeUsersError": "未能将用户从角色中删除。",
+        "removeUsersSuccess": "用户成功删除了。",
+        "searchAssignedUsers": "搜索分配的用户...",
+        "searchUsers": "搜索用户...",
+        "updateError": "无法更新角色。",
+        "updateSuccess": "角色成功更新。",
+        "updateSuccessDescription": "该角色的更改已保存。",
+        "addSelectedUsers_other": "添加选定的用户",
+        "addUsersSuccessDescription_other": "{{count}} 用户已被添加到该角色中。",
+        "assignedUsers_other": "{{count}} 分配的用户",
+        "removeSelectedUsers_other": "删除选定的用户",
+        "removeUsersSuccessDescription_other": "{{count}} 用户已从该角色中删除。",
+        "usersFound_other": "{{count}} 用户发现",
+        "usersSelected_other": "{{count}} 选择的用户",
+        "usersToRemove_other": "{{count}} 用户要删除"
+      },
+      "trace": {
+        "title": "审核日志"
+      },
+      "techStack": {
+        "add": "添加技术",
+        "createError": "无法创建技术。",
+        "createSuccess": "技术成功添加了。",
+        "createSuccessDescription": "添加了新的技术堆栈项目。",
+        "deleteAction": "删除",
+        "deleteError": "未能删除技术。",
+        "deleteSuccess": "技术成功删除了。",
+        "deleteSuccessDescription": "技术堆栈条目已成功删除。",
+        "deleteTooltip": "从堆栈中删除这项技术",
+        "description": "管理应用程序中使用的技术。",
+        "edit": "编辑",
+        "editAction": "编辑",
+        "editDescriptionDialog": "编辑所选技术的详细信息。",
+        "name": "技术名称",
+        "tableActions": "动作",
+        "tableDescription": "描述",
+        "tableLogo": "标识",
+        "tableTechnology": "技术",
+        "tableTotalApps": "总申请",
+        "title": "技术堆栈",
+        "updateError": "无法更新技术。",
+        "updateSuccess": "技术成功更新了。",
+        "updateSuccessDescription": "该技术的变化得到了保存。"
+      }
+    }
+  },
+  "errors": {
+    "required": "此字段是必需的",
+    "invalidEmail": "无效的电子邮件地址",
+    "invalidPassword": "密码必须至少8个字符",
+    "invalidCredentials": "无效的电子邮件或密码",
+    "serverError": "发生错误。"
+  },
+  "sidebar": {
+    "dashboard": "仪表板",
+    "applications": "申请",
+    "gateways": "网关",
+    "team": "团队",
+    "settings": "设置",
+    "logout": "注销"
+  },
+  "step": {
+    "provider": {
+      "description": "选择一个提供商来链接您的代码存储库和身份。",
+      "email": "电子邮件",
+      "link": "链接帐户",
+      "or": "或者",
+      "title": "开发提供商"
+    },
+    "role": {
+      "add": "添加角色",
+      "color": "角色颜色",
+      "description": "角色描述",
+      "icon": "角色偶像",
+      "icon preview": "图标预览",
+      "name": "角色名称",
+      "placeholder": "选择角色",
+      "selected": "选定的角色",
+      "title": "角色设置"
+    },
+    "user": {
+      "address": "地址",
+      "dob": "出生日期",
+      "email": "电子邮件",
+      "firstName": "名",
+      "lastName": "姓",
+      "password": "密码",
+      "phone": "电话号码",
+      "username": "用户名"
+    }
+  },
+  "theme": "主题"
+}

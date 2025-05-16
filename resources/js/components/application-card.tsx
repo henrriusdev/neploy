@@ -5,7 +5,6 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/comp
 import {TechIcon} from "@/components/icons/tech-icon";
 import {Trash2} from "lucide-react";
 import {useTranslation} from "react-i18next";
-import "@/i18n";
 import {router} from "@inertiajs/react";
 
 interface ApplicationCardProps {

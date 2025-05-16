@@ -132,7 +132,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
     const unsubProgress = onNotification((message: ProgressMessage) => {
       if (message.type === "progress") {
         toast({
-          title: t("applications.actions.deploymentProgress"),
+          title: t("dashboard.applications.actions.deploymentProgress"),
           description: message.message,
         });
       }
@@ -147,7 +147,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
 
       setActionDialog({
         show: true,
-        title: message.title || t("applications.actions.required"),
+        title: message.title || t("dashboard.applications.actions.required"),
         description: message.message || "",
         fields: message.inputs.map((input) => ({
           ...input,
@@ -157,7 +157,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
               ? (value: string) => {
                 const port = parseInt(value);
                 if (isNaN(port) || port < 1 || port > 65535) {
-                  return t("applications.errors.portInvalid");
+                  return t("dashboard.applications.errors.portInvalid");
                 }
                 return true;
               }
@@ -179,8 +179,8 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
 
           // Show confirmation toast
           toast({
-            title: t("applications.actions.portConfiguration"),
-            description: t("applications.actions.portExposed", {
+            title: t("dashboard.applications.actions.portConfiguration"),
+            description: t("dashboard.applications.actions.portExposed", {
               port: data.port,
             }),
           });

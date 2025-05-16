@@ -8,7 +8,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {useTranslation} from "react-i18next";
-import {SUPPORTED_LANGUAGES} from "@/i18n";
+import {SUPPORTED_LANGUAGES} from "../../../i18n";
 
 const serviceSchema = z.object({
   teamName: z.string().min(1, "Team name is required"),
@@ -45,9 +45,9 @@ export function ServiceStep({onNext, onBack, initialData}: Props) {
   return (
     <Card className="w-full max-w-screen-md mx-auto">
       <CardHeader>
-        <CardTitle>{t("onboarding.steps.service.title")}</CardTitle>
+        <CardTitle>{t("onboarding.teamSetup.title")}</CardTitle>
         <CardDescription>
-          {t("onboarding.steps.service.description")}
+          {t("onboarding.teamSetup.description")}
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -89,7 +89,7 @@ export function ServiceStep({onNext, onBack, initialData}: Props) {
             />
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                {t("onboarding.steps.service.language.label")}
+                {t("onboarding.teamSetup.language.label")}
               </label>
               <Select
                 value={form.watch("language")}
@@ -97,7 +97,7 @@ export function ServiceStep({onNext, onBack, initialData}: Props) {
                 <SelectTrigger>
                   <SelectValue
                     placeholder={t(
-                      "onboarding.steps.service.language.placeholder"
+                      "onboarding.teamSetup.language.placeholder"
                     )}
                   />
                 </SelectTrigger>
@@ -113,9 +113,9 @@ export function ServiceStep({onNext, onBack, initialData}: Props) {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button type="button" variant="outline" onClick={onBack}>
-              {t("onboarding.buttons.back")}
+              {t("actions.back")}
             </Button>
-            <Button type="submit">{t("onboarding.buttons.next")}</Button>
+            <Button type="submit">{t("actions.next")}</Button>
           </CardFooter>
         </form>
       </Form>

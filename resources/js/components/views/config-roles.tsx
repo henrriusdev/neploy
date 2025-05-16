@@ -50,8 +50,8 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
       }).unwrap();
 
       toast({
-        title: t("settings.roles.updateSuccess"),
-        description: t("settings.roles.updateSuccessDescription", {
+        title: t("dashboard.settings.roles.updateSuccess"),
+        description: t("dashboard.settings.roles.updateSuccessDescription", {
           role: data.name,
         }),
       });
@@ -60,7 +60,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.roles.updateError"),
+        description: t("dashboard.settings.roles.updateError"),
         variant: "destructive",
       });
     }
@@ -75,8 +75,8 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
         color: data.color,
       }).unwrap();
       toast({
-        title: t("settings.roles.createSuccess"),
-        description: t("settings.roles.createSuccessDescription", {
+        title: t("dashboard.settings.roles.createSuccess"),
+        description: t("dashboard.settings.roles.createSuccessDescription", {
           role: data.name,
         }),
       });
@@ -85,7 +85,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.roles.createError"),
+        description: t("dashboard.settings.roles.createError"),
         variant: "destructive",
       });
     }
@@ -95,13 +95,13 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
     try {
       await deleteRole({id: roleId}).unwrap();
       toast({
-        title: t("settings.roles.deleteSuccess"),
-        description: t("settings.roles.deleteSuccessDescription"),
+        title: t("dashboard.settings.roles.deleteSuccess"),
+        description: t("dashboard.settings.roles.deleteSuccessDescription"),
       });
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.roles.deleteError"),
+        description: t("dashboard.settings.roles.deleteError"),
         variant: "destructive",
       });
     }
@@ -111,11 +111,11 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          {t("settings.roles.title")}
+          {t("dashboard.settings.roles.title")}
           <DialogButton
-            buttonText={t("settings.roles.add")}
-            title={t("settings.roles.editDialog")}
-            description={t("settings.roles.editDescriptionDialog")}
+            buttonText={t("dashboard.settings.roles.add")}
+            title={t("dashboard.settings.roles.editDialog")}
+            description={t("dashboard.settings.roles.editDescriptionDialog")}
             icon={PlusCircle}
             open={open}
             variant="text"
@@ -132,11 +132,11 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("settings.roles.tableIcon")}</TableHead>
-              <TableHead>{t("settings.roles.tableName")}</TableHead>
-              <TableHead>{t("settings.roles.tableDescription")}</TableHead>
-              <TableHead>{t("settings.roles.tableUsers")}</TableHead>
-              <TableHead>{t("settings.roles.tableActions")}</TableHead>
+              <TableHead>{t("dashboard.settings.roles.tableIcon")}</TableHead>
+              <TableHead>{t("dashboard.settings.roles.tableName")}</TableHead>
+              <TableHead>{t("dashboard.settings.roles.tableDescription")}</TableHead>
+              <TableHead>{t("dashboard.settings.roles.tableUsers")}</TableHead>
+              <TableHead>{t("dashboard.settings.roles.tableActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -151,7 +151,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <TooltipButton
-                      tooltip={t("settings.roles.showAction")}
+                      tooltip={t("dashboard.settings.roles.showAction")}
                       icon={Users}
                       variant="ghost"
                       size="icon"
@@ -165,9 +165,9 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
                       assignedUsers={role.users}
                     />
                     <DialogButton
-                      buttonText={t("settings.roles.editAction")}
-                      title={t("settings.roles.editDialog")}
-                      description={t("settings.roles.editDescriptionDialog")}
+                      buttonText={t("dashboard.settings.roles.editAction")}
+                      title={t("dashboard.settings.roles.editDialog")}
+                      description={t("dashboard.settings.roles.editDescriptionDialog")}
                       icon={Pencil}
                       variant="tooltip"
                       open={openRoleId === role.id}
@@ -183,7 +183,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
                       />
                     </DialogButton>
                     <TooltipButton
-                      tooltip={t("settings.roles.deleteAction")}
+                      tooltip={t("dashboard.settings.roles.deleteAction")}
                       icon={Trash2}
                       variant="destructive"
                       size="icon"

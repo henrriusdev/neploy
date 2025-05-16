@@ -9,7 +9,6 @@ import * as z from "zod";
 import {useDropzone} from "react-dropzone";
 import React from "react";
 import {useTranslation} from "react-i18next";
-import "@/i18n";
 
 const baseFields = {
   repoUrl: z

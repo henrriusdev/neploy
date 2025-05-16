@@ -116,8 +116,8 @@ export function RoleUserManagerDialog({
         userIds: Array.from(selectedUserIds),
       })
       toast({
-        title: t("settings.roles.addUsersSuccess"),
-        description: t("settings.roles.addUsersSuccessDescription", {
+        title: t("dashboard.settings.roles.addUsersSuccess"),
+        description: t("dashboard.settings.roles.addUsersSuccessDescription", {
           count: selectedUserIds.size,
           role: roleName,
         }),
@@ -126,7 +126,7 @@ export function RoleUserManagerDialog({
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.roles.addUsersError"),
+        description: t("dashboard.settings.roles.addUsersError"),
         variant: "destructive",
       })
     }
@@ -142,8 +142,8 @@ export function RoleUserManagerDialog({
         userIds: Array.from(usersToRemove),
       })
       toast({
-        title: t("settings.roles.removeUsersSuccess"),
-        description: t("settings.roles.removeUsersSuccessDescription", {
+        title: t("dashboard.settings.roles.removeUsersSuccess"),
+        description: t("dashboard.settings.roles.removeUsersSuccessDescription", {
           count: usersToRemove.size,
           role: roleName,
         }),
@@ -152,7 +152,7 @@ export function RoleUserManagerDialog({
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.roles.removeUsersError"),
+        description: t("dashboard.settings.roles.removeUsersError"),
         variant: "destructive",
       })
     }
@@ -164,15 +164,15 @@ export function RoleUserManagerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("settings.roles.manageUsers", {role: roleName})}</DialogTitle>
-          <DialogDescription>{t("settings.roles.manageUsersDescription")}</DialogDescription>
+          <DialogTitle>{t("dashboard.settings.roles.manageUsers", {role: roleName})}</DialogTitle>
+          <DialogDescription>{t("dashboard.settings.roles.manageUsersDescription")}</DialogDescription>
         </DialogHeader>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="add">{t("settings.roles.addUsers")}</TabsTrigger>
+            <TabsTrigger value="add">{t("dashboard.settings.roles.addUsers")}</TabsTrigger>
             <TabsTrigger value="remove" disabled={assignedUsers.length === 0}>
-              {t("settings.roles.removeUsers")}
+              {t("dashboard.settings.roles.removeUsers")}
             </TabsTrigger>
           </TabsList>
 
@@ -180,7 +180,7 @@ export function RoleUserManagerDialog({
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
               <Input
-                placeholder={t("settings.roles.searchUsers")}
+                placeholder={t("dashboard.settings.roles.searchUsers")}
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -192,13 +192,13 @@ export function RoleUserManagerDialog({
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"/>
               </div>
             ) : usersError ? (
-              <div className="py-4 text-center text-destructive">{t("settings.roles.errorLoadingUsers")}</div>
+              <div className="py-4 text-center text-destructive">{t("dashboard.settings.roles.errorLoadingUsers")}</div>
             ) : (
               <>
                 <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{t("settings.roles.usersFound", {count: filteredUsers.length})}</span>
+                  <span>{t("dashboard.settings.roles.usersFound", {count: filteredUsers.length})}</span>
                   {selectedUserIds.size > 0 && (
-                    <span>{t("settings.roles.usersSelected", {count: selectedUserIds.size})}</span>
+                    <span>{t("dashboard.settings.roles.usersSelected", {count: selectedUserIds.size})}</span>
                   )}
                 </div>
 
@@ -206,7 +206,7 @@ export function RoleUserManagerDialog({
                   <div className="p-4">
                     {filteredUsers.length === 0 ? (
                       <div className="flex h-full items-center justify-center py-4 text-center text-muted-foreground">
-                        {t("settings.roles.noUsersFound")}
+                        {t("dashboard.settings.roles.noUsersFound")}
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -232,7 +232,7 @@ export function RoleUserManagerDialog({
                                 </div>
                                 {isAssigned && (
                                   <Badge variant="outline" className="ml-2">
-                                    {t("settings.roles.alreadyAssigned")}
+                                    {t("dashboard.settings.roles.alreadyAssigned")}
                                   </Badge>
                                 )}
                               </label>
@@ -251,7 +251,7 @@ export function RoleUserManagerDialog({
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
               <Input
-                placeholder={t("settings.roles.searchAssignedUsers")}
+                placeholder={t("dashboard.settings.roles.searchAssignedUsers")}
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -259,9 +259,9 @@ export function RoleUserManagerDialog({
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-              <span>{t("settings.roles.assignedUsers", {count: assignedUsers.length})}</span>
+              <span>{t("dashboard.settings.roles.assignedUsers", {count: assignedUsers.length})}</span>
               {usersToRemove.size > 0 && (
-                <span>{t("settings.roles.usersToRemove", {count: usersToRemove.size})}</span>
+                <span>{t("dashboard.settings.roles.usersToRemove", {count: usersToRemove.size})}</span>
               )}
             </div>
 
@@ -269,7 +269,7 @@ export function RoleUserManagerDialog({
               <div className="p-4">
                 {assignedUsers.length === 0 ? (
                   <div className="flex h-full items-center justify-center py-4 text-center text-muted-foreground">
-                    {t("settings.roles.noAssignedUsers")}
+                    {t("dashboard.settings.roles.noAssignedUsers")}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -320,7 +320,7 @@ export function RoleUserManagerDialog({
               ) : (
                 <UserPlus className="h-4 w-4"/>
               )}
-              {t("settings.roles.addSelectedUsers", {count: selectedUserIds.size})}
+              {t("dashboard.settings.roles.addSelectedUsers", {count: selectedUserIds.size})}
             </Button>
           ) : (
             <Button
@@ -335,7 +335,7 @@ export function RoleUserManagerDialog({
               ) : (
                 <X className="h-4 w-4"/>
               )}
-              {t("settings.roles.removeSelectedUsers", {count: usersToRemove.size})}
+              {t("dashboard.settings.roles.removeSelectedUsers", {count: usersToRemove.size})}
             </Button>
           )}
         </DialogFooter>
