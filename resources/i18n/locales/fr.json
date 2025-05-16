@@ -207,7 +207,18 @@
     },
     "gateways": {
       "title": "Passerelles",
-      "description": "Gérez vos passerelles d'application"
+      "description": "Gérez vos passerelles d'application",
+      "routes": "Routes",
+      "noGateways": "Aucune passerelle d'application trouvée",
+      "routePath": "Route",
+      "url": "URL",
+      "application": "Application",
+      "configSaved": "Configuration enregistrée avec succès",
+      "configError": "Échec de l'enregistrement de la configuration",
+      "config": "Paramètres de la passerelle",
+      "defaultVersioning": "Versionnage par défaut",
+      "defaultVersioningHeader": "En-tête HTTP",
+      "defaultVersioningURI": "URI"
     },
     "team": {
       "title": "Équipe",
