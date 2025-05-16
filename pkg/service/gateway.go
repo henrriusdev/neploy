@@ -208,8 +208,6 @@ func (s *gateway) GetConfig(ctx context.Context) (model.GatewayConfig, error) {
 func (s *gateway) SaveConfig(ctx context.Context, req model.GatewayConfigRequest) (model.GatewayConfig, error) {
 	config := model.GatewayConfig{
 		DefaultVersioningType: req.DefaultVersioning,
-		DefaultVersion:        req.DefaultVersion,
-		LoadBalancer:          req.LoadBalancer,
 	}
 
 	config, err := s.repos.GatewayConfig.Upsert(ctx, config)

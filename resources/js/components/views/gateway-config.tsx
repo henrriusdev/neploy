@@ -7,6 +7,7 @@ import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useGetGatewayConfigQuery, useSaveGatewayConfigMutation} from "@/services/api/gateways";
 import {useToast} from "@/hooks";
 import {GatewayConfigProps} from "@/types";
+import {useTranslation} from "react-i18next";
 
 const formSchema = z.object({
   defaultVersioning: z.enum(["header", "uri"], {required_error: "You need to select a default versioning type."}),
@@ -23,6 +24,7 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
     },
   });
   const {toast} = useToast();
+  const {t} = useTranslation();
   const [setConfig] = useSaveGatewayConfigMutation();
 
   // 2. Define a submit handler.
@@ -49,11 +51,8 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
   return (
     <section>
       <h2 className="text-2xl font-semibold mb-5">
-        API Gateway Config
+        {t('dashboard.gateways.config')}
       </h2>
-      <p className="text-muted-foreground">
-        Here you can define your config with a variety of options to use.
-      </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 grid grid-cols-3 items-center">
           <FormField
@@ -61,7 +60,7 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
             name="defaultVersioning"
             render={({field}) => (
               <FormItem>
-                <FormLabel>Default versioning</FormLabel>
+                <FormLabel>{t('dashboard.gateways.defaultVersioning')}</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
@@ -73,7 +72,7 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
                         <RadioGroupItem value="header"/>
                       </FormControl>
                       <FormLabel className="font-normal">
-                        Header
+                        {t('dashboard.gateways.defaultVersioningHeader')}
                       </FormLabel>
                     </FormItem>
                     <FormItem className="flex items-center space-x-3 space-y-0">
@@ -81,75 +80,7 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
                         <RadioGroupItem value="uri"/>
                       </FormControl>
                       <FormLabel className="font-normal">
-                        URI
-                      </FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage/>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="defaultVersion"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>Default version</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex flex-col space-y-1"
-                  >
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="latest"/>
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Latest
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="stable"/>
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Stable
-                      </FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage/>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="loadBalancer"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>You need a Load Balancer?</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex flex-col space-y-1"
-                  >
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="true"/>
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Yes
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="false"/>
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        No
+                        {t('dashboard.gateways.defaultVersioningURI')}
                       </FormLabel>
                     </FormItem>
                   </RadioGroup>
@@ -159,8 +90,8 @@ export const GatewayConfig: React.FC<GatewayConfigProps> = ({config}) => {
             )}
           />
           <div className="col-span-full flex justify-end items-center gap-x-2">
-            <Button type="button" variant="ghost">Cancel</Button>
-            <Button type="submit" variant="default">Save</Button>
+            <Button type="button" variant="ghost">{t('actions.cancel')}</Button>
+            <Button type="submit" variant="default">{t('actions.save')}</Button>
           </div>
         </form>
       </Form>

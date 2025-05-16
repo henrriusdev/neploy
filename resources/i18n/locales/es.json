@@ -6,20 +6,20 @@
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
-    "save": "Ahorrar",
-    "saving": "Ahorro...",
+    "save": "Guardar",
+    "saving": "Guardando...",
     "cancel": "Cancelar"
   },
   "actions": {
     "back": "Atrás",
     "cancel": "Cancelar",
     "next": "Próximo",
-    "save": "Ahorrar"
+    "save": "Guardar"
   },
   "languages": {
     "en": "Inglés",
     "es": "Español",
-    "pt": "portugués",
+    "pt": "Portugués",
     "zh": "Chino",
     "fr": "Francés"
   },
@@ -41,19 +41,19 @@
     "feature3": "Monitoreo del rendimiento en tiempo real",
     "enterEmail": "Ingrese su correo electrónico",
     "enterPassword": "Ingrese su contraseña",
-    "loggingIn": "Iniciar sesión ...",
+    "loggingIn": "Iniciando sesión ...",
     "logIn": "Acceso"
   },
   "onboarding": {
-    "welcome": "Bienvenido a Neple",
+    "welcome": "Bienvenido a Neploy",
     "description": "Vamos a comenzar con su viaje de implementación",
     "administratorAccount": "Usuario de administrador",
     "email": "Correo electrónico",
-    "error": "Hubo un error al cometer la configuración, intente nuevamente",
+    "error": "Hubo un error al guardar la configuración, intente nuevamente",
     "name": "Nombre completo",
-    "reviewSetup": "Revisar los datos proporcionados",
+    "reviewSetup": "Revise los datos proporcionados",
     "roles": "Roles",
-    "setupAccount": "¡Configurar neploy!",
+    "setupAccount": "¡Configure neploy!",
     "verifyInformation": "Por favor verifique su información",
     "success": "¡Éxito!",
     "teamInformation": "Información del equipo",
@@ -99,12 +99,10 @@
     "stats": {
       "totalApps": "Aplicaciones totales",
       "totalAppsDescription": "Número total de aplicaciones implementadas",
-      "runningApps": "Ejecutando aplicaciones",
+      "runningApps": "Aplicaciones corriendo",
       "runningAppsDescription": "Aplicaciones que se ejecutan actualmente",
       "teamMembers": "Miembros del equipo",
-      "teamMembersDescription": "Miembros del equipo activos",
-      "deployments": "Despliegues",
-      "deploymentsDescription": "Implementaciones totales este mes"
+      "teamMembersDescription": "Miembros del equipo activos"
     },
     "recentActivity": {
       "title": "Actividad reciente",
@@ -118,18 +116,15 @@
       "guides": "Guías",
       "examples": "Ejemplos"
     },
-    "healthApps": "Aplicaciones de salud",
+    "healthApps": "Aplicaciones saludables",
     "fullyHealthy": "son completamente saludables",
     "totalRequests": "Solicitudes totales",
-    "requestsLastMonth": "+18% del mes pasado",
     "totalVisitors": "Visitantes totales",
-    "visitorsLastHour": "+201 desde la última hora",
     "totalErrors": "Errores totales",
-    "errorsLastHour": "-5% de la última hora",
     "requestsByTime": "Solicitudes por tiempo",
     "successful": "Exitoso",
     "errors": "Errores",
-    "techStacksMostUsed": "Pilas tecnológicas más utilizadas por aplicaciones",
+    "techStacksMostUsed": "Tecnologías más utilizadas por aplicaciones",
     "visitorCountByTime": "Conteo de visitantes por tiempo",
     "visitors": "Visitantes",
     "applications": {
@@ -153,7 +148,7 @@
       },
       "stats": {
         "totalApplications": "Aplicaciones totales",
-        "runningApplications": "Ejecutar aplicaciones",
+        "runningApplications": "Aplicaciones corriendo",
         "failedApplications": "Aplicaciones fallidas"
       },
       "errors": {
@@ -206,8 +201,20 @@
       }
     },
     "gateways": {
-      "title": "Puertas de enlace",
-      "description": "Administre las puertas de enlace de su aplicación"
+      "title": "Puerta de enlace",
+      "description": "Administre las puertas de enlace de su aplicación",
+      "routes": "Rutas",
+      "noGateways": "No se encontraron puertas de enlace de las aplicaciones",
+      "routePath": "Ruta",
+      "url": "Enlace",
+      "application": "Aplicación",
+      "configSaved": "Configuración guardada con éxito",
+      "configError": "No se pudo guardar la configuración",
+      "config": "Configuración de la puerta de enlace",
+      "defaultVersioning": "Versionado predeterminado",
+      "defaultVersioningHeader": "Encabezado HTTP",
+      "defaultVersioningURI": "URI"
+
     },
     "team": {
       "title": "Equipo",
@@ -215,12 +222,12 @@
       "inviteMember": "Invitar miembro",
       "inviteDescription": "Enviar una invitación a un nuevo miembro del equipo",
       "email": "Dirección de correo electrónico",
-      "role": "Role",
+      "role": "Rol",
       "selectRole": "Seleccione un rol",
       "member": "Miembro",
       "status": "Estado",
-      "actions": "Comportamiento",
-      "inviting": "Atractivo...",
+      "actions": "Acciones",
+      "inviting": "Invitando...",
       "invite": "Enviar invitación",
       "inviteSuccess": "Invitación enviada con éxito",
       "inviteError": "No se pudo enviar invitación",

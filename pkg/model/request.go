@@ -79,8 +79,6 @@ type CreateTechStackRequest struct {
 
 type GatewayConfigRequest struct {
 	DefaultVersioning VersioningType `json:"defaultVersioning" validate:"required,oneof=header uri"`
-	DefaultVersion    VersionType    `json:"defaultVersion" validate:"required,oneof=latest stable"`
-	LoadBalancer      bool           `json:"loadBalancer" `
 }
 
 type ProfileRequest struct {

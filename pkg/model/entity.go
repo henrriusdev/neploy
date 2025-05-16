@@ -159,8 +159,6 @@ type Invitation struct {
 type GatewayConfig struct {
 	BaseEntity
 	DefaultVersioningType VersioningType `json:"defaultVersioningType" db:"default_versioning_type" json:"defaultVersioningType,omitempty"`
-	DefaultVersion        VersionType    `json:"defaultVersion" db:"default_version" json:"defaultVersion,omitempty"`
-	LoadBalancer          bool           `json:"loadBalancer" db:"load_balancer"`
 }
 
 type ApplicationVersion struct {

@@ -82,8 +82,6 @@ func (g *GatewayConfig) Get(ctx context.Context) (conf model.GatewayConfig, err 
 func (g *GatewayConfig) createDefault(ctx context.Context) (conf model.GatewayConfig, err error) {
 	conf, err = g.InsertOne(ctx, model.GatewayConfig{
 		DefaultVersioningType: "headers",
-		DefaultVersion:        "latest",
-		LoadBalancer:          false,
 	})
 
 	return

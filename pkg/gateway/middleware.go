@@ -174,10 +174,6 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 				}
 			}
 
-			if resolvedVersion == "" {
-				resolvedVersion = string(config.DefaultVersion)
-			}
-
 			// Validar si la versión existe para la app actual
 			if len(pathSegments) > 1 {
 				appName := pathSegments[1] // se asume /vX/app-name

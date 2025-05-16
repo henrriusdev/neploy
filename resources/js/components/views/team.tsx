@@ -204,7 +204,7 @@ export function Team({team, roles}: TeamProps) {
                     <div className="flex items-center space-x-4">
                       <Avatar>
                         <AvatarImage
-                          src={`https://unavatar.io/${member.provider}/${member.username}`}
+                          src={`https://unavatar.io/${member.provider === 'github' ? `${member.provider}/${member.username}` : member.email}`}
                           alt={member.firstName + " " + member.lastName}
                         />
                         <AvatarFallback>
