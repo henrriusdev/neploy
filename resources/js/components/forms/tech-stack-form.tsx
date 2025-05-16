@@ -40,7 +40,7 @@ export function TechStackForm({defaultValues, onSubmit, onCancel, renderFooter}:
           name="name"
           render={({field}) => (
             <FormItem>
-              <FormLabel>{t("settings.techStack.name")}</FormLabel>
+              <FormLabel>{t("dashboard.settings.techStack.name")}</FormLabel>
               <FormControl>
                 <InputAutoComplete
                   field={field}
@@ -48,7 +48,7 @@ export function TechStackForm({defaultValues, onSubmit, onCancel, renderFooter}:
                     label: icon.name,
                     value: icon.name,
                   }))}
-                  placeholder={t("settings.techStack.name")}
+                  placeholder={t("dashboard.settings.techStack.name")}
                 />
               </FormControl>
               <FormMessage/>
@@ -61,9 +61,9 @@ export function TechStackForm({defaultValues, onSubmit, onCancel, renderFooter}:
           name="description"
           render={({field}) => (
             <FormItem>
-              <FormLabel>{t("settings.techStack.description")}</FormLabel>
+              <FormLabel>{t("dashboard.settings.techStack.description")}</FormLabel>
               <FormControl>
-                <Input {...field} placeholder={t("settings.techStack.description")}/>
+                <Input {...field} placeholder={t("dashboard.settings.techStack.description")}/>
               </FormControl>
               <FormMessage/>
             </FormItem>

@@ -226,7 +226,7 @@ const TraceabilityTab = ({traces}: TracesSettingsProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            Audit Logs
+            {t("dashboard.settings.trace.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>

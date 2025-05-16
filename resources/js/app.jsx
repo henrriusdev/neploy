@@ -4,7 +4,7 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { Provider } from 'react-redux';
 import { store } from './store';
 import "../css/app.css";
-import '@/i18n';
+import '../i18n';
 
 createInertiaApp({
   resolve: (name) =>

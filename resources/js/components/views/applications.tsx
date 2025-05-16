@@ -96,7 +96,7 @@ export function Applications({
     if (applicationsError) {
       toast({
         title: t("common.error"),
-        description: t("applications.errors.fetchFailed"),
+        description: t("dashboard.applications.errors.fetchFailed"),
         variant: "destructive",
       });
     }
@@ -148,14 +148,14 @@ export function Applications({
 
       toast({
         title: t("common.success"),
-        description: t(`applications.actions.deleteSuccess`),
+        description: t(`dashboard.applications.actions.deleteSuccess`),
       });
 
       refreshApplications();
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description: error.message || t(`applications.errors.deleteFailed`),
+        description: error.message || t(`dashboard.applications.errors.deleteFailed`),
         variant: "destructive",
       });
     }
@@ -168,7 +168,7 @@ export function Applications({
     if (!values.appName) {
       toast({
         title: t("common.error"),
-        description: t("applications.errors.nameRequired"),
+        description: t("dashboard.applications.errors.nameRequired"),
         variant: "destructive",
       });
       return;
@@ -177,7 +177,7 @@ export function Applications({
     if (!file && !values.repoUrl) {
       toast({
         title: t("common.error"),
-        description: t("applications.errors.fileOrRepoRequired"),
+        description: t("dashboard.applications.errors.fileOrRepoRequired"),
         variant: "destructive",
       });
       return;
@@ -205,7 +205,7 @@ export function Applications({
         if (!values.branch) {
           toast({
             title: t("common.error"),
-            description: t("applications.errors.branchRequired"),
+            description: t("dashboard.applications.errors.branchRequired"),
             variant: "destructive",
           });
           return;
@@ -219,7 +219,7 @@ export function Applications({
 
         toast({
           title: t("common.success"),
-          description: t("applications.actions.deploySuccess"),
+          description: t("dashboard.applications.actions.deploySuccess"),
         });
       }
 
@@ -231,7 +231,7 @@ export function Applications({
 
         toast({
           title: t("common.success"),
-          description: t("applications.actions.uploadSuccess"),
+          description: t("dashboard.applications.actions.uploadSuccess"),
         });
       }
 
@@ -240,7 +240,7 @@ export function Applications({
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description: error.message || t("applications.errors.unknown"),
+        description: error.message || t("dashboard.applications.errors.unknown"),
         variant: "destructive",
       });
     } finally {
@@ -252,7 +252,7 @@ export function Applications({
     const unsubProgress = onNotification((message: ProgressMessage) => {
       if (message.type === "progress") {
         toast({
-          title: t("applications.actions.deploymentProgress"),
+          title: t("dashboard.applications.actions.deploymentProgress"),
           description: message.message,
         });
       }
@@ -267,7 +267,7 @@ export function Applications({
 
       setActionDialog({
         show: true,
-        title: message.title || t("applications.actions.required"),
+        title: message.title || t("dashboard.applications.actions.required"),
         description: message.message || "",
         fields: message.inputs.map((input: Input) => ({
           ...input,
@@ -277,7 +277,7 @@ export function Applications({
               ? (value: string) => {
                 const port = parseInt(value);
                 if (isNaN(port) || port < 1 || port > 65535) {
-                  return t("applications.errors.portInvalid");
+                  return t("dashboard.applications.errors.portInvalid");
                 }
                 return true;
               }
@@ -299,8 +299,8 @@ export function Applications({
 
           // Show confirmation toast
           toast({
-            title: t("applications.actions.portConfiguration"),
-            description: t("applications.actions.portExposed", {
+            title: t("dashboard.applications.actions.portConfiguration"),
+            description: t("dashboard.applications.actions.portExposed", {
               port: data.port,
             }),
           });

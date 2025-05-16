@@ -1,6 +1,6 @@
 import {useTranslation} from 'react-i18next';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {SUPPORTED_LANGUAGES} from '@/i18n';
+import {SUPPORTED_LANGUAGES} from '../../../i18n';
 
 interface Props {
   className?: string;

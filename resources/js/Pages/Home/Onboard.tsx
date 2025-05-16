@@ -5,7 +5,6 @@ import {useToast} from "@/hooks/use-toast";
 import {useOnboardMutation} from "@/services/api/onboard";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
-import "@/i18n";
 import {ProviderStep, RolesStep, ServiceStep, UserDataStep,} from "@/components/steps";
 
 interface Props {
@@ -174,13 +173,13 @@ export default function Onboard({email, username}: Props) {
                                 <dl className="mt-2 space-y-1">
                                     <div>
                                         <dt className="text-sm text-muted-foreground">
-                                            {t("onboarding.teamName")}
+                                            {t("onboarding.teamSetup.teamName")}
                                         </dt>
                                         <dd>{serviceData.teamName}</dd>
                                     </div>
                                     <div>
                                         <dt className="text-sm text-muted-foreground">
-                                            {t("onboarding.language")}
+                                            {t("language")}
                                         </dt>
                                         <dd>{serviceData.language}</dd>
                                     </div>
@@ -192,7 +191,7 @@ export default function Onboard({email, username}: Props) {
                                 type="button"
                                 variant="outline"
                                 onClick={handleSummaryBack}>
-                                {t("common.back")}
+                                {t("actions.back")}
                             </Button>
                             <Button onClick={handleSubmit}>
                                 {t("onboarding.completeSetup")}

@@ -9,7 +9,6 @@ import * as z from "zod";
 import {router} from "@inertiajs/react";
 import {useTranslation} from "react-i18next";
 import {LanguageSelector} from "@/components/forms/language-selector";
-import "@/i18n";
 import {useLoginMutation} from "@/services/api/auth";
 import {useTheme} from "@/hooks";
 

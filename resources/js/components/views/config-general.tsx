@@ -55,14 +55,14 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
       // Show success toast or notification
       toast({
         title: t("common.success"),
-        description: t("settings.general.updateSuccess"),
+        description: t("dashboard.settings.general.updateSuccess"),
       });
     } catch (error) {
       console.error("Failed to save settings:", error);
       // Show error toast or notification
       toast({
         title: t("common.error"),
-        description: t("settings.general.updateError"),
+        description: t("dashboard.settings.general.updateError"),
         variant: "destructive",
       });
     }
@@ -71,7 +71,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("settings.general.title")}</CardTitle>
+        <CardTitle>{t("dashboard.settings.general.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Form {...form}>
@@ -82,10 +82,10 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 name="teamName"
                 render={({field}) => (
                   <FormItem className="space-y-2 col-span-3">
-                    <FormLabel>{t("settings.general.teamName")}</FormLabel>
+                    <FormLabel>{t("dashboard.settings.general.teamName")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t("settings.general.teamNamePlaceholder")}
+                        placeholder={t("dashboard.settings.general.teamNamePlaceholder")}
                         {...field}
                       />
                     </FormControl>
@@ -98,10 +98,10 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 name="logoUrl"
                 render={({field}) => (
                   <FormItem className="space-y-2 col-span-3">
-                    <FormLabel>{t("settings.general.logoUrl")}</FormLabel>
+                    <FormLabel>{t("dashboard.settings.general.logoUrl")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t("settings.general.logoUrlPlaceholder")}
+                        placeholder={t("dashboard.settings.general.logoUrlPlaceholder")}
                         {...field}
                       />
                     </FormControl>
@@ -114,7 +114,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 name="language"
                 render={({field}) => (
                   <FormItem className="space-y-2 col-span-2">
-                    <FormLabel>{t("settings.general.language")}</FormLabel>
+                    <FormLabel>{t("dashboard.settings.general.language")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}>
@@ -122,7 +122,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         <SelectTrigger>
                           <SelectValue
                             placeholder={t(
-                              "settings.general.languagePlaceholder"
+                              "dashboard.settings.general.languagePlaceholder"
                             )}
                           />
                         </SelectTrigger>
@@ -145,9 +145,9 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 render={({field}) => (
                   <FormItem className="flex items-center justify-start gap-x-14 col-span-2">
                     <div>
-                      <FormLabel>{t("settings.general.darkMode")}</FormLabel>
+                      <FormLabel>{t("dashboard.settings.general.darkMode")}</FormLabel>
                       <FormDescription>
-                        {t("settings.general.darkModeDescription")}
+                        {t("dashboard.settings.general.darkModeDescription")}
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -167,10 +167,10 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                   <FormItem className="flex items-center justify-start gap-x-14 col-span-2">
                     <div>
                       <FormLabel>
-                        {t("settings.general.emailNotifications")}
+                        {t("dashboard.settings.general.emailNotifications")}
                       </FormLabel>
                       <FormDescription>
-                        {t("settings.general.emailNotificationsDescription")}
+                        {t("dashboard.settings.general.emailNotificationsDescription")}
                       </FormDescription>
                     </div>
                     <FormControl>

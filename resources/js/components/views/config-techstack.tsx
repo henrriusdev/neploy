@@ -54,15 +54,15 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
       }).unwrap();
 
       toast({
-        title: t("settings.techStack.updateSuccess"),
-        description: t("settings.techStack.updateSuccessDescription"),
+        title: t("dashboard.settings.techStack.updateSuccess"),
+        description: t("dashboard.settings.techStack.updateSuccessDescription"),
       });
       setOpenTechStackId(null);
       getTechStacks.refetch();
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.techStack.updateError"),
+        description: t("dashboard.settings.techStack.updateError"),
         variant: "destructive",
       });
     }
@@ -75,15 +75,15 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
         description: data.description,
       }).unwrap();
       toast({
-        title: t("settings.techStack.createSuccess"),
-        description: t("settings.techStack.createSuccessDescription"),
+        title: t("dashboard.settings.techStack.createSuccess"),
+        description: t("dashboard.settings.techStack.createSuccessDescription"),
       });
       getTechStacks.refetch();
       setOpen(false);
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.techStack.createError"),
+        description: t("dashboard.settings.techStack.createError"),
         variant: "destructive",
       });
     }
@@ -93,14 +93,14 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
     try {
       await deleteTechStack(techStackId).unwrap();
       toast({
-        title: t("settings.techStack.deleteSuccess"),
-        description: t("settings.techStack.deleteSuccessDescription"),
+        title: t("dashboard.settings.techStack.deleteSuccess"),
+        description: t("dashboard.settings.techStack.deleteSuccessDescription"),
       });
       getTechStacks.refetch();
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: t("settings.techStack.deleteError"),
+        description: t("dashboard.settings.techStack.deleteError"),
         variant: "destructive",
       });
     }
@@ -110,31 +110,31 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
     <div className="space-y-4">
       <div className="flex justify-end">
         <DialogButton
-          title={t("settings.techStack.add")}
+          title={t("dashboard.settings.techStack.add")}
           open={open}
           onOpen={setOpen}
-          description={t("settings.techStack.editDescriptionDialog")}
+          description={t("dashboard.settings.techStack.editDescriptionDialog")}
           icon={PlusCircle}
-          buttonText={t("settings.techStack.add")}>
+          buttonText={t("dashboard.settings.techStack.add")}>
           <TechStackForm onSubmit={create}/>
         </DialogButton>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("settings.techStack.title")}</CardTitle>
+          <CardTitle>{t("dashboard.settings.techStack.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("settings.techStack.tableLogo")}</TableHead>
-                <TableHead>{t("settings.techStack.tableTechnology")}</TableHead>
+                <TableHead>{t("dashboard.settings.techStack.tableLogo")}</TableHead>
+                <TableHead>{t("dashboard.settings.techStack.tableTechnology")}</TableHead>
                 <TableHead>
-                  {t("settings.techStack.tableDescription")}
+                  {t("dashboard.settings.techStack.tableDescription")}
                 </TableHead>
-                <TableHead>{t("settings.techStack.tableTotalApps")}</TableHead>
-                <TableHead>{t("settings.techStack.tableActions")}</TableHead>
+                <TableHead>{t("dashboard.settings.techStack.tableTotalApps")}</TableHead>
+                <TableHead>{t("dashboard.settings.techStack.tableActions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,15 +158,15 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
                   <TableCell>
                     <div className="flex space-x-2">
                       <DialogButton
-                        title={t("settings.techStack.edit")}
+                        title={t("dashboard.settings.techStack.edit")}
                         description={t(
-                          "settings.techStack.editDescriptionDialog"
+                          "dashboard.settings.techStack.editDescriptionDialog"
                         )}
                         icon={Pencil}
                         variant="tooltip"
                         open={openTechStackId === techStack.id}
                         onOpen={() => setOpenTechStackId(techStack.id)}
-                        buttonText={t("settings.techStack.editAction")}>
+                        buttonText={t("dashboard.settings.techStack.editAction")}>
                         <TechStackForm
                           defaultValues={techStack}
                           onSubmit={(data) => update(techStack.id, data)}
@@ -174,12 +174,12 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
                       </DialogButton>
                       <TooltipButton
                         icon={Trash2}
-                        tooltip={t("settings.techStack.deleteTooltip")}
+                        tooltip={t("dashboard.settings.techStack.deleteTooltip")}
                         variant="destructive"
                         size="icon"
                         disabled={techStack.applications?.length > 0}
                         onClick={() => del(techStack.id)}>
-                        {t("settings.techStack.deleteAction")}
+                        {t("dashboard.settings.techStack.deleteAction")}
                       </TooltipButton>
                     </div>
                   </TableCell>

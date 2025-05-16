@@ -23,16 +23,16 @@ export function OnboardingSidebar({ currentStep, className }: OnboardingSidebarP
             description: t('onboarding.provider.description'),
         },
         data: {
-            title: t('onboarding.data.title'),
-            description: t('onboarding.data.description'),
+            title: t('onboarding.personalInfo.title'),
+            description: t('onboarding.personalInfo.description'),
         },
         roles: {
             title: t('onboarding.roles.title'),
             description: t('onboarding.roles.description'),
         },
         service: {
-            title: t('onboarding.service.title'),
-            description: t('onboarding.service.description'),
+            title: t('onboarding.teamSetup.title'),
+            description: t('onboarding.teamSetup.description'),
         },
         summary: {
             title: t('onboarding.summary.title'),
@@ -87,13 +87,6 @@ const handleLanguageChange = (value: string) => {
             </div>
 
             <div className="mt-auto">
-                <h3 className="font-medium mb-2">{t('onboarding.help.title')}</h3>
-                <p className="text-sm text-muted-foreground">
-                    {t('onboarding.help.firstDescription')}{' '}
-                    <a href="#" className="text-primary hover:underline">{t('onboarding.help.documentation')}</a>{' '}
-                    {t('onboarding.help.secondDescription')}{' '}
-                    <a href="#" className="text-primary hover:underline">{t('onboarding.help.support')}</a>.
-                </p>
                 <p className="text-sm text-muted-foreground capitalize mt-5 mb-1">{t('language')}</p>
                 <LanguageSelector />
                 <ThemeSwitcher className="mt-2" />

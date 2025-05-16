@@ -1,4 +1,6 @@
 {
+  "language": "Language",
+  "profile": "Profile",
   "common": {
     "languageSelector": "Language",
     "loading": "Loading...",
@@ -7,6 +9,12 @@
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel"
+  },
+  "actions": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "next": "Next",
+    "save": "Save"
   },
   "languages": {
     "en": "English",
@@ -39,6 +47,20 @@
   "onboarding": {
     "welcome": "Welcome to Neploy",
     "description": "Let's get you started with your deployment journey",
+    "administratorAccount": "Administrator user",
+    "email": "Email",
+    "error": "There was an error when commiting the setup, please try again",
+    "name": "Full name",
+    "reviewSetup": "Review the provided data",
+    "roles": "Roles",
+    "setupAccount": "Setup Neploy!",
+    "verifyInformation": "Please verify your info",
+    "success": "Success!",
+    "teamInformation": "Team Info",
+    "provider": {
+      "title": "Choose a Dev Provider",
+      "description": "Choose if you want to use github, gitlab or manual input for your username and avatar"
+    },
     "steps": {
       "personal": "Personal Info",
       "team": "Team Setup",
@@ -57,16 +79,10 @@
       "title": "Team Setup",
       "description": "Configure your team settings",
       "teamName": "Team Name",
-      "teamSize": "Team Size",
-      "industry": "Industry"
-    },
-    "projectDetails": {
-      "title": "Project Details",
-      "description": "Tell us about your project",
-      "projectName": "Project Name",
-      "projectType": "Project Type",
-      "framework": "Framework",
-      "database": "Database"
+      "language": {
+        "label": "Language",
+        "placeholder": "Choose a language for the app"
+      }
     },
     "summary": {
       "title": "Summary",
@@ -75,11 +91,7 @@
       "teamSection": "Team Information",
       "projectSection": "Project Information"
     },
-    "buttons": {
-      "next": "Next",
-      "previous": "Previous",
-      "finish": "Finish"
-    }
+    "completeSetup": "Complete Initial Setup"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -129,6 +141,7 @@
       "start": "Start",
       "stop": "Stop",
       "delete": "Delete",
+      "deleteFailed": "The deletion has failed",
       "confirmDelete": "Are you sure you want to delete this application?",
       "status": {
         "running": "Running",
@@ -150,7 +163,8 @@
         "fileOrRepoRequired": "Please provide either a file or a repository URL",
         "branchRequired": "Please select a branch",
         "portInvalid": "Please enter a valid port number (1-65535)",
-        "unknown": "An unexpected error occurred"
+        "unknown": "An unexpected error occurred",
+        "deleteFailed": "Failed to delete the application. Please try again."
       },
       "actions": {
         "deploymentProgress": "Deployment Progress",
@@ -243,7 +257,76 @@
         "tableActions": "Actions",
         "showAction": "Show Users",
         "editAction": "Edit",
-        "deleteAction": "Delete"
+        "deleteAction": "Delete",
+        "addSelectedUsers_one": "Add selected user",
+        "addSelectedUsers_other": "Add selected users",
+        "addUsers": "Add Users",
+        "addUsersError": "Failed to add users to the role.",
+        "addUsersSuccess": "Users added successfully.",
+        "addUsersSuccessDescription_one": "1 user has been added to the role.",
+        "addUsersSuccessDescription_other": "{{count}} users have been added to the role.",
+        "alreadyAssigned": "User already assigned to this role.",
+        "assignedUsers_one": "1 user assigned",
+        "assignedUsers_other": "{{count}} users assigned",
+        "createError": "Failed to create the role.",
+        "createSuccess": "Role created successfully.",
+        "createSuccessDescription": "The new role has been created and is now available.",
+        "deleteError": "Failed to delete the role.",
+        "deleteSuccess": "Role deleted successfully.",
+        "deleteSuccessDescription": "The selected role was removed from the system.",
+        "editDescriptionDialog": "Edit the role name, icon or description.",
+        "editDialog": "Edit Role Details",
+        "errorLoadingUsers": "Error loading users. Please try again.",
+        "manageUsers": "Manage Role Users",
+        "manageUsersDescription": "Add or remove users assigned to this role.",
+        "noAssignedUsers": "No users assigned to this role.",
+        "noUsersFound": "No users found matching your search.",
+        "removeSelectedUsers_one": "Remove selected user",
+        "removeSelectedUsers_other": "Remove selected users",
+        "removeUsers": "Remove Users",
+        "removeUsersError": "Failed to remove users from the role.",
+        "removeUsersSuccess": "Users removed successfully.",
+        "removeUsersSuccessDescription_one": "1 user has been removed from the role.",
+        "removeUsersSuccessDescription_other": "{{count}} users have been removed from the role.",
+        "searchAssignedUsers": "Search assigned users...",
+        "searchUsers": "Search users...",
+        "updateError": "Failed to update the role.",
+        "updateSuccess": "Role updated successfully.",
+        "updateSuccessDescription": "The changes to the role have been saved.",
+        "usersFound_one": "1 user found",
+        "usersFound_other": "{{count}} users found",
+        "usersSelected_one": "1 user selected",
+        "usersSelected_other": "{{count}} users selected",
+        "usersToRemove_one": "1 user to remove",
+        "usersToRemove_other": "{{count}} users to remove"
+      },
+      "trace": {
+        "title": "Audit logs"
+      },
+      "techStack": {
+        "add": "Add Technology",
+        "createError": "Failed to create technology.",
+        "createSuccess": "Technology added successfully.",
+        "createSuccessDescription": "The new tech stack item has been added.",
+        "deleteAction": "Delete",
+        "deleteError": "Failed to delete technology.",
+        "deleteSuccess": "Technology deleted successfully.",
+        "deleteSuccessDescription": "The tech stack entry was removed successfully.",
+        "deleteTooltip": "Delete this technology from the stack",
+        "description": "Manage the technologies used in your applications.",
+        "edit": "Edit",
+        "editAction": "Edit",
+        "editDescriptionDialog": "Edit the selected technology's details.",
+        "name": "Technology Name",
+        "tableActions": "Actions",
+        "tableDescription": "Description",
+        "tableLogo": "Logo",
+        "tableTechnology": "Technology",
+        "tableTotalApps": "Total Applications",
+        "title": "Technology Stack",
+        "updateError": "Failed to update technology.",
+        "updateSuccess": "Technology updated successfully.",
+        "updateSuccessDescription": "Changes to the technology were saved."
       }
     }
   },
@@ -261,5 +344,36 @@
     "team": "Team",
     "settings": "Settings",
     "logout": "Logout"
-  }
+  },
+  "step": {
+    "provider": {
+      "description": "Choose a provider to link your code repository and identity.",
+      "email": "Email",
+      "link": "Link Account",
+      "or": "Or",
+      "title": "Development Provider"
+    },
+    "role": {
+      "add": "Add Role",
+      "color": "Role Color",
+      "description": "Role Description",
+      "icon": "Role Icon",
+      "icon preview": "Icon Preview",
+      "name": "Role Name",
+      "placeholder": "Select a role",
+      "selected": "Selected Role",
+      "title": "Role Setup"
+    },
+    "user": {
+      "address": "Address",
+      "dob": "Date of Birth",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "password": "Password",
+      "phone": "Phone Number",
+      "username": "Username"
+    }
+  },
+  "theme": "Theme"
 }
