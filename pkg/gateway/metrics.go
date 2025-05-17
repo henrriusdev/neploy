@@ -51,22 +51,42 @@ func (m *MetricsCollector) RecordRequest(timestamp time.Time, isError bool) {
 	}
 
 	m.hourlyMetrics[hourKey] = metrics
+	m.writeMetrics(hourKey, metrics.requests, metrics.errors)
 }
 
 func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {
-	// Format the line: "2024-12-26 11:00 - 100, 5"
-	line := fmt.Sprintf("%s - %d, %d = %s \n", hourKey, requests, errors, m.applicationID)
+	lineToWrite := fmt.Sprintf("%s - %d, %d = %s", hourKey, requests, errors, m.applicationID)
 
-	// Open file in append mode
-	file, err := os.OpenFile(m.metricsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err != nil {
-		log.Printf("ERROR: Failed to open metrics file: %v", err)
+	mu := &sync.Mutex{}
+	mu.Lock()
+	defer mu.Unlock()
+
+	// Leer el archivo actual
+	content, err := os.ReadFile(m.metricsFile)
+	if err != nil && !os.IsNotExist(err) {
+		log.Printf("ERROR: reading metrics file: %v", err)
 		return
 	}
-	defer file.Close()
 
-	if _, err := file.WriteString(line); err != nil {
-		log.Printf("ERROR: Failed to write metrics: %v", err)
+	lines := strings.Split(string(content), "\n")
+	updated := false
+
+	for i, line := range lines {
+		if strings.HasPrefix(line, hourKey+" - ") {
+			lines[i] = lineToWrite
+			updated = true
+			break
+		}
+	}
+
+	if !updated {
+		lines = append(lines, lineToWrite)
+	}
+
+	finalContent := strings.Join(lines, "\n")
+	err = os.WriteFile(m.metricsFile, []byte(finalContent), 0644)
+	if err != nil {
+		log.Printf("ERROR: writing metrics file: %v", err)
 	}
 }
 
@@ -106,7 +126,7 @@ func (m *MetricsCollector) GetMetrics(days int) ([]LastHourMetrics, error) {
 		}
 
 		// Parse the timestamp
-		timestamp, err := time.Parse("2006-01-02 15:04", hourPart)
+		timestamp, err := time.Parse("2006-01-02 15:00", hourPart)
 		if err != nil {
 			continue
 		}

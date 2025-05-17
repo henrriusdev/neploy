@@ -1,15 +1,12 @@
 "use client";
 
-import * as React from "react";
-import {useEffect, useMemo, useState} from "react";
+import {FC, useEffect, useMemo, useState} from "react";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
 import {Progress} from "@/components/ui/progress";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import {Collapsible, CollapsibleContent, CollapsibleTrigger,} from "@/components/ui/collapsible";
-import {ChevronDown, CirclePlay, Pause, Plus, Search, Trash2,} from "lucide-react";
+import {CirclePlay, Pause, Plus, Trash2,} from "lucide-react";
 import {ActionMessage, ActionResponse, ApplicationProps, ProgressMessage,} from "@/types";
 import {
   useDeleteVersionMutation,
@@ -54,11 +51,8 @@ const uploadFormSchema = z.object({
   branch: z.string().optional(),
 });
 
-export const ApplicationView: React.FC<ApplicationProps> = ({
-                                                              application,
-                                                            }) => {
-  const [isLogsOpen, setIsLogsOpen] = useState(true);
-  const [searchLogs, setSearchLogs] = useState("");
+export const ApplicationView: FC<ApplicationProps> = ({application}) => {
+
   const [versions, setVersions] = useState(application.versions);
   const [currentRepoUrl, setCurrentRepoUrl] = useState("");
   const [branches, setBranches] = useState<string[]>([]);
@@ -66,9 +60,7 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
   const {toast} = useToast();
   const {t} = useTranslation();
   const {onNotification, onInteractive, sendMessage} = useWebSocket();
-  const [filteredLogs, setFilteredLogs] = useState(
-    application.logs?.slice(0, 10) ?? []
-  );
+
   const [actionDialog, setActionDialog] = useState<{
     show: boolean;
     title: string;
@@ -97,16 +89,6 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
     {repoUrl: currentRepoUrl},
     {skip: !currentRepoUrl}
   );
-
-  useEffect(() => {
-    setFilteredLogs(
-      application.logs
-        ?.filter((item) =>
-          item.toLowerCase().includes(searchLogs.toLowerCase())
-        )
-        ?.slice(0, 10) ?? []
-    );
-  }, [searchLogs, application.logs]);
 
   useEffect(() => {
     application.versions && setVersions(application.versions);
@@ -250,10 +232,6 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
     []
   );
 
-  const handleRepoUrlChange = (repoUrl: string) => {
-    debouncedFetchBranches(repoUrl);
-  };
-
   const handleVersionSubmit = async (
     values: z.infer<typeof uploadFormSchema>,
     file: File | null
@@ -383,56 +361,6 @@ export const ApplicationView: React.FC<ApplicationProps> = ({
               </div>
             </div>
           </CardContent>
-        </Card>
-
-        {/* Logs Section */}
-        <Card className="md:col-span-2  border-border/50">
-          <Collapsible open={isLogsOpen} onOpenChange={setIsLogsOpen}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>Logs</CardTitle>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      isLogsOpen ? "transform rotate-180" : ""
-                    }`}
-                  />
-                </Button>
-              </CollapsibleTrigger>
-            </CardHeader>
-            <CollapsibleContent>
-              <CardContent>
-                <div className="flex items-center gap-2 mb-4">
-                  <Search className="w-4 h-4 text-muted-foreground"/>
-                  <Input
-                    placeholder="Search logs..."
-                    value={searchLogs}
-                    onChange={(e) => setSearchLogs(e.target.value)}
-                    className="max-w-sm"
-                  />
-                </div>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Log</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLogs &&
-                        filteredLogs.map((item, i) => (
-                          <TableRow key={i}>
-                            <TableCell className="text-sm font-mono font-bold">
-                              {item}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
         </Card>
 
         {/* API Versions Section */}

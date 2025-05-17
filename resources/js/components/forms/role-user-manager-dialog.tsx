@@ -4,14 +4,7 @@ import {useEffect, useMemo, useState} from "react"
 import {useTranslation} from "react-i18next"
 import {Search, UserPlus, X} from "lucide-react"
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import {DialogFooter,} from "@/components/ui/dialog"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Checkbox} from "@/components/ui/checkbox"
@@ -157,189 +150,180 @@ export function RoleUserManagerDialog({
       })
     }
   }
-
   const isLoading = isLoadingUsers || isAddingUsers || isRemovingUser
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("dashboard.settings.roles.manageUsers", {role: roleName})}</DialogTitle>
-          <DialogDescription>{t("dashboard.settings.roles.manageUsersDescription")}</DialogDescription>
-        </DialogHeader>
+    <>
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="add">{t("dashboard.settings.roles.addUsers")}</TabsTrigger>
+          <TabsTrigger value="remove" disabled={assignedUsers.length === 0}>
+            {t("dashboard.settings.roles.removeUsers")}
+          </TabsTrigger>
+        </TabsList>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="add">{t("dashboard.settings.roles.addUsers")}</TabsTrigger>
-            <TabsTrigger value="remove" disabled={assignedUsers.length === 0}>
-              {t("dashboard.settings.roles.removeUsers")}
-            </TabsTrigger>
-          </TabsList>
+        <TabsContent value="add" className="mt-4">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
+            <Input
+              placeholder={t("dashboard.settings.roles.searchUsers")}
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-          <TabsContent value="add" className="mt-4">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
-              <Input
-                placeholder={t("dashboard.settings.roles.searchUsers")}
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          {isLoadingUsers ? (
+            <div className="flex justify-center py-8">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"/>
             </div>
-
-            {isLoadingUsers ? (
-              <div className="flex justify-center py-8">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"/>
-              </div>
-            ) : usersError ? (
-              <div className="py-4 text-center text-destructive">{t("dashboard.settings.roles.errorLoadingUsers")}</div>
-            ) : (
-              <>
-                <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{t("dashboard.settings.roles.usersFound", {count: filteredUsers.length})}</span>
-                  {selectedUserIds.size > 0 && (
-                    <span>{t("dashboard.settings.roles.usersSelected", {count: selectedUserIds.size})}</span>
-                  )}
-                </div>
-
-                <ScrollArea className="mt-2 h-[240px] rounded-md border">
-                  <div className="p-4">
-                    {filteredUsers.length === 0 ? (
-                      <div className="flex h-full items-center justify-center py-4 text-center text-muted-foreground">
-                        {t("dashboard.settings.roles.noUsersFound")}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {filteredUsers.map((user) => {
-                          const isAssigned = assignedUsers.some((u) => u.email === user.email)
-
-                          return (
-                            <div key={user.email} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`user-${user.email}`}
-                                checked={selectedUserIds.has(user.email)}
-                                onCheckedChange={() => toggleUserSelection(user.email)}
-                                disabled={isAssigned}
-                              />
-                              <label
-                                htmlFor={`user-${user.email}`}
-                                className="flex flex-1 cursor-pointer items-center justify-between text-sm"
-                              >
-                                <div>
-                                  <div className="font-medium">{user.email}</div>
-                                  {user.firstName &&
-                                      <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>}
-                                </div>
-                                {isAssigned && (
-                                  <Badge variant="outline" className="ml-2">
-                                    {t("dashboard.settings.roles.alreadyAssigned")}
-                                  </Badge>
-                                )}
-                              </label>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-              </>
-            )}
-          </TabsContent>
-
-          <TabsContent value="remove" className="mt-4">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
-              <Input
-                placeholder={t("dashboard.settings.roles.searchAssignedUsers")}
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-              <span>{t("dashboard.settings.roles.assignedUsers", {count: assignedUsers.length})}</span>
-              {usersToRemove.size > 0 && (
-                <span>{t("dashboard.settings.roles.usersToRemove", {count: usersToRemove.size})}</span>
-              )}
-            </div>
-
-            <ScrollArea className="mt-2 h-[240px] rounded-md border">
-              <div className="p-4">
-                {assignedUsers.length === 0 ? (
-                  <div className="flex h-full items-center justify-center py-4 text-center text-muted-foreground">
-                    {t("dashboard.settings.roles.noAssignedUsers")}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {assignedUsers
-                      .filter(
-                        (user) =>
-                          !searchQuery.trim() ||
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (user.firstName && user.firstName.toLowerCase().includes(searchQuery.toLowerCase())),
-                      )
-                      .map((user) => (
-                        <div key={user.email} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`remove-user-${user.email}`}
-                            checked={usersToRemove.has(user.email)}
-                            onCheckedChange={() => toggleUserRemoval(user.email)}
-                          />
-                          <label htmlFor={`remove-user-${user.email}`} className="flex flex-1 cursor-pointer text-sm">
-                            <div>
-                              <div className="font-medium">{user.email}</div>
-                              {user.firstName &&
-                                  <div className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</div>}
-                            </div>
-                          </label>
-                        </div>
-                      ))}
-                  </div>
+          ) : usersError ? (
+            <div className="py-4 text-center text-destructive">{t("dashboard.settings.roles.errorLoadingUsers")}</div>
+          ) : (
+            <>
+              <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+                <span>{t("dashboard.settings.roles.usersFound", {count: filteredUsers.length})}</span>
+                {selectedUserIds.size > 0 && (
+                  <span>{t("dashboard.settings.roles.usersSelected", {count: selectedUserIds.size})}</span>
                 )}
               </div>
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
 
-        <DialogFooter className="flex sm:justify-between">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            {t("common.cancel")}
-          </Button>
+              <ScrollArea className="mt-2 h-[240px] rounded-md border">
+                <div className="p-4">
+                  {filteredUsers.length === 0 ? (
+                    <div className="flex h-full items-center justify-center py-4 text-center text-muted-foreground">
+                      {t("dashboard.settings.roles.noUsersFound")}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {filteredUsers.map((user) => {
+                        const isAssigned = assignedUsers.some((u) => u.email === user.email)
 
-          {selectedTab === "add" ? (
-            <Button
-              type="button"
-              onClick={handleAddUsers}
-              disabled={selectedUserIds.size === 0 || isLoading}
-              className="gap-2"
-            >
-              {isAddingUsers ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"/>
-              ) : (
-                <UserPlus className="h-4 w-4"/>
-              )}
-              {t("dashboard.settings.roles.addSelectedUsers", {count: selectedUserIds.size})}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleRemoveUsers}
-              disabled={usersToRemove.size === 0 || isLoading}
-              className="gap-2"
-            >
-              {isRemovingUser ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"/>
-              ) : (
-                <X className="h-4 w-4"/>
-              )}
-              {t("dashboard.settings.roles.removeSelectedUsers", {count: usersToRemove.size})}
-            </Button>
+                        return (
+                          <div key={user.email} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`user-${user.email}`}
+                              checked={selectedUserIds.has(user.email)}
+                              onCheckedChange={() => toggleUserSelection(user.email)}
+                              disabled={isAssigned}
+                            />
+                            <label
+                              htmlFor={`user-${user.email}`}
+                              className="flex flex-1 cursor-pointer items-center justify-between text-sm"
+                            >
+                              <div>
+                                <div className="font-medium">{user.email}</div>
+                                {user.firstName &&
+                                    <p className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</p>}
+                              </div>
+                              {isAssigned && (
+                                <Badge variant="outline" className="ml-2">
+                                  {t("dashboard.settings.roles.alreadyAssigned")}
+                                </Badge>
+                              )}
+                            </label>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </TabsContent>
+
+        <TabsContent value="remove" className="mt-4">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
+            <Input
+              placeholder={t("dashboard.settings.roles.searchAssignedUsers")}
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+            <span>{t("dashboard.settings.roles.assignedUsers", {count: assignedUsers.length})}</span>
+            {usersToRemove.size > 0 && (
+              <span>{t("dashboard.settings.roles.usersToRemove", {count: usersToRemove.size})}</span>
+            )}
+          </div>
+
+          <ScrollArea className="mt-2 h-[240px] rounded-md border">
+            <div className="p-4">
+              {assignedUsers.length === 0 ? (
+                <div className="flex h-full items-center justify-center py-4 text-center text-muted-foreground">
+                  {t("dashboard.settings.roles.noAssignedUsers")}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {assignedUsers
+                    .filter(
+                      (user) =>
+                        !searchQuery.trim() ||
+                        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (user.firstName && user.firstName.toLowerCase().includes(searchQuery.toLowerCase())),
+                    )
+                    .map((user) => (
+                      <div key={user.email} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`remove-user-${user.email}`}
+                          checked={usersToRemove.has(user.email)}
+                          onCheckedChange={() => toggleUserRemoval(user.email)}
+                        />
+                        <label htmlFor={`remove-user-${user.email}`} className="flex flex-1 cursor-pointer text-sm">
+                          <div>
+                            <div className="font-medium">{user.email}</div>
+                            {user.firstName &&
+                                <div className="text-xs text-muted-foreground">{user.firstName} {user.lastName}</div>}
+                          </div>
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
+      <DialogFooter className="flex sm:justify-between">
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+          {t("common.cancel")}
+        </Button>
+
+        {selectedTab === "add" ? (
+          <Button
+            type="button"
+            onClick={handleAddUsers}
+            disabled={selectedUserIds.size === 0 || isLoading}
+            className="gap-2"
+          >
+            {isAddingUsers ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"/>
+            ) : (
+              <UserPlus className="h-4 w-4"/>
+            )}
+            {t("dashboard.settings.roles.addSelectedUsers", {count: selectedUserIds.size})}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleRemoveUsers}
+            disabled={usersToRemove.size === 0 || isLoading}
+            className="gap-2"
+          >
+            {isRemovingUser ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"/>
+            ) : (
+              <X className="h-4 w-4"/>
+            )}
+            {t("dashboard.settings.roles.removeSelectedUsers", {count: usersToRemove.size})}
+          </Button>
+        )}
+      </DialogFooter>
+    </>
   )
 }

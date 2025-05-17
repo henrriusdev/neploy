@@ -261,8 +261,6 @@ func (v *versioning) resolveVersionTag(ctx context.Context, app model.Applicatio
 		return "", err
 	}
 
-	println(exists)
-
 	if !exists {
 		version := model.ApplicationVersion{
 			ApplicationID: app.ID,

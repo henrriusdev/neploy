@@ -8,7 +8,6 @@ import {Avatar, AvatarFallback, AvatarImage} from "../ui/avatar";
 import {Badge} from "../ui/badge";
 import {Button} from "../ui/button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "../ui/card";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "../ui/dialog";
 import {Input} from "../ui/input";
 import {Label} from "../ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "../ui/select";
@@ -16,6 +15,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "..
 import {TechAssignmentDialog} from "@/components/forms/tech-assignment-dialog";
 import {useGetTechStacksQuery} from "@/services/api/tech-stack";
 import {useUpdateUserTechStacksMutation} from "@/services/api/users";
+import {DialogButton} from "@/components/forms/dialog-button";
 
 interface InviteMemberData {
   email: string;
@@ -24,6 +24,7 @@ interface InviteMemberData {
 
 export function Team({team, roles}: TeamProps) {
   const [open, setOpen] = useState(false);
+  const [openTechs, setOpenTechs] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<InviteMemberData>({
     email: "",
@@ -96,7 +97,7 @@ export function Team({team, roles}: TeamProps) {
         title: t('dashboard.team.inviteSuccess'),
         description: t('dashboard.team.inviteSuccess'),
       });
-      setOpen(false);
+      setOpenTechs(false);
       setFormData({email: '', role: ''});
     } catch (err) {
       console.error(err)
@@ -127,62 +128,50 @@ export function Team({team, roles}: TeamProps) {
                 {t("dashboard.team.description")}
               </CardDescription>
             </div>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4"/>
-                  {t("dashboard.team.inviteMember")}
+            <DialogButton open={open} onOpen={setOpen} buttonText={t("dashboard.team.inviteMember")}
+                          title={t("dashboard.team.inviteMember")} description={t("dashboard.team.inviteDescription")}
+                          icon={PlusCircle} variant="text">
+              <form onSubmit={handleInvite} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">{t("dashboard.team.email")}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({...formData, email: e.target.value})
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="role">{t("dashboard.team.role")}</Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) =>
+                      setFormData({...formData, role: value})
+                    }>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t("dashboard.team.selectRole")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role.name} value={role.name}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading
+                    ? t("dashboard.team.inviting")
+                    : t("dashboard.team.invite")}
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("dashboard.team.inviteMember")}</DialogTitle>
-                  <DialogDescription>
-                    {t("dashboard.team.inviteDescription")}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleInvite} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">{t("dashboard.team.email")}</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({...formData, email: e.target.value})
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="role">{t("dashboard.team.role")}</Label>
-                    <Select
-                      value={formData.role}
-                      onValueChange={(value) =>
-                        setFormData({...formData, role: value})
-                      }>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("dashboard.team.selectRole")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role.name} value={role.name}>
-                            {role.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading
-                      ? t("dashboard.team.inviting")
-                      : t("dashboard.team.invite")}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
+              </form>
+            </DialogButton>
           </div>
         </CardHeader>
         <CardContent>
@@ -204,7 +193,7 @@ export function Team({team, roles}: TeamProps) {
                     <div className="flex items-center space-x-4">
                       <Avatar>
                         <AvatarImage
-                          src={`https://unavatar.io/${member.provider}/${member.username}`}
+                          src={`https://unavatar.io/${member.provider === 'github' ? `${member.provider}/${member.username}` : member.email}`}
                           alt={member.firstName + " " + member.lastName}
                         />
                         <AvatarFallback>
@@ -238,12 +227,17 @@ export function Team({team, roles}: TeamProps) {
                     <span className="text-xs">Active</span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <TechAssignmentDialog
-                      userId={member.id}
-                      allTechStacks={techStacks}
-                      selectedTechIds={member.techStacks?.map((t) => t.id) ?? []}
-                      onSave={handleSaveTechs}
-                    />
+                    <DialogButton buttonText="Editar pila de tecnologías"
+                                  description="Edita la pila de tecnologías del miembro"
+                                  title="Editar pila de tecnologías" open={openTechs} onOpen={setOpenTechs}
+                                  icon={PlusCircle} variant="tooltip">
+                      <TechAssignmentDialog
+                        userId={member.id}
+                        allTechStacks={techStacks}
+                        selectedTechIds={member.techStacks?.map((t) => t.id) ?? []}
+                        onSave={handleSaveTechs}
+                      />
+                    </DialogButton>
                     <Button
                       variant="destructive"
                       size="icon"

@@ -145,12 +145,6 @@ func LoggingMiddleware(next http.Handler, metrics *MetricsCollector) http.Handle
 	})
 }
 
-// RateLimitMiddleware implements rate limiting for gateway routes
-func RateLimitMiddleware(next http.Handler, rateLimit int) http.Handler {
-	// TODO: Implement rate limiting using a token bucket or similar algorithm
-	return next
-}
-
 // VersionRoutingMiddleware enruta a la versión correcta según el header o la ruta
 func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *repository.ApplicationVersion) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -172,10 +166,6 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 				if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {
 					resolvedVersion = pathSegments[0]
 				}
-			}
-
-			if resolvedVersion == "" {
-				resolvedVersion = string(config.DefaultVersion)
 			}
 
 			// Validar si la versión existe para la app actual

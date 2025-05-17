@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Card, CardContent, CardHeader, CardTitle,} from "@/components/ui/card";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import {RoleIcon} from "@/components/icons/role-icon";
-import {Pencil, PlusCircle, Trash2, Users} from "lucide-react";
+import {Pencil, PlusCircle, Trash2, UserPlus} from "lucide-react";
 import {TooltipButton} from "@/components/ui/tooltip-button";
 import {useTranslation} from "react-i18next";
 import {DialogButton} from "../forms/dialog-button";
@@ -150,20 +150,22 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
                 <TableCell>{role.users.length}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <TooltipButton
-                      tooltip={t("dashboard.settings.roles.showAction")}
-                      icon={Users}
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setOpenManageUsersRole(role.id)}
-                    />
-                    <RoleUserManagerDialog
+                    <DialogButton
+                      buttonText={t("dashboard.settings.roles.showAction")}
                       open={openManageUsersRole === role.id}
-                      onOpenChange={() => setOpenManageUsersRole(null)}
-                      roleId={role.id}
-                      roleName={role.name}
-                      assignedUsers={role.users}
-                    />
+                      onOpen={() => setOpenManageUsersRole(role.id)}
+                      variant="tooltip"
+                      description={t("dashboard.settings.roles.manageUsersDescription")}
+                      icon={UserPlus}
+                    >
+                      <RoleUserManagerDialog
+                        open={open}
+                        onOpenChange={() => setOpenManageUsersRole(null)}
+                        roleId={role.id}
+                        roleName={role.name}
+                        assignedUsers={role.users}
+                      />
+                    </DialogButton>
                     <DialogButton
                       buttonText={t("dashboard.settings.roles.editAction")}
                       title={t("dashboard.settings.roles.editDialog")}

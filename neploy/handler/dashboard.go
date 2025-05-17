@@ -54,7 +54,7 @@ func (d *Dashboard) Index(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	healthyApps, _, err := d.services.Application.GetHealthy(context.Background())
+	healthyApps, apps, err := d.services.Application.GetHealthy(context.Background())
 	if err != nil {
 		log.Println("error retrieving app health:", err)
 		// manejar fallback si hace falta
@@ -80,13 +80,20 @@ func (d *Dashboard) Index(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	techStats, err := d.services.TechStack.GetUsage(context.Background())
+	if err != nil {
+		logger.Error("error getting tech stats: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
-		"teamName": metadata.TeamName,
-		"logoUrl":  metadata.LogoURL,
-		"roles":    roles,
-		"health":   fmt.Sprintf("%d/%d", healthyApps, 4),
-		"user":     user,
-		"requests": requestData,
+		"teamName":  metadata.TeamName,
+		"logoUrl":   metadata.LogoURL,
+		"roles":     roles,
+		"health":    fmt.Sprintf("%d/%d", healthyApps, apps),
+		"user":      user,
+		"requests":  requestData,
+		"techStack": techStats,
 	})
 }
 

@@ -19,7 +19,6 @@ export const techStackApi = baseApi.injectEndpoints({
       }),
       providesTags: ["tech-stacks"],
     }),
-
     createTechStack: builder.mutation<void, CreateTechStackRequest>({
       query: (body) => ({
         url: "/tech-stacks",
@@ -28,7 +27,6 @@ export const techStackApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["tech-stacks"],
     }),
-
     updateTechStack: builder.mutation<void, UpdateTechStackRequest>({
       query: ({ id, ...body }) => ({
         url: `/tech-stacks/${id}`,
@@ -37,7 +35,6 @@ export const techStackApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["tech-stacks"],
     }),
-
     deleteTechStack: builder.mutation<void, string>({
       query: (id) => ({
         url: `/tech-stacks/${id}`,

@@ -12,7 +12,6 @@ import (
 
 func NewConnection(cfg config.EnvVar) (Queryable, error) {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPass, cfg.DBName, cfg.DBSSLMode)
-	println(dsn)
 	connection, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		logger.Error("Failed to open connection: %v", err)

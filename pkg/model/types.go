@@ -10,21 +10,15 @@ import (
 )
 
 type (
-	Provider             string
-	GatewayVersionStatus string
-	VersioningType       string
-	VersionType          string
+	Provider       string
+	VersioningType string
 )
 
 const (
-	Github                       Provider             = "github"
-	Gitlab                       Provider             = "gitlab"
-	VersioningTypeHeader         VersioningType       = "header"
-	VersioningTypeUri            VersioningType       = "uri"
-	VersionTypeLatest            VersionType          = "latest"
-	VersionTypeStable            VersionType          = "stable"
-	GatewayVersionStatusActive   GatewayVersionStatus = "active"
-	GatewayVersionStatusInactive GatewayVersionStatus = "inactive"
+	Github               Provider       = "github"
+	Gitlab               Provider       = "gitlab"
+	VersioningTypeHeader VersioningType = "header"
+	VersioningTypeUri    VersioningType = "uri"
 )
 
 type JWTClaims struct {

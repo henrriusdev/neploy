@@ -134,8 +134,6 @@ func (u *User) CreateInvitation(ctx context.Context, invitation model.Invitation
 		return err
 	}
 
-	println(q)
-
 	_, err = u.Store.ExecContext(ctx, q, args...)
 	common.AttachSQLToTrace(ctx, q)
 	return err

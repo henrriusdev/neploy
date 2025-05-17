@@ -1,4 +1,3 @@
-import { RootState } from "@/store";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Create our base query with proper CSRF handling for Laravel
@@ -24,6 +23,3 @@ export const baseApi = createApi({
   tagTypes: ["applications", "metadata", "onboard", "roles", "tech-stacks", "gateways"],
   endpoints: () => ({}),
 });
-
-// Export hooks for usage in components
-export const { endpoints, reducerPath, reducer, middleware } = baseApi;

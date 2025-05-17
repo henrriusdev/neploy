@@ -207,7 +207,18 @@
     },
     "gateways": {
       "title": "Gateways",
-      "description": "Manage your application gateways"
+      "description": "Manage your application gateways",
+      "routes": "Routes",
+      "noGateways": "No routes configured for any application.",
+      "routePath": "Route Path",
+      "url": "Link",
+      "application": "Application",
+      "configSaved": "Configuration saved successfully",
+      "configError": "Failed to save configuration",
+      "config": "API Gateway Configuration",
+      "defaultVersioning": "Default Versioning",
+      "defaultVersioningHeader": "HTTP Header",
+      "defaultVersioningURI": "URI"
     },
     "team": {
       "title": "Team",

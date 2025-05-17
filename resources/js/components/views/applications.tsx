@@ -5,11 +5,9 @@ import {
   useDeployApplicationMutation,
   useGetAllApplicationsQuery,
   useLoadBranchesQuery,
-  useStartApplicationMutation,
-  useStopApplicationMutation,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import {ActionMessage, ActionResponse, ApplicationsProps, Input, ProgressMessage,} from "@/types";
+import {ActionMessage, ActionResponse, Input, ProgressMessage,} from "@/types";
 import {debounce} from "lodash";
 import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -46,9 +44,7 @@ const uploadFormSchema = z.object({
   branch: z.string().optional(),
 });
 
-export function Applications({
-                               applications: initialApplications = null,
-                             }: ApplicationsProps) {
+export function Applications() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -138,8 +134,6 @@ export function Applications({
   const [createApplication] = useCreateApplicationMutation();
   const [deployApplication] = useDeployApplicationMutation();
   const [uploadApplication] = useUploadApplicationMutation();
-  const [startApplication] = useStartApplicationMutation();
-  const [stopApplication] = useStopApplicationMutation();
   const [deleteApplication] = useDeleteApplicationMutation();
 
   const handleApplicationAction = async (appId: string) => {

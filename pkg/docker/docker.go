@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"math"
 	"os"
@@ -45,7 +44,6 @@ func (d *Docker) CreateContainer(ctx context.Context, config *container.Config, 
 	if err != nil && strings.Contains(err.Error(), "already in use") {
 		id, _ := d.GetContainerID(ctx, name)
 		res = container.CreateResponse{ID: id}
-		println(err, id, name)
 		return res, err
 	}
 
@@ -305,7 +303,6 @@ func (d *Docker) GetUsage(ctx context.Context, containerId string) (float64, flo
 	// Cálculo del uso de RAM
 	memUsage := float64(statsData.MemoryStats.Usage)
 	memLimit := float64(statsData.MemoryStats.Limit)
-	fmt.Println(memUsage, memLimit)
 	memPercent := (memUsage / memLimit) * 100.0
 
 	if math.IsNaN(memPercent) {

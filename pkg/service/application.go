@@ -263,13 +263,13 @@ func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullAp
 			continue
 		}
 
-		hasTechStack := false
+		hasTechStack := true
 		for _, ut := range techStacks {
 			if *app.TechStackID == ut.TechStackID || role.ID != "" {
-				//if *app.TechStackID == ut.TechStackID {
 				hasTechStack = true
 				break
 			}
+			hasTechStack = false
 		}
 
 		if !hasTechStack {
@@ -405,7 +405,7 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 		if err != nil {
 			continue
 		}
-		if status == "running" {
+		if status == "Running" {
 			healthy++
 		}
 	}

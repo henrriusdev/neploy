@@ -75,8 +75,8 @@ func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error 
 		role := model.CreateRoleRequest{
 			Name:        "Configurator",
 			Description: "Gives access to the system configuration for other users without the admin role",
-			Icon:        "User",
-			Color:       "#ff0000",
+			Icon:        "UserCog",
+			Color:       "#000000",
 		}
 		if err := o.roleService.Create(ctx, role); err != nil {
 			logger.Error("error creating default role: %v", err)

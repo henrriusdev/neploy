@@ -57,5 +57,3 @@ export interface ActionResponse {
   action: string;
   data: Record<string, any>;
 }
-
-export type WebSocketMessage = ProgressMessage | ActionMessage | ActionResponse;

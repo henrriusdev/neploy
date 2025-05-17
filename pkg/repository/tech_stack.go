@@ -148,3 +148,31 @@ func (t *TechStack) GetAll(ctx context.Context) ([]model.TechStack, error) {
 	common.AttachSQLToTrace(ctx, q)
 	return techStacks, nil
 }
+
+func (t *TechStack) GetUsageInApps(ctx context.Context) ([]model.TechStat, error) {
+	query := t.baseQuery("t").
+		Join(
+			goqu.T("applications").As("a"),
+			goqu.On(goqu.I("a.tech_stack_id").Eq(goqu.I("t.id"))),
+		).
+		Select(
+			goqu.COUNT("*").As("count"),
+			goqu.I("t.name").As("name"),
+		).
+		GroupBy(goqu.I("t.name"))
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		logger.Error("error building query for get techstack usage in apps: %v", err)
+		return nil, err
+	}
+
+	var techStats []model.TechStat
+	if err := t.Store.SelectContext(ctx, &techStats, q, args...); err != nil {
+		logger.Error("error executing get all query: %v", err)
+		return nil, err
+	}
+
+	common.AttachSQLToTrace(ctx, q)
+	return techStats, nil
+}
