@@ -128,3 +128,27 @@ func (v *VisitorTrace) GetByVisitorID(ctx context.Context, visitorID string) ([]
 	common.AttachSQLToTrace(ctx, q)
 	return visitorTraces, nil
 }
+
+func (v *VisitorTrace) Create(ctx context.Context, visitorTrace model.VisitorTrace, resolvedVersion string) (model.VisitorTrace, error) {
+	exists, err := NewApplicationVersion(v.Store).ExistsByName(ctx, visitorTrace.ApplicationID, resolvedVersion)
+	if err != nil || !exists {
+		logger.Error("error checking application version existence %v", err)
+		return model.VisitorTrace{}, err
+	}
+
+	app, err := NewApplication(v.Store).GetByName(ctx, visitorTrace.ApplicationID)
+	if err != nil {
+		logger.Error("error getting application by name %v", err)
+		return model.VisitorTrace{}, err
+	}
+
+	println(app.ID)
+
+	visitorTrace.ApplicationID = app.ID
+	trace, err := v.InsertOne(ctx, visitorTrace)
+	if err != nil {
+		logger.Error("error inserting visitor trace %v", err)
+	}
+
+	return trace, err
+}

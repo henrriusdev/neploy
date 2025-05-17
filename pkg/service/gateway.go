@@ -32,8 +32,14 @@ type gateway struct {
 
 func NewGateway(repos repository.Repositories) Gateway {
 	return &gateway{
-		router: neployway.NewRouter(repos.ApplicationStat, repos.ApplicationVersion, repos.GatewayConfig),
-		repos:  repos,
+		router: neployway.NewRouter(
+			repos.ApplicationStat,
+			repos.ApplicationVersion,
+			repos.GatewayConfig,
+			repos.VisitorTrace,
+			repos.VisitorInfo,
+		),
+		repos: repos,
 	}
 }
 

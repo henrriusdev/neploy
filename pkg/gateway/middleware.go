@@ -2,8 +2,11 @@ package gateway
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/mssola/user_agent"
 	"io"
 	"log"
 	"neploy.dev/pkg/model"
@@ -182,4 +185,75 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func VisitorTraceMiddleware(visitorTrace *repository.VisitorTrace, visitor *repository.VisitorInfo) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+			ctx := r.Context()
+
+			visitorID := r.Header.Get("X-Visitor-ID")
+			if visitorID == "" {
+				visitorID = uuid.NewString()
+
+				// Parsear datos del user-agent
+				ua := user_agent.New(r.UserAgent())
+				browser, version := ua.Browser()
+
+				info := model.VisitorInfo{
+					IpAddress: r.RemoteAddr,
+					Device:    ua.Platform(),
+					Os:        ua.OS(),
+					Browser:   fmt.Sprintf("%s v%s", browser, version),
+					VisitedAt: model.NewDateNow(),
+				}
+
+				vis, err := visitor.InsertOne(ctx, info)
+				if err == nil {
+					visitorID = vis.ID
+				} else {
+					log.Printf("[VisitorTrace] Error creating visitor: %v", err)
+				}
+
+				// Inyectar el visitor ID al request y response para futuras trazas
+				r.Header.Set("X-Visitor-ID", visitorID)
+				w.Header().Set("X-Visitor-ID", visitorID)
+			}
+
+			// Continuar con la traza después de la respuesta
+			next.ServeHTTP(w, r)
+			duration := int(time.Since(start).Milliseconds())
+
+			resolvedVersion := r.Header.Get("Resolved-Version")
+			appName := ExtractAppName(r.URL.Path)
+			if appName == "" {
+				return
+			}
+
+			trace := model.VisitorTrace{
+				ApplicationID:    appName,
+				VisitorID:        visitorID,
+				PageVisited:      r.URL.Path,
+				VisitDuration:    duration,
+				VisitedTimestamp: model.NewDateNow(),
+			}
+
+			go func() {
+				visitorTrace.Create(context.Background(), trace, resolvedVersion)
+			}()
+		})
+	}
+}
+
+func ExtractAppName(path string) string {
+	pathSegments := strings.Split(strings.Trim(path, "/"), "/")
+	var appName string
+	if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {
+		appName = pathSegments[1]
+	} else if len(pathSegments) > 0 {
+		appName = pathSegments[0]
+	}
+
+	return appName
 }

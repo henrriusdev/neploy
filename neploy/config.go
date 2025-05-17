@@ -37,7 +37,13 @@ func Start(npy Neploy) {
 	npy.Repositories = repos
 
 	// Initialize router
-	router := neployway.NewRouter(npy.Repositories.ApplicationStat, npy.Repositories.ApplicationVersion, npy.Repositories.GatewayConfig)
+	router := neployway.NewRouter(
+		npy.Repositories.ApplicationStat,
+		npy.Repositories.ApplicationVersion,
+		npy.Repositories.GatewayConfig,
+		npy.Repositories.VisitorTrace,
+		npy.Repositories.VisitorInfo,
+	)
 	npy.Router = router
 
 	// Initialize services
