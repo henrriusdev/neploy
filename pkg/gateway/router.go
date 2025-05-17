@@ -29,10 +29,9 @@ type Router struct {
 	version           *repository.ApplicationVersion
 	conf              *repository.GatewayConfig
 	vtrace            *repository.VisitorTrace
-	visitor           *repository.VisitorInfo
 }
 
-func NewRouter(appStatRepo *repository.ApplicationStat, version *repository.ApplicationVersion, conf *repository.GatewayConfig, vtrace *repository.VisitorTrace, visitor *repository.VisitorInfo) *Router {
+func NewRouter(appStatRepo *repository.ApplicationStat, version *repository.ApplicationVersion, conf *repository.GatewayConfig, vtrace *repository.VisitorTrace) *Router {
 	router := &Router{
 		routes:    make(map[string]*httputil.ReverseProxy),
 		routeInfo: make(map[string]Route),
@@ -41,7 +40,6 @@ func NewRouter(appStatRepo *repository.ApplicationStat, version *repository.Appl
 		version:   version,
 		conf:      conf,
 		vtrace:    vtrace,
-		visitor:   visitor,
 	}
 
 	// Create metrics aggregator without a specific collector
@@ -163,7 +161,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				}
 
 				handler = CacheMiddleware(handler)
-				handler = VisitorTraceMiddleware(r.vtrace, r.visitor)(handler)
+				handler = VisitorTraceMiddleware(r.vtrace)(handler)
 
 				handler.ServeHTTP(w, req)
 				return

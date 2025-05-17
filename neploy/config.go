@@ -42,7 +42,6 @@ func Start(npy Neploy) {
 		npy.Repositories.ApplicationVersion,
 		npy.Repositories.GatewayConfig,
 		npy.Repositories.VisitorTrace,
-		npy.Repositories.VisitorInfo,
 	)
 	npy.Router = router
 
@@ -105,7 +104,7 @@ func NewServices(npy Neploy) service.Services {
 	gateway := service.NewGateway(npy.Repositories)
 	techStack := service.NewTechStack(npy.Repositories.TechStack, npy.Repositories.Application)
 	trace := service.NewTrace(npy.Repositories.Trace, npy.Repositories.User)
-	visitor := service.NewVisitor(npy.Repositories.VisitorInfo, npy.Repositories.VisitorTrace)
+	visitor := service.NewVisitor(npy.Repositories.VisitorTrace)
 	healthChecker := service.NewHealthChecker(npy.Repositories.Gateway, npy.Repositories.Application, time.Minute*5)
 
 	return service.Services{
@@ -132,7 +131,6 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	applicationStat := repository.NewApplicationStat(npy.DB)
 	appVersion := repository.NewApplicationVersion(npy.DB)
 	userTechStack := repository.NewUserTechStack(npy.DB)
-	visitorInfo := repository.NewVisitor(npy.DB)
 	visitorTrace := repository.NewVisitorTrace(npy.DB)
 	techStack := repository.NewTechStack(npy.DB)
 	gateway := repository.NewGateway(npy.DB)
@@ -153,7 +151,6 @@ func NewRepositories(npy Neploy) repository.Repositories {
 		UserOauth:          userOauth,
 		UserRole:           userRole,
 		UserTechStack:      userTechStack,
-		VisitorInfo:        visitorInfo,
 		VisitorTrace:       visitorTrace,
 	}
 }
