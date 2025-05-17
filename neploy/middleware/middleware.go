@@ -60,18 +60,18 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			// Get token from cookie
 			cookie, err := c.Cookie("token")
 			if err != nil {
-				return c.Redirect(http.StatusSeeOther, "")
+				return c.Redirect(http.StatusSeeOther, "/")
 			}
 
 			// Check if token exists
 			if cookie.Value == "" {
-				return c.Redirect(http.StatusSeeOther, "")
+				return c.Redirect(http.StatusSeeOther, "/")
 			}
 
 			// Validate JWT token
 			claims, valid, err := service.ValidateJWT(cookie.Value)
 			if err != nil || !valid {
-				return c.Redirect(http.StatusSeeOther, "")
+				return c.Redirect(http.StatusSeeOther, "/we")
 			}
 
 			// Store claims in context

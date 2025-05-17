@@ -23,6 +23,5 @@ export function RoleIcon({ icon, color = "white", size = 40 }: RoleIconProps) {
     );
   }
 
-  console.warn(`Icon not found: ${icon} (tried both Lucide and Radix)`);
   return null;
 }

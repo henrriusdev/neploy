@@ -3,6 +3,7 @@
 ALTER TABLE gateway_config
     DROP COLUMN default_version,
     DROP COLUMN load_balancer;
+ALTER TABLE application_stats DROP COLUMN healthy;
 -- +goose StatementEnd
 
 -- +goose Down

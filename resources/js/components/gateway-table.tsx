@@ -3,9 +3,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/
 import {GatewayTableProps} from "@/types/props";
 import {useTranslation} from "react-i18next";
 
-export function GatewayTable({
-  gateways,
-}: GatewayTableProps) {
+export function GatewayTable({gateways}: GatewayTableProps) {
   const {t} = useTranslation();
   return (
     <div className="rounded-md border">

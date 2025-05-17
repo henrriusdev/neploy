@@ -1,4 +1,4 @@
-import {CommandGroup, CommandInput, CommandItem, CommandList,} from "../ui/command";
+import {CommandGroup, CommandInput, CommandItem, CommandList,Command} from "../ui/command";
 import {Command as CommandPrimitive} from "cmdk";
 import {forwardRef, type KeyboardEvent, useCallback, useEffect, useRef, useState,} from "react";
 import {Skeleton} from "../ui/skeleton";
@@ -24,23 +24,19 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
     const [isOpen, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState<string>("");
 
-    // Initialize selected value from field or value prop
     const [selected, setSelected] = useState<Option | undefined>(() => {
       if (field?.value) {
-        const fieldOption = options.find((opt) => opt.value === field.value);
-        return fieldOption;
+        return options.find((opt) => opt.value === field.value);
       }
       return value;
     });
 
-    // Sync input value with selected option
     useEffect(() => {
       if (selected) {
         setInputValue(selected.label);
       }
     }, [selected]);
 
-    // Sync with external value changes
     useEffect(() => {
       if (field?.value) {
         const fieldOption = options.find((opt) => opt.value === field.value);
@@ -111,7 +107,7 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
     );
 
     return (
-      <CommandPrimitive onKeyDown={handleKeyDown}>
+      <Command onKeyDown={handleKeyDown}>
         <div>
           <CommandInput
             ref={ref || inputRef}
@@ -172,7 +168,7 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
             </CommandList>
           </div>
         </div>
-      </CommandPrimitive>
+      </Command>
     );
   }
 );

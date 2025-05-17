@@ -3,6 +3,8 @@ package gateway
 import (
 	"context"
 	"log"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -85,24 +87,23 @@ func (m *MetricsAggregator) run() {
 func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
- 	
+
 	for appID, collector := range m.collectors {
-		// 🔥 Cargar todos los logs disponibles
 		metrics, err := collector.GetMetrics(30) // últimos 30 días
 		if err != nil {
 			log.Printf("ERROR: Failed to get metrics for app %s: %v", appID, err)
 			continue
 		}
 
+		processedHours := make(map[string]bool)
+
 		for _, metric := range metrics {
-			// Convertir string a time.Time
 			timestamp, err := time.Parse("2006-01-02 15:00", metric.Hour)
 			if err != nil {
 				log.Printf("WARN: Invalid time format in metrics: %s", metric.Hour)
 				continue
 			}
 
-			// Construir el stat para guardar
 			stat := model.ApplicationStat{
 				ApplicationID: appID,
 				Requests:      metric.Requests,
@@ -110,13 +111,46 @@ func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 				Date:          model.Date{Time: timestamp},
 			}
 
-			// Guardar en base de datos
 			if err := m.appStatRepo.Insert(context.Background(), stat); err != nil {
 				log.Printf("ERROR: Failed to save metrics for app %s: %v", appID, err)
+				continue
 			}
 
-			// Reescribir la línea de log (una vez por hora)
-			collector.writeMetrics(metric.Hour, metric.Requests, metric.Errors)
+			// Marca la hora como procesada
+			processedHours[metric.Hour] = true
 		}
+
+		// 🔥 Limpiar del log solo las horas procesadas
+		removeProcessedLines(collector.metricsFile, processedHours)
+	}
+}
+
+func removeProcessedLines(filePath string, processedHours map[string]bool) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Printf("ERROR: reading metrics file to clean: %v", err)
+		return
+	}
+
+	lines := strings.Split(string(content), "\n")
+	filtered := make([]string, 0)
+
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, " - ")
+		if len(parts) < 1 {
+			continue
+		}
+		hourPart := parts[0]
+		if !processedHours[hourPart] {
+			filtered = append(filtered, line)
+		}
+	}
+
+	err = os.WriteFile(filePath, []byte(strings.Join(filtered, "\n")), 0644)
+	if err != nil {
+		log.Printf("ERROR: writing cleaned metrics file: %v", err)
 	}
 }

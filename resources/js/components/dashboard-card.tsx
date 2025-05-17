@@ -7,11 +7,7 @@ interface DashboardCardProps {
   icon: ReactNode;
 }
 
-export function DashboardCard({
-                                title,
-                                value,
-                                icon,
-                              }: DashboardCardProps) {
+export function DashboardCard({title, value, icon}: DashboardCardProps) {
   return (
     <Card className="bg-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

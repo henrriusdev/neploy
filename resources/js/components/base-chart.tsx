@@ -2,8 +2,8 @@ import React from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {
   Bar,
-  BarChart,
-  Cell,
+  BarChart, CartesianGrid,
+  Cell, Legend,
   Line,
   LineChart,
   Pie,
@@ -31,7 +31,6 @@ export function BaseChart({
                             dataKeys,
                             colors,
                             className,
-                            config,
                           }: BaseChartProps) {
   const renderChart = () => {
     switch (type) {
@@ -42,8 +41,9 @@ export function BaseChart({
               <XAxis dataKey="name"/>
               <YAxis/>
               <Tooltip/>
+              <Legend/>
               {dataKeys.map((key, index) => (
-                <Bar key={key} dataKey={key} fill={colors[index]} stackId="a"/>
+                <Bar key={key} dataKey={key} fill={colors[index]} stackId="a" />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -52,9 +52,11 @@ export function BaseChart({
         return (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name"/>
               <YAxis/>
               <Tooltip/>
+              <Legend />
               {dataKeys.map((key, index) => (
                 <Line
                   key={key}
@@ -72,6 +74,7 @@ export function BaseChart({
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Tooltip/>
+              <Legend/>
               <Pie
                 data={data}
                 cx="50%"

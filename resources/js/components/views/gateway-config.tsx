@@ -4,7 +4,7 @@ import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod"
 import {useForm} from "react-hook-form";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {useGetGatewayConfigQuery, useSaveGatewayConfigMutation} from "@/services/api/gateways";
+import {useSaveGatewayConfigMutation} from "@/services/api/gateways";
 import {useToast} from "@/hooks";
 import {GatewayConfigProps} from "@/types";
 import {useTranslation} from "react-i18next";

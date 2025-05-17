@@ -80,3 +80,8 @@ type RequestStat struct {
 	Successful int    `db:"successful" json:"successful"`
 	Errors     int    `db:"errors" json:"errors"`
 }
+
+type TechStat struct {
+	Name  string `json:"name" db:"name"`
+	Count uint   `json:"value" db:"count"`
+}

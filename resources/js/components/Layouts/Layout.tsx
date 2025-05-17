@@ -57,7 +57,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                                                               logoUrl,
                                                               teamName,
                                                               children,
-                                                            }: SidebarLayoutProps) => {
+                                                            }) => {
   const {theme, isDark, applyTheme} = useTheme(); // <- aquí usamos applyTheme directamente
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
 
   return (
     <SidebarProvider>
-      <div className="flex !h-screen w-full">
+      <div className="flex max-h-dvh w-full">
         <Sidebar collapsible="icon">
           <SidebarHeader className="flex items-center justify-center">
             <img
@@ -136,7 +136,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                       <LanguageSelector className="w-full p-2"/>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <ThemeSwitcher className={"!w-full"}/>
+                      <ThemeSwitcher className="w-[140px] p-2"/>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
@@ -152,17 +152,17 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <main className="flex-1 !w-full overflow-auto">
-          <div className="h-screen">
-            <div className="!w-full py-6">
-              <div className="flex items-center justify-start gap-x-4 mb-4 pl-3">
-                <SidebarTrigger/>
-                {teamName && (
-                  <span className="text-base lg:text-xl font-semibold">
-                    {teamName} API Gateway
-                  </span>
-                )}
-              </div>
+        <main className="flex-1 !w-full flex flex-col min-h-0">
+          <div className="flex flex-col min-h-0 flex-1">
+            <div className="flex items-center justify-start gap-x-4 mb-4 py-3 pl-3">
+              <SidebarTrigger/>
+              {teamName && (
+                <span className="text-base lg:text-xl font-semibold">
+                  {teamName} API Gateway
+                </span>
+              )}
+            </div>
+            <div className="px-4 py-2 overflow-auto flex-1">
               {children}
             </div>
           </div>

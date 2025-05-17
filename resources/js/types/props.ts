@@ -1,14 +1,14 @@
-import { LucideIcon } from "lucide-react";
-import { DateRange } from "react-day-picker";
-import { ControllerRenderProps } from "react-hook-form";
+import {LucideIcon} from "lucide-react";
+import {DateRange} from "react-day-picker";
+import {ControllerRenderProps} from "react-hook-form";
 import {
-  Application, ApplicationDockered,
-  Gateway, GatewayConfig,
-  Roles,
+  ApplicationDockered,
+  Gateway,
+  GatewayConfig,
   RoleWithUsers,
   TeamMember,
-  TechStack,
-  TechStackWithApplications, Trace,
+  TechStackWithApplications,
+  Trace,
   User,
 } from "./common";
 
@@ -113,10 +113,6 @@ export interface DatePickerProps {
   minYear?: number;
   maxYear?: number;
   field?: ControllerRenderProps<any, any>;
-}
-
-export interface ApplicationsProps extends CommonProps{
-  applications?: Application[] | null;
 }
 
 export interface SettingsProps extends CommonProps{

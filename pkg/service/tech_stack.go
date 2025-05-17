@@ -14,6 +14,7 @@ type TechStack interface {
 	Create(context.Context, model.CreateTechStackRequest) error
 	Update(context.Context, string, model.CreateTechStackRequest) error
 	Delete(context.Context, string) error
+	GetUsage(ctx context.Context) ([]model.TechStat, error)
 }
 
 type techStack struct {
@@ -69,4 +70,8 @@ func (t *techStack) Update(ctx context.Context, id string, techStack model.Creat
 
 func (t *techStack) Delete(ctx context.Context, id string) error {
 	return t.repo.Delete(ctx, id)
+}
+
+func (t *techStack) GetUsage(ctx context.Context) ([]model.TechStat, error) {
+	return t.repo.GetUsageInApps(ctx)
 }

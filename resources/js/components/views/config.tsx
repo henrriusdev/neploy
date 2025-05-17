@@ -5,6 +5,7 @@ import GeneralTab from "./config-general";
 import RolesTab from "./config-roles";
 import TechStackTab from "./config-techstack";
 import TraceabilityTab from "./config-traceability";
+import {useTranslation} from "react-i18next";
 
 export const Config = ({
                          teamName,
@@ -14,6 +15,7 @@ export const Config = ({
                          techStacks = [],
                          traces = []
                        }: SettingsProps) => {
+  const {t} = useTranslation()
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">System Configuration</h1>
@@ -22,19 +24,19 @@ export const Config = ({
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">
             <Settings className="h-4 w-4 mr-2"/>
-            General
+            {t('dashboard.settings.general.title')}
           </TabsTrigger>
           <TabsTrigger value="roles">
             <UsersRound className="h-4 w-4 mr-2"/>
-            Roles
+            {t('dashboard.settings.roles.title')}
           </TabsTrigger>
           <TabsTrigger value="techstack">
             <Boxes className="h-4 w-4 mr-2"/>
-            Tech Stack
+            {t('dashboard.settings.techStack.title')}
           </TabsTrigger>
           <TabsTrigger value="traceability">
             <GitBranch className="h-4 w-4 mr-2"/>
-            Traceability
+            {t('dashboard.settings.trace.title')}
           </TabsTrigger>
         </TabsList>
 

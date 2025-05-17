@@ -3,13 +3,6 @@ import {GatewayConfigRequest} from "@/types";
 
 export const gateways = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getGatewayConfig: builder.query({
-      query: () => ({
-        url: "gateways/config",
-        method: "GET"
-      }),
-      providesTags: ["gateways"]
-    }),
     saveGatewayConfig: builder.mutation({
       query: ({defaultVersioning, defaultVersion, loadBalancer}: GatewayConfigRequest) => ({
         url: "gateways/config",
@@ -21,4 +14,4 @@ export const gateways = baseApi.injectEndpoints({
   })
 })
 
-export const {useGetGatewayConfigQuery, useSaveGatewayConfigMutation} = gateways
+export const {useSaveGatewayConfigMutation} = gateways

@@ -1,11 +1,10 @@
 import * as React from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Switch} from "@/components/ui/switch";
 import {Input} from "@/components/ui/input";
 import {GeneralSettingsProps} from "@/types/props";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "../ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "../ui/form";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,8 +16,6 @@ const formSchema = z.object({
   teamName: z.string().min(1, "Team name is required"),
   logoUrl: z.string().url("Must be a valid URL"),
   language: z.enum(["en", "es", "fr", "pt", "zh"]),
-  darkMode: z.boolean(),
-  emailNotifications: z.boolean(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,8 +34,6 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
       teamName: originalTeamName,
       logoUrl: originalLogoUrl,
       language: originalLanguage as "en" | "es" | "fr" | "pt" | "zh",
-      darkMode: false,
-      emailNotifications: false,
     },
   });
 
@@ -76,12 +71,12 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
       <CardContent className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid gap-4 grid-cols-6">
+            <div className="grid gap-4 grid-cols-3">
               <FormField
                 control={form.control}
                 name="teamName"
                 render={({field}) => (
-                  <FormItem className="space-y-2 col-span-3">
+                  <FormItem className="space-y-2">
                     <FormLabel>{t("dashboard.settings.general.teamName")}</FormLabel>
                     <FormControl>
                       <Input
@@ -97,7 +92,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 control={form.control}
                 name="logoUrl"
                 render={({field}) => (
-                  <FormItem className="space-y-2 col-span-3">
+                  <FormItem className="space-y-2">
                     <FormLabel>{t("dashboard.settings.general.logoUrl")}</FormLabel>
                     <FormControl>
                       <Input
@@ -113,7 +108,7 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                 control={form.control}
                 name="language"
                 render={({field}) => (
-                  <FormItem className="space-y-2 col-span-2">
+                  <FormItem className="space-y-2">
                     <FormLabel>{t("dashboard.settings.general.language")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -135,50 +130,6 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         <SelectItem value="zh">{t("languages.zh")}</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage/>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="darkMode"
-                render={({field}) => (
-                  <FormItem className="flex items-center justify-start gap-x-14 col-span-2">
-                    <div>
-                      <FormLabel>{t("dashboard.settings.general.darkMode")}</FormLabel>
-                      <FormDescription>
-                        {t("dashboard.settings.general.darkModeDescription")}
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage/>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="emailNotifications"
-                render={({field}) => (
-                  <FormItem className="flex items-center justify-start gap-x-14 col-span-2">
-                    <div>
-                      <FormLabel>
-                        {t("dashboard.settings.general.emailNotifications")}
-                      </FormLabel>
-                      <FormDescription>
-                        {t("dashboard.settings.general.emailNotificationsDescription")}
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
                     <FormMessage/>
                   </FormItem>
                 )}

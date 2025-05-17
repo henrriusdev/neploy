@@ -30,7 +30,7 @@ export default function CompleteInvite({
     password: "",
   });
   const { toast } = useToast();
-  const [completeInvite, { isLoading }] = useCompleteInviteMutation();
+  const [completeInvite] = useCompleteInviteMutation();
 
   React.useEffect(() => {
     if (status === "expired") {
