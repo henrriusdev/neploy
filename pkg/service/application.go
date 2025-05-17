@@ -405,13 +405,10 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 		if err != nil {
 			continue
 		}
-		println(status)
 		if status == "Running" {
 			healthy++
 		}
 	}
-
-	println(healthy, len(versions))
 
 	return healthy, uint(len(versions)), nil
 }
