@@ -41,7 +41,6 @@ export function BaseChart({
               <XAxis dataKey="name"/>
               <YAxis/>
               <Tooltip/>
-              <Legend/>
               {dataKeys.map((key, index) => (
                 <Bar key={key} dataKey={key} fill={colors[index]} stackId="a" />
               ))}
@@ -56,7 +55,6 @@ export function BaseChart({
               <XAxis dataKey="name"/>
               <YAxis/>
               <Tooltip/>
-              <Legend />
               {dataKeys.map((key, index) => (
                 <Line
                   key={key}

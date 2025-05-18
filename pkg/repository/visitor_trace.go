@@ -150,3 +150,28 @@ func (v *VisitorTrace) Create(ctx context.Context, visitorTrace model.VisitorTra
 
 	return trace, err
 }
+
+func (v *VisitorTrace) GetTraces(ctx context.Context) ([]model.VisitorStat, error) {
+	query := v.baseQuery().Select(
+		goqu.COUNT(goqu.DISTINCT(goqu.C("id"))).As("amount"),
+		goqu.L("DATE(visit_timestamp)").As("date"),
+	).
+		GroupBy(goqu.L("DATE(visit_timestamp)")).
+		Order(goqu.L("DATE(visit_timestamp)").Asc()).
+		Limit(1000)
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		logger.Error("error building select query: %v", err)
+		return nil, err
+	}
+
+	var visitorTraces []model.VisitorStat
+	if err := v.Store.SelectContext(ctx, &visitorTraces, q, args...); err != nil {
+		logger.Error("error executing select query: %v", err)
+		return nil, err
+	}
+
+	common.AttachSQLToTrace(ctx, q)
+	return visitorTraces, nil
+}

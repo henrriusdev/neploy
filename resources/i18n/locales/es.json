@@ -315,7 +315,11 @@
         "usersToRemove_other": "{{count}} usuarios para eliminar"
       },
       "trace": {
-        "title": "Registros de auditoría"
+        "title": "Registros de auditoría",
+        "action": "Acción",
+        "date": "Fecha",
+        "sqlQuery": "Consulta SQL",
+        "user": "Usuario"
       },
       "techStack": {
         "add": "Agregar tecnología",
@@ -389,5 +393,8 @@
       "username": "Nombre de usuario"
     }
   },
-  "theme": "Tema"
+  "theme": "Tema",
+  "appearance": "Apariencia",
+  "light": "Claro",
+  "dark": "Oscuro"
 }

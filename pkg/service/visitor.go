@@ -8,7 +8,7 @@ import (
 )
 
 type Visitor interface {
-	GetAllTraces(context.Context) ([]model.VisitorTrace, error)
+	GetAllTraces(context.Context) ([]model.VisitorStat, error)
 	GetTraceByID(context.Context, string) (model.VisitorTrace, error)
 	CreateTrace(context.Context, model.VisitorTrace) error
 	UpdateTrace(context.Context, model.VisitorTrace) error
@@ -23,8 +23,8 @@ func NewVisitor(trace *repository.VisitorTrace) Visitor {
 	return &visitor{trace}
 }
 
-func (v *visitor) GetAllTraces(ctx context.Context) ([]model.VisitorTrace, error) {
-	return v.trace.GetAll(ctx)
+func (v *visitor) GetAllTraces(ctx context.Context) ([]model.VisitorStat, error) {
+	return v.trace.GetTraces(ctx)
 }
 
 func (v *visitor) GetTraceByID(ctx context.Context, id string) (model.VisitorTrace, error) {

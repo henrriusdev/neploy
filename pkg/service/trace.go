@@ -8,7 +8,7 @@ import (
 )
 
 type Trace interface {
-	GetAll(context.Context) ([]model.Trace, error)
+	GetAll(context.Context, ...uint) ([]model.Trace, error)
 	GetByID(context.Context, string) (model.Trace, error)
 	Create(context.Context, model.Trace) error
 	Update(context.Context, model.Trace) error
@@ -24,7 +24,7 @@ func NewTrace(repo *repository.Trace, user *repository.User) Trace {
 	return &trace{repo, user}
 }
 
-func (t *trace) GetAll(ctx context.Context) ([]model.Trace, error) {
+func (t *trace) GetAll(ctx context.Context, limit ...uint) ([]model.Trace, error) {
 	traces, err := t.repo.GetAll(ctx)
 	if err != nil {
 		return nil, err
@@ -37,6 +37,13 @@ func (t *trace) GetAll(ctx context.Context) ([]model.Trace, error) {
 		}
 
 		traces[i].Email = user.Email
+	}
+
+	if len(limit) == 1 && limit[0] > 0 {
+		if limit[0] > uint(len(traces)) {
+			limit[0] = uint(len(traces))
+		}
+		traces = traces[len(traces)-int(limit[0]):]
 	}
 
 	return traces, nil

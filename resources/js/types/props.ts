@@ -58,15 +58,15 @@ export interface StackData {
 
 export interface VisitorData {
   name: string;
-  visitors: number;
+  value: number;
 }
 
 export interface DashboardProps extends CommonProps{
   requests?: RequestData[];
   techStack?: StackData[];
-  visitorData?: VisitorData[];
+  visitors?: VisitorData[];
+  traces?: Trace[];
   health?: string;
-  stats?: any; // TODO: add type
 }
 
 export interface TeamProps extends CommonProps{

@@ -312,7 +312,11 @@
         "usersToRemove_other": "{{count}} users to remove"
       },
       "trace": {
-        "title": "Audit logs"
+        "title": "Audit logs",
+        "action": "Action",
+        "date": "Date",
+        "sqlQuery": "SQL Query",
+        "user": "User"
       },
       "techStack": {
         "add": "Add Technology",
@@ -386,5 +390,8 @@
       "username": "Username"
     }
   },
-  "theme": "Theme"
+  "theme": "Theme",
+  "appearance": "Appearance",
+  "light": "Light",
+    "dark": "Dark"
 }
