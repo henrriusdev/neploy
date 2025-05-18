@@ -85,3 +85,8 @@ type TechStat struct {
 	Name  string `json:"name" db:"name"`
 	Count uint   `json:"value" db:"count"`
 }
+
+type VisitorStat struct {
+	Value uint `json:"value" db:"amount"`
+	Date  Date `json:"name" db:"date"`
+}

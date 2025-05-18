@@ -93,12 +93,15 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <ThemeSwitcher className="w-full p-2"/>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
-                <DropdownMenu>
+                <DropdownMenu modal>
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton
                       size="lg"
@@ -134,9 +137,6 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
                     <DropdownMenuSeparator/>
                     <DropdownMenuItem className="p-0">
                       <LanguageSelector className="w-full p-2"/>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <ThemeSwitcher className="w-[140px] p-2"/>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link

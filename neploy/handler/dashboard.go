@@ -86,6 +86,20 @@ func (d *Dashboard) Index(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	visitors, err := d.services.Visitor.GetAllTraces(context.Background())
+	if err != nil {
+		logger.Error("error getting traces: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	traces, err := d.services.Trace.GetAll(context.Background(), 5)
+	if err != nil {
+		logger.Error("error getting traces: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	println(len(visitors))
+
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"teamName":  metadata.TeamName,
 		"logoUrl":   metadata.LogoURL,
@@ -94,6 +108,8 @@ func (d *Dashboard) Index(c echo.Context) error {
 		"user":      user,
 		"requests":  requestData,
 		"techStack": techStats,
+		"visitors":  visitors,
+		"traces":    traces,
 	})
 }
 

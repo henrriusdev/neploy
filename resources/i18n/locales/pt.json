@@ -394,5 +394,8 @@
       "username": "Nome de usuário"
     }
   },
-  "theme": "Tema"
+  "theme": "Tema",
+  "appearance": "Aparência",
+  "light": "Claro",
+  "dark": "Escuro"
 }

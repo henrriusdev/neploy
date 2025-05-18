@@ -8,18 +8,7 @@ import {techStackColors} from "@/lib/colors";
 import {useEffect, useState} from "react";
 import {Skeleton} from "@/components/ui/skeleton";
 
-const defaultVisitorsData = [
-  {name: "Mon", visitors: 2400},
-  {name: "Wed", visitors: 9800},
-  {name: "Sun", visitors: 4300},
-];
-
-export function Home({
-                       requests,
-                       techStack,
-                       visitorData = defaultVisitorsData,
-                       health = "4/10",
-                     }: DashboardProps) {
+export function Home({requests, techStack, visitors, health = "4/10"}: DashboardProps) {
   const {t} = useTranslation();
   const [totalRequests, setTotalRequests] = useState(0);
   const [totalErrors, setTotalErrors] = useState(0);
@@ -166,7 +155,7 @@ export function Home({
       />
     </div>
     <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-      {techStack?.length === 0 ? (
+      {techStack?.length > 0 ? (
         <BaseChart
           title={t("dashboard.techStacksMostUsed")}
           data={techStack}
@@ -174,14 +163,14 @@ export function Home({
           dataKeys={["value"]}
           colors={techStackColors}
           className="col-span-3 lg:col-span-3"
-        /> ) : (
+        />) : (
         <Skeleton className="col-span-3 lg:col-span-3 h-[300px]"/>
       )}
       <BaseChart
         title={t("dashboard.visitorCountByTime")}
-        data={defaultVisitorsData}
+        data={visitors}
         type="line"
-        dataKeys={["visitors"]}
+        dataKeys={["value"]}
         colors={["var(--primary)"]}
         className="col-span-3 lg:col-span-4 border-none"
       />

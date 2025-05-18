@@ -386,5 +386,8 @@
       "username": "Username"
     }
   },
-  "theme": "Theme"
+  "theme": "Theme",
+  "appearance": "Appearance",
+  "light": "Light",
+    "dark": "Dark"
 }

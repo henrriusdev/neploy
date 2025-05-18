@@ -367,5 +367,8 @@
       "username": "用户名"
     }
   },
-  "theme": "主题"
+  "theme": "主题",
+  "appearance": "外观",
+  "light": "光",
+  "dark": "黑暗"
 }

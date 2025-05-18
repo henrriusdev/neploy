@@ -389,5 +389,8 @@
       "username": "Nombre de usuario"
     }
   },
-  "theme": "Tema"
+  "theme": "Tema",
+  "appearance": "Apariencia",
+  "light": "Claro",
+  "dark": "Oscuro"
 }
