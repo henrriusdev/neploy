@@ -2,8 +2,10 @@ package gateway
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mssola/user_agent"
 	"io"
 	"log"
 	"neploy.dev/pkg/model"
@@ -182,4 +184,53 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func VisitorTraceMiddleware(visitorTrace *repository.VisitorTrace) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+
+			// Parsear datos del user-agent
+			ua := user_agent.New(r.UserAgent())
+			browser, version := ua.Browser()
+
+			// Continuar con la traza después de la respuesta
+			next.ServeHTTP(w, r)
+			duration := int(time.Since(start).Milliseconds())
+
+			resolvedVersion := r.Header.Get("Resolved-Version")
+			appName := ExtractAppName(r.URL.Path)
+			if appName == "" {
+				return
+			}
+
+			trace := model.VisitorTrace{
+				ApplicationID:    appName,
+				IpAddress:        r.RemoteAddr,
+				Device:           ua.Platform(),
+				Os:               ua.OS(),
+				Browser:          fmt.Sprintf("%s v%s", browser, version),
+				PageVisited:      r.URL.Path,
+				VisitDuration:    duration,
+				VisitedTimestamp: model.NewDateNow(),
+			}
+
+			go func() {
+				visitorTrace.Create(context.Background(), trace, resolvedVersion)
+			}()
+		})
+	}
+}
+
+func ExtractAppName(path string) string {
+	pathSegments := strings.Split(strings.Trim(path, "/"), "/")
+	var appName string
+	if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {
+		appName = pathSegments[1]
+	} else if len(pathSegments) > 0 {
+		appName = pathSegments[0]
+	}
+
+	return appName
 }

@@ -134,3 +134,22 @@ func (a *Application) GetByTechStack(ctx context.Context, techStackID string) ([
 
 	return applications, nil
 }
+
+func (a *Application) GetByName(ctx context.Context, name string) (model.Application, error) {
+	query := a.baseQuery().Where(goqu.Ex{"app_name": name})
+	q, args, err := query.ToSQL()
+	if err != nil {
+		logger.Error("error building select query: %v", err)
+		return model.Application{}, err
+	}
+
+	var application model.Application
+	if err := a.Store.QueryRowxContext(ctx, q, args...).StructScan(&application); err != nil {
+		logger.Error("error executing select query: %v", err)
+		return model.Application{}, err
+	}
+
+	common.AttachSQLToTrace(ctx, q)
+
+	return application, nil
+}

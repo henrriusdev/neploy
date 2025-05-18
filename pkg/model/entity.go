@@ -108,23 +108,16 @@ type ApplicationStat struct {
 	UniqueVisitors      int    `json:"unique_visitors" db:"unique_visitors"`
 }
 
-type VisitorInfo struct {
-	BaseEntity
-	IpAddress string `json:"ip_address" db:"ip_address"`
-	Location  string `json:"location" db:"location"`
-	Device    string `json:"device" db:"device"`
-	Browser   string `json:"browser" db:"browser"`
-	Os        string `json:"os" db:"os"`
-	VisitedAt Date   `json:"visited_at" db:"visited_at"`
-}
-
 type VisitorTrace struct {
 	BaseEntity
-	ApplicationID string `json:"application_id" db:"application_id"`
-	VisitorID     string `json:"visitor_id" db:"visitor_id"`
-	PageVisited   string `json:"page_visited" db:"page_visited"`
-	VisitDuration int    `json:"visit_duration" db:"visit_duration"`
-	VisitedAt     Date   `json:"visited_at" db:"visited_at"`
+	ApplicationID    string `json:"application_id" db:"application_id"`
+	IpAddress        string `json:"ip_address" db:"ip_address"`
+	Device           string `json:"device" db:"device"`
+	Browser          string `json:"browser" db:"browser"`
+	Os               string `json:"os" db:"os"`
+	PageVisited      string `json:"page_visited" db:"page_visited"`
+	VisitDuration    int    `json:"visit_duration" db:"visit_duration"`
+	VisitedTimestamp Date   `json:"visit_timestamp" db:"visit_timestamp"`
 }
 
 type UserOAuth struct {

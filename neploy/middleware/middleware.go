@@ -2,13 +2,11 @@ package middleware
 
 import (
 	"context"
-	"neploy.dev/pkg/model"
-	"net/http"
-	"time"
-
 	"github.com/labstack/echo/v4"
 	"neploy.dev/pkg/common"
+	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
+	"net/http"
 )
 
 func OnboardingMiddleware(service service.Onboard) echo.MiddlewareFunc {
@@ -104,33 +102,6 @@ func TraceMiddleware(traceService service.Trace) echo.MiddlewareFunc {
 
 			// Guardar al final
 			go traceService.Create(context.Background(), *trace)
-			return err
-		}
-	}
-}
-
-func VisitorTraceMiddleware(visitorTraceService service.Visitor) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			start := time.Now()
-			err := next(c)
-			duration := int(time.Since(start).Milliseconds())
-
-			visitorID := c.Request().Header.Get("X-Visitor-ID")
-			if visitorID == "" {
-				visitorID = c.RealIP()
-			}
-
-			appID := c.Request().Header.Get("X-Application-ID") // asegúrate de inyectarlo
-			trace := model.VisitorTrace{
-				ApplicationID: appID,
-				VisitorID:     visitorID,
-				PageVisited:   c.Path(),
-				VisitDuration: duration,
-				VisitedAt:     model.NewDateNow(),
-			}
-
-			go visitorTraceService.CreateTrace(c.Request().Context(), trace)
 			return err
 		}
 	}
