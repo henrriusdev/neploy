@@ -320,7 +320,11 @@
         "usersToRemove_other": "{{count}} les utilisateurs à supprimer"
       },
       "trace": {
-        "title": "Journaux d'audit"
+        "title": "Journaux d'audit",
+        "action": "Action",
+        "date": "Date",
+        "sqlQuery": "Requête SQL",
+        "user": "Utilisateur"
       },
       "techStack": {
         "add": "Ajouter la technologie",

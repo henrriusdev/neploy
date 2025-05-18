@@ -65,6 +65,7 @@ export interface DashboardProps extends CommonProps{
   requests?: RequestData[];
   techStack?: StackData[];
   visitors?: VisitorData[];
+  traces?: Trace[];
   health?: string;
 }
 

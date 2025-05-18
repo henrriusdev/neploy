@@ -27,7 +27,7 @@ const TraceabilityTab = ({traces}: TracesSettingsProps) => {
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Day
+            {t("dashboard.settings.trace.date")}
             <ArrowUpDown className="ml-2 h-4 w-4"/>
           </Button>
         )
@@ -41,7 +41,7 @@ const TraceabilityTab = ({traces}: TracesSettingsProps) => {
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            User email
+            {t("dashboard.settings.trace.user")}
             <ArrowUpDown className="ml-2 h-4 w-4"/>
           </Button>
         )
@@ -55,7 +55,7 @@ const TraceabilityTab = ({traces}: TracesSettingsProps) => {
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Action
+            {t("dashboard.settings.trace.action")}
             <ArrowUpDown className="ml-2 h-4 w-4"/>
           </Button>
         )
@@ -63,7 +63,7 @@ const TraceabilityTab = ({traces}: TracesSettingsProps) => {
     },
     {
       accessorKey: "sqlStatement",
-      header: "SQL query"
+      header: t("dashboard.settings.trace.query"),
     }
   ]
 

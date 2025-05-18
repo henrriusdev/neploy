@@ -43,7 +43,7 @@ func (t *trace) GetAll(ctx context.Context, limit ...uint) ([]model.Trace, error
 		if limit[0] > uint(len(traces)) {
 			limit[0] = uint(len(traces))
 		}
-		traces = traces[:limit[0]]
+		traces = traces[len(traces)-int(limit[0]):]
 	}
 
 	return traces, nil

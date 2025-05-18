@@ -7,8 +7,9 @@ import {BaseChart} from "../base-chart";
 import {techStackColors} from "@/lib/colors";
 import {useEffect, useState} from "react";
 import {Skeleton} from "@/components/ui/skeleton";
+import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 
-export function Home({requests, techStack, visitors, health = "4/10"}: DashboardProps) {
+export function Home({requests, techStack, visitors, health = "4/10", traces}: DashboardProps) {
   const {t} = useTranslation();
   const [totalRequests, setTotalRequests] = useState(0);
   const [totalErrors, setTotalErrors] = useState(0);
@@ -37,17 +38,34 @@ export function Home({requests, techStack, visitors, health = "4/10"}: Dashboard
 
   return <div className="flex-1 space-y-4 p-8 pt-6">
     <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-      <Card className="col-span-4">
+      <Card className="md:col-span-2 lg:col-span-4">
         <CardHeader>
           <CardTitle>{t("dashboard.recentActivity.title")}</CardTitle>
           <CardDescription>
             {t("dashboard.recentActivity.description")}
           </CardDescription>
         </CardHeader>
-        <CardContent>{/* Activity content */}</CardContent>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableHead>{t("dashboard.settings.trace.date")}</TableHead>
+              <TableHead>{t("dashboard.settings.trace.user")}</TableHead>
+              <TableHead>{t("dashboard.settings.trace.action")}</TableHead>
+            </TableHeader>
+            <TableBody>
+              {traces?.map((trace) => (
+                <TableRow key={trace.id}>
+                  <TableHead>{trace.actionTimestamp}</TableHead>
+                  <TableHead>{trace.email}</TableHead>
+                  <TableHead>{trace.action}</TableHead>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
 
-      <Card className="col-span-3">
+      <Card className="md:col-span-2 lg:col-span-3">
         <CardHeader>
           <CardTitle>{t("dashboard.resources.title")}</CardTitle>
           <CardDescription>

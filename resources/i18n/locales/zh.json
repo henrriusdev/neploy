@@ -293,7 +293,11 @@
         "usersToRemove_other": "{{count}} 用户要删除"
       },
       "trace": {
-        "title": "审核日志"
+        "title": "审核日志",
+        "action": "操作",
+        "date": "日期",
+        "sqlQuery": "SQL查询",
+        "user": "用户"
       },
       "techStack": {
         "add": "添加技术",
