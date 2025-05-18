@@ -142,8 +142,6 @@ func (v *VisitorTrace) Create(ctx context.Context, visitorTrace model.VisitorTra
 		return model.VisitorTrace{}, err
 	}
 
-	println(app.ID)
-
 	visitorTrace.ApplicationID = app.ID
 	trace, err := v.InsertOne(ctx, visitorTrace)
 	if err != nil {

@@ -37,7 +37,6 @@ func NewGateway(repos repository.Repositories) Gateway {
 			repos.ApplicationVersion,
 			repos.GatewayConfig,
 			repos.VisitorTrace,
-			repos.VisitorInfo,
 		),
 		repos: repos,
 	}
