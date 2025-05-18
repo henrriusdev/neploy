@@ -165,7 +165,6 @@ func (v *VisitorTrace) GetTraces(ctx context.Context) ([]model.VisitorStat, erro
 		logger.Error("error building select query: %v", err)
 		return nil, err
 	}
-	println(q)
 
 	var visitorTraces []model.VisitorStat
 	if err := v.Store.SelectContext(ctx, &visitorTraces, q, args...); err != nil {

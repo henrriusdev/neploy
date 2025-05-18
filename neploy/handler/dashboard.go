@@ -98,8 +98,6 @@ func (d *Dashboard) Index(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	println(len(visitors))
-
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
 		"teamName":  metadata.TeamName,
 		"logoUrl":   metadata.LogoURL,
