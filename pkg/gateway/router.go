@@ -13,11 +13,10 @@ import (
 )
 
 type Route struct {
-	AppID     string
-	Port      string
-	Domain    string
-	Path      string
-	Subdomain string
+	AppID  string
+	Port   string
+	Domain string
+	Path   string
 }
 
 type Router struct {
@@ -196,9 +195,6 @@ func ValidateRoute(route Route) error {
 	}
 	if route.Domain == "" {
 		return fmt.Errorf("domain is required")
-	}
-	if route.Subdomain == "" && route.Path == "" {
-		return fmt.Errorf("either subdomain or path must be specified")
 	}
 	return nil
 }

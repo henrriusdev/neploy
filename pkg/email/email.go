@@ -1,8 +1,10 @@
 package email
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 
 	"github.com/resend/resend-go/v2"
 	"neploy.dev/config"
@@ -60,5 +62,27 @@ func (e *Email) SendInvitation(ctx context.Context, to, teamName, role, inviteLi
 	}
 
 	_, err := e.client.Emails.Send(params)
+	return err
+}
+
+func (e *Email) SendPasswordReset(to string, data PasswordResetData) error {
+	tmpl, err := template.ParseFiles("templates/password_reset_email.html")
+	if err != nil {
+		return fmt.Errorf("parsing template: %w", err)
+	}
+
+	var htmlBody bytes.Buffer
+	if err := tmpl.Execute(&htmlBody, data); err != nil {
+		return fmt.Errorf("executing template: %w", err)
+	}
+
+	params := &resend.SendEmailRequest{
+		From:    fmt.Sprintf("%s <%s>", config.Env.ResendFromName, config.Env.ResendFromEmail),
+		To:      []string{to},
+		Subject: data.Translations.Title,
+		Html:    htmlBody.String(),
+	}
+
+	_, err = e.client.Emails.Send(params)
 	return err
 }

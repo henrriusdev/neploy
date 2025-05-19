@@ -61,7 +61,6 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>
 
 export function UserProfile({user}: { user: User }) {
   const {t} = useTranslation()
-  console.log(user)
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {

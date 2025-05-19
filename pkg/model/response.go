@@ -1,10 +1,8 @@
 package model
 
 type LoginResponse struct {
-	Token     string   `json:"token"`
-	User      User     `json:"user"`
-	RoleIDs   []string `json:"roles"`
-	RoleNames []string `json:"roleNames"`
+	Token string `json:"token"`
+	User  User   `json:"user"`
 }
 
 type OAuthResponse struct {

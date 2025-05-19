@@ -56,6 +56,8 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 func (a *Auth) RegisterRoutes(r *echo.Group) {
 	r.POST("/login", a.Login)
 	r.GET("/logout", a.Logout)
+	r.POST("/password/change", a.PasswordReset)
+	r.GET("/password/change", a.PasswordResetPage)
 	r.GET("", a.Index)
 	r.GET("/onboard", a.Onboard)
 	r.GET("/auth/github", a.GithubOAuth)
@@ -333,4 +335,48 @@ func (a *Auth) GitlabOAuthCallback(c echo.Context) error {
 		oauthResponse.Username,
 		oauthResponse.Email,
 		oauthResponse.Provider))
+}
+
+// PasswordReset godoc
+// @Summary Request password reset
+// @Description Request password reset
+// @Tags Auth, User
+// @Accept json
+// @Produce json
+// @Param request body language string true "Password Reset Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /password/change [post]
+func (a *Auth) PasswordReset(c echo.Context) error {
+	var req struct {
+		Email    string `json:"email" validate:"required,email"`
+		Language string `json:"language" validate:"required,oneof=en es pt zh fr"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":   "Invalid request",
+			"message": err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if _, err := a.user.NewPasswordLink(c.Request().Context(), req.Email, req.Language); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   "Failed to send password reset email",
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Password reset email sent successfully",
+	})
+}
+
+func (a *Auth) PasswordResetPage(c echo.Context) error {
+	return a.i.Render(c.Response(), c.Request(), "Auth/PasswordReset", inertia.Props{})
 }

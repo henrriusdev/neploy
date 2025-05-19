@@ -58,10 +58,6 @@ func (s *gateway) validateGateway(ctx context.Context, gateway model.Gateway) er
 	}
 
 	switch gateway.EndpointType {
-	case "subdomain":
-		if gateway.Subdomain == "" {
-			return errors.New("subdomain is required for subdomain endpoint type")
-		}
 	case "path":
 		if gateway.Path == "" {
 			return errors.New("path is required for path endpoint type")
@@ -148,11 +144,10 @@ func (s *gateway) ListByApp(ctx context.Context, appID string) ([]model.Gateway,
 
 func (s *gateway) AddRoute(ctx context.Context, gateway model.Gateway) error {
 	route := neployway.Route{
-		AppID:     gateway.ApplicationID,
-		Port:      gateway.Port,
-		Domain:    gateway.Domain,
-		Subdomain: gateway.Subdomain,
-		Path:      gateway.Path,
+		AppID:  gateway.ApplicationID,
+		Port:   gateway.Port,
+		Domain: gateway.Domain,
+		Path:   gateway.Path,
 	}
 
 	if err := s.router.AddRoute(route); err != nil {
@@ -167,10 +162,9 @@ func (s *gateway) AddRoute(ctx context.Context, gateway model.Gateway) error {
 
 func (s *gateway) RemoveRoute(ctx context.Context, gateway model.Gateway) error {
 	route := neployway.Route{
-		AppID:     gateway.ApplicationID,
-		Domain:    gateway.Domain,
-		Subdomain: gateway.Subdomain,
-		Path:      gateway.Path,
+		AppID:  gateway.ApplicationID,
+		Domain: gateway.Domain,
+		Path:   gateway.Path,
 	}
 
 	s.router.RemoveRoute(route.Path)

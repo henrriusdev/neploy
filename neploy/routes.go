@@ -90,11 +90,10 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 			port -= i
 
 			route := neployway.Route{
-				AppID:     gateway.ApplicationID,
-				Port:      strconv.Itoa(int(port)),
-				Domain:    gateway.Domain,
-				Path:      versionedPath,
-				Subdomain: gateway.Subdomain,
+				AppID:  gateway.ApplicationID,
+				Port:   strconv.Itoa(int(port)),
+				Domain: gateway.Domain,
+				Path:   versionedPath,
 			}
 
 			println("Registering default route:", route.Path, route.Port)
@@ -106,11 +105,10 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 
 		// ➕ Registrar ruta sin versión para la versión por defecto
 		route := neployway.Route{
-			AppID:     gateway.ApplicationID,
-			Port:      gateway.Port,
-			Domain:    gateway.Domain,
-			Path:      gateway.EndpointURL, // sin versión
-			Subdomain: gateway.Subdomain,
+			AppID:  gateway.ApplicationID,
+			Port:   gateway.Port,
+			Domain: gateway.Domain,
+			Path:   gateway.EndpointURL, // sin versión
 		}
 
 		println("Registering default route:", route.Path)
