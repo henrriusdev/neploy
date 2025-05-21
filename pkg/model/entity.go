@@ -80,7 +80,6 @@ type Gateway struct {
 	EndpointURL     string `json:"endpointUrl" db:"endpoint_url"`
 	EndpointType    string `json:"endpointType" db:"endpoint_type"` // "subdomain" or "path"
 	Domain          string `json:"domain" db:"domain"`
-	Subdomain       string `json:"subdomain" db:"subdomain"`
 	Path            string `json:"path" db:"path"`
 	Port            string `json:"port" db:"port"`
 	Stage           string `json:"stage" db:"stage"`

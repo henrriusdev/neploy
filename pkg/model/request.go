@@ -92,9 +92,10 @@ type ProfileRequest struct {
 }
 
 type PasswordRequest struct {
-	CurrentPassword string `json:"currentPassword" validate:"required,min=8"`
+	CurrentPassword string `json:"currentPassword" validate:"omitempty"`
 	NewPassword     string `json:"newPassword" validate:"required,min=8"`
 	ConfirmPassword string `json:"confirmPassword" validate:"required,min=8"`
+	Reset           bool   `json:"reset,omitempty"`
 }
 
 type SelectUserTechStacksRequest struct {

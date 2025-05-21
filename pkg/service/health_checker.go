@@ -86,16 +86,7 @@ func (h *healthChecker) checkAllGateways(ctx context.Context) {
 
 func (h *healthChecker) CheckGatewayHealth(ctx context.Context, gateway model.Gateway) error {
 	// Construct health check URL based on gateway configuration
-	var healthCheckURL string
-	switch gateway.EndpointType {
-	case "subdomain":
-		healthCheckURL = fmt.Sprintf("http://%s.%s/health", gateway.Subdomain, gateway.Domain)
-	case "path":
-		healthCheckURL = fmt.Sprintf("http://%s%s/health", gateway.Domain, gateway.Path)
-	default:
-		return fmt.Errorf("invalid endpoint type: %s", gateway.EndpointType)
-	}
-
+	var healthCheckURL string = fmt.Sprintf("http://%s%s/health", gateway.Domain, gateway.Path)
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 5 * time.Second,

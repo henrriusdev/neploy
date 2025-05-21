@@ -83,7 +83,6 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 		EndpointType:  "path",
 		Domain:        config.Env.DefaultDomain,
 		EndpointURL:   "/" + appName,
-		Subdomain:     strings.Replace(containerName, "neploy", "", -1),
 		Port:          port,
 		Path:          "/" + appName,
 		Status:        "active",
@@ -94,11 +93,10 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 	}
 
 	route := neployway.Route{
-		AppID:     app.ID,
-		Port:      port,
-		Domain:    config.Env.DefaultDomain,
-		Path:      "/" + appName,
-		Subdomain: "",
+		AppID:  app.ID,
+		Port:   port,
+		Domain: config.Env.DefaultDomain,
+		Path:   "/" + appName,
 	}
 	if err := d.router.AddRoute(route); err != nil {
 		logger.Error("Failed to add route: %v", err)

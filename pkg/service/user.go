@@ -36,6 +36,7 @@ type User interface {
 	UpdatePassword(ctx context.Context, req model.PasswordRequest, userID string) error
 	UpdateTechStacks(ctx context.Context, req model.SelectUserTechStacksRequest) error
 	GetAll(ctx context.Context) ([]model.User, error)
+	NewPasswordLink(ctx context.Context, email, language string) (string, error)
 }
 
 type user struct {
@@ -201,49 +202,14 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 		return model.LoginResponse{}, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return model.LoginResponse{}, err
-	}
-
-	roles, err := u.repos.UserRole.GetByUserID(ctx, user.ID)
-	if err != nil {
-		return model.LoginResponse{}, err
-	}
-
-	roleNames := make([]string, len(roles))
-	roleIDs := make([]string, len(roles))
-	roleNamesLower := make([]string, len(roles))
-	for i, role := range roles {
-		roleNames[i] = role.Role.Name
-		roleIDs[i] = role.Role.ID
-		roleNamesLower[i] = strings.ToLower(role.Role.Name)
-	}
-
-	// create the JWT access token here and return it
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
-		ID:         user.ID,
-		Email:      user.Email,
-		Roles:      roleNames,
-		RoleIDs:    roleIDs,
-		RolesLower: roleNamesLower,
-		Name:       user.FirstName + " " + user.LastName,
-		Username:   user.Username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 5)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	})
-
-	t, err := token.SignedString([]byte(config.Env.JWTSecret))
+	t, err := u.generateToken(ctx, user)
 	if err != nil {
 		return model.LoginResponse{}, err
 	}
 
 	return model.LoginResponse{
-		Token:     t,
-		User:      user,
-		RoleIDs:   roleIDs,
-		RoleNames: roleNamesLower,
+		Token: t,
+		User:  user,
 	}, nil
 }
 
@@ -403,10 +369,11 @@ func (s *user) UpdatePassword(ctx context.Context, req model.PasswordRequest, us
 		return err
 	}
 
-	// Compare the current password with the stored password hash
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword))
-	if err != nil {
-		return errors.New("current password is incorrect")
+	if !req.Reset {
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword))
+		if err != nil {
+			return errors.New("current password is incorrect")
+		}
 	}
 
 	// Hash the new password
@@ -468,4 +435,82 @@ func (u *user) GetAll(ctx context.Context) ([]model.User, error) {
 	}
 
 	return users, nil
+}
+
+func (u *user) NewPasswordLink(ctx context.Context, userEmail, language string) (string, error) {
+	user, err := u.repos.User.GetByEmail(ctx, userEmail)
+	if err != nil {
+		logger.Error("error getting user by email %v", err)
+		return "", err
+	}
+
+	metadata, err := u.repos.Metadata.Get(ctx)
+	if err != nil {
+		logger.Error("error getting metadata %v", err)
+		return "", err
+	}
+
+	// 2. Crear token
+	token, err := u.generateToken(ctx, user)
+	if err != nil {
+		logger.Error("error generating password reset token %v", err)
+		return "", err
+	}
+
+	// 3. Preparar los datos del email
+	resetURL := fmt.Sprintf("%s:%s/password/change?token=%s", config.Env.BaseURL, config.Env.Port, token)
+
+	emailData := email.PasswordResetData{
+		UserName:     user.FirstName,
+		CompanyName:  metadata.TeamName,
+		LogoURL:      metadata.LogoURL,
+		ResetURL:     resetURL,
+		ResetToken:   token,
+		BaseURL:      fmt.Sprintf("%s:%s", config.Env.BaseURL, config.Env.Port),
+		CurrentYear:  time.Now().Year(),
+		Translations: email.GetTranslations(language),
+		Language:     language,
+	}
+
+	// 4. Enviar email
+	if err := u.email.SendPasswordReset(user.Email, emailData); err != nil {
+		logger.Error("error sending password reset email %v", err)
+		return "", err
+	}
+
+	// retornar un mensaje de éxito
+	return "Password reset email sent successfully", nil
+}
+
+func (u *user) generateToken(ctx context.Context, user model.User) (string, error) {
+	roles, err := u.repos.UserRole.GetByUserID(ctx, user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	roleNames := make([]string, len(roles))
+	roleIDs := make([]string, len(roles))
+	roleNamesLower := make([]string, len(roles))
+	for i, role := range roles {
+		roleNames[i] = role.Role.Name
+		roleIDs[i] = role.Role.ID
+		roleNamesLower[i] = strings.ToLower(role.Role.Name)
+	}
+
+	// create the JWT access token here and return it
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &model.JWTClaims{
+		ID:         user.ID,
+		Email:      user.Email,
+		Roles:      roleNames,
+		RoleIDs:    roleIDs,
+		RolesLower: roleNamesLower,
+		Name:       user.FirstName + " " + user.LastName,
+		Username:   user.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 5)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	})
+
+	return token.SignedString([]byte(config.Env.JWTSecret))
 }
