@@ -98,13 +98,10 @@ type RefreshToken struct {
 
 type ApplicationStat struct {
 	BaseEntity
-	ApplicationID       string `json:"application_id" db:"application_id"`
-	Date                Date   `json:"date" db:"date"`
-	Requests            int    `json:"requests" db:"requests"`
-	Errors              int    `json:"errors" db:"errors"`
-	AverageResponseTime int    `json:"average_response_time" db:"average_response_time"`
-	DataTransfered      int    `json:"data_transfered" db:"data_transfered"`
-	UniqueVisitors      int    `json:"unique_visitors" db:"unique_visitors"`
+	ApplicationID string `json:"application_id" db:"application_id"`
+	Date          Date   `json:"date" db:"date"`
+	Requests      int    `json:"requests" db:"requests"`
+	Errors        int    `json:"errors" db:"errors"`
 }
 
 type VisitorTrace struct {
@@ -133,12 +130,6 @@ type Metadata struct {
 	Language string `json:"language" db:"language"`
 }
 
-type ApplicationUser struct {
-	BaseRelation
-	ApplicationID string `json:"application_id" db:"application_id"`
-	UserID        string `json:"user_id" db:"user_id"`
-}
-
 type Invitation struct {
 	BaseEntity
 	Email      string `json:"email" db:"email"`
@@ -150,7 +141,7 @@ type Invitation struct {
 
 type GatewayConfig struct {
 	BaseEntity
-	DefaultVersioningType VersioningType `json:"defaultVersioningType" db:"default_versioning_type" json:"defaultVersioningType,omitempty"`
+	DefaultVersioningType VersioningType `json:"defaultVersioningType,omitempty" db:"default_versioning_type"`
 }
 
 type ApplicationVersion struct {

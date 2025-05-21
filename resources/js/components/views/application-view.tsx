@@ -1,13 +1,14 @@
 "use client";
 
-import {FC, useEffect, useMemo, useState} from "react";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Progress} from "@/components/ui/progress";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import {CirclePlay, Pause, Plus, Trash2,} from "lucide-react";
-import {ActionMessage, ActionResponse, ApplicationProps, ProgressMessage,} from "@/types";
+import { ApplicationForm, DynamicForm } from "@/components/forms";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { useToast, useWebSocket } from "@/hooks";
+import { sanitizeAppName } from "@/lib/utils";
 import {
   useDeleteVersionMutation,
   useDeployApplicationMutation,
@@ -16,16 +17,14 @@ import {
   useStopApplicationMutation,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import {router} from "@inertiajs/react";
-import {useToast, useWebSocket} from "@/hooks";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
-import {DialogTrigger} from "@radix-ui/react-dialog";
-import {ApplicationForm, DynamicForm} from "@/components/forms";
-import {debounce} from "lodash";
-import {z} from "zod";
-import {useTranslation} from "react-i18next";
-import type {Input as InputInterface} from "@/types/websocket";
-import {sanitizeAppName} from "@/lib/utils";
+import { ActionMessage, ActionResponse, ApplicationProps, ProgressMessage, } from "@/types";
+import type { Input as InputInterface } from "@/types/websocket";
+import { router } from "@inertiajs/react";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import { CirclePlay, Pause, Plus, Trash2, } from "lucide-react";
+import { FC, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 const uploadFormSchema = z.object({
   description: z.string().optional(),
@@ -219,18 +218,21 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
     }
   };
 
-  const debouncedFetchBranches = useMemo(
-    () =>
-      debounce((repoUrl: string) => {
-        if (!repoUrl) {
-          setBranches([]);
-          setCurrentRepoUrl("");
-          return;
-        }
-        setCurrentRepoUrl(repoUrl);
-      }, 1000),
-    []
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!currentRepoUrl) {
+        setBranches([]);
+        setCurrentRepoUrl("");
+        return;
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [currentRepoUrl]);
+
+  const handleRepoUrlChange = (url: string) => {
+    setCurrentRepoUrl(url);
+  };
 
   const handleVersionSubmit = async (
     values: z.infer<typeof uploadFormSchema>,
@@ -385,7 +387,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
                     isUploading={isUploading}
                     branches={branches}
                     isLoadingBranches={isLoadingBranches}
-                    onRepoUrlChange={(url) => debouncedFetchBranches(url)}
+                    onRepoUrlChange={handleRepoUrlChange}
                   />
                 </DialogContent>
               </Dialog>
