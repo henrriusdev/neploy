@@ -29,6 +29,10 @@ type Neploy struct {
 
 func Start(npy Neploy) {
 	i := initInertia()
+	if i == nil {
+		logger.Debug("Error initializing Inertia")
+		return
+	}
 
 	e := echo.New()
 
@@ -91,6 +95,7 @@ func Start(npy Neploy) {
 
 		return c.File("./public/build/assets/" + filename)
 	})
+	e.Static("/assets", "resources/assets")
 
 	e.Start(":" + npy.Port)
 }

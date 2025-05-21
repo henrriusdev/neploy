@@ -1,4 +1,4 @@
-import {useToast, useWebSocket} from "@/hooks";
+import { useToast, useWebSocket } from "@/hooks";
 import {
   useCreateApplicationMutation,
   useDeleteApplicationMutation,
@@ -7,17 +7,23 @@ import {
   useLoadBranchesQuery,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import {ActionMessage, ActionResponse, Input, ProgressMessage,} from "@/types";
-import {debounce} from "lodash";
-import {useEffect, useMemo, useState} from "react";
-import {useTranslation} from "react-i18next";
-import {z} from "zod";
-import {Card, CardContent, CardHeader, CardTitle} from "../ui/card";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,} from "../ui/dialog";
-import {Button} from "../ui/button";
-import {PlusCircle} from "lucide-react";
-import {ApplicationForm, DynamicForm} from "../forms";
-import {ApplicationCard} from "../application-card";
+import { ActionMessage, ActionResponse, Input, ProgressMessage } from "@/types";
+import { PlusCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import { ApplicationCard } from "../application-card";
+import { ApplicationForm, DynamicForm } from "../forms";
+import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -38,7 +44,7 @@ const uploadFormSchema = z.object({
           return false;
         }
       },
-      {message: "Must be a valid GitHub or GitLab repository URL"}
+      { message: "Must be a valid GitHub or GitLab repository URL" }
     )
     .optional(),
   branch: z.string().optional(),
@@ -60,13 +66,12 @@ export function Applications() {
     title: "",
     description: "",
     fields: [],
-    onSubmit: () => {
-    },
+    onSubmit: () => {},
   });
   const [currentRepoUrl, setCurrentRepoUrl] = useState("");
-  const {toast} = useToast();
-  const {t} = useTranslation();
-  const {onNotification, onInteractive, sendMessage} = useWebSocket();
+  const { toast } = useToast();
+  const { t } = useTranslation();
+  const { onNotification, onInteractive, sendMessage } = useWebSocket();
 
   const {
     data: applications,
@@ -84,8 +89,8 @@ export function Applications() {
     isFetching: isLoadingBranches,
     error: branchesError,
   } = useLoadBranchesQuery(
-    {repoUrl: currentRepoUrl},
-    {skip: !currentRepoUrl}
+    { repoUrl: currentRepoUrl },
+    { skip: !currentRepoUrl }
   );
 
   useEffect(() => {
@@ -114,21 +119,20 @@ export function Applications() {
     }
   }, [branchesData]);
 
-  const debouncedFetchBranches = useMemo(
-    () =>
-      debounce((repoUrl: string) => {
-        if (!repoUrl) {
-          setBranches([]);
-          setCurrentRepoUrl("");
-          return;
-        }
-        setCurrentRepoUrl(repoUrl);
-      }, 1000),
-    []
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!currentRepoUrl) {
+        setBranches([]);
+        setCurrentRepoUrl("");
+        return;
+      }
+    }, 1000);
 
-  const handleRepoUrlChange = (repoUrl: string) => {
-    debouncedFetchBranches(repoUrl);
+    return () => clearTimeout(timer);
+  }, [currentRepoUrl]);
+
+  const handleRepoUrlChange = (url: string) => {
+    setCurrentRepoUrl(url);
   };
 
   const [createApplication] = useCreateApplicationMutation();
@@ -138,7 +142,7 @@ export function Applications() {
 
   const handleApplicationAction = async (appId: string) => {
     try {
-      await deleteApplication({appId});
+      await deleteApplication({ appId });
 
       toast({
         title: t("common.success"),
@@ -149,7 +153,8 @@ export function Applications() {
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description: error.message || t(`dashboard.applications.errors.deleteFailed`),
+        description:
+          error.message || t(`dashboard.applications.errors.deleteFailed`),
         variant: "destructive",
       });
     }
@@ -234,7 +239,8 @@ export function Applications() {
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description: error.message || t("dashboard.applications.errors.unknown"),
+        description:
+          error.message || t("dashboard.applications.errors.unknown"),
         variant: "destructive",
       });
     } finally {
@@ -269,12 +275,12 @@ export function Applications() {
           validate:
             input.name === "port"
               ? (value: string) => {
-                const port = parseInt(value);
-                if (isNaN(port) || port < 1 || port > 65535) {
-                  return t("dashboard.applications.errors.portInvalid");
+                  const port = parseInt(value);
+                  if (isNaN(port) || port < 1 || port > 65535) {
+                    return t("dashboard.applications.errors.portInvalid");
+                  }
+                  return true;
                 }
-                return true;
-              }
               : undefined,
         })),
         onSubmit: (data) => {
@@ -289,7 +295,7 @@ export function Applications() {
           };
           console.log("Sending response:", response);
           sendMessage(response.type, response.action, response.data);
-          setActionDialog((prev) => ({...prev, show: false}));
+          setActionDialog((prev) => ({ ...prev, show: false }));
 
           // Show confirmation toast
           toast({
@@ -377,11 +383,13 @@ export function Applications() {
 
       {/* Actions Bar */}
       <div className="flex justify-between items-center px-3 py-1">
-        <h1 className="font-bold text-3xl">{t('dashboard.applications.title')}</h1>
+        <h1 className="font-bold text-3xl">
+          {t("dashboard.applications.title")}
+        </h1>
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4"/>
+              <PlusCircle className="mr-2 h-4 w-4" />
               {t("dashboard.applications.create")}
             </Button>
           </DialogTrigger>
@@ -423,7 +431,7 @@ export function Applications() {
       <Dialog
         open={actionDialog.show}
         onOpenChange={(open) =>
-          !open && setActionDialog({...actionDialog, show: false})
+          !open && setActionDialog({ ...actionDialog, show: false })
         }>
         <DialogContent>
           <DialogHeader>

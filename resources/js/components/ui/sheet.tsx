@@ -9,6 +9,8 @@ const Sheet = SheetPrimitive.Root
 
 const SheetPortal = SheetPrimitive.Portal
 
+const SheetTrigger = SheetPrimitive.Trigger;
+
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -73,4 +75,5 @@ export {
   SheetPortal,
   SheetOverlay,
   SheetContent,
+  SheetTrigger,
 }
