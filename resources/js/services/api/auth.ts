@@ -24,7 +24,14 @@ export const authApi = baseApi.injectEndpoints({
         return response;
       },
     }),
+    passwordLink: builder.mutation<void, { email: string, language: string }>({
+      query: ({ email, language }) => ({
+        url: "password/change",
+        method: "POST",
+        body: { email, language },
+      }),
+    }),
   }),
 });
 
-export const { useCompleteInviteMutation, useLoginMutation } = authApi;
+export const { useCompleteInviteMutation, useLoginMutation, usePasswordLinkMutation } = authApi;

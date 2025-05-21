@@ -3,12 +3,16 @@ package email
 import (
 	"bytes"
 	"context"
+	"embed"
 	"fmt"
 	"html/template"
 
 	"github.com/resend/resend-go/v2"
 	"neploy.dev/config"
 )
+
+//go:embed templates/*
+var emailTmpl embed.FS
 
 type Email struct {
 	client *resend.Client
@@ -66,7 +70,7 @@ func (e *Email) SendInvitation(ctx context.Context, to, teamName, role, inviteLi
 }
 
 func (e *Email) SendPasswordReset(to string, data PasswordResetData) error {
-	tmpl, err := template.ParseFiles("templates/password_reset_email.html")
+	tmpl, err := template.ParseFS(emailTmpl, "templates/password_reset_email.gohtml")
 	if err != nil {
 		return fmt.Errorf("parsing template: %w", err)
 	}

@@ -11,7 +11,7 @@ import * as z from "zod"
 import { router } from "@inertiajs/react"
 import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "@/components/forms/language-selector"
-import { useLoginMutation } from "@/services/api/auth"
+import {useLoginMutation, usePasswordLinkMutation} from "@/services/api/auth"
 import { useTheme } from "@/hooks"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { ArrowLeft, KeyRound, Mail } from "lucide-react"
@@ -27,11 +27,12 @@ const resetPasswordFormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
 })
 
-export default function AuthViews() {
+export default function AuthViews({logoUrl, name}: {logoUrl: string, name: string}) {
   const [isLoading, setIsLoading] = useState(false)
   const [view, setView] = useState<"login" | "resetPassword">("login")
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [login] = useLoginMutation()
+  const [passwordLink] = usePasswordLinkMutation()
 
   const { theme, isDark, applyTheme } = useTheme()
 
@@ -80,9 +81,8 @@ export default function AuthViews() {
   async function onResetPasswordSubmit(values: z.infer<typeof resetPasswordFormSchema>) {
     setIsLoading(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
+      const language = i18n.language
+      await passwordLink({email: values.email, language}).unwrap()
       // Show success message
       resetPasswordForm.reset()
       alert(`Password reset link sent to ${values.email}`)
@@ -105,14 +105,14 @@ export default function AuthViews() {
       <div className="md:w-2/5 p-8 flex flex-col justify-center">
         <div className="mb-8">
           <img
-            src="/placeholder.svg?height=80&width=80"
-            alt="Company Logo"
+            src={logoUrl}
+            alt={name + " logo"}
             width={80}
             height={80}
             className="rounded-full bg-white p-2"
           />
         </div>
-        <h2 className="text-3xl font-bold text-white mb-4">{t("auth.welcomeTitle")}</h2>
+        <h2 className="text-3xl font-bold text-white mb-4">{t("auth.welcomeTitle")} {name}</h2>
         <p className="text-white mb-4">{t("auth.welcomeDescription")}</p>
         <ul className="text-white list-disc list-inside">
           <li>{t("auth.feature1")}</li>

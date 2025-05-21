@@ -369,10 +369,11 @@ func (s *user) UpdatePassword(ctx context.Context, req model.PasswordRequest, us
 		return err
 	}
 
-	// Compare the current password with the stored password hash
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword))
-	if err != nil {
-		return errors.New("current password is incorrect")
+	if !req.Reset {
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword))
+		if err != nil {
+			return errors.New("current password is incorrect")
+		}
 	}
 
 	// Hash the new password
@@ -457,7 +458,7 @@ func (u *user) NewPasswordLink(ctx context.Context, userEmail, language string) 
 	}
 
 	// 3. Preparar los datos del email
-	resetURL := fmt.Sprintf("%s:%s/password/reset?token=%s", config.Env.BaseURL, config.Env.Port, token)
+	resetURL := fmt.Sprintf("%s:%s/password/change?token=%s", config.Env.BaseURL, config.Env.Port, token)
 
 	emailData := email.PasswordResetData{
 		UserName:     user.FirstName,

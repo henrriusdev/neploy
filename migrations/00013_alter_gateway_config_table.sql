@@ -4,7 +4,10 @@ ALTER TABLE gateway_config
     DROP COLUMN default_version,
     DROP COLUMN load_balancer;
 ALTER TABLE application_stats
-    DROP COLUMN IF EXISTS healthy;
+    DROP COLUMN IF EXISTS healthy,
+    drop COLUMN if EXISTS average_response_time,
+    drop COLUMN if EXISTS data_transfered,
+    drop COLUMN if EXISTS unique_visitors;
 ALTER TABLE visitor_traces
     DROP COLUMN IF EXISTS visitor_id;
 ALTER TABLE visitor_traces

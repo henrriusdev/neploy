@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	neployware "neploy.dev/neploy/middleware"
 	"net/http"
 	"time"
 
@@ -19,14 +20,16 @@ import (
 )
 
 type Auth struct {
-	user service.User
-	i    *inertia.Inertia
+	user     service.User
+	metadata service.Metadata
+	i        *inertia.Inertia
 }
 
-func NewAuth(user service.User, i *inertia.Inertia) *Auth {
+func NewAuth(user service.User, metadata service.Metadata, i *inertia.Inertia) *Auth {
 	return &Auth{
-		user: user,
-		i:    i,
+		user:     user,
+		metadata: metadata,
+		i:        i,
 	}
 }
 
@@ -57,7 +60,7 @@ func (a *Auth) RegisterRoutes(r *echo.Group) {
 	r.POST("/login", a.Login)
 	r.GET("/logout", a.Logout)
 	r.POST("/password/change", a.PasswordReset)
-	r.GET("/password/change", a.PasswordResetPage)
+	r.GET("/password/change", a.PasswordResetPage, neployware.ResetTokenMiddleware(), neployware.JWTMiddleware())
 	r.GET("", a.Index)
 	r.GET("/onboard", a.Onboard)
 	r.GET("/auth/github", a.GithubOAuth)
@@ -129,7 +132,13 @@ func (a *Auth) Logout(c echo.Context) error {
 }
 
 func (a *Auth) Index(c echo.Context) error {
-	return a.i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{})
+	metadata, err := a.metadata.Get(c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "Failed to get metadata",
+		})
+	}
+	return a.i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{"logoUrl": metadata.LogoURL, "name": metadata.TeamName})
 }
 
 func (a *Auth) Onboard(c echo.Context) error {
@@ -378,5 +387,12 @@ func (a *Auth) PasswordReset(c echo.Context) error {
 }
 
 func (a *Auth) PasswordResetPage(c echo.Context) error {
-	return a.i.Render(c.Response(), c.Request(), "Auth/PasswordReset", inertia.Props{})
+	claims, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error": "Unauthorized",
+		})
+	}
+
+	return a.i.Render(c.Response(), c.Request(), "Auth/PasswordReset", inertia.Props{"name": claims.Name})
 }

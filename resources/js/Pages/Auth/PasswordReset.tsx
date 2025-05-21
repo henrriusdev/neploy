@@ -12,12 +12,10 @@ import {Input} from "@/components/ui/input"
 import {useUpdatePasswordMutation} from "@/services/api/users"
 import {AlertCircle, CheckCircle2, KeyRound, ShieldCheck} from "lucide-react"
 import {useTheme} from "@/hooks";
+import {router} from "@inertiajs/react";
 
 const passwordFormSchema = z
   .object({
-    currentPassword: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
     newPassword: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
@@ -43,7 +41,6 @@ export default function PasswordUpdateForm() {
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
-      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
@@ -53,12 +50,16 @@ export default function PasswordUpdateForm() {
 
   async function onPasswordSubmit(data: PasswordFormValues) {
     try {
-      await updatePassword(data)
+      await updatePassword({...data, reset: true})
       setUpdateStatus({
         success: true,
         message: "Password updated successfully!",
       })
       passwordForm.reset()
+      setTimeout(() => {
+        setUpdateStatus(null)
+        window.location.replace("/")
+      }, 2000)
     } catch (error) {
       setUpdateStatus({
         success: false,
@@ -101,30 +102,6 @@ export default function PasswordUpdateForm() {
           <Form {...passwordForm}>
             <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-5">
               <div className="space-y-5">
-                <FormField
-                  control={passwordForm.control}
-                  name="currentPassword"
-                  render={({field}) => (
-                    <FormItem>
-                      <div className="flex items-center justify-between">
-                        <FormLabel className="text-foreground/80">Current Password</FormLabel>
-                      </div>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type="password"
-                            placeholder="Enter current password"
-                            className="pl-10 bg-background border-input/50 focus:border-primary"
-                            {...field}
-                          />
-                          <KeyRound className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground"/>
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs font-medium text-destructive"/>
-                    </FormItem>
-                  )}
-                />
-
                 <div className="border-t border-primary/5 pt-5">
                   <h3 className="text-sm font-medium text-primary mb-4">New Password Details</h3>
 

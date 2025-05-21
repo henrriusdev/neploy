@@ -17,7 +17,7 @@ import (
 )
 
 func loginRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
-	auth := handler.NewAuth(npy.Services.User, i)
+	auth := handler.NewAuth(npy.Services.User, npy.Services.Metadata, i)
 	auth.RegisterRoutes(e.Group(""))
 }
 

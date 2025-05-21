@@ -2,8 +2,11 @@ package middleware
 
 import (
 	"context"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"neploy.dev/config"
 	"neploy.dev/pkg/common"
+	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 	"net/http"
@@ -103,6 +106,39 @@ func TraceMiddleware(traceService service.Trace) echo.MiddlewareFunc {
 			// Guardar al final
 			go traceService.Create(context.Background(), *trace)
 			return err
+		}
+	}
+}
+
+func ResetTokenMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// Leer el token desde query param
+			tokenStr := c.QueryParam("token")
+			if tokenStr == "" {
+				logger.Debug("Token no encontrado en query param")
+				return c.Redirect(http.StatusSeeOther, "/")
+			}
+
+			// Validar el token
+			token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+				return []byte(config.Env.JWTSecret), nil
+			})
+			if err != nil || !token.Valid {
+				logger.Debug("Token inválido: %v", err)
+				// Token inválido → no se mete en contexto
+				return c.Redirect(http.StatusSeeOther, "/")
+			}
+
+			// Meter en contexto
+			cookie := new(http.Cookie)
+			cookie.Name = "token"
+			cookie.Value = tokenStr
+			cookie.HttpOnly = true
+			cookie.Path = "/"
+			c.SetCookie(cookie)
+
+			return next(c)
 		}
 	}
 }
