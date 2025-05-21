@@ -3,16 +3,18 @@ package handler
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
+	"slices"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
-	"log"
+
 	"neploy.dev/config"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
-	"net/http"
-	"slices"
 )
 
 type Dashboard struct {

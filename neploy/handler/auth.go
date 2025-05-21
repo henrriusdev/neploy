@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	neployware "neploy.dev/neploy/middleware"
 	"net/http"
+	"os"
 	"time"
+
+	neployware "neploy.dev/neploy/middleware"
 
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
@@ -62,6 +64,7 @@ func (a *Auth) RegisterRoutes(r *echo.Group) {
 	r.POST("/password/change", a.PasswordReset)
 	r.GET("/password/change", a.PasswordResetPage, neployware.ResetTokenMiddleware(), neployware.JWTMiddleware())
 	r.GET("", a.Index)
+	r.GET("/manual", a.GetMarkdown)
 	r.GET("/onboard", a.Onboard)
 	r.GET("/auth/github", a.GithubOAuth)
 	r.GET("/auth/github/callback", a.GithubOAuthCallback)
@@ -395,4 +398,15 @@ func (a *Auth) PasswordResetPage(c echo.Context) error {
 	}
 
 	return a.i.Render(c.Response(), c.Request(), "Auth/PasswordReset", inertia.Props{"name": claims.Name})
+}
+
+func (d *Auth) GetMarkdown(c echo.Context) error {
+	content, err := os.ReadFile("resources/md/introduccion.md")
+	if err != nil {
+		return c.String(http.StatusNotFound, "Sección no encontrada")
+	}
+
+	return d.i.Render(c.Response().Writer, c.Request(), "Home/Manual", map[string]interface{}{
+		"content": string(content),
+	})
 }

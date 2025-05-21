@@ -64,7 +64,7 @@ func initInertia() *inertia.Inertia {
 			return url + entry, nil
 		})
 
-		i.ShareProp("IsDev", isDevMode)
+		i.ShareTemplateData("IsDev", isDevMode)
 
 		return i
 	}
