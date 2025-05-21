@@ -469,6 +469,7 @@ func (u *user) NewPasswordLink(ctx context.Context, userEmail, language string) 
 		BaseURL:      fmt.Sprintf("%s:%s", config.Env.BaseURL, config.Env.Port),
 		CurrentYear:  time.Now().Year(),
 		Translations: email.GetTranslations(language),
+		Language:     language,
 	}
 
 	// 4. Enviar email
