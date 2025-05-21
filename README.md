@@ -1,4 +1,6 @@
-****# 🧪 Evaluación de Cumplimiento del Proyecto - API Gateway REST
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/henrriusdev/neploy)
+
+# 🧪 Evaluación de Cumplimiento del Proyecto - API Gateway REST
 
 **Fecha:** 2025-04-10
 
@@ -41,8 +43,6 @@
 | Sprint 7: Módulo de Integración         | ✅ Sí           | Integración con servicios backend               |
 | Sprint 8-9: Módulos adicionales         | ❌ No           | Faltan notificaciones, perfil y reportes        |
 | Sprint 10-12: Pruebas y Ajustes Finales | ✅ Sí           | Pruebas manuales, revisión general detectadas   |
-
-**✅ Cumplimiento de fases metodológicas: 8 / 9 → 88.89%**
 
 ---
 
