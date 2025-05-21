@@ -119,20 +119,20 @@ export function Applications() {
     }
   }, [branchesData]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!currentRepoUrl) {
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  const handleRepoUrlChange = (url: string) => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(() => {
+      if (!url) {
         setBranches([]);
         setCurrentRepoUrl("");
-        return;
+      } else {
+        setCurrentRepoUrl(url);
       }
     }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [currentRepoUrl]);
-
-  const handleRepoUrlChange = (url: string) => {
-    setCurrentRepoUrl(url);
   };
 
   const [createApplication] = useCreateApplicationMutation();

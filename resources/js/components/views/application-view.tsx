@@ -218,22 +218,22 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!currentRepoUrl) {
-        setBranches([]);
-        setCurrentRepoUrl("");
-        return;
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [currentRepoUrl]);
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const handleRepoUrlChange = (url: string) => {
-    setCurrentRepoUrl(url);
-  };
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
 
+    debounceTimer = setTimeout(() => {
+      if (!url) {
+        setBranches([]);
+        setCurrentRepoUrl("");
+      } else {
+        setCurrentRepoUrl(url);
+      }
+    }, 1000);
+  };
   const handleVersionSubmit = async (
     values: z.infer<typeof uploadFormSchema>,
     file: File | null
