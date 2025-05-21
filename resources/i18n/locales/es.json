@@ -111,9 +111,9 @@
     "resources": {
       "title": "Recursos",
       "description": "Recursos útiles y documentación",
-      "documentation": "Documentación",
+      "documentation": "Manual de usuario",
       "apiReference": "Referencia de API",
-      "guides": "Guías",
+      "guides": "Creador",
       "examples": "Ejemplos"
     },
     "healthApps": "Aplicaciones saludables",

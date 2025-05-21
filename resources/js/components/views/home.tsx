@@ -73,17 +73,17 @@ export function Home({requests, techStack, visitors, health = "4/10", traces}: D
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start" onClick={() => window.open("/manual", "_blank")}>
             {t("dashboard.resources.documentation")}
           </Button>
-          <Button variant="outline" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start" onClick={() => window.open("https://deepwiki.com/henrriusdev/neploy", "_blank")}>
             {t("dashboard.resources.apiReference")}
           </Button>
-          <Button variant="outline" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start" onClick={() => window.open("https://github.com/henrriusdev", "_blank")}>
             {t("dashboard.resources.guides")}
           </Button>
-          <Button variant="outline" className="w-full justify-start">
-            {t("dashboard.resources.examples")}
+          <Button variant="outline" className="w-full justify-start" onClick={() => window.open("https://github.com/henrriusdev/neploy/issues", "_blank")}>
+            Repo
           </Button>
         </CardContent>
       </Card>
