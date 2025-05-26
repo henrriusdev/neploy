@@ -1,4 +1,4 @@
-# Manual de Usuario – Sistema de Gestión Neploy
+****# Manual de Usuario – Sistema de Gestión Neploy
 
 Este manual está diseñado para orientar a los usuarios en el uso correcto del sistema, desde la configuración inicial hasta la gestión completa de gateways y equipos de trabajo.
 
@@ -225,6 +225,8 @@ El despliegue de versiones puede ser por medio de dos formas, una de ellas es **
 - El sistema clonará y construirá la aplicación
 - Se mostrará progreso en tiempo real mediante WebSocket (`progress` messages)
 
+
+**Nota**: si en el archivo docker no se especifica un puerto, el sistema solicitará al usuario que ingrese el puerto a utilizar. Además, para una nueva versión, no se especifica un puerto, el sistema supondrá que se encuentra al puerto siguiente, por ejemplo si se encuentra en el puerto 4000 y desean subir una nueva versión, el sistema asumirá que se subirá al puerto 4001.
 
 ### 🔄 WebSocket y Acciones Interactivas
 
