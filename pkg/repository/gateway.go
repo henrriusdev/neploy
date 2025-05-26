@@ -128,3 +128,21 @@ func (g *Gateway) GetByApplicationID(ctx context.Context, applicationID string) 
 	common.AttachSQLToTrace(ctx, q)
 	return gateways, nil
 }
+
+func (g *Gateway) GetByPath(ctx context.Context, path string) (model.Gateway, error) {
+	query := g.baseQuery().Where(goqu.Ex{"path": "/" + path})
+	q, args, err := query.ToSQL()
+	if err != nil {
+		logger.Error("error building select query: %v", err)
+		return model.Gateway{}, err
+	}
+
+	var gateway model.Gateway
+	if err := g.Store.GetContext(ctx, &gateway, q, args...); err != nil {
+		logger.Error("error executing select query: %v", err)
+		return model.Gateway{}, err
+	}
+
+	common.AttachSQLToTrace(ctx, q)
+	return gateway, nil
+}

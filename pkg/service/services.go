@@ -1,10 +1,5 @@
 package service
 
-import (
-	"fmt"
-	"regexp"
-)
-
 type Services struct {
 	Application   Application
 	Gateway       Gateway
@@ -16,13 +11,4 @@ type Services struct {
 	Trace         Trace
 	User          User
 	Visitor       Visitor
-}
-
-var semverRegex = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
-
-func validateVersionTag(version string) error {
-	if !semverRegex.MatchString(version) {
-		return fmt.Errorf("invalid version tag format, expected 'vX.Y.Z'")
-	}
-	return nil
 }

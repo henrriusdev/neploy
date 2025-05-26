@@ -3,15 +3,13 @@ package neploy
 import (
 	"context"
 	"fmt"
-	"neploy.dev/pkg/repository/filters"
-	"net/http"
-	"strconv"
-
 	"github.com/labstack/echo/v4"
 	"neploy.dev/neploy/handler"
 	"neploy.dev/neploy/middleware"
 	neployway "neploy.dev/pkg/gateway"
 	"neploy.dev/pkg/logger"
+	"neploy.dev/pkg/repository/filters"
+	"net/http"
 
 	inertia "github.com/romsar/gonertia"
 )
@@ -82,16 +80,13 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 			continue
 		}
 
-		for i, v := range versions {
+		for _, v := range versions {
 			// Ruta con versión incluida: /vX.Y.Z/app
-			versionedPath := fmt.Sprintf("/%s%s", v.VersionTag, gateway.EndpointURL)
-
-			port := 4001
-			port -= i
+			versionedPath := fmt.Sprintf("/%s%s", v.VersionTag, gateway.Path)
 
 			route := neployway.Route{
 				AppID:  gateway.ApplicationID,
-				Port:   strconv.Itoa(int(port)),
+				Port:   gateway.Port,
 				Domain: gateway.Domain,
 				Path:   versionedPath,
 			}
@@ -108,7 +103,7 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 			AppID:  gateway.ApplicationID,
 			Port:   gateway.Port,
 			Domain: gateway.Domain,
-			Path:   gateway.EndpointURL, // sin versión
+			Path:   gateway.Path, // sin versión
 		}
 
 		println("Registering default route:", route.Path)

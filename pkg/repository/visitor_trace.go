@@ -136,13 +136,13 @@ func (v *VisitorTrace) Create(ctx context.Context, visitorTrace model.VisitorTra
 		return model.VisitorTrace{}, err
 	}
 
-	app, err := NewApplication(v.Store).GetByName(ctx, visitorTrace.ApplicationID)
+	gateway, err := NewGateway(v.Store).GetByPath(ctx, visitorTrace.ApplicationID)
 	if err != nil {
 		logger.Error("error getting application by name %v", err)
 		return model.VisitorTrace{}, err
 	}
 
-	visitorTrace.ApplicationID = app.ID
+	visitorTrace.ApplicationID = gateway.ApplicationID
 	trace, err := v.InsertOne(ctx, visitorTrace)
 	if err != nil {
 		logger.Error("error inserting visitor trace %v", err)

@@ -54,9 +54,9 @@ func (a *ApplicationVersion) ExistsByName(ctx context.Context, name, tag string)
 	query := a.baseQuery("v").
 		Select(goqu.I("v.*")).
 		LeftJoin(
-			goqu.T("applications").As("a"),
-			goqu.On(goqu.I("a.id").Eq(goqu.I("v.application_id"))),
-		).Where(goqu.I("a.app_name").Eq(name)).Where(goqu.I("v.version_tag").Eq(tag))
+			goqu.T("gateways").As("g"),
+			goqu.On(goqu.I("g.application_id").Eq(goqu.I("v.application_id"))),
+		).Where(goqu.I("g.path").Eq("/" + name)).Where(goqu.I("v.version_tag").Eq(tag))
 
 	q, args, err := query.ToSQL()
 	if err != nil {

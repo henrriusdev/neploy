@@ -72,7 +72,7 @@ func (m *MetricsCollector) writeMetrics(hourKey string, requests, errors int) {
 	updated := false
 
 	for i, line := range lines {
-		if strings.HasPrefix(line, hourKey+" - ") {
+		if strings.HasPrefix(line, hourKey+" - ") && strings.HasSuffix(line, m.applicationID) {
 			lines[i] = lineToWrite
 			updated = true
 			break

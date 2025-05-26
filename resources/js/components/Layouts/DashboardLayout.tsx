@@ -6,6 +6,7 @@ import * as React from "react";
 import {useTranslation} from "react-i18next";
 import {Applications, Config, Gateways, Home, Team} from "../views";
 import {ApplicationView} from "@/components/views/application-view";
+import {Reports} from "@/components/views/reports";
 
 const navItems = [
   {
@@ -32,6 +33,11 @@ const navItems = [
     title: "sidebar.settings",
     url: "/dashboard/settings",
     icon: Settings2,
+  },
+  {
+    title: "Reportes",
+    url: "/dashboard/report",
+    icon: PieChartIcon,
   },
   {
     title: "sidebar.logout",
@@ -89,6 +95,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return <Team {...props} />;
       case "/settings":
         return <Config {...props} />;
+      case "/report":
+        return <Reports {...props} />;
       default:
         return "Dashboard";
     }
