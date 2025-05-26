@@ -10,6 +10,7 @@ import (
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository/filters"
 	"net/http"
+	"strconv"
 
 	inertia "github.com/romsar/gonertia"
 )
@@ -84,9 +85,17 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 			// Ruta con versión incluida: /vX.Y.Z/app
 			versionedPath := fmt.Sprintf("/%s%s", v.VersionTag, gateway.Path)
 
+			port, err := strconv.Atoi(gateway.Port)
+			if err != nil {
+				logger.Error("Invalid port for gateway %s: %v", gateway.ApplicationID, err)
+				continue
+			}
+
+			port++
+
 			route := neployway.Route{
 				AppID:  gateway.ApplicationID,
-				Port:   gateway.Port,
+				Port:   strconv.Itoa(port),
 				Domain: gateway.Domain,
 				Path:   versionedPath,
 			}
