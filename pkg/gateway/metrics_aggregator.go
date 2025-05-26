@@ -105,7 +105,7 @@ func (m *MetricsAggregator) aggregateAndSaveMetrics() {
 			}
 
 			stat := model.ApplicationStat{
-				ApplicationID: appID,
+				ApplicationID: metric.ApplicationID,
 				Requests:      metric.Requests,
 				Errors:        metric.Errors,
 				Date:          model.Date{Time: timestamp},
