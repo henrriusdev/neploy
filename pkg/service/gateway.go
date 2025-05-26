@@ -44,26 +44,11 @@ func NewGateway(repos repository.Repositories) Gateway {
 
 func (s *gateway) validateGateway(ctx context.Context, gateway model.Gateway) error {
 	// Validate required fields
-	if gateway.Name == "" {
-		return errors.New("gateway name is required")
-	}
 	if gateway.ApplicationID == "" {
 		return errors.New("application ID is required")
 	}
-	if gateway.EndpointType == "" {
-		return errors.New("endpoint type is required")
-	}
 	if gateway.Domain == "" {
 		return errors.New("domain is required")
-	}
-
-	switch gateway.EndpointType {
-	case "path":
-		if gateway.Path == "" {
-			return errors.New("path is required for path endpoint type")
-		}
-	default:
-		return errors.New("invalid endpoint type")
 	}
 
 	// Check if application exists

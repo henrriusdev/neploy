@@ -76,24 +76,11 @@ type Trace struct {
 
 type Gateway struct {
 	BaseEntity
-	Name            string `json:"name" db:"name"`
-	EndpointURL     string `json:"endpointUrl" db:"endpoint_url"`
-	EndpointType    string `json:"endpointType" db:"endpoint_type"` // "subdomain" or "path"
-	Domain          string `json:"domain" db:"domain"`
-	Path            string `json:"path" db:"path"`
-	Port            string `json:"port" db:"port"`
-	Stage           string `json:"stage" db:"stage"`
-	HttpMethod      string `json:"httpMethod" db:"http_method"`
-	IntegrationType string `json:"integrationType" db:"integration_type"`
-	LoggingLevel    string `json:"loggingLevel" db:"logging_level"`
-	ApplicationID   string `json:"applicationId" db:"application_id"`
-	Status          string `json:"status" db:"status"` // "active", "inactive", "error"
-}
-
-type RefreshToken struct {
-	BaseEntity
-	UserID string `json:"user_id" db:"user_id"`
-	Token  string `json:"token" db:"token"` // hello
+	Domain        string `json:"domain" db:"domain"`
+	Path          string `json:"path" db:"path"`
+	Port          string `json:"port" db:"port"`
+	ApplicationID string `json:"applicationId" db:"application_id"`
+	Status        string `json:"status" db:"status"` // "active", "inactive", "error"
 }
 
 type ApplicationStat struct {
@@ -102,6 +89,7 @@ type ApplicationStat struct {
 	Date          Date   `json:"date" db:"date"`
 	Requests      int    `json:"requests" db:"requests"`
 	Errors        int    `json:"errors" db:"errors"`
+	AppName       string `json:"name,omitempty" db:"-"`
 }
 
 type VisitorTrace struct {

@@ -141,7 +141,7 @@ func (a *Auth) Index(c echo.Context) error {
 			"error": "Failed to get metadata",
 		})
 	}
-	return a.i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{"logoUrl": metadata.LogoURL, "name": metadata.TeamName})
+	return a.i.Render(c.Response(), c.Request(), "Home/Login", inertia.Props{"logoUrl": metadata.LogoURL, "name": metadata.TeamName, "language": metadata.Language})
 }
 
 func (a *Auth) Onboard(c echo.Context) error {
@@ -355,7 +355,6 @@ func (a *Auth) GitlabOAuthCallback(c echo.Context) error {
 // @Tags Auth, User
 // @Accept json
 // @Produce json
-// @Param request body language string true "Password Reset Request"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}

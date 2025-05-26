@@ -45,23 +45,38 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
     });
 
     useEffect(() => {
-      setSelectedDate(isFormContext ? field.value : date);
-      setMonth(isFormContext ? field?.value : date)
-    }, [isFormContext, field?.value, date]);
+      const currentValue = isFormContext ? field?.value : selectedDate;
+
+      if (currentValue instanceof Date) {
+        setMonth(currentValue);
+      } else if (currentValue && typeof currentValue === 'object' && 'from' in currentValue && currentValue.from instanceof Date) {
+        setMonth(currentValue.from);
+      } else {
+        setMonth(new Date()); // fallback para asegurar consistencia
+      }
+
+      setSelectedDate(currentValue);
+    }, [isFormContext, field?.value, selectedDate]);
 
     useEffect(() => {
       setIsRange(isRangePicker);
     }, [isRangePicker]);
 
     useEffect(() => {
-      if (month instanceof Date && !isNaN(month.getTime())) {
-        setMonth(new Date(maxYear, new Date().getMonth(), new Date().getDate()));
-      }
-    }, []);
+      console.log(typeof month)
+      console.log(month.getFullYear())
+    }, [month]);
 
     const handleDateSelect = (newDate: Date | DateRange | undefined) => {
       setSelectedDate(newDate);
-      setMonth(newDate)
+
+      console.log(newDate)
+      if (newDate instanceof Date) {
+        setMonth(newDate);
+      } else if (newDate && 'from' in newDate && newDate.from instanceof Date) {
+        setMonth(newDate.from);
+      }
+
       if (isFormContext) {
         field.onChange(newDate);
       } else {
@@ -89,9 +104,10 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
       <div ref={ref} className={cn("grid gap-2", className)}>
         <Popover>
           <PopoverTrigger asChild>
+            {isFormContext ? (
             <FormControl>
               <Button
-                id={isFormContext ? field.name : undefined}
+                id={field.name}
                 variant={"outline"}
                 className={cn(
                   "w-full justify-start text-left font-normal",
@@ -101,7 +117,18 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
                 <CalendarIcon className="mr-2 h-4 w-4"/>
                 {formatDate(selectedDate)}
               </Button>
-            </FormControl>
+            </FormControl> ): (
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !selectedDate && "text-muted-foreground"
+                )}
+                {...buttonProps}>
+                <CalendarIcon className="mr-2 h-4 w-4"/>
+                {formatDate(selectedDate)}
+              </Button>
+              )}
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 bg-background" align="start">
             <div className="w-[350px] p-3 space-y-3 flex items-center justify-between">
@@ -109,8 +136,11 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
                 <Select
                   value={month instanceof Date && !isNaN(month.getTime()) ? format(month, "MMMM") : ""}
 
-                  onValueChange={(value) =>
-                    setMonth(new Date(month.getFullYear(), parseInt(value), 1))
+                  onValueChange={(value) => {
+                    if (month instanceof Date && !isNaN(month.getTime())) {
+                      setMonth(new Date(month.getFullYear(), parseInt(value), 1));
+                    }
+                  }
                   }>
                   <SelectTrigger className="w-[160px] text-white">
                     <SelectValue>{month instanceof Date && !isNaN(month.getTime()) ? format(month, "MMMM") : ""}</SelectValue>
@@ -125,8 +155,11 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
                 </Select>
                 <Select
                   value={month?.getFullYear().toString() ?? new Date(maxYear).getFullYear().toString()}
-                  onValueChange={(value) =>
-                    setMonth(new Date(parseInt(value), month.getMonth(), 1))
+                  onValueChange={(value) => {
+                    if (month instanceof Date && !isNaN(month.getTime())) {
+                      setMonth(new Date(parseInt(value), month.getMonth(), 1));
+                    }
+                  }
                   }>
                   <SelectTrigger className="w-[160px] text-white">
                     <SelectValue>{month?.getFullYear().toString() ?? new Date(maxYear, 1, 1).getFullYear().toString()}</SelectValue>

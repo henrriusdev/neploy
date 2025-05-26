@@ -36,6 +36,7 @@ func (d *Dashboard) RegisterRoutes(r *echo.Group) {
 	r.GET("/applications/:id", d.ApplicationView)
 	r.GET("/gateways", d.Gateways)
 	r.GET("/settings", d.Config)
+	r.GET("/report", d.ReportStats)
 }
 
 func (d *Dashboard) Index(c echo.Context) error {
@@ -386,5 +387,49 @@ func (d *Dashboard) Config(c echo.Context) error {
 		"roles":      roles,
 		"techStacks": techStacks,
 		"traces":     traces,
+	})
+}
+
+func (d *Dashboard) ReportStats(c echo.Context) error {
+	claims, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	if !slices.Contains(claims.RolesLower, "administrator") {
+		return c.Redirect(http.StatusSeeOther, "/dashboard")
+	}
+
+	metadata, err := d.services.Metadata.Get(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting metadata: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	provider, err := d.services.User.GetProvider(c.Request().Context(), claims.ID)
+	if err != nil {
+		logger.Error("error getting provider: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	user := model.UserResponse{
+		Email:    claims.Email,
+		Username: claims.Username,
+		Name:     claims.Name,
+		Roles:    claims.RolesLower,
+		Provider: provider,
+	}
+
+	stats, err := d.services.Application.GetStats(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting stats: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
+		"user":     user,
+		"teamName": metadata.TeamName,
+		"logoUrl":  metadata.LogoURL,
+		"stats":    stats,
 	})
 }

@@ -7,6 +7,7 @@ import "../css/app.css";
 import '../i18n';
 
 createInertiaApp({
+  title: (title) => `Neploy`,
   resolve: (name) =>
     resolvePageComponent(
       `./Pages/${name}.tsx`,

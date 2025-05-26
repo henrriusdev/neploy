@@ -79,10 +79,7 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 	}
 
 	gateway := model.Gateway{
-		Name:          appName + "-gateway",
-		EndpointType:  "path",
 		Domain:        config.Env.DefaultDomain,
-		EndpointURL:   "/" + appName,
 		Port:          port,
 		Path:          "/" + appName,
 		Status:        "active",

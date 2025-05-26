@@ -1,20 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import {useEffect, useState} from "react"
+import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
+import {Button} from "@/components/ui/button"
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form"
+import {Input} from "@/components/ui/input"
+import {useForm} from "react-hook-form"
+import {zodResolver} from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { router } from "@inertiajs/react"
-import { useTranslation } from "react-i18next"
-import { LanguageSelector } from "@/components/forms/language-selector"
+import {router} from "@inertiajs/react"
+import {useTranslation} from "react-i18next"
+import {LanguageSelector} from "@/components/forms/language-selector"
 import {useLoginMutation, usePasswordLinkMutation} from "@/services/api/auth"
-import { useTheme } from "@/hooks"
-import { ThemeSwitcher } from "@/components/theme-switcher"
-import { ArrowLeft, KeyRound, Mail } from "lucide-react"
+import {useTheme} from "@/hooks"
+import {ThemeSwitcher} from "@/components/theme-switcher"
+import {ArrowLeft, KeyRound, Mail} from "lucide-react"
 
 // Login form schema
 const loginFormSchema = z.object({
@@ -27,7 +27,7 @@ const resetPasswordFormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
 })
 
-export default function AuthViews({logoUrl, name}: {logoUrl: string, name: string}) {
+export default function AuthViews({logoUrl, name, language = "en"}: {logoUrl: string, name: string, language: string}) {
   const [isLoading, setIsLoading] = useState(false)
   const [view, setView] = useState<"login" | "resetPassword">("login")
   const { t, i18n } = useTranslation()
@@ -36,6 +36,10 @@ export default function AuthViews({logoUrl, name}: {logoUrl: string, name: strin
 
   const { theme, isDark, applyTheme } = useTheme()
 
+  // Set the initial language
+  useEffect(() => {
+    i18n.changeLanguage(language)
+  }, [language, i18n])
   useEffect(() => {
     applyTheme(theme, isDark)
   }, [theme, isDark, applyTheme])
@@ -100,6 +104,7 @@ export default function AuthViews({logoUrl, name}: {logoUrl: string, name: strin
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background flex flex-col md:flex-row bg-gradient-to-r from-[#2b354c] to-background from-30% to-70%">
       {/* Side Content */}
       <div className="md:w-2/5 p-8 flex flex-col justify-center">
@@ -140,6 +145,7 @@ export default function AuthViews({logoUrl, name}: {logoUrl: string, name: strin
         )}
       </div>
     </div>
+    </>
   )
 }
 

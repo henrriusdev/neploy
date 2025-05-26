@@ -1152,6 +1152,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/password/change": {
+            "post": {
+                "description": "Request password reset",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth",
+                    "User"
+                ],
+                "summary": "Request password reset",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/roles": {
             "get": {
                 "description": "List all roles",
@@ -2177,9 +2216,6 @@ const docTemplate = `{
                     "description": "\"active\", \"inactive\", \"error\"",
                     "type": "string"
                 },
-                "subdomain": {
-                    "type": "string"
-                },
                 "updatedAt": {
                     "$ref": "#/definitions/model.Date"
                 }
@@ -2191,9 +2227,6 @@ const docTemplate = `{
                 "createdAt": {
                     "$ref": "#/definitions/model.Date"
                 },
-                "defaultVersion": {
-                    "$ref": "#/definitions/model.VersionType"
-                },
                 "defaultVersioningType": {
                     "$ref": "#/definitions/model.VersioningType"
                 },
@@ -2202,9 +2235,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
-                },
-                "loadBalancer": {
-                    "type": "boolean"
                 },
                 "updatedAt": {
                     "$ref": "#/definitions/model.Date"
@@ -2250,18 +2280,6 @@ const docTemplate = `{
         "model.LoginResponse": {
             "type": "object",
             "properties": {
-                "roleNames": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "token": {
                     "type": "string"
                 },
@@ -2350,7 +2368,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "confirmPassword",
-                "currentPassword",
                 "newPassword"
             ],
             "properties": {
@@ -2359,12 +2376,14 @@ const docTemplate = `{
                     "minLength": 8
                 },
                 "currentPassword": {
-                    "type": "string",
-                    "minLength": 8
+                    "type": "string"
                 },
                 "newPassword": {
                     "type": "string",
                     "minLength": 8
+                },
+                "reset": {
+                    "type": "boolean"
                 }
             }
         },
@@ -2514,17 +2533,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "model.VersionType": {
-            "type": "string",
-            "enum": [
-                "latest",
-                "stable"
-            ],
-            "x-enum-varnames": [
-                "VersionTypeLatest",
-                "VersionTypeStable"
-            ]
         },
         "model.VersioningType": {
             "type": "string",

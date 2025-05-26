@@ -196,8 +196,6 @@ definitions:
       status:
         description: '"active", "inactive", "error"'
         type: string
-      subdomain:
-        type: string
       updatedAt:
         $ref: '#/definitions/model.Date'
     type: object
@@ -205,16 +203,12 @@ definitions:
     properties:
       createdAt:
         $ref: '#/definitions/model.Date'
-      defaultVersion:
-        $ref: '#/definitions/model.VersionType'
       defaultVersioningType:
         $ref: '#/definitions/model.VersioningType'
       deletedAt:
         $ref: '#/definitions/model.Date'
       id:
         type: string
-      loadBalancer:
-        type: boolean
       updatedAt:
         $ref: '#/definitions/model.Date'
     type: object
@@ -244,14 +238,6 @@ definitions:
     type: object
   model.LoginResponse:
     properties:
-      roleNames:
-        items:
-          type: string
-        type: array
-      roles:
-        items:
-          type: string
-        type: array
       token:
         type: string
       user:
@@ -313,14 +299,14 @@ definitions:
         minLength: 8
         type: string
       currentPassword:
-        minLength: 8
         type: string
       newPassword:
         minLength: 8
         type: string
+      reset:
+        type: boolean
     required:
     - confirmPassword
-    - currentPassword
     - newPassword
     type: object
   model.Provider:
@@ -420,14 +406,6 @@ definitions:
       userId:
         type: string
     type: object
-  model.VersionType:
-    enum:
-    - latest
-    - stable
-    type: string
-    x-enum-varnames:
-    - VersionTypeLatest
-    - VersionTypeStable
   model.VersioningType:
     enum:
     - header
@@ -1211,6 +1189,33 @@ paths:
       summary: Initiate onboarding
       tags:
       - Onboard
+  /password/change:
+    post:
+      consumes:
+      - application/json
+      description: Request password reset
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Request password reset
+      tags:
+      - Auth
+      - User
   /roles:
     get:
       consumes:

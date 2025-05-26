@@ -39,6 +39,7 @@ type Application interface {
 	DeleteVersion(ctx context.Context, appID string, versionID string) error
 	GetHealthy(ctx context.Context) (uint, uint, error)
 	GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error)
+	GetStats(ctx context.Context) ([]model.ApplicationStat, error)
 }
 
 type application struct {
@@ -415,4 +416,23 @@ func (a *application) GetHealthy(ctx context.Context) (uint, uint, error) {
 
 func (a *application) GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error) {
 	return a.repos.ApplicationStat.GetHourlyRequests(ctx)
+}
+
+func (a *application) GetStats(ctx context.Context) ([]model.ApplicationStat, error) {
+	stats, err := a.repos.ApplicationStat.GetAll(ctx)
+	if err != nil {
+		logger.Error("error getting application stats: %v", err)
+		return nil, err
+	}
+
+	for i, stat := range stats {
+		app, err := a.repos.Application.GetByID(ctx, stat.ApplicationID)
+		if err != nil {
+			logger.Error("error getting application for stat %s: %v", stat.ID, err)
+			continue
+		}
+		stats[i].AppName = app.AppName
+	}
+
+	return stats, nil
 }
