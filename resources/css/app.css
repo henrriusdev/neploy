@@ -337,3 +337,16 @@
         font-feature-settings: "rlig" 1, "calt" 1;
     }
 }
+
+/* Background transitions */
+.auth-background {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.3s ease-in-out;
+}

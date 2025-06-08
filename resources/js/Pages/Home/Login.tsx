@@ -33,7 +33,6 @@ export default function AuthViews({logoUrl, name, language = "en"}: {logoUrl: st
   const { t, i18n } = useTranslation()
   const [login] = useLoginMutation()
   const [passwordLink] = usePasswordLinkMutation()
-
   const { theme, isDark, applyTheme } = useTheme()
 
   // Set the initial language
@@ -105,29 +104,9 @@ export default function AuthViews({logoUrl, name, language = "en"}: {logoUrl: st
 
   return (
     <>
-    <div className="min-h-screen bg-background flex flex-col md:flex-row bg-gradient-to-r from-[#2b354c] to-background from-30% to-70%">
-      {/* Side Content */}
-      <div className="md:w-2/5 p-8 flex flex-col justify-center">
-        <div className="mb-8">
-          <img
-            src={logoUrl}
-            alt={name + " logo"}
-            width={80}
-            height={80}
-            className="rounded-full bg-white p-2"
-          />
-        </div>
-        <h2 className="text-3xl font-bold text-white mb-4">{t("auth.welcomeTitle")} {name}</h2>
-        <p className="text-white mb-4">{t("auth.welcomeDescription")}</p>
-        <ul className="text-white list-disc list-inside">
-          <li>{t("auth.feature1")}</li>
-          <li>{t("auth.feature2")}</li>
-          <li>{t("auth.feature3")}</li>
-        </ul>
-      </div>
-
+    <div className="auth-background bg-background flex-col md:flex-row">
       {/* Auth Forms */}
-      <div className="md:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full flex items-center justify-center p-8">
         {view === "login" ? (
           <LoginView
             form={loginForm}
@@ -164,7 +143,7 @@ function LoginView({
   const { t } = useTranslation()
 
   return (
-    <Card className="w-full max-w-md border-primary/10 shadow-lg">
+    <Card className="w-full max-w-lg border-primary/10 shadow-lg">
       <CardHeader>
         <div className="flex justify-between items-center pb-3">
           <CardTitle className="text-4xl mr-4">{t("auth.login")}</CardTitle>
@@ -290,7 +269,7 @@ function ResetPasswordView({
   const { t } = useTranslation()
 
   return (
-    <Card className="w-full max-w-md border-primary/10 shadow-lg">
+    <Card className="w-full max-w-lg border-primary/10 shadow-lg">
       <CardHeader>
         <div className="flex items-center pb-3">
           <Button variant="ghost" size="icon" className="mr-2 h-8 w-8 text-primary" onClick={onBack}>

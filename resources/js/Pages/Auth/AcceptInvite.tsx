@@ -1,9 +1,10 @@
-import * as React from "react";
 import { router } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { AcceptInviteProps } from "@/types/props";
+import { useTheme } from "@/hooks";
+import {useEffect, useState} from "react";
 
 export default function AcceptInvite({
   token,
@@ -12,11 +13,16 @@ export default function AcceptInvite({
   provider,
 }: AcceptInviteProps) {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const {theme, isDark, applyTheme} = useTheme();
+
+  useEffect(() => {
+    applyTheme(theme, isDark);
+  }, [theme, isDark, applyTheme]);
 
   if (expired) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="auth-background">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>Invitation Expired</CardTitle>
@@ -32,7 +38,7 @@ export default function AcceptInvite({
 
   if (alreadyAccepted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="auth-background">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>Invitation Already Accepted</CardTitle>
@@ -81,7 +87,7 @@ export default function AcceptInvite({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="auth-background">
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle>Accept Team Invitation</CardTitle>

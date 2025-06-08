@@ -7,44 +7,7 @@ import {useTranslation} from "react-i18next";
 import {Applications, Config, Gateways, Home, Team} from "../views";
 import {ApplicationView} from "@/components/views/application-view";
 import {Reports} from "@/components/views/reports";
-
-const navItems = [
-  {
-    title: "sidebar.dashboard",
-    url: "/dashboard",
-    icon: PieChartIcon,
-  },
-  {
-    title: "sidebar.applications",
-    url: "/dashboard/applications",
-    icon: AppWindowMac,
-  },
-  {
-    title: "sidebar.gateways",
-    url: "/dashboard/gateways",
-    icon: DoorOpen,
-  },
-  {
-    title: "sidebar.team",
-    url: "/dashboard/team",
-    icon: Frame,
-  },
-  {
-    title: "sidebar.settings",
-    url: "/dashboard/settings",
-    icon: Settings2,
-  },
-  {
-    title: "Reportes",
-    url: "/dashboard/report",
-    icon: PieChartIcon,
-  },
-  {
-    title: "sidebar.logout",
-    url: "/logout",
-    icon: DoorOpen,
-  },
-];
+import {navItems} from "@/lib/utils";
 
 interface DashboardLayoutProps {
   user?: {

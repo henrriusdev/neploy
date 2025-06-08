@@ -1,4 +1,4 @@
-import {CommandGroup, CommandInput, CommandItem, CommandList,Command} from "../ui/command";
+import {CommandGroup, CommandInput, CommandItem, CommandList, Command} from "../ui/command";
 import {Command as CommandPrimitive} from "cmdk";
 import {forwardRef, type KeyboardEvent, useCallback, useEffect, useRef, useState,} from "react";
 import {Skeleton} from "../ui/skeleton";
@@ -130,7 +130,7 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
               {isLoading ? (
                 <CommandPrimitive.Loading>
                   <div className="p-1">
-                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full"/>
                   </div>
                 </CommandPrimitive.Loading>
               ) : null}
@@ -153,7 +153,7 @@ export const AutoComplete = forwardRef<HTMLInputElement, AutoCompleteProps>(
                             ? "pl-8"
                             : "bg-primary text-primary-foreground"
                         )}>
-                        {isSelected ? <Check className="w-4" /> : null}
+                        {isSelected ? <Check className="w-4"/> : null}
                         {option.label}
                       </CommandItem>
                     );
