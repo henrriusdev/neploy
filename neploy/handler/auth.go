@@ -41,7 +41,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 		return &oauth2.Config{
 			ClientID:     config.Env.GithubClientID,
 			ClientSecret: config.Env.GithubClientSecret,
-			RedirectURL:  fmt.Sprintf("%s:%s/auth/github/callback", config.Env.BaseURL, config.Env.Port),
+			RedirectURL:  "http://neploy.live:8081/auth/github/callback",
 			Scopes:       []string{"user:email", "read:user"},
 			Endpoint:     github.Endpoint,
 		}
@@ -49,7 +49,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 		return &oauth2.Config{
 			ClientID:     config.Env.GitlabApplicationID,
 			ClientSecret: config.Env.GitlabSecret,
-			RedirectURL:  fmt.Sprintf("%s:%s/auth/gitlab/callback", config.Env.BaseURL, config.Env.Port),
+			RedirectURL:  "http://neploy.live:8081/auth/gitlab/callback",
 			Scopes:       []string{"read_user"},
 			Endpoint:     gitlab.Endpoint,
 		}
