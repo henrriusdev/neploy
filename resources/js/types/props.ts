@@ -144,7 +144,8 @@ export interface DialogButtonProps {
   buttonText: string;
   title?: string;
   description?: string;
-  onOpen?: (boolean) => void;
+  onOpen?: (open: boolean) => void;
+  onOpenChange?: (open: boolean) => void;
   open?: boolean;
   icon?: LucideIcon;
   className?: string;

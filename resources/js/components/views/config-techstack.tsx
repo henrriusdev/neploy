@@ -165,11 +165,20 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
                         icon={Pencil}
                         variant="tooltip"
                         open={openTechStackId === techStack.id}
-                        onOpen={() => setOpenTechStackId(techStack.id)}
+                        onOpenChange={(isOpen) => {
+                          if (!isOpen) {
+                            setOpenTechStackId(null);
+                          } else {
+                            setOpenTechStackId(techStack.id);
+                          }
+                        }}
                         buttonText={t("dashboard.settings.techStack.editAction")}>
                         <TechStackForm
                           defaultValues={techStack}
-                          onSubmit={(data) => update(techStack.id, data)}
+                          onSubmit={(data) => {
+                            update(techStack.id, data);
+                            setOpenTechStackId(null);
+                          }}
                         />
                       </DialogButton>
                       <TooltipButton

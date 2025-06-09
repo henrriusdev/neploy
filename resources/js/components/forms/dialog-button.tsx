@@ -16,13 +16,17 @@ export const DialogButton = React.forwardRef<
       open,
       icon: Icon,
       onOpen,
+      onOpenChange,
       className,
       children,
       variant,
     },
     ref
   ) => (
-    <Dialog open={open} onOpenChange={onOpen}>
+    <Dialog 
+      open={open} 
+      onOpenChange={onOpenChange || onOpen} // Support both for backward compatibility
+    >
       <DialogTrigger asChild>
         {variant === "tooltip" ? (
           <TooltipButton
