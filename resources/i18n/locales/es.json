@@ -77,7 +77,7 @@
     },
     "teamSetup": {
       "title": "Configuración de equipo",
-      "description": "Configurar la configuración de su equipo",
+      "description": "Editar la información de su equipo",
       "teamName": "Nombre del equipo",
       "language": {
         "label": "Idioma",

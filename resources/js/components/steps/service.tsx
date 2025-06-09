@@ -58,7 +58,7 @@ export function ServiceStep({onNext, onBack, initialData}: Props) {
               name="teamName"
               render={({field}) => (
                 <FormItem>
-                  <FormLabel>Team Name</FormLabel>
+                  <FormLabel>{t("onboarding.teamSetup.teamName")}</FormLabel>
                   <FormControl>
                     <Controller
                       control={form.control}
