@@ -1,10 +1,11 @@
-import * as React from "react";
 import { router } from "@inertiajs/react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/hooks";
 import { ProviderStep, UserDataStep, SummaryStep } from "@/components/steps";
 import { CompleteInviteProps } from "@/types/props";
 import { User } from "@/types/common";
 import { useCompleteInviteMutation } from "@/services/api/auth";
+import {useEffect, useState} from "react";
 
 type Step = "provider" | "data" | "summary";
 
@@ -16,10 +17,10 @@ export default function CompleteInvite({
   error,
   status,
 }: CompleteInviteProps) {
-  const [step, setStep] = React.useState<Step>(() => {
+  const [step, setStep] = useState<Step>(() => {
     return provider ? "data" : "provider";
   });
-  const [userData, setUserData] = React.useState<User>({
+  const [userData, setUserData] = useState<User>({
     firstName: "",
     lastName: "",
     dob: "",
@@ -30,9 +31,14 @@ export default function CompleteInvite({
     password: "",
   });
   const { toast } = useToast();
+  const { theme, isDark, applyTheme } = useTheme();
   const [completeInvite] = useCompleteInviteMutation();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    applyTheme(theme, isDark);
+  }, [theme, isDark, applyTheme]);
+
+  useEffect(() => {
     if (status === "expired") {
       toast({
         title: "Invitation Expired",
@@ -156,7 +162,7 @@ export default function CompleteInvite({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-accent from-40% to-95% py-12 px-4 sm:px-6 lg:px-8">
+    <div className="auth-background">
       <div className="w-full">{renderStep()}</div>
     </div>
   );

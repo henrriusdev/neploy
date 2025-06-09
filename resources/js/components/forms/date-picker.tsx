@@ -62,10 +62,6 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
       setIsRange(isRangePicker);
     }, [isRangePicker]);
 
-    useEffect(() => {
-      console.log(typeof month)
-      console.log(month.getFullYear())
-    }, [month]);
 
     const handleDateSelect = (newDate: Date | DateRange | undefined) => {
       setSelectedDate(newDate);
@@ -86,14 +82,14 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
 
     const formatDate = (date: Date | DateRange | undefined) => {
       if (!date) return "Pick a date";
-      if (date instanceof Date) return format(date, "PPP");
+      if (date instanceof Date) return format(date, "yyyy-MM-dd");
       if (date.from) {
         if (date.to)
-          return `${format(date.from, "LLL dd, y")} - ${format(
+          return `${format(date.from, "yyyy-MM-dd")} - ${format(
             date.to,
-            "LLL dd, y"
+            "yyyy-MM-dd"
           )}`;
-        return `${format(date.from, "LLL dd, y")} - `;
+        return `${format(date.from, "yyyy-MM-dd")} - `;
       }
       return "Pick a date range";
     };
@@ -165,11 +161,14 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
                     <SelectValue>{month?.getFullYear().toString() ?? new Date(maxYear, 1, 1).getFullYear().toString()}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({length: maxYear - minYear + 1}, (_, i) => (
-                      <SelectItem key={i} value={(minYear + i).toString()}>
-                        {minYear + i}
-                      </SelectItem>
-                    ))}
+                    {Array.from({length: maxYear - minYear + 1}, (_, i) => {
+                      const year = maxYear - i;
+                      return (
+                        <SelectItem key={i} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

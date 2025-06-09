@@ -3,7 +3,7 @@ import {useForm, UseFormReturn} from "react-hook-form";
 import * as z from "zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
-import {InputAutoComplete} from "@/components/forms/input-autocomplete";
+import {Autocomplete} from "@/components/forms";
 import {techIcons} from "@/lib/icons";
 import {Button} from "@/components/ui/button";
 import {DialogFooter} from "@/components/ui/dialog";
@@ -42,9 +42,9 @@ export function TechStackForm({defaultValues, onSubmit, onCancel, renderFooter}:
             <FormItem>
               <FormLabel>{t("dashboard.settings.techStack.name")}</FormLabel>
               <FormControl>
-                <InputAutoComplete
+                <Autocomplete
                   field={field}
-                  OPTIONS={techIcons.map((icon) => ({
+                  options={techIcons.map((icon) => ({
                     label: icon.name,
                     value: icon.name,
                   }))}

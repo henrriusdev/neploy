@@ -49,7 +49,7 @@
     "description": "Let's get you started with your deployment journey",
     "administratorAccount": "Administrator user",
     "email": "Email",
-    "error": "There was an error when commiting the setup, please try again",
+    "error": "There was an error when committing the setup, please try again",
     "name": "Full name",
     "reviewSetup": "Review the provided data",
     "roles": "Roles",
@@ -115,7 +115,7 @@
       "description": "Helpful resources and documentation",
       "documentation": "Documentation",
       "apiReference": "API Reference",
-      "guides": "Creator",
+      "guides": "Guides",
       "examples": "Examples"
     },
     "healthApps": "Health Apps",
@@ -145,7 +145,7 @@
       "confirmDelete": "Are you sure you want to delete this application?",
       "status": {
         "running": "Running",
-        "building": "Building",
+        "building": "Building...",
         "stopped": "Stopped",
         "error": "Error",
         "unknown": "Unknown",

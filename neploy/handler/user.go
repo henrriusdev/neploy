@@ -230,6 +230,7 @@ func (u *User) Profile(c echo.Context) error {
 		Username: claims.Username,
 		Name:     claims.Name,
 		Provider: provider,
+		Roles:    claims.RolesLower,
 	}
 
 	metadata, err := u.metadata.Get(c.Request().Context())

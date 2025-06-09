@@ -12,7 +12,6 @@ import {Input} from "@/components/ui/input"
 import {useUpdatePasswordMutation} from "@/services/api/users"
 import {AlertCircle, CheckCircle2, KeyRound, ShieldCheck} from "lucide-react"
 import {useTheme} from "@/hooks";
-import {router} from "@inertiajs/react";
 
 const passwordFormSchema = z
   .object({

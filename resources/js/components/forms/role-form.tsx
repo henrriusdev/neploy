@@ -4,7 +4,7 @@ import * as z from "zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
-import {InputAutoComplete} from "@/components/forms/input-autocomplete";
+import {Autocomplete} from "@/components/forms";
 import {ColorPicker} from "@/components/forms";
 import {RoleIcon} from "@/components/icons";
 import {icons} from "@/lib/icons";
@@ -74,9 +74,9 @@ export function RoleForm({defaultValues, onSubmit, onCancel, renderFooter}: Role
                       control={form.control}
                       name="icon"
                       render={({field}) => (
-                        <InputAutoComplete
+                        <Autocomplete
                           field={field}
-                          OPTIONS={icons.map((icon) => ({
+                          options={icons.map((icon) => ({
                             value: icon,
                             label: icon,
                             icon: (
