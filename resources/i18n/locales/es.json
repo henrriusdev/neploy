@@ -13,7 +13,7 @@
   "actions": {
     "back": "Atrás",
     "cancel": "Cancelar",
-    "next": "Próximo",
+    "next": "Siguiente",
     "save": "Guardar"
   },
   "languages": {
@@ -58,8 +58,8 @@
     "success": "¡Éxito!",
     "teamInformation": "Información del equipo",
     "provider": {
-      "title": "Elija un proveedor de dev",
-      "description": "Elija si desea usar github, gitlab o entrada manual para su nombre de usuario y avatar"
+      "title": "Proveedor de OAuth",
+      "description": "Elija entre GitHub, GitLab o ingrese manualmente su nombre de usuario y avatar"
     },
     "steps": {
       "personal": "Información personal",
@@ -139,8 +139,8 @@
       "deleteFailed": "La eliminación ha fallado",
       "confirmDelete": "¿Estás seguro de que quieres eliminar esta aplicación?",
       "status": {
-        "running": "Correr",
-        "building": "Edificio",
+        "running": "Corriendo",
+        "building": "Compilando...",
         "stopped": "Interrumpido",
         "error": "Error",
         "unknown": "Desconocido",

@@ -42,12 +42,12 @@ export function RolesStep({onNext, onBack, roles, setRoles}: Props) {
                 {t('actions.back')}
               </Button>
               <div className="space-x-2">
-                <Button type="submit">{t('step.role.add')}</Button>
+                <Button variant="secondary" type="submit">{t('step.role.add')}</Button>
                 <Button
                   type="button"
                   onClick={onNext}
                   disabled={roles.length === 0}>
-                  {t('actions.back')}
+                  {t('actions.next')}
                 </Button>
               </div>
             </div>

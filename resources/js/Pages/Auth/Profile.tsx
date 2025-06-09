@@ -1,3 +1,5 @@
+"use client"
+
 import {User} from "@/types";
 import {UserProfile} from "@/components/views/user-profile";
 import Layout from "@/components/Layouts/Layout";
@@ -8,6 +10,7 @@ export default function Profile({userData, user: backendUser, teamName, logoUrl}
   const user = {
     name: backendUser?.name || "",
     email: backendUser?.email || "",
+    roles: backendUser.roles || [],
     avatar:
       backendUser?.provider === "github"
         ? `https://unavatar.io/github/${backendUser?.username}`
