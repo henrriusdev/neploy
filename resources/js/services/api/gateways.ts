@@ -1,17 +1,17 @@
-import {baseApi} from "@/services/api/api";
-import {GatewayConfigRequest} from "@/types";
+import { baseApi } from "@/services/api/api";
+import { GatewayConfigRequest } from "@/types";
 
 export const gateways = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     saveGatewayConfig: builder.mutation({
-      query: ({defaultVersioning, defaultVersion, loadBalancer}: GatewayConfigRequest) => ({
+      query: ({ defaultVersioning, defaultVersion, loadBalancer }: GatewayConfigRequest) => ({
         url: "gateways/config",
         method: "POST",
-        body: {defaultVersioning, defaultVersion, loadBalancer}
+        body: { defaultVersioning, defaultVersion, loadBalancer },
       }),
-      invalidatesTags: ["gateways"]
-    })
-  })
-})
+      invalidatesTags: ["gateways"],
+    }),
+  }),
+});
 
-export const {useSaveGatewayConfigMutation} = gateways
+export const { useSaveGatewayConfigMutation } = gateways;

@@ -1,2543 +1,2232 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "description": "Neploy API",
-        "title": "Neploy API",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "6oMwz@example.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "1.0"
+  "swagger": "2.0",
+  "info": {
+    "description": "Neploy API",
+    "title": "Neploy API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "name": "API Support",
+      "url": "http://www.swagger.io/support",
+      "email": "6oMwz@example.com"
     },
-    "host": "localhost:8080",
-    "basePath": "/",
-    "paths": {
-        "/applications": {
-            "get": {
-                "description": "List all applications",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "List all applications",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Application"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Create a new application",
-                "parameters": [
-                    {
-                        "description": "Application details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.CreateApplicationRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/applications/:id/versions/:versionID": {
-            "delete": {
-                "description": "Delete an version of a explicit app",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Delete an application version",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Version ID",
-                        "name": "versionID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/applications/branches": {
-            "post": {
-                "description": "Get list of branches from a Git repository",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Get repository branches",
-                "parameters": [
-                    {
-                        "description": "Repository URL",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.GetBranchesRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/applications/{id}": {
-            "get": {
-                "description": "Get an application by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Get an application by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Application"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete an application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Delete an application",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/applications/{id}/deploy": {
-            "post": {
-                "description": "Deploy an application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Deploy an application",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Deployment details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.DeployApplicationRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/applications/{id}/start": {
-            "post": {
-                "description": "Start an application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Start an application",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/applications/{id}/stop": {
-            "post": {
-                "description": "Stop an application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Stop an application",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/github": {
-            "get": {
-                "description": "Start GitHub OAuth flow",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Start GitHub OAuth flow",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "State parameter",
-                        "name": "state",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "302": {
-                        "description": "Redirects to GitHub OAuth flow",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/github/callback": {
-            "get": {
-                "description": "Handle GitHub OAuth callback",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Handle GitHub OAuth callback",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "State parameter",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Authorization code",
-                        "name": "code",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.OAuthResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/gitlab": {
-            "get": {
-                "description": "Start GitLab OAuth flow",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Start GitLab OAuth flow",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "State parameter",
-                        "name": "state",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "302": {
-                        "description": "Redirects to GitLab OAuth flow",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/gitlab/callback": {
-            "get": {
-                "description": "Handle GitLab OAuth callback",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Handle GitLab OAuth callback",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "State parameter",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Authorization code",
-                        "name": "code",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.OAuthResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/gateways": {
-            "post": {
-                "description": "Create a new gateway",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Create a new gateway",
-                "parameters": [
-                    {
-                        "description": "Gateway details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Gateway"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/gateways/app/{appId}": {
-            "get": {
-                "description": "List gateways by app ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "List gateways by app ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "App ID",
-                        "name": "appId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Gateway"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/gateways/config": {
-            "get": {
-                "description": "Gets the configuration of the API Gateway",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Get API Gateway Config",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.GatewayConfig"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Saves API Gateway Configurations like default versioning",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Saves config",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.GatewayConfig"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/gateways/{id}": {
-            "get": {
-                "description": "Get a gateway by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Get a gateway by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Gateway ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Gateway"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a gateway",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Update a gateway",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Gateway ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Gateway details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Gateway"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a gateway",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Delete a gateway",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Gateway ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/gateways/{id}/health": {
-            "get": {
-                "description": "Check the health of a gateway",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Gateway"
-                ],
-                "summary": "Check the health of a gateway",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Gateway ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
-            "post": {
-                "description": "Login a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth",
-                    "User"
-                ],
-                "summary": "Login a user",
-                "parameters": [
-                    {
-                        "description": "Login Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.LoginRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.LoginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/logout": {
-            "post": {
-                "description": "Logout a user",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth",
-                    "User"
-                ],
-                "summary": "Logout a user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/metadata": {
-            "get": {
-                "description": "Get metadata",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Metadata"
-                ],
-                "summary": "Get metadata",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Metadata"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Update metadata",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Metadata"
-                ],
-                "summary": "Update metadata",
-                "parameters": [
-                    {
-                        "description": "Metadata",
-                        "name": "metadata",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.MetadataRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Metadata"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/onboard": {
-            "post": {
-                "description": "Initiate onboarding",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Onboard"
-                ],
-                "summary": "Initiate onboarding",
-                "parameters": [
-                    {
-                        "description": "Onboard Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.OnboardRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/password/change": {
-            "post": {
-                "description": "Request password reset",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth",
-                    "User"
-                ],
-                "summary": "Request password reset",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/roles": {
-            "get": {
-                "description": "List all roles",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "List all roles",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Role"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new role",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "Create a new role",
-                "parameters": [
-                    {
-                        "description": "Role details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.CreateRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/roles/users/{id}": {
-            "get": {
-                "description": "Get roles for a specific user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "Get user roles",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.UserRoles"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/roles/{id}": {
-            "delete": {
-                "description": "Delete a role by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "Delete a role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Update a role by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "Update a role",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Role details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.CreateRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/roles/{id}/users": {
-            "post": {
-                "description": "Add a role to users by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "Add a role to users",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User IDs",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.UserRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove a role from users by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Role"
-                ],
-                "summary": "Remove a role from users",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Role ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "User IDs",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.UserRoleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/tech-stacks": {
-            "get": {
-                "description": "List all tech stacks",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "TechStack"
-                ],
-                "summary": "List all tech stacks",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.TechStack"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new tech stack",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "TechStack"
-                ],
-                "summary": "Create a new tech stack",
-                "parameters": [
-                    {
-                        "description": "Tech stack details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.CreateTechStackRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/tech-stacks/{id}": {
-            "delete": {
-                "description": "Delete a tech stack by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "TechStack"
-                ],
-                "summary": "Delete a tech stack",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tech stack ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Update a tech stack by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "TechStack"
-                ],
-                "summary": "Update a tech stack",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tech stack ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Tech stack details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.CreateTechStackRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/user/complete-invite": {
-            "post": {
-                "description": "Complete user invitation",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Complete user invitation",
-                "parameters": [
-                    {
-                        "description": "Complete Invite Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.CompleteInviteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/user/invite": {
-            "post": {
-                "description": "Invite a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Invite a user",
-                "parameters": [
-                    {
-                        "description": "Invite User Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.InviteUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "description": "Get all users",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.User"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/users/profile": {
-            "get": {
-                "description": "Get user profile",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get user profile",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.User"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/users/profile/update": {
-            "put": {
-                "description": "Update user profile",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Update user profile",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.User"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/users/profile/update-password": {
-            "put": {
-                "description": "Update user password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Update user password",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.PasswordRequest"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/users/update-techstacks": {
-            "put": {
-                "description": "Select user tech stacks",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Select user tech stacks",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        }
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "definitions": {
-        "model.Application": {
-            "type": "object",
-            "properties": {
-                "appName": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "storageLocation": {
-                    "type": "string"
-                },
-                "techStackId": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                }
+    "version": "1.0"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "paths": {
+    "/applications": {
+      "get": {
+        "description": "List all applications",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "List all applications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/model.Application"
+              }
             }
-        },
-        "model.CompleteInviteRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "dob",
-                "email",
-                "firstName",
-                "lastName",
-                "password",
-                "phone",
-                "token",
-                "username"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "maxLength": 128,
-                    "minLength": 2
-                },
-                "dob": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 8
-                },
-                "phone": {
-                    "type": "string",
-                    "maxLength": 10,
-                    "minLength": 10
-                },
-                "token": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
             }
-        },
-        "model.CreateApplicationRequest": {
-            "type": "object",
-            "properties": {
-                "appName": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
             }
-        },
-        "model.CreateRoleRequest": {
-            "type": "object",
-            "required": [
-                "color",
-                "description",
-                "icon",
-                "name"
-            ],
-            "properties": {
-                "color": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                },
-                "description": {
-                    "type": "string",
-                    "maxLength": 128,
-                    "minLength": 2
-                },
-                "icon": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                }
-            }
-        },
-        "model.CreateTechStackRequest": {
-            "type": "object",
-            "required": [
-                "description",
-                "name"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "maxLength": 128,
-                    "minLength": 2
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                }
-            }
-        },
-        "model.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "dob",
-                "email",
-                "firstName",
-                "lastName",
-                "password",
-                "phone",
-                "provider",
-                "username"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "maxLength": 128,
-                    "minLength": 2
-                },
-                "dob": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                },
-                "lastName": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 8
-                },
-                "phone": {
-                    "type": "string",
-                    "maxLength": 10,
-                    "minLength": 10
-                },
-                "provider": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 2
-                }
-            }
-        },
-        "model.Date": {
-            "type": "object",
-            "properties": {
-                "time.Time": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.DeployApplicationRequest": {
-            "type": "object",
-            "properties": {
-                "branch": {
-                    "type": "string"
-                },
-                "repoUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.Gateway": {
-            "type": "object",
-            "properties": {
-                "applicationId": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "domain": {
-                    "type": "string"
-                },
-                "endpointType": {
-                    "description": "\"subdomain\" or \"path\"",
-                    "type": "string"
-                },
-                "endpointUrl": {
-                    "type": "string"
-                },
-                "httpMethod": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "integrationType": {
-                    "type": "string"
-                },
-                "loggingLevel": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "port": {
-                    "type": "string"
-                },
-                "stage": {
-                    "type": "string"
-                },
-                "status": {
-                    "description": "\"active\", \"inactive\", \"error\"",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                }
-            }
-        },
-        "model.GatewayConfig": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "defaultVersioningType": {
-                    "$ref": "#/definitions/model.VersioningType"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                }
-            }
-        },
-        "model.GetBranchesRequest": {
-            "type": "object",
-            "properties": {
-                "repoUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.InviteUserRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 8
-                }
-            }
-        },
-        "model.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/model.User"
-                }
-            }
-        },
-        "model.Metadata": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "language": {
-                    "type": "string"
-                },
-                "logo_url": {
-                    "type": "string"
-                },
-                "team_name": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                }
-            }
-        },
-        "model.MetadataRequest": {
-            "type": "object",
-            "properties": {
-                "language": {
-                    "type": "string"
-                },
-                "logoUrl": {
-                    "type": "string"
-                },
-                "teamName": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.OAuthResponse": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "provider": {
-                    "$ref": "#/definitions/model.Provider"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.OnboardRequest": {
-            "type": "object",
-            "required": [
-                "adminUser",
-                "metadata",
-                "roles"
-            ],
-            "properties": {
-                "adminUser": {
-                    "$ref": "#/definitions/model.CreateUserRequest"
-                },
-                "metadata": {
-                    "$ref": "#/definitions/model.MetadataRequest"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.CreateRoleRequest"
-                    }
-                }
-            }
-        },
-        "model.PasswordRequest": {
-            "type": "object",
-            "required": [
-                "confirmPassword",
-                "newPassword"
-            ],
-            "properties": {
-                "confirmPassword": {
-                    "type": "string",
-                    "minLength": 8
-                },
-                "currentPassword": {
-                    "type": "string"
-                },
-                "newPassword": {
-                    "type": "string",
-                    "minLength": 8
-                },
-                "reset": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "model.Provider": {
-            "type": "string",
-            "enum": [
-                "github",
-                "gitlab"
-            ],
-            "x-enum-varnames": [
-                "Github",
-                "Gitlab"
-            ]
-        },
-        "model.Role": {
-            "type": "object",
-            "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                }
-            }
-        },
-        "model.TechStack": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                }
-            }
-        },
-        "model.User": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "dob": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "provider": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.UserRoleRequest": {
-            "type": "object",
-            "required": [
-                "userIds"
-            ],
-            "properties": {
-                "userIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "model.UserRoles": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "role": {
-                    "$ref": "#/definitions/model.Role"
-                },
-                "roleId": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "$ref": "#/definitions/model.Date"
-                },
-                "user": {
-                    "$ref": "#/definitions/model.User"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.VersioningType": {
-            "type": "string",
-            "enum": [
-                "header",
-                "uri"
-            ],
-            "x-enum-varnames": [
-                "VersioningTypeHeader",
-                "VersioningTypeUri"
-            ]
+          }
         }
+      },
+      "post": {
+        "description": "Create a new application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Create a new application",
+        "parameters": [
+          {
+            "description": "Application details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.CreateApplicationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/applications/:id/versions/:versionID": {
+      "delete": {
+        "description": "Delete an version of a explicit app",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Delete an application version",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Application ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Version ID",
+            "name": "versionID",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/applications/branches": {
+      "post": {
+        "description": "Get list of branches from a Git repository",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Get repository branches",
+        "parameters": [
+          {
+            "description": "Repository URL",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.GetBranchesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/applications/{id}": {
+      "get": {
+        "description": "Get an application by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Get an application by ID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Application ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.Application"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete an application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Delete an application",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Application ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/applications/{id}/deploy": {
+      "post": {
+        "description": "Deploy an application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Deploy an application",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Application ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Deployment details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.DeployApplicationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/applications/{id}/start": {
+      "post": {
+        "description": "Start an application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Start an application",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Application ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/applications/{id}/stop": {
+      "post": {
+        "description": "Stop an application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Application"],
+        "summary": "Stop an application",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Application ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/auth/github": {
+      "get": {
+        "description": "Start GitHub OAuth flow",
+        "produces": ["application/json"],
+        "tags": ["Auth"],
+        "summary": "Start GitHub OAuth flow",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "State parameter",
+            "name": "state",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to GitHub OAuth flow",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/auth/github/callback": {
+      "get": {
+        "description": "Handle GitHub OAuth callback",
+        "produces": ["application/json"],
+        "tags": ["Auth"],
+        "summary": "Handle GitHub OAuth callback",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "State parameter",
+            "name": "state",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Authorization code",
+            "name": "code",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.OAuthResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/auth/gitlab": {
+      "get": {
+        "description": "Start GitLab OAuth flow",
+        "produces": ["application/json"],
+        "tags": ["Auth"],
+        "summary": "Start GitLab OAuth flow",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "State parameter",
+            "name": "state",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to GitLab OAuth flow",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/auth/gitlab/callback": {
+      "get": {
+        "description": "Handle GitLab OAuth callback",
+        "produces": ["application/json"],
+        "tags": ["Auth"],
+        "summary": "Handle GitLab OAuth callback",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "State parameter",
+            "name": "state",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Authorization code",
+            "name": "code",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.OAuthResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/gateways": {
+      "post": {
+        "description": "Create a new gateway",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Create a new gateway",
+        "parameters": [
+          {
+            "description": "Gateway details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.Gateway"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/gateways/app/{appId}": {
+      "get": {
+        "description": "List gateways by app ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "List gateways by app ID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "App ID",
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/model.Gateway"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/gateways/config": {
+      "get": {
+        "description": "Gets the configuration of the API Gateway",
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Get API Gateway Config",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.GatewayConfig"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Saves API Gateway Configurations like default versioning",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Saves config",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.GatewayConfig"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/gateways/{id}": {
+      "get": {
+        "description": "Get a gateway by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Get a gateway by ID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Gateway ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.Gateway"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Update a gateway",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Update a gateway",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Gateway ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Gateway details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.Gateway"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a gateway",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Delete a gateway",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Gateway ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/gateways/{id}/health": {
+      "get": {
+        "description": "Check the health of a gateway",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Gateway"],
+        "summary": "Check the health of a gateway",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Gateway ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "description": "Login a user",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Auth", "User"],
+        "summary": "Login a user",
+        "parameters": [
+          {
+            "description": "Login Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.LoginRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.LoginResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "description": "Logout a user",
+        "produces": ["application/json"],
+        "tags": ["Auth", "User"],
+        "summary": "Logout a user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/metadata": {
+      "get": {
+        "description": "Get metadata",
+        "produces": ["application/json"],
+        "tags": ["Metadata"],
+        "summary": "Get metadata",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.Metadata"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Update metadata",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Metadata"],
+        "summary": "Update metadata",
+        "parameters": [
+          {
+            "description": "Metadata",
+            "name": "metadata",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.MetadataRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.Metadata"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/onboard": {
+      "post": {
+        "description": "Initiate onboarding",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Onboard"],
+        "summary": "Initiate onboarding",
+        "parameters": [
+          {
+            "description": "Onboard Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.OnboardRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/password/change": {
+      "post": {
+        "description": "Request password reset",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Auth", "User"],
+        "summary": "Request password reset",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/roles": {
+      "get": {
+        "description": "List all roles",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "List all roles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/model.Role"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new role",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "Create a new role",
+        "parameters": [
+          {
+            "description": "Role details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.CreateRoleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/roles/users/{id}": {
+      "get": {
+        "description": "Get roles for a specific user",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "Get user roles",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/model.UserRoles"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/roles/{id}": {
+      "delete": {
+        "description": "Delete a role by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "Delete a role",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Update a role by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "Update a role",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Role details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.CreateRoleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/roles/{id}/users": {
+      "post": {
+        "description": "Add a role to users by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "Add a role to users",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "User IDs",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.UserRoleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Remove a role from users by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Role"],
+        "summary": "Remove a role from users",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Role ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "User IDs",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.UserRoleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/tech-stacks": {
+      "get": {
+        "description": "List all tech stacks",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["TechStack"],
+        "summary": "List all tech stacks",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/model.TechStack"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new tech stack",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["TechStack"],
+        "summary": "Create a new tech stack",
+        "parameters": [
+          {
+            "description": "Tech stack details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.CreateTechStackRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/tech-stacks/{id}": {
+      "delete": {
+        "description": "Delete a tech stack by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["TechStack"],
+        "summary": "Delete a tech stack",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Tech stack ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Update a tech stack by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["TechStack"],
+        "summary": "Update a tech stack",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Tech stack ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Tech stack details",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.CreateTechStackRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/user/complete-invite": {
+      "post": {
+        "description": "Complete user invitation",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Complete user invitation",
+        "parameters": [
+          {
+            "description": "Complete Invite Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.CompleteInviteRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/user/invite": {
+      "post": {
+        "description": "Invite a user",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Invite a user",
+        "parameters": [
+          {
+            "description": "Invite User Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.InviteUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Get all users",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Get all users",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/model.User"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "description": "Get user profile",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Get user profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.User"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/users/profile/update": {
+      "put": {
+        "description": "Update user profile",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Update user profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.User"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/users/profile/update-password": {
+      "put": {
+        "description": "Update user password",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Update user password",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.PasswordRequest"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "/users/update-techstacks": {
+      "put": {
+        "description": "Select user tech stacks",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["User"],
+        "summary": "Select user tech stacks",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
     }
+  },
+  "definitions": {
+    "model.Application": {
+      "type": "object",
+      "properties": {
+        "appName": {
+          "type": "string"
+        },
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "storageLocation": {
+          "type": "string"
+        },
+        "techStackId": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        }
+      }
+    },
+    "model.CompleteInviteRequest": {
+      "type": "object",
+      "required": ["address", "dob", "email", "firstName", "lastName", "password", "phone", "token", "username"],
+      "properties": {
+        "address": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 2
+        },
+        "dob": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 8
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "token": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "model.CreateApplicationRequest": {
+      "type": "object",
+      "properties": {
+        "appName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "model.CreateRoleRequest": {
+      "type": "object",
+      "required": ["color", "description", "icon", "name"],
+      "properties": {
+        "color": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 2
+        },
+        "icon": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        }
+      }
+    },
+    "model.CreateTechStackRequest": {
+      "type": "object",
+      "required": ["description", "name"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 2
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        }
+      }
+    },
+    "model.CreateUserRequest": {
+      "type": "object",
+      "required": ["address", "dob", "email", "firstName", "lastName", "password", "phone", "provider", "username"],
+      "properties": {
+        "address": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 2
+        },
+        "dob": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        },
+        "lastName": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 8
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 10,
+          "minLength": 10
+        },
+        "provider": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "username": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 2
+        }
+      }
+    },
+    "model.Date": {
+      "type": "object",
+      "properties": {
+        "time.Time": {
+          "type": "string"
+        }
+      }
+    },
+    "model.DeployApplicationRequest": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "repoUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "model.Gateway": {
+      "type": "object",
+      "properties": {
+        "applicationId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "endpointType": {
+          "description": "\"subdomain\" or \"path\"",
+          "type": "string"
+        },
+        "endpointUrl": {
+          "type": "string"
+        },
+        "httpMethod": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "integrationType": {
+          "type": "string"
+        },
+        "loggingLevel": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "status": {
+          "description": "\"active\", \"inactive\", \"error\"",
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        }
+      }
+    },
+    "model.GatewayConfig": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "defaultVersioningType": {
+          "$ref": "#/definitions/model.VersioningType"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "id": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        }
+      }
+    },
+    "model.GetBranchesRequest": {
+      "type": "object",
+      "properties": {
+        "repoUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "model.InviteUserRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      }
+    },
+    "model.LoginRequest": {
+      "type": "object",
+      "required": ["email", "password"],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 8
+        }
+      }
+    },
+    "model.LoginResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/model.User"
+        }
+      }
+    },
+    "model.Metadata": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "id": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "logo_url": {
+          "type": "string"
+        },
+        "team_name": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        }
+      }
+    },
+    "model.MetadataRequest": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "logoUrl": {
+          "type": "string"
+        },
+        "teamName": {
+          "type": "string"
+        }
+      }
+    },
+    "model.OAuthResponse": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/definitions/model.Provider"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "model.OnboardRequest": {
+      "type": "object",
+      "required": ["adminUser", "metadata", "roles"],
+      "properties": {
+        "adminUser": {
+          "$ref": "#/definitions/model.CreateUserRequest"
+        },
+        "metadata": {
+          "$ref": "#/definitions/model.MetadataRequest"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/model.CreateRoleRequest"
+          }
+        }
+      }
+    },
+    "model.PasswordRequest": {
+      "type": "object",
+      "required": ["confirmPassword", "newPassword"],
+      "properties": {
+        "confirmPassword": {
+          "type": "string",
+          "minLength": 8
+        },
+        "currentPassword": {
+          "type": "string"
+        },
+        "newPassword": {
+          "type": "string",
+          "minLength": 8
+        },
+        "reset": {
+          "type": "boolean"
+        }
+      }
+    },
+    "model.Provider": {
+      "type": "string",
+      "enum": ["github", "gitlab"],
+      "x-enum-varnames": ["Github", "Gitlab"]
+    },
+    "model.Role": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "description": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        }
+      }
+    },
+    "model.TechStack": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        }
+      }
+    },
+    "model.User": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "dob": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "model.UserRoleRequest": {
+      "type": "object",
+      "required": ["userIds"],
+      "properties": {
+        "userIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "model.UserRoles": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "deletedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "role": {
+          "$ref": "#/definitions/model.Role"
+        },
+        "roleId": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "$ref": "#/definitions/model.Date"
+        },
+        "user": {
+          "$ref": "#/definitions/model.User"
+        },
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "model.VersioningType": {
+      "type": "string",
+      "enum": ["header", "uri"],
+      "x-enum-varnames": ["VersioningTypeHeader", "VersioningTypeUri"]
+    }
+  }
 }

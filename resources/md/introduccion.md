@@ -1,4 +1,4 @@
-****# Manual de Usuario – Sistema de Gestión Neploy
+\*\*\*\*# Manual de Usuario – Sistema de Gestión Neploy
 
 Este manual está diseñado para orientar a los usuarios en el uso correcto del sistema, desde la configuración inicial hasta la gestión completa de gateways y equipos de trabajo.
 
@@ -9,7 +9,6 @@ Este manual está diseñado para orientar a los usuarios en el uso correcto del 
 La configuración inicial se realiza una única vez, justo después del despliegue del sistema. Tiene como propósito establecer los parámetros fundamentales del entorno y registrar al **usuario administrador principal** que liderará la gestión.
 
 Esta configuración solo está disponible si **el sistema aún no ha sido inicializado**.
-
 
 ### 🔐 Paso 1: Conexión con GitHub o GitLab
 
@@ -26,20 +25,18 @@ Una vez autorizada la conexión, el sistema recupera automáticamente:
 
 > 📌 Este usuario será registrado como **administrador principal**.
 
-
 ### 🧍 Paso 2: Datos del Administrador
 
 Además del correo y proveedor, el sistema solicitará completar los siguientes datos del administrador:
 
-| Campo            | Validación                            |
-|------------------|----------------------------------------|
-| Nombre           | Requerido, mínimo 2, máximo 64 chars  |
-| Apellido         | Requerido, mínimo 2, máximo 64 chars  |
-| Fecha de nacimiento (DOB) | Requerido                |
-| Dirección        | Requerido, mínimo 2, máximo 128 chars |
-| Teléfono         | Exactamente 10 dígitos                |
-| Contraseña       | Requerida, entre 8 y 64 caracteres    |
-
+| Campo                     | Validación                            |
+| ------------------------- | ------------------------------------- |
+| Nombre                    | Requerido, mínimo 2, máximo 64 chars  |
+| Apellido                  | Requerido, mínimo 2, máximo 64 chars  |
+| Fecha de nacimiento (DOB) | Requerido                             |
+| Dirección                 | Requerido, mínimo 2, máximo 128 chars |
+| Teléfono                  | Exactamente 10 dígitos                |
+| Contraseña                | Requerida, entre 8 y 64 caracteres    |
 
 ### 🧱 Paso 3: Creación de Roles Iniciales
 
@@ -47,28 +44,26 @@ Durante la configuración, el sistema te pedirá definir al menos un rol inicial
 
 Cada rol incluye:
 
-| Campo        | Descripción                                  |
-|--------------|----------------------------------------------|
-| Nombre       | Nombre único del rol                         |
-| Descripción  | Explicación de la función del rol            |
-| Ícono        | Clave de ícono (por ejemplo: `shield`, `user`) |
-| Color        | Color de referencia para UI (ej. `blue`, `green`) |
+| Campo       | Descripción                                       |
+| ----------- | ------------------------------------------------- |
+| Nombre      | Nombre único del rol                              |
+| Descripción | Explicación de la función del rol                 |
+| Ícono       | Clave de ícono (por ejemplo: `shield`, `user`)    |
+| Color       | Color de referencia para UI (ej. `blue`, `green`) |
 
 > ✅ Puedes definir múltiples roles. Ej: `Desarrollador`, `Auditor`, `Infra`, `DevOps`, etc.
-
 
 ### 🧾 Paso 4: Metadatos del Equipo
 
 Para identificar el entorno de trabajo, se solicitan los siguientes datos:
 
-| Campo             | Descripción                                           |
-|-------------------|-------------------------------------------------------|
-| Nombre del equipo | Nombre interno que agrupará a todos los usuarios     |
-| Logo del equipo   | URL o imagen cargada que se mostrará en el sistema   |
-| Idioma del sistema| Idioma por defecto (`es`, `en`, `pt`, `fr`, `zh`)    |
+| Campo              | Descripción                                        |
+| ------------------ | -------------------------------------------------- |
+| Nombre del equipo  | Nombre interno que agrupará a todos los usuarios   |
+| Logo del equipo    | URL o imagen cargada que se mostrará en el sistema |
+| Idioma del sistema | Idioma por defecto (`es`, `en`, `pt`, `fr`, `zh`)  |
 
 > 🌐 El idioma afectará toda la interfaz inicial, pero puede cambiarse por usuario luego.
-
 
 ### ✅ Finalizar configuración
 
@@ -83,7 +78,6 @@ El sistema:
 2. Establece los metadatos.
 3. Redirige al login para comenzar a trabajar.
 
-
 ### Consideraciones importantes
 
 - **Este paso solo se realiza una vez**. Luego, la ruta de configuración inicial estará deshabilitada.
@@ -96,7 +90,6 @@ El sistema:
 
 El sistema permite el acceso únicamente mediante **credenciales tradicionales**: correo electrónico y contraseña. Este método es sencillo, directo y compatible con los permisos definidos por rol.
 
-
 ### 🔐 Acceso al sistema
 
 1. Dirígete a la ruta `/login`.
@@ -108,7 +101,6 @@ Si las credenciales son correctas:
 
 - Serás redirigido automáticamente al **dashboard principal**.
 
-
 ### 🧯 Gestión de errores
 
 En caso de error:
@@ -117,13 +109,11 @@ En caso de error:
 - Si la contraseña es incorrecta, el mismo mensaje será mostrado.
 - No se especifica qué campo falló por razones de seguridad.
 
-
 ### ✅ Características del login
 
 - **Sin autenticación social**: no se permite ingresar con Google, GitHub u otros proveedores externos.
 - **Sin verificación por correo**: no se requiere confirmar identidad por email tras iniciar sesión.
 - **Sin reCAPTCHA**: el sistema no usa verificación de bot al iniciar sesión (pero puede implementarse más adelante si se requiere seguridad extra).
-
 
 ### 🔐 Seguridad
 
@@ -140,7 +130,6 @@ Consulta la sección **9. Recuperación de clave** para conocer el procedimiento
 
 El **Dashboard** es la pantalla principal del sistema una vez que el usuario ha iniciado sesión. Ofrece una visión general del comportamiento del entorno, destacando métricas clave y acceso directo a módulos importantes.
 
-
 ### 📊 Panel de métricas
 
 El dashboard muestra tres gráficos principales en tiempo real, con datos obtenidos directamente desde el Gateway y las aplicaciones registradas:
@@ -152,13 +141,11 @@ El dashboard muestra tres gráficos principales en tiempo real, con datos obteni
 - **Eje Y**: Cantidad de solicitudes por hora
 - **Finalidad**: Detectar picos de tráfico, posibles ataques, o validar despliegues recientes
 
-
 #### 2. Tecnologías hospedadas
 
 - **Tipo de gráfico**: Torta / Pie chart
 - **Segmentos**: Tecnologías registradas por las aplicaciones (ej. Go, Node.js, Python)
 - **Finalidad**: Visualizar la diversidad del stack tecnológico dentro del entorno
-
 
 #### 3. Visitantes por día
 
@@ -166,7 +153,6 @@ El dashboard muestra tres gráficos principales en tiempo real, con datos obteni
 - **Eje X**: Días de la última semana o mes
 - **Eje Y**: Número de visitantes únicos registrados por día
 - **Finalidad**: Analizar evolución del uso, campañas de activación, etc.
-
 
 ### ⚙️ Navegación desde el Dashboard
 
@@ -176,12 +162,10 @@ Desde esta vista también puedes acceder rápidamente a otros módulos clave:
 - **Gateway**: para consultar endpoints y versionado
 - **Ajustes**: para cambiar configuraciones generales
 
-
 ### 🔐 Visibilidad
 
 - Todos los usuarios con acceso al sistema pueden ver el dashboard.
 - La visualización de datos puede variar según los **permisos por rol**.
-
 
 ### 🛡️ Seguridad
 
@@ -193,7 +177,6 @@ Desde esta vista también puedes acceder rápidamente a otros módulos clave:
 ## 4. Aplicaciones
 
 El módulo **Aplicaciones** permite gestionar todo el ciclo de vida de una aplicación hospedada o desplegada en el entorno. Desde esta sección puedes crear, cargar, desplegar y monitorear múltiples versiones de tus aplicaciones, ya sea desde archivos binarios o desde repositorios Git.
-
 
 ### 🧩 Crear una aplicación
 
@@ -210,7 +193,6 @@ El módulo **Aplicaciones** permite gestionar todo el ciclo de vida de una aplic
 
 > El sistema validará automáticamente la estructura del repositorio y descargará las ramas disponibles si la URL es válida.
 
-
 ### 🚀 Despliegue de versiones
 
 El despliegue de versiones puede ser por medio de dos formas, una de ellas es **subiendo un .zip**, en la cual:
@@ -225,7 +207,6 @@ El despliegue de versiones puede ser por medio de dos formas, una de ellas es **
 - El sistema clonará y construirá la aplicación
 - Se mostrará progreso en tiempo real mediante WebSocket (`progress` messages)
 
-
 **Nota**: si en el archivo docker no se especifica un puerto, el sistema solicitará al usuario que ingrese el puerto a utilizar. Además, para una nueva versión, no se especifica un puerto, el sistema supondrá que se encuentra al puerto siguiente, por ejemplo si se encuentra en el puerto 4000 y desean subir una nueva versión, el sistema asumirá que se subirá al puerto 4001.
 
 ### 🔄 WebSocket y Acciones Interactivas
@@ -238,7 +219,6 @@ El sistema puede enviar notificaciones de:
 
 > Algunas acciones requerirán completar formularios dinámicos directamente en el frontend. El usuario debe responder con los datos solicitados (por ejemplo, `port`, `env`).
 
-
 ### 📦 Gestión de aplicaciones
 
 Una vez creada la app:
@@ -249,7 +229,6 @@ Una vez creada la app:
   - **Eliminar** la aplicación
   - **Ver estadísticas**: cantidad total, activas y con errores
   - **Re-deplegar** una nueva versión
-
 
 ### 🧪 Validaciones
 
@@ -263,11 +242,9 @@ Una vez creada la app:
 
 El módulo de Gateway en el sistema es un componente de **solo lectura** que permite visualizar cómo están expuestas las aplicaciones a través del API Gateway y configurar el **tipo de versionado** utilizado para las rutas de acceso.
 
-
 ### Acceso al Módulo
 
 Desde el menú lateral, haz clic en **"Gateway"** para ingresar al módulo.
-
 
 ### Visualización de Configuración
 
@@ -284,17 +261,17 @@ La vista del módulo incluye:
 La configuración admite dos tipos de versionado:
 
 1. **Por URI**:
+
    - Las rutas incluyen explícitamente la versión en el path.
    - Ejemplo: `/v1.0.0/myApp/endpoint`
 
 2. **Por HTTP Headers**:
    - La versión se indica mediante un encabezado HTTP personalizado.
-   - Ejemplo:  
+   - Ejemplo:
      ```
      GET /myApp/endpoint
      X-API-Version: 1.0.0
      ```
-
 
 ### Limitaciones
 
@@ -322,7 +299,6 @@ El módulo de **Ajustes** permite gestionar la configuración general del sistem
 - **TechStack**
 - **Trazabilidad** (actividad reciente de los usuarios)
 
-
 ### ⚙️ General
 
 Aquí se configuran los parámetros básicos del sistema:
@@ -334,7 +310,6 @@ Aquí se configuran los parámetros básicos del sistema:
 - **Idioma predeterminado**: Lenguaje que se aplicará por defecto a nuevos usuarios (por ahora soporta `es`, `en`, `fr`, `pt`, `zh`).
 
 > 💾 Todos los campos se pueden modificar en cualquier momento. Los cambios se aplican en tiempo real para nuevos usuarios y vistas.
-
 
 ### 👥 Roles
 
@@ -352,7 +327,6 @@ Desde esta sección puedes gestionar los roles y sus asignaciones:
 
 - Los roles son usados para controlar permisos dentro del sistema.
 - Se pueden definir roles como `Auditor`, `Operador`, `Backend`, `Lider`, etc., según tu estructura organizativa.
-
 
 ### 🧱 TechStack
 
@@ -372,7 +346,6 @@ Administra las tecnologías que pueden seleccionarse al registrar aplicaciones:
 
 > 📦 Las tecnologías conectadas a una o más aplicaciones no pueden eliminarse hasta que todas las apps asociadas sean modificadas o eliminadas.
 
-
 ### 🔍 Trazabilidad (actividad reciente)
 
 Esta subsección permite auditar la actividad reciente del sistema. Las acciones son registradas con:
@@ -383,7 +356,6 @@ Esta subsección permite auditar la actividad reciente del sistema. Las acciones
 - Acción realizada (`"Editó rol"`, `"Actualizó logo"`, `"Cambió idioma"`, etc.)
 
 > 🛡️ Solo los usuarios con permisos de administrador pueden visualizar esta sección.
-
 
 ### Observaciones
 
@@ -396,7 +368,6 @@ Esta subsección permite auditar la actividad reciente del sistema. Las acciones
 ## 7. Perfil
 
 El módulo de **Perfil** permite que cada usuario gestione su propia cuenta dentro del sistema. Es una sección individual, accesible desde el menú superior o desde el menú lateral en la opción **"Perfil"**.
-
 
 ### Información visible
 
@@ -412,7 +383,6 @@ El perfil muestra los siguientes datos del usuario:
 - **Número telefónico**
 - **Proveedor de autenticación** (`GitHub`, `GitLab` o `manual`)
 
-
 ### Acciones disponibles
 
 #### ✏️ Editar perfil
@@ -423,7 +393,6 @@ El usuario puede actualizar su:
 - Dirección
 - Teléfono
 - Otra información valiosa que requiera actualizar
-
 
 ### 🔐 Cambio de contraseña
 
@@ -450,7 +419,6 @@ Para añadir un nuevo usuario al sistema:
 
 > El invitado recibirá un correo con un enlace para registrarse y completar sus datos personales.
 
-
 ### 🎭 Roles asignados
 
 Durante la invitación, el rol se selecciona directamente desde una lista predefinida de roles personalizados.
@@ -459,7 +427,6 @@ Durante la invitación, el rol se selecciona directamente desde una lista predef
 - Los permisos disponibles dependerán del rol asignado.
 
 > 📌 Los roles deben ser creados previamente desde **Ajustes → Roles**.
-
 
 ### 👥 Gestión del equipo
 
@@ -470,12 +437,10 @@ Dentro del listado de usuarios se puede:
 - **Desactivar usuarios**: impedir su acceso al sistema sin eliminar su cuenta.
 - **Eliminar usuarios** (si no hay registros críticos asociados).
 
-
 ### 🛡️ Control de acceso
 
 - Solo usuarios con privilegios de **Administrador** pueden acceder a esta sección.
 - Toda modificación en el equipo queda registrada en **Trazabilidad**.
-
 
 ### Consideraciones
 
@@ -483,11 +448,9 @@ Dentro del listado de usuarios se puede:
 - Si el usuario no completa el registro, su invitación puede ser reenviada o eliminada.
 - Un usuario desactivado no puede iniciar sesión hasta ser reactivado por un administrador.
 
-
 ## 9. Recuperación de Clave
 
 El sistema permite recuperar el acceso mediante un flujo de restablecimiento de contraseña completamente automatizado. Este proceso está diseñado para ser **rápido, seguro y sin intervención manual** por parte de los administradores.
-
 
 ### 1. Iniciar recuperación
 

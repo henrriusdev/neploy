@@ -8,8 +8,8 @@
 
 ## ✅ Estado General del Cumplimiento de Alcances
 
-| Módulo / Funcionalidad                   | Estado            | Detalles                                                           |
-|------------------------------------------|-------------------|--------------------------------------------------------------------|
+| Módulo / Funcionalidad                   | Estado             | Detalles                                                           |
+| ---------------------------------------- | ------------------ | ------------------------------------------------------------------ |
 | Configuración inicial                    | ✅ Implementado    | Setup del sistema, creación de roles, validación inicial           |
 | Gestión del equipo y usuarios            | ✅ Implementado    | Crear/editar usuarios, invitaciones, roles                         |
 | Incorporación al equipo (OAuth / correo) | ✅ Implementado    | GitHub / GitLab + email                                            |
@@ -33,16 +33,16 @@
 ## 🛠️ Cumplimiento de Fases del Desarrollo de la Metodología
 
 | Fase del Sprint                         | ¿Implementado? | Comentario                                      |
-|-----------------------------------------|----------------|-------------------------------------------------|
-| Sprint 1: Autenticación y Autorización  | ✅ Sí           | OAuth, JWT, `authService`, middleware           |
-| Sprint 2: Enrutamiento de Solicitudes   | ✅ Sí           | Router y rutas dinámicas                        |
-| Sprint 3: Políticas de Acceso           | ✅ Sí           | Falta implementación de listas blancas/negras   |
-| Sprint 4: Módulo de Caché               | ✅ Sí           | Lógica activa, parte del router                 |
-| Sprint 5: Módulo de Monitoreo           | ✅ Sí (base)    | Métricas presentes, sin frontend ni alertas aún |
-| Sprint 6: Módulo de Seguridad           | ✅ Sí           | Validaciones, headers seguros, protección DoS   |
-| Sprint 7: Módulo de Integración         | ✅ Sí           | Integración con servicios backend               |
-| Sprint 8-9: Módulos adicionales         | ❌ No           | Faltan notificaciones, perfil y reportes        |
-| Sprint 10-12: Pruebas y Ajustes Finales | ✅ Sí           | Pruebas manuales, revisión general detectadas   |
+| --------------------------------------- | -------------- | ----------------------------------------------- |
+| Sprint 1: Autenticación y Autorización  | ✅ Sí          | OAuth, JWT, `authService`, middleware           |
+| Sprint 2: Enrutamiento de Solicitudes   | ✅ Sí          | Router y rutas dinámicas                        |
+| Sprint 3: Políticas de Acceso           | ✅ Sí          | Falta implementación de listas blancas/negras   |
+| Sprint 4: Módulo de Caché               | ✅ Sí          | Lógica activa, parte del router                 |
+| Sprint 5: Módulo de Monitoreo           | ✅ Sí (base)   | Métricas presentes, sin frontend ni alertas aún |
+| Sprint 6: Módulo de Seguridad           | ✅ Sí          | Validaciones, headers seguros, protección DoS   |
+| Sprint 7: Módulo de Integración         | ✅ Sí          | Integración con servicios backend               |
+| Sprint 8-9: Módulos adicionales         | ❌ No          | Faltan notificaciones, perfil y reportes        |
+| Sprint 10-12: Pruebas y Ajustes Finales | ✅ Sí          | Pruebas manuales, revisión general detectadas   |
 
 ---
 
@@ -52,4 +52,3 @@
 - Falta cubrir aspectos clave de observabilidad y experiencia del usuario: rate limiting, alertas visuales, configuración de perfil y sistema de reportes.
 - Las notificaciones son mencionadas explícitamente en el módulo de monitoreo y en las preferencias de usuario, pero aún no han sido implementadas.
 - Las fases del desarrollo se alinean correctamente con el avance técnico, aunque los módulos adicionales requeridos por el T.E.G. deben completarse para alcanzar el 100%.
-

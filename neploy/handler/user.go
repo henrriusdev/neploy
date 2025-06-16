@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
@@ -95,23 +94,6 @@ func (u *User) CompleteInvite(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	// Get oauth_id from cookie
-	cookie, err := c.Cookie("oauth_id")
-	oauthID := "no_oauth_id"
-	if err == nil && cookie.Value != "" {
-		oauthID = cookie.Value
-	}
-
-	// delete oauth_id cookie
-	cookieDel := new(http.Cookie)
-	cookieDel.Name = "oauth_id"
-	cookieDel.Value = ""
-	cookieDel.Path = "/"
-	cookieDel.MaxAge = -1
-	c.SetCookie(cookieDel)
-
-	req.OauthID = oauthID
-
 	// Accept the invitation
 	invitation, err := u.user.AcceptInvitation(c.Request().Context(), req.Token)
 	if err != nil {
@@ -130,7 +112,7 @@ func (u *User) CompleteInvite(c echo.Context) error {
 		Password:  req.Password,
 	}
 
-	if err := u.user.Create(c.Request().Context(), userReq, oauthID); err != nil {
+	if err := u.user.Create(c.Request().Context(), userReq); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -147,21 +129,6 @@ func (u *User) AcceptInvite(c echo.Context) error {
 	username := c.QueryParam("username")
 	email := c.QueryParam("email")
 	provider := c.QueryParam("provider")
-
-	// Get oauth_id from cookies
-	cookie, err := c.Cookie("oauth_id")
-	var oauthID string
-	if err == nil && cookie.Value != "" {
-		oauthID = cookie.Value
-		// Clear the cookie
-		cookieDel := new(http.Cookie)
-		cookieDel.Name = "oauth_id"
-		cookieDel.Value = ""
-		cookieDel.Path = "/"
-		cookieDel.Expires = time.Now().Add(-1 * time.Hour)
-		cookieDel.HttpOnly = true
-		c.SetCookie(cookieDel)
-	}
 
 	// Get the invitation
 	invitation, err := u.user.GetInvitationByToken(context.Background(), token)
@@ -189,9 +156,6 @@ func (u *User) AcceptInvite(c echo.Context) error {
 	}
 	if provider != "" {
 		props["provider"] = provider
-	}
-	if oauthID != "" {
-		props["oauth_id"] = oauthID
 	}
 
 	return u.i.Render(c.Response(), c.Request(), "Auth/CompleteInvite", props)

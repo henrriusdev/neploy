@@ -1,11 +1,11 @@
-import {ControllerRenderProps} from "react-hook-form";
-import {CommandGroup, CommandInput, CommandItem, CommandList, Command} from "../ui/command";
-import {Command as CommandPrimitive} from "cmdk";
-import {Check} from "lucide-react";
-import {Skeleton} from "../ui/skeleton";
-import {cn} from "@/lib/utils";
-import {Option} from "@/types/props";
-import {forwardRef, useCallback, useEffect, useRef, useState} from "react";
+import { ControllerRenderProps } from "react-hook-form";
+import { CommandGroup, CommandInput, CommandItem, CommandList, Command } from "../ui/command";
+import { Command as CommandPrimitive } from "cmdk";
+import { Check } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
+import { cn } from "@/lib/utils";
+import { Option } from "@/types/props";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 
 export interface AutocompleteProps {
   options: Option[];
@@ -20,20 +20,7 @@ export interface AutocompleteProps {
 }
 
 export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
-  (
-    {
-      options,
-      placeholder,
-      emptyMessage = "No results.",
-      value,
-      onValueChange,
-      disabled,
-      isLoading = false,
-      field,
-      className,
-    },
-    ref
-  ) => {
+  ({ options, placeholder, emptyMessage = "No results.", value, onValueChange, disabled, isLoading = false, field, className }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isOpen, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState<string>("");
@@ -70,9 +57,7 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
         }
 
         if (event.key === "Enter" && input.value !== "") {
-          const optionToSelect = options.find(
-            (option) => option.label.toLowerCase() === input.value.toLowerCase()
-          );
+          const optionToSelect = options.find((option) => option.label.toLowerCase() === input.value.toLowerCase());
           if (optionToSelect) {
             handleSelectOption(optionToSelect);
           }
@@ -82,7 +67,7 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
           input.blur();
         }
       },
-      [isOpen, options]
+      [isOpen, options],
     );
 
     const handleBlur = useCallback(() => {
@@ -111,7 +96,7 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
           inputRef?.current?.blur();
         }, 0);
       },
-      [field, onValueChange]
+      [field, onValueChange],
     );
 
     return (
@@ -127,17 +112,12 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
             disabled={disabled}
             className={className}
           />
-          <div
-            className={cn(
-              "absolute top-full left-0 z-50 w-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
-              isOpen ? "block" : "hidden"
-            )}
-          >
+          <div className={cn("absolute top-full left-0 z-50 w-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95", isOpen ? "block" : "hidden")}>
             <CommandList className="max-h-[200px] overflow-y-auto">
               {isLoading ? (
                 <CommandPrimitive.Loading>
                   <div className="p-1">
-                    <Skeleton className="h-8 w-full"/>
+                    <Skeleton className="h-8 w-full" />
                   </div>
                 </CommandPrimitive.Loading>
               ) : null}
@@ -156,12 +136,9 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
                         onSelect={() => handleSelectOption(option)}
                         className={cn(
                           "flex w-full items-center gap-2 px-2 py-1.5 text-sm outline-none cursor-pointer hover:bg-accent hover:text-accent-foreground",
-                          isSelected && "bg-accent text-accent-foreground"
-                        )}
-                      >
-                        {option.icon && (
-                          <span className="flex-shrink-0">{option.icon}</span>
-                        )}
+                          isSelected && "bg-accent text-accent-foreground",
+                        )}>
+                        {option.icon && <span className="flex-shrink-0">{option.icon}</span>}
                         <span className="truncate">{option.label}</span>
                         {isSelected && <Check className="ml-auto h-4 w-4" />}
                       </CommandItem>
@@ -169,17 +146,13 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
                   })}
                 </CommandGroup>
               ) : null}
-              {!isLoading && options.length === 0 ? (
-                <CommandPrimitive.Empty className="py-6 text-center text-sm">
-                  {emptyMessage}
-                </CommandPrimitive.Empty>
-              ) : null}
+              {!isLoading && options.length === 0 ? <CommandPrimitive.Empty className="py-6 text-center text-sm">{emptyMessage}</CommandPrimitive.Empty> : null}
             </CommandList>
           </div>
         </Command>
       </div>
     );
-  }
+  },
 );
 
 Autocomplete.displayName = "Autocomplete";

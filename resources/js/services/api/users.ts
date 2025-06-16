@@ -1,4 +1,4 @@
-import {baseApi} from "./api";
+import { baseApi } from "./api";
 
 export const users = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -17,24 +17,19 @@ export const users = baseApi.injectEndpoints({
       }),
     }),
     updateUserTechStacks: builder.mutation<void, { userId: string; techIds: string[] }>({
-      query: ({userId, techIds}) => ({
-        url: '/users/update-techstacks',
-        method: 'PUT',
-        body: {userId, techIds},
+      query: ({ userId, techIds }) => ({
+        url: "/users/update-techstacks",
+        method: "PUT",
+        body: { userId, techIds },
       }),
     }),
     getUsers: builder.query({
       query: () => ({
-        url: 'users',
-        method: 'GET',
+        url: "users",
+        method: "GET",
       }),
     }),
   }),
 });
 
-export const {
-  useUpdateUserTechStacksMutation,
-  useUpdateProfileMutation,
-  useUpdatePasswordMutation,
-  useGetUsersQuery
-} = users;
+export const { useUpdateUserTechStacksMutation, useUpdateProfileMutation, useUpdatePasswordMutation, useGetUsersQuery } = users;

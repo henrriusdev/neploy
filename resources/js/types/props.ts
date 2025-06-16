@@ -1,16 +1,7 @@
-import {LucideIcon} from "lucide-react";
-import {DateRange} from "react-day-picker";
-import {ControllerRenderProps} from "react-hook-form";
-import {
-  ApplicationDockered,
-  Gateway,
-  GatewayConfig,
-  RoleWithUsers,
-  TeamMember,
-  TechStackWithApplications,
-  Trace,
-  User,
-} from "./common";
+import { LucideIcon } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { ControllerRenderProps } from "react-hook-form";
+import { ApplicationDockered, Gateway, GatewayConfig, RoleWithUsers, TeamMember, TechStackWithApplications, Trace, User } from "./common";
 
 interface CommonProps {
   user: {
@@ -61,7 +52,7 @@ export interface VisitorData {
   value: number;
 }
 
-export interface DashboardProps extends CommonProps{
+export interface DashboardProps extends CommonProps {
   requests?: RequestData[];
   techStack?: StackData[];
   visitors?: VisitorData[];
@@ -69,7 +60,7 @@ export interface DashboardProps extends CommonProps{
   health?: string;
 }
 
-export interface TeamProps extends CommonProps{
+export interface TeamProps extends CommonProps {
   team?: TeamMember[];
   roles?: Array<{
     name: string;
@@ -79,7 +70,7 @@ export interface TeamProps extends CommonProps{
   }>;
 }
 
-export interface GatewayProps extends CommonProps{
+export interface GatewayProps extends CommonProps {
   gateways: Gateway[];
   config?: GatewayConfig;
 }
@@ -115,11 +106,11 @@ export interface DatePickerProps {
   field?: ControllerRenderProps<any, any>;
 }
 
-export interface SettingsProps extends CommonProps{
+export interface SettingsProps extends CommonProps {
   language: string;
   roles: RoleWithUsers[];
   techStacks: TechStackWithApplications[];
-  traces: Trace[]
+  traces: Trace[];
 }
 
 export interface GeneralSettingsProps {
@@ -137,7 +128,7 @@ export interface TechStacksSettingsProps {
 }
 
 export interface TracesSettingsProps {
-  traces: Trace[]
+  traces: Trace[];
 }
 
 export interface DialogButtonProps {
@@ -154,7 +145,7 @@ export interface DialogButtonProps {
 }
 
 export interface GatewayConfigProps {
-  config?: GatewayConfig
+  config?: GatewayConfig;
 }
 
 export interface ApplicationProps extends CommonProps {

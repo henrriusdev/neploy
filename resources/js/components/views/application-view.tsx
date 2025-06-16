@@ -4,9 +4,9 @@ import { ApplicationForm, DynamicForm } from "@/components/forms";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast, useWebSocket } from "@/hooks";
 import { sanitizeAppName } from "@/lib/utils";
 import {
@@ -17,11 +17,11 @@ import {
   useStopApplicationMutation,
   useUploadApplicationMutation,
 } from "@/services/api/applications";
-import { ActionMessage, ActionResponse, ApplicationProps, ProgressMessage, } from "@/types";
+import { ActionMessage, ActionResponse, ApplicationProps, ProgressMessage } from "@/types";
 import type { Input as InputInterface } from "@/types/websocket";
 import { router } from "@inertiajs/react";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { CirclePlay, Pause, Plus, Trash2, } from "lucide-react";
+import { CirclePlay, Pause, Plus, Trash2 } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -44,21 +44,20 @@ const uploadFormSchema = z.object({
           return false;
         }
       },
-      {message: "Must be a valid GitHub or GitLab repository URL"}
+      { message: "Must be a valid GitHub or GitLab repository URL" },
     )
     .optional(),
   branch: z.string().optional(),
 });
 
-export const ApplicationView: FC<ApplicationProps> = ({application}) => {
-
+export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
   const [versions, setVersions] = useState(application.versions);
   const [currentRepoUrl, setCurrentRepoUrl] = useState("");
   const [branches, setBranches] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const {toast} = useToast();
-  const {t} = useTranslation();
-  const {onNotification, onInteractive, sendMessage} = useWebSocket();
+  const { toast } = useToast();
+  const { t } = useTranslation();
+  const { onNotification, onInteractive, sendMessage } = useWebSocket();
 
   const [actionDialog, setActionDialog] = useState<{
     show: boolean;
@@ -71,8 +70,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
     title: "",
     description: "",
     fields: [],
-    onSubmit: () => {
-    },
+    onSubmit: () => {},
   });
 
   const [deleteVersion] = useDeleteVersionMutation();
@@ -80,14 +78,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
   const [uploadApplication] = useUploadApplicationMutation();
   const [startApplication] = useStartApplicationMutation();
   const [stopApplication] = useStopApplicationMutation();
-  const {
-    data: branchesData,
-    isFetching: isLoadingBranches,
-    error: branchesError,
-  } = useLoadBranchesQuery(
-    {repoUrl: currentRepoUrl},
-    {skip: !currentRepoUrl}
-  );
+  const { data: branchesData, isFetching: isLoadingBranches, error: branchesError } = useLoadBranchesQuery({ repoUrl: currentRepoUrl }, { skip: !currentRepoUrl });
 
   useEffect(() => {
     application.versions && setVersions(application.versions);
@@ -136,12 +127,12 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
           validate:
             input.name === "port"
               ? (value: string) => {
-                const port = parseInt(value);
-                if (isNaN(port) || port < 1 || port > 65535) {
-                  return t("dashboard.applications.errors.portInvalid");
+                  const port = parseInt(value);
+                  if (isNaN(port) || port < 1 || port > 65535) {
+                    return t("dashboard.applications.errors.portInvalid");
+                  }
+                  return true;
                 }
-                return true;
-              }
               : undefined,
         })),
         onSubmit: (data) => {
@@ -156,7 +147,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
           };
           console.log("Sending response:", response);
           sendMessage(response.type, response.action, response.data);
-          setActionDialog((prev) => ({...prev, show: false}));
+          setActionDialog((prev) => ({ ...prev, show: false }));
 
           // Show confirmation toast
           toast({
@@ -178,16 +169,12 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
     };
   }, [onNotification, onInteractive, sendMessage, toast, t]);
 
-  const handleVersionAction = async (
-    appId: string,
-    versionId: string,
-    action: "start" | "stop"
-  ) => {
+  const handleVersionAction = async (appId: string, versionId: string, action: "start" | "stop") => {
     try {
       if (action === "start") {
-        await startApplication({appId, versionId}).unwrap();
+        await startApplication({ appId, versionId }).unwrap();
       } else if (action === "stop") {
-        await stopApplication({appId, versionId}).unwrap();
+        await stopApplication({ appId, versionId }).unwrap();
       }
 
       toast({
@@ -195,7 +182,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
         description: t(`applications.actions.${action}Success`),
       });
 
-      router.reload({only: ["application"]});
+      router.reload({ only: ["application"] });
     } catch (error: any) {
       toast({
         title: t("common.error"),
@@ -207,12 +194,12 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
 
   const handleDeleteVersion = async (appId: string, versionId: string) => {
     try {
-      await deleteVersion({appId, versionId}).unwrap();
+      await deleteVersion({ appId, versionId }).unwrap();
       toast({
         title: "Success",
         description: "Version deleted successfully",
       });
-      router.reload({only: ["application"]});
+      router.reload({ only: ["application"] });
     } catch (error) {
       console.error(error);
     }
@@ -234,10 +221,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
       }
     }, 1000);
   };
-  const handleVersionSubmit = async (
-    values: z.infer<typeof uploadFormSchema>,
-    file: File | null
-  ) => {
+  const handleVersionSubmit = async (values: z.infer<typeof uploadFormSchema>, file: File | null) => {
     setIsUploading(true);
 
     try {
@@ -289,15 +273,10 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold ">{application.appName}</h1>
           <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-            >
+            <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
               Running
             </Badge>
-            <span className="text-sm text-muted-foreground">
-              ID: {application.id}
-            </span>
+            <span className="text-sm text-muted-foreground">ID: {application.id}</span>
           </div>
         </div>
       </div>
@@ -335,20 +314,16 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm">CPU Usage</span>
-                <span className="text-sm font-medium">
-                  {application.cpuUsage.toFixed(2)}%
-                </span>
+                <span className="text-sm font-medium">{application.cpuUsage.toFixed(2)}%</span>
               </div>
-              <Progress value={application.cpuUsage} className="h-2"/>
+              <Progress value={application.cpuUsage} className="h-2" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Memory Usage</span>
-                <span className="text-sm font-medium">
-                  {application.memoryUsage.toFixed(2)}%
-                </span>
+                <span className="text-sm font-medium">{application.memoryUsage.toFixed(2)}%</span>
               </div>
-              <Progress value={application.memoryUsage} className="h-2"/>
+              <Progress value={application.memoryUsage} className="h-2" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -357,9 +332,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Requests/min</p>
-                <p className="text-sm font-medium">
-                  {application.requestsPerMin}
-                </p>
+                <p className="text-sm font-medium">{application.requestsPerMin}</p>
               </div>
             </div>
           </CardContent>
@@ -373,7 +346,7 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
-                    <Plus className="w-4 h-4 mr-2"/>
+                    <Plus className="w-4 h-4 mr-2" />
                     New Version
                   </Button>
                 </DialogTrigger>
@@ -409,72 +382,48 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
                 {versions?.length ? (
                   versions.map((version, i) => (
                     <TableRow key={i}>
-                      <TableCell className="font-mono">
-                        {version.versionTag}
-                      </TableCell>
+                      <TableCell className="font-mono">{version.versionTag}</TableCell>
                       <TableCell>{version.description}</TableCell>
                       <TableCell>
-                        <a target="_blank"
-                           href={`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}>{`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}</a></TableCell>
+                        <a target="_blank" href={`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}>{`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}</a>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs capitalize">
                           {version.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        {new Date(version.createdAt).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{new Date(version.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-blue-400 hover:bg-blue-400/10"
-                          onClick={() =>
-                            handleVersionAction(
-                              application.id,
-                              version.id,
-                              "start"
-                            )
-                          }
-                          disabled={version.status === "active"}
-                        >
-                          <CirclePlay className="h-4 w-4"/>
+                          onClick={() => handleVersionAction(application.id, version.id, "start")}
+                          disabled={version.status === "active"}>
+                          <CirclePlay className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-yellow-400 hover:bg-yellow-400/10"
-                          onClick={() =>
-                            handleVersionAction(
-                              application.id,
-                              version.id,
-                              "stop"
-                            )
-                          }
-                          disabled={version.status !== "active"}
-                        >
-                          <Pause className="h-4 w-4"/>
+                          onClick={() => handleVersionAction(application.id, version.id, "stop")}
+                          disabled={version.status !== "active"}>
+                          <Pause className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-red-400 hover:bg-red-400/10"
-                          onClick={() =>
-                            handleDeleteVersion(application.id, version.id)
-                          }
-                          disabled={version.status === "Running"}
-                        >
-                          <Trash2 className="h-4 w-4"/>
+                          onClick={() => handleDeleteVersion(application.id, version.id)}
+                          disabled={version.status === "Running"}>
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-muted-foreground"
-                    >
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       No versions found.
                     </TableCell>
                   </TableRow>
@@ -485,24 +434,15 @@ export const ApplicationView: FC<ApplicationProps> = ({application}) => {
         </Card>
       </div>
 
-      <Dialog
-        open={actionDialog.show}
-        onOpenChange={(open) =>
-          !open && setActionDialog({...actionDialog, show: false})
-        }
-      >
+      <Dialog open={actionDialog.show} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, show: false })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{actionDialog.title}</DialogTitle>
             <DialogDescription>{actionDialog.description}</DialogDescription>
           </DialogHeader>
-          <DynamicForm
-            fields={actionDialog.fields}
-            onSubmit={actionDialog.onSubmit}
-          />
+          <DynamicForm fields={actionDialog.fields} onSubmit={actionDialog.onSubmit} />
         </DialogContent>
       </Dialog>
     </div>
-  )
-    ;
+  );
 };

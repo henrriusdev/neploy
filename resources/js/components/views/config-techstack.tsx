@@ -1,33 +1,26 @@
-import React, {useEffect, useState} from "react";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import {Badge} from "@/components/ui/badge";
-import {TechStacksSettingsProps} from "@/types/props";
-import {TechIcon} from "@/components/icons/tech-icon";
-import {useTranslation} from "react-i18next";
-import {DialogButton} from "../forms/dialog-button";
-import {TechStackForm} from "../forms/tech-stack-form";
-import {useToast} from "@/hooks";
-import {z} from "zod";
-import {
-  useCreateTechStackMutation,
-  useDeleteTechStackMutation,
-  useGetTechStacksQuery,
-  useUpdateTechStackMutation,
-} from "@/services/api/tech-stack";
-import {Pencil, PlusCircle, Trash2} from "lucide-react";
-import {TooltipButton} from "../ui/tooltip-button";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { TechStacksSettingsProps } from "@/types/props";
+import { TechIcon } from "@/components/icons/tech-icon";
+import { useTranslation } from "react-i18next";
+import { DialogButton } from "../forms/dialog-button";
+import { TechStackForm } from "../forms/tech-stack-form";
+import { useToast } from "@/hooks";
+import { z } from "zod";
+import { useCreateTechStackMutation, useDeleteTechStackMutation, useGetTechStacksQuery, useUpdateTechStackMutation } from "@/services/api/tech-stack";
+import { Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { TooltipButton } from "../ui/tooltip-button";
 
 const techStackSchema = z.object({
   name: z.string().min(2).max(64),
   description: z.string().min(2).max(128),
 });
 
-const TechStackTab: React.FC<TechStacksSettingsProps> = ({
-                                                           techStacks: initialTechStacks,
-                                                         }) => {
-  const {t} = useTranslation();
-  const {toast} = useToast();
+const TechStackTab: React.FC<TechStacksSettingsProps> = ({ techStacks: initialTechStacks }) => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
   const getTechStacks = useGetTechStacksQuery();
   const [createTechStack] = useCreateTechStackMutation();
   const [updateTechStack] = useUpdateTechStackMutation();
@@ -42,10 +35,7 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
     }
   }, [getTechStacks.data]);
 
-  async function update(
-    techStackId: string,
-    data: z.infer<typeof techStackSchema>
-  ) {
+  async function update(techStackId: string, data: z.infer<typeof techStackSchema>) {
     try {
       await updateTechStack({
         id: techStackId,
@@ -116,7 +106,7 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
           description={t("dashboard.settings.techStack.editDescriptionDialog")}
           icon={PlusCircle}
           buttonText={t("dashboard.settings.techStack.add")}>
-          <TechStackForm onSubmit={create}/>
+          <TechStackForm onSubmit={create} />
         </DialogButton>
       </div>
 
@@ -130,9 +120,7 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
               <TableRow>
                 <TableHead>{t("dashboard.settings.techStack.tableLogo")}</TableHead>
                 <TableHead>{t("dashboard.settings.techStack.tableTechnology")}</TableHead>
-                <TableHead>
-                  {t("dashboard.settings.techStack.tableDescription")}
-                </TableHead>
+                <TableHead>{t("dashboard.settings.techStack.tableDescription")}</TableHead>
                 <TableHead>{t("dashboard.settings.techStack.tableTotalApps")}</TableHead>
                 <TableHead>{t("dashboard.settings.techStack.tableActions")}</TableHead>
               </TableRow>
@@ -141,27 +129,18 @@ const TechStackTab: React.FC<TechStacksSettingsProps> = ({
               {techStacks.map((techStack) => (
                 <TableRow key={techStack.id}>
                   <TableCell>
-                    <TechIcon name={techStack.name} size={40}/>
+                    <TechIcon name={techStack.name} size={40} />
                   </TableCell>
                   <TableCell>{techStack.name}</TableCell>
                   <TableCell>{techStack.description}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        techStack.applications?.length > 0
-                          ? "destructive"
-                          : "default"
-                      }>
-                      {techStack.applications?.length ?? 0}
-                    </Badge>
+                    <Badge variant={techStack.applications?.length > 0 ? "destructive" : "default"}>{techStack.applications?.length ?? 0}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <DialogButton
                         title={t("dashboard.settings.techStack.edit")}
-                        description={t(
-                          "dashboard.settings.techStack.editDescriptionDialog"
-                        )}
+                        description={t("dashboard.settings.techStack.editDescriptionDialog")}
                         icon={Pencil}
                         variant="tooltip"
                         open={openTechStackId === techStack.id}

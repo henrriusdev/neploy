@@ -31,7 +31,6 @@ type OnboardRequest struct {
 	AdminUser CreateUserRequest   `json:"adminUser" validate:"required"`
 	Roles     []CreateRoleRequest `json:"roles" validate:"required"`
 	Metadata  MetadataRequest     `json:"metadata" validate:"required"`
-	OauthID   string              `json:"-"`
 }
 
 type MetadataRequest struct {
@@ -55,7 +54,6 @@ type CompleteInviteRequest struct {
 	Email     string    `json:"email" validate:"required,email"`
 	Username  string    `json:"username" validate:"required"`
 	Password  string    `json:"password" validate:"required,min=8,max=64"`
-	OauthID   string    `json:"-"`
 }
 
 type CreateApplicationRequest struct {

@@ -20,7 +20,7 @@ import (
 )
 
 type User interface {
-	Create(ctx context.Context, user model.CreateUserRequest, oauthID string) error
+	Create(ctx context.Context, user model.CreateUserRequest) error
 	Get(ctx context.Context, id string) (model.User, error)
 	Update(ctx context.Context, user model.User) error
 	Delete(ctx context.Context, id string) error
@@ -48,7 +48,7 @@ func NewUser(repos repository.Repositories) User {
 	return &user{repos: repos, email: email.NewEmail()}
 }
 
-func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID string) error {
+func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -87,8 +87,6 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID 
 			return err
 		}
 	}
-
-	// No need to create OAuth connection anymore as we store the provider in the User entity
 
 	return nil
 }

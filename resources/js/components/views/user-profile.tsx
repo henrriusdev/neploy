@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import {zodResolver} from "@hookform/resolvers/zod"
-import {useForm} from "react-hook-form"
-import {z} from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form"
-import {Input} from "@/components/ui/input"
-import {Switch} from "@/components/ui/switch"
-import {User} from "@/types";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {DatePicker} from "@/components/forms/date-picker";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { User } from "@/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DatePicker } from "@/components/forms/date-picker";
 import * as React from "react";
-import {useTranslation} from "react-i18next";
-import {withMask} from "use-mask-input";
-import {parse} from "date-fns"
-import {useUpdatePasswordMutation, useUpdateProfileMutation} from "@/services/api/users";
+import { useTranslation } from "react-i18next";
+import { withMask } from "use-mask-input";
+import { parse } from "date-fns";
+import { useUpdatePasswordMutation, useUpdateProfileMutation } from "@/services/api/users";
 
 const profileFormSchema = z.object({
   email: z.string().email({
@@ -28,7 +28,7 @@ const profileFormSchema = z.object({
   lastName: z.string().min(2, {
     message: "Last name must be at least 2 characters.",
   }),
-  dob: z.date({message:"Required"}),
+  dob: z.date({ message: "Required" }),
   address: z.string().min(5, {
     message: "Address must be at least 5 characters.",
   }),
@@ -36,7 +36,7 @@ const profileFormSchema = z.object({
     message: "Phone number must be at least 5 characters.",
   }),
   notifications: z.boolean().default(false),
-})
+});
 
 const passwordFormSchema = z
   .object({
@@ -53,21 +53,20 @@ const passwordFormSchema = z
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
-  })
+  });
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
-type PasswordFormValues = z.infer<typeof passwordFormSchema>
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
-
-export function UserProfile({user}: { user: User }) {
-  const {t} = useTranslation()
+export function UserProfile({ user }: { user: User }) {
+  const { t } = useTranslation();
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       ...user,
-      dob: parse(user.dob, "yyyy-MM-dd", new Date())
+      dob: parse(user.dob, "yyyy-MM-dd", new Date()),
     },
-  })
+  });
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -76,39 +75,38 @@ export function UserProfile({user}: { user: User }) {
       newPassword: "",
       confirmPassword: "",
     },
-  })
+  });
 
-  const [updateProfile] = useUpdateProfileMutation()
-  const [updatePassword] = useUpdatePasswordMutation()
+  const [updateProfile] = useUpdateProfileMutation();
+  const [updatePassword] = useUpdatePasswordMutation();
 
   async function onProfileSubmit(data: ProfileFormValues) {
     try {
       await updateProfile({
         ...data,
         dob: data.dob.toISOString(),
-      }).unwrap()
-      console.log("Perfil actualizado exitosamente")
+      }).unwrap();
+      console.log("Perfil actualizado exitosamente");
     } catch (error) {
-      console.error("Error al actualizar perfil:", error)
+      console.error("Error al actualizar perfil:", error);
     }
   }
 
   async function onPasswordSubmit(data: PasswordFormValues) {
     try {
-      await updatePassword(data).unwrap()
-      console.log("Contraseña actualizada exitosamente")
+      await updatePassword(data).unwrap();
+      console.log("Contraseña actualizada exitosamente");
     } catch (error) {
-      console.error("Error al actualizar contraseña:", error)
+      console.error("Error al actualizar contraseña:", error);
     }
   }
 
-  const avatarUrl =
-    user.provider === "github" ? `https://unavatar.io/github/${user.username}` : `https://unavatar.io/${user.email}`
+  const avatarUrl = user.provider === "github" ? `https://unavatar.io/github/${user.username}` : `https://unavatar.io/${user.email}`;
 
   // Get initials for fallback
   const getInitials = () => {
-    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-  }
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  };
 
   return (
     <div className="space-y-8 p-6">
@@ -135,26 +133,26 @@ export function UserProfile({user}: { user: User }) {
                   <FormField
                     control={profileForm.control}
                     name="firstName"
-                    render={({field}) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>First Name</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter your first name" {...field} />
                         </FormControl>
-                        <FormMessage/>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
                     control={profileForm.control}
                     name="lastName"
-                    render={({field}) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>Last Name</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter your last name" {...field} />
                         </FormControl>
-                        <FormMessage/>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -163,13 +161,13 @@ export function UserProfile({user}: { user: User }) {
                 <FormField
                   control={profileForm.control}
                   name="email"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your email" {...field} />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -177,17 +175,13 @@ export function UserProfile({user}: { user: User }) {
                 <FormField
                   control={profileForm.control}
                   name="dob"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>{t('step.user.dob')}</FormLabel>
+                      <FormLabel>{t("step.user.dob")}</FormLabel>
                       <FormControl>
-                        <DatePicker
-                          field={field}
-                          maxYear={new Date().getFullYear() - 18}
-                          minYear={new Date().getFullYear() - 90}
-                        />
+                        <DatePicker field={field} maxYear={new Date().getFullYear() - 18} minYear={new Date().getFullYear() - 90} />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -195,13 +189,13 @@ export function UserProfile({user}: { user: User }) {
                 <FormField
                   control={profileForm.control}
                   name="address"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter your address" {...field} />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -209,13 +203,13 @@ export function UserProfile({user}: { user: User }) {
                 <FormField
                   control={profileForm.control}
                   name="phone"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>{t('step.user.phone')}</FormLabel>
+                      <FormLabel>{t("step.user.phone")}</FormLabel>
                       <FormControl>
-                        <Input {...field} ref={withMask("(9999) 999-99-99")}/>
+                        <Input {...field} ref={withMask("(9999) 999-99-99")} />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -223,14 +217,14 @@ export function UserProfile({user}: { user: User }) {
                 <FormField
                   control={profileForm.control}
                   name="notifications"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Notifications</FormLabel>
                         <FormDescription>Receive system notifications and alerts.</FormDescription>
                       </div>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange}/>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -248,7 +242,7 @@ export function UserProfile({user}: { user: User }) {
           <CardHeader>
             <div className="flex items-start flex-col gap-4">
               <Avatar className="h-36 w-36 border-2 border-primary/10">
-                <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={`${user.firstName} ${user.lastName}`}/>
+                <AvatarImage src={avatarUrl || "/placeholder.svg"} alt={`${user.firstName} ${user.lastName}`} />
                 <AvatarFallback className="text-lg font-medium">{getInitials()}</AvatarFallback>
               </Avatar>
               <div>
@@ -263,40 +257,40 @@ export function UserProfile({user}: { user: User }) {
                 <FormField
                   control={passwordForm.control}
                   name="currentPassword"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Current Password</FormLabel>
                       <FormControl>
                         <Input type="password" placeholder="Enter current password" {...field} />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={passwordForm.control}
                   name="newPassword"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>New Password</FormLabel>
                       <FormControl>
                         <Input type="password" placeholder="Enter new password" {...field} />
                       </FormControl>
                       <FormDescription>Password must be at least 8 characters long.</FormDescription>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={passwordForm.control}
                   name="confirmPassword"
-                  render={({field}) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
                       <FormControl>
                         <Input type="password" placeholder="Confirm new password" {...field} />
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -309,5 +303,5 @@ export function UserProfile({user}: { user: User }) {
         </Card>
       </div>
     </div>
-  )
+  );
 }

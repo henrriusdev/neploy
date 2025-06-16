@@ -16,14 +16,7 @@ import { ApplicationCard } from "../application-card";
 import { ApplicationForm, DynamicForm } from "../forms";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 const uploadFormSchema = z.object({
   appName: z.string().min(1, "Application name is required"),
@@ -44,7 +37,7 @@ const uploadFormSchema = z.object({
           return false;
         }
       },
-      { message: "Must be a valid GitHub or GitLab repository URL" }
+      { message: "Must be a valid GitHub or GitLab repository URL" },
     )
     .optional(),
   branch: z.string().optional(),
@@ -84,14 +77,7 @@ export function Applications() {
     refetchOnReconnect: true,
   });
 
-  const {
-    data: branchesData,
-    isFetching: isLoadingBranches,
-    error: branchesError,
-  } = useLoadBranchesQuery(
-    { repoUrl: currentRepoUrl },
-    { skip: !currentRepoUrl }
-  );
+  const { data: branchesData, isFetching: isLoadingBranches, error: branchesError } = useLoadBranchesQuery({ repoUrl: currentRepoUrl }, { skip: !currentRepoUrl });
 
   useEffect(() => {
     if (applicationsError) {
@@ -153,17 +139,13 @@ export function Applications() {
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description:
-          error.message || t(`dashboard.applications.errors.deleteFailed`),
+        description: error.message || t(`dashboard.applications.errors.deleteFailed`),
         variant: "destructive",
       });
     }
   };
 
-  const onSubmit = async (
-    values: z.infer<typeof uploadFormSchema>,
-    file: File | null
-  ) => {
+  const onSubmit = async (values: z.infer<typeof uploadFormSchema>, file: File | null) => {
     if (!values.appName) {
       toast({
         title: t("common.error"),
@@ -187,11 +169,7 @@ export function Applications() {
     try {
       const response = await createApplication({
         appName: values.appName,
-        description:
-          values.description ||
-          `Application created from ${
-            file ? "file upload" : "repository " + values.repoUrl
-          }`,
+        description: values.description || `Application created from ${file ? "file upload" : "repository " + values.repoUrl}`,
       });
 
       if ("error" in response) {
@@ -239,8 +217,7 @@ export function Applications() {
     } catch (error: any) {
       toast({
         title: t("common.error"),
-        description:
-          error.message || t("dashboard.applications.errors.unknown"),
+        description: error.message || t("dashboard.applications.errors.unknown"),
         variant: "destructive",
       });
     } finally {
@@ -318,11 +295,7 @@ export function Applications() {
   }, [onNotification, onInteractive, sendMessage, toast, t]);
 
   useEffect(() => {
-    const ws = new WebSocket(
-      `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${
-        window.location.host
-      }/ws`
-    );
+    const ws = new WebSocket(`${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -343,49 +316,33 @@ export function Applications() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("dashboard.applications.stats.totalApplications")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.applications.stats.totalApplications")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {applications?.length || 0}
-            </div>
+            <div className="text-2xl font-bold">{applications?.length || 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("dashboard.applications.stats.runningApplications")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.applications.stats.runningApplications")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {applications?.filter((app) => app.status === "Running").length ||
-                0}
-            </div>
+            <div className="text-2xl font-bold">{applications?.filter((app) => app.status === "Running").length || 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("dashboard.applications.stats.failedApplications")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.applications.stats.failedApplications")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {applications?.filter((app) => app.status === "Error").length ||
-                0}
-            </div>
+            <div className="text-2xl font-bold">{applications?.filter((app) => app.status === "Error").length || 0}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Actions Bar */}
       <div className="flex justify-between items-center px-3 py-1">
-        <h1 className="font-bold text-3xl">
-          {t("dashboard.applications.title")}
-        </h1>
+        <h1 className="font-bold text-3xl">{t("dashboard.applications.title")}</h1>
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -395,53 +352,25 @@ export function Applications() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>
-                {t("dashboard.applications.createNew.title")}
-              </DialogTitle>
-              <DialogDescription>
-                {t("dashboard.applications.createNew.description")}
-              </DialogDescription>
+              <DialogTitle>{t("dashboard.applications.createNew.title")}</DialogTitle>
+              <DialogDescription>{t("dashboard.applications.createNew.description")}</DialogDescription>
             </DialogHeader>
-            <ApplicationForm
-              onSubmit={onSubmit}
-              isUploading={isUploading}
-              branches={branches}
-              isLoadingBranches={isLoadingBranches}
-              onRepoUrlChange={handleRepoUrlChange}
-            />
+            <ApplicationForm onSubmit={onSubmit} isUploading={isUploading} branches={branches} isLoadingBranches={isLoadingBranches} onRepoUrlChange={handleRepoUrlChange} />
           </DialogContent>
         </Dialog>
       </div>
 
-      <div
-        className={
-          viewMode === "grid"
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            : "space-y-4"
-        }>
-        {applications?.map((app) => (
-          <ApplicationCard
-            key={app.id}
-            app={app}
-            onDelete={() => handleApplicationAction(app.id)}
-          />
-        ))}
+      <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
+        {applications?.map((app) => <ApplicationCard key={app.id} app={app} onDelete={() => handleApplicationAction(app.id)} />)}
       </div>
 
-      <Dialog
-        open={actionDialog.show}
-        onOpenChange={(open) =>
-          !open && setActionDialog({ ...actionDialog, show: false })
-        }>
+      <Dialog open={actionDialog.show} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, show: false })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{actionDialog.title}</DialogTitle>
             <DialogDescription>{actionDialog.description}</DialogDescription>
           </DialogHeader>
-          <DynamicForm
-            fields={actionDialog.fields}
-            onSubmit={actionDialog.onSubmit}
-          />
+          <DynamicForm fields={actionDialog.fields} onSubmit={actionDialog.onSubmit} />
         </DialogContent>
       </Dialog>
     </div>

@@ -13,20 +13,20 @@ export const connectNotifications = () => {
   if (notificationsSocket?.readyState === WebSocket.OPEN) return;
 
   notificationsSocket = new WebSocket(`ws://${window.location.host}/ws/notifications`);
-  
+
   notificationsSocket.onmessage = (event) => {
     const message = JSON.parse(event.data) as ProgressMessage;
     if (message.type === "progress") {
-      notificationsCallbacks.forEach(callback => callback(message));
+      notificationsCallbacks.forEach((callback) => callback(message));
     }
   };
 
   notificationsSocket.onerror = (error) => {
-    console.error('Notifications WebSocket error:', error);
+    console.error("Notifications WebSocket error:", error);
   };
 
   notificationsSocket.onclose = () => {
-    console.log('Notifications WebSocket closed');
+    console.log("Notifications WebSocket closed");
     if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       const delay = Math.min(INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttempts), 30000);
       setTimeout(connectNotifications, delay);
@@ -37,29 +37,29 @@ export const connectNotifications = () => {
 
 export const connectInteractive = () => {
   if (interactiveSocket?.readyState === WebSocket.OPEN) {
-    readyCallbacks.forEach(callback => callback());
+    readyCallbacks.forEach((callback) => callback());
     return;
   }
 
   interactiveSocket = new WebSocket(`ws://${window.location.host}/ws/interactive`);
-  
+
   interactiveSocket.onopen = () => {
-    console.log('Interactive WebSocket connected');
+    console.log("Interactive WebSocket connected");
     reconnectAttempts = 0;
-    readyCallbacks.forEach(callback => callback());
+    readyCallbacks.forEach((callback) => callback());
   };
 
   interactiveSocket.onmessage = (event) => {
     const message = JSON.parse(event.data) as ActionMessage;
-    interactiveCallbacks.forEach(callback => callback(message));
+    interactiveCallbacks.forEach((callback) => callback(message));
   };
 
   interactiveSocket.onerror = (error) => {
-    console.error('Interactive WebSocket error:', error);
+    console.error("Interactive WebSocket error:", error);
   };
 
   interactiveSocket.onclose = () => {
-    console.log('Interactive WebSocket closed');
+    console.log("Interactive WebSocket closed");
     if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       const delay = Math.min(INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttempts), 30000);
       setTimeout(connectInteractive, delay);
@@ -102,7 +102,7 @@ export const sendInteractiveMessage = async (type: ActionType, action: string, d
   if (interactiveSocket?.readyState === WebSocket.OPEN) {
     interactiveSocket.send(JSON.stringify({ type, action, data }));
   } else {
-    console.error('Interactive WebSocket is not connected');
+    console.error("Interactive WebSocket is not connected");
   }
 };
 

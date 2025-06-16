@@ -1,17 +1,17 @@
-import {zodResolver} from "@hookform/resolvers/zod";
-import {Controller, useForm, UseFormReturn} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm, UseFormReturn } from "react-hook-form";
 import * as z from "zod";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {Textarea} from "@/components/ui/textarea";
-import {Autocomplete} from "@/components/forms";
-import {ColorPicker} from "@/components/forms";
-import {RoleIcon} from "@/components/icons";
-import {icons} from "@/lib/icons";
-import {roleSchema} from "@/lib/validations/role";
-import {Button} from "@/components/ui/button";
-import {DialogFooter} from "@/components/ui/dialog";
-import {useTranslation} from "react-i18next";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Autocomplete } from "@/components/forms";
+import { ColorPicker } from "@/components/forms";
+import { RoleIcon } from "@/components/icons";
+import { icons } from "@/lib/icons";
+import { roleSchema } from "@/lib/validations/role";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 
 interface RoleFormProps {
   defaultValues?: z.infer<typeof roleSchema>;
@@ -20,8 +20,8 @@ interface RoleFormProps {
   renderFooter?: (form: UseFormReturn<z.infer<typeof roleSchema>>) => React.ReactNode;
 }
 
-export function RoleForm({defaultValues, onSubmit, onCancel, renderFooter}: RoleFormProps) {
-  const {t} = useTranslation();
+export function RoleForm({ defaultValues, onSubmit, onCancel, renderFooter }: RoleFormProps) {
+  const { t } = useTranslation();
   const form = useForm<z.infer<typeof roleSchema>>({
     resolver: zodResolver(roleSchema),
     defaultValues: defaultValues || {
@@ -38,95 +38,85 @@ export function RoleForm({defaultValues, onSubmit, onCancel, renderFooter}: Role
         <FormField
           control={form.control}
           name="name"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('step.role.name')}</FormLabel>
+              <FormLabel>{t("step.role.name")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
           name="description"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('step.role.description')}</FormLabel>
+              <FormLabel>{t("step.role.description")}</FormLabel>
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
           name="icon"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('step.role.icon')}</FormLabel>
+              <FormLabel>{t("step.role.icon")}</FormLabel>
               <FormControl>
                 <div className="flex gap-2 items-center">
                   <div className="flex-grow">
                     <Controller
                       control={form.control}
                       name="icon"
-                      render={({field}) => (
+                      render={({ field }) => (
                         <Autocomplete
                           field={field}
                           options={icons.map((icon) => ({
                             value: icon,
                             label: icon,
-                            icon: (
-                              <RoleIcon
-                                icon={icon}
-                                color={form.getValues("color") || "#000000"}
-                                size={24}
-                              />
-                            ),
+                            icon: <RoleIcon icon={icon} color={form.getValues("color") || "#000000"} size={24} />,
                           }))}
-                          placeholder={t('step.role.placeholder')}
+                          placeholder={t("step.role.placeholder")}
                         />
                       )}
                     />
                   </div>
                 </div>
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
           name="color"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('step.role.color')}</FormLabel>
+              <FormLabel>{t("step.role.color")}</FormLabel>
               <FormControl>
-                <Controller
-                  control={form.control}
-                  name="color"
-                  render={({field}) => <ColorPicker field={field}/>}
-                />
+                <Controller control={form.control} name="color" render={({ field }) => <ColorPicker field={field} />} />
               </FormControl>
-              <FormMessage/>
+              <FormMessage />
             </FormItem>
           )}
         />
         <div className="flex items-start flex-col space-y-2">
-          <h2 className="font-semibold text-lg">{t('step.role.icon preview')}</h2>
-          <RoleIcon icon={form.watch("icon")} color={form.watch("color")}/>
+          <h2 className="font-semibold text-lg">{t("step.role.icon preview")}</h2>
+          <RoleIcon icon={form.watch("icon")} color={form.watch("color")} />
         </div>
         {renderFooter ? (
           renderFooter(form)
         ) : (
           <DialogFooter>
             <Button variant="outline" type="button" onClick={onCancel}>
-              {t('actions.cancel')}
+              {t("actions.cancel")}
             </Button>
-            <Button type="submit">{t('actions.save')}</Button>
+            <Button type="submit">{t("actions.save")}</Button>
           </DialogFooter>
         )}
       </form>

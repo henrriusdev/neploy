@@ -48,23 +48,6 @@ func (o *Onboard) Initiate(c echo.Context) error {
 	// print request as json with fmt.Printf
 	fmt.Printf("Request: %+v\n", req)
 
-	oauthID, err := c.Cookie("oauth_id")
-	if err != nil || oauthID.Value == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"error": "Unauthorized",
-		})
-	}
-
-	// delete oauth_id cookie
-	cookie := new(http.Cookie)
-	cookie.Name = "oauth_id"
-	cookie.Value = ""
-	cookie.Path = "/"
-	cookie.MaxAge = -1
-	c.SetCookie(cookie)
-
-	req.OauthID = oauthID.Value
-
 	if err := o.service.Initiate(c.Request().Context(), req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),

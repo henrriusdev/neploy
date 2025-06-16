@@ -4,17 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { AcceptInviteProps } from "@/types/props";
 import { useTheme } from "@/hooks";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
-export default function AcceptInvite({
-  token,
-  expired,
-  alreadyAccepted,
-  provider,
-}: AcceptInviteProps) {
+export default function AcceptInvite({ token, expired, alreadyAccepted, provider }: AcceptInviteProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const {theme, isDark, applyTheme} = useTheme();
+  const { theme, isDark, applyTheme } = useTheme();
 
   useEffect(() => {
     applyTheme(theme, isDark);
@@ -26,10 +21,7 @@ export default function AcceptInvite({
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>Invitation Expired</CardTitle>
-            <CardDescription>
-              This invitation has expired. Please request a new invitation from
-              your team administrator.
-            </CardDescription>
+            <CardDescription>This invitation has expired. Please request a new invitation from your team administrator.</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -42,10 +34,7 @@ export default function AcceptInvite({
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle>Invitation Already Accepted</CardTitle>
-            <CardDescription>
-              This invitation has already been used. Please log in to access
-              your account.
-            </CardDescription>
+            <CardDescription>This invitation has already been used. Please log in to access your account.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={() => router.visit("/login")}>
@@ -82,7 +71,7 @@ export default function AcceptInvite({
           });
         },
         onFinish: () => setIsLoading(false),
-      }
+      },
     );
   };
 
@@ -91,15 +80,10 @@ export default function AcceptInvite({
       <Card className="max-w-md w-full">
         <CardHeader>
           <CardTitle>Accept Team Invitation</CardTitle>
-          <CardDescription>
-            Click below to join your team on Neploy
-          </CardDescription>
+          <CardDescription>Click below to join your team on Neploy</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            className="w-full"
-            onClick={handleAcceptInvite}
-            disabled={isLoading}>
+          <Button className="w-full" onClick={handleAcceptInvite} disabled={isLoading}>
             {isLoading ? "Accepting..." : "Accept Invitation"}
           </Button>
         </CardContent>

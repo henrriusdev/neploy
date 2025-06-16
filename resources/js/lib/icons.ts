@@ -1,4 +1,4 @@
-import { icons as lucideIconsList } from 'lucide-react';
+import { icons as lucideIconsList } from "lucide-react";
 import * as RadixIcons from "@radix-ui/react-icons";
 
 // Get Lucide icons
@@ -13,21 +13,21 @@ const radixIconNames = Object.keys(RadixIcons)
 export const icons = [...new Set([...lucideIconNames, ...radixIconNames])].sort();
 
 // Create a type union of all icon names
-export type Icon = typeof icons[number];
+export type Icon = (typeof icons)[number];
 
 export const techIcons = [
-  { name: 'JavaScript', value: 'javascript' },
-  { name: 'Python', value: 'python' },
-  { name: 'Go', value: 'go' },
-  { name: 'Java', value: 'spring' },
-  { name: 'React', value: 'react' },
-  { name: 'Angular', value: 'angular' },
-  { name: 'Node.js', value: 'nodedotjs' },
-  { name: 'Django', value: 'django' },
-  { name: 'Docker', value: 'docker' },
-  { name: 'MySQL', value: 'mysql' },
-  { name: 'PostgreSQL', value: 'postgresql' },
-  { name: 'MongoDB', value: 'mongodb' },
-  { name: 'Nginx', value: 'nginx' },
-  { name: 'Redis', value: 'redis' },
+  { name: "JavaScript", value: "javascript" },
+  { name: "Python", value: "python" },
+  { name: "Go", value: "go" },
+  { name: "Java", value: "spring" },
+  { name: "React", value: "react" },
+  { name: "Angular", value: "angular" },
+  { name: "Node.js", value: "nodedotjs" },
+  { name: "Django", value: "django" },
+  { name: "Docker", value: "docker" },
+  { name: "MySQL", value: "mysql" },
+  { name: "PostgreSQL", value: "postgresql" },
+  { name: "MongoDB", value: "mongodb" },
+  { name: "Nginx", value: "nginx" },
+  { name: "Redis", value: "redis" },
 ];

@@ -19,12 +19,12 @@ export const authApi = baseApi.injectEndpoints({
       }),
       transformErrorResponse: (response: any) => {
         if (response.status === 303) {
-          return { data: null, meta: { location: response.headers.get('location') } };
+          return { data: null, meta: { location: response.headers.get("location") } };
         }
         return response;
       },
     }),
-    passwordLink: builder.mutation<void, { email: string, language: string }>({
+    passwordLink: builder.mutation<void, { email: string; language: string }>({
       query: ({ email, language }) => ({
         url: "password/change",
         method: "POST",

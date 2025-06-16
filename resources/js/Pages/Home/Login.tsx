@@ -1,47 +1,47 @@
-"use client"
+"use client";
 
-import {useEffect, useState} from "react"
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
-import {Button} from "@/components/ui/button"
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form"
-import {Input} from "@/components/ui/input"
-import {useForm} from "react-hook-form"
-import {zodResolver} from "@hookform/resolvers/zod"
-import * as z from "zod"
-import {router} from "@inertiajs/react"
-import {useTranslation} from "react-i18next"
-import {LanguageSelector} from "@/components/forms/language-selector"
-import {useLoginMutation, usePasswordLinkMutation} from "@/services/api/auth"
-import {useTheme} from "@/hooks"
-import {ThemeSwitcher} from "@/components/theme-switcher"
-import {ArrowLeft, KeyRound, Mail} from "lucide-react"
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { router } from "@inertiajs/react";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "@/components/forms/language-selector";
+import { useLoginMutation, usePasswordLinkMutation } from "@/services/api/auth";
+import { useTheme } from "@/hooks";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 
 // Login form schema
 const loginFormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z.string().min(1, "Password is required").min(6, { message: "Password must be at least 6 characters" }),
-})
+});
 
 // Password reset request form schema
 const resetPasswordFormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
-})
+});
 
-export default function AuthViews({logoUrl, name, language = "en"}: {logoUrl: string, name: string, language: string}) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [view, setView] = useState<"login" | "resetPassword">("login")
-  const { t, i18n } = useTranslation()
-  const [login] = useLoginMutation()
-  const [passwordLink] = usePasswordLinkMutation()
-  const { theme, isDark, applyTheme } = useTheme()
+export default function AuthViews({ logoUrl, name, language = "en" }: { logoUrl: string; name: string; language: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [view, setView] = useState<"login" | "resetPassword">("login");
+  const { t, i18n } = useTranslation();
+  const [login] = useLoginMutation();
+  const [passwordLink] = usePasswordLinkMutation();
+  const { theme, isDark, applyTheme } = useTheme();
 
   // Set the initial language
   useEffect(() => {
-    i18n.changeLanguage(language)
-  }, [language, i18n])
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
   useEffect(() => {
-    applyTheme(theme, isDark)
-  }, [theme, isDark, applyTheme])
+    applyTheme(theme, isDark);
+  }, [theme, isDark, applyTheme]);
 
   // Login form
   const loginForm = useForm<z.infer<typeof loginFormSchema>>({
@@ -50,7 +50,7 @@ export default function AuthViews({logoUrl, name, language = "en"}: {logoUrl: st
       email: "",
       password: "",
     },
-  })
+  });
 
   // Reset password form
   const resetPasswordForm = useForm<z.infer<typeof resetPasswordFormSchema>>({
@@ -58,89 +58,69 @@ export default function AuthViews({logoUrl, name, language = "en"}: {logoUrl: st
     defaultValues: {
       email: "",
     },
-  })
+  });
 
   async function onLoginSubmit(values: z.infer<typeof loginFormSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       // @ts-expect-error
-      await login(values).unwrap()
+      await login(values).unwrap();
       // Redirect after successful login
-      router.visit("/dashboard")
+      router.visit("/dashboard");
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       if (error.data?.message) {
-        loginForm.setError("root", { message: error.data.message })
+        loginForm.setError("root", { message: error.data.message });
       } else if (error.status === 401) {
-        loginForm.setError("root", { message: t("errors.invalidCredentials") })
+        loginForm.setError("root", { message: t("errors.invalidCredentials") });
       } else {
-        loginForm.setError("root", { message: t("errors.serverError") })
+        loginForm.setError("root", { message: t("errors.serverError") });
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   async function onResetPasswordSubmit(values: z.infer<typeof resetPasswordFormSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const language = i18n.language
-      await passwordLink({email: values.email, language}).unwrap()
+      const language = i18n.language;
+      await passwordLink({ email: values.email, language }).unwrap();
       // Show success message
-      resetPasswordForm.reset()
-      alert(`Password reset link sent to ${values.email}`)
+      resetPasswordForm.reset();
+      alert(`Password reset link sent to ${values.email}`);
 
       // Return to login view
-      setView("login")
+      setView("login");
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       resetPasswordForm.setError("root", {
         message: error.message || t("errors.serverError"),
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   return (
     <>
-    <div className="auth-background bg-background flex-col md:flex-row">
-      {/* Auth Forms */}
-      <div className="w-full flex items-center justify-center p-8">
-        {view === "login" ? (
-          <LoginView
-            form={loginForm}
-            onSubmit={onLoginSubmit}
-            isLoading={isLoading}
-            onForgotPassword={() => setView("resetPassword")}
-          />
-        ) : (
-          <ResetPasswordView
-            form={resetPasswordForm}
-            onSubmit={onResetPasswordSubmit}
-            isLoading={isLoading}
-            onBack={() => setView("login")}
-          />
-        )}
+      <div className="auth-background bg-background flex-col md:flex-row">
+        {/* Auth Forms */}
+        <div className="w-full flex items-center justify-center p-8">
+          {view === "login" ? (
+            <LoginView form={loginForm} onSubmit={onLoginSubmit} isLoading={isLoading} onForgotPassword={() => setView("resetPassword")} />
+          ) : (
+            <ResetPasswordView form={resetPasswordForm} onSubmit={onResetPasswordSubmit} isLoading={isLoading} onBack={() => setView("login")} />
+          )}
+        </div>
       </div>
-    </div>
     </>
-  )
+  );
 }
 
 // Login View Component
-function LoginView({
-                     form,
-                     onSubmit,
-                     isLoading,
-                     onForgotPassword,
-                   }: {
-  form: any
-  onSubmit: (values: any) => void
-  isLoading: boolean
-  onForgotPassword: () => void
-}) {
-  const { t } = useTranslation()
+function LoginView({ form, onSubmit, isLoading, onForgotPassword }: { form: any; onSubmit: (values: any) => void; isLoading: boolean; onForgotPassword: () => void }) {
+  const { t } = useTranslation();
 
   return (
     <Card className="w-full max-w-lg border-primary/10 shadow-lg">
@@ -164,11 +144,7 @@ function LoginView({
                   <FormLabel>{t("auth.email")}</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input
-                        placeholder={t("auth.enterEmail")}
-                        className="pl-10 bg-background border-input/50 focus:border-primary"
-                        {...field}
-                      />
+                      <Input placeholder={t("auth.enterEmail")} className="pl-10 bg-background border-input/50 focus:border-primary" {...field} />
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     </div>
                   </FormControl>
@@ -183,23 +159,13 @@ function LoginView({
                 <FormItem>
                   <div className="flex justify-between items-center">
                     <FormLabel>{t("auth.password")}</FormLabel>
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-xs text-primary"
-                      type="button"
-                      onClick={onForgotPassword}
-                    >
+                    <Button variant="link" className="p-0 h-auto text-xs text-primary" type="button" onClick={onForgotPassword}>
                       {t("auth.forgotPassword")}
                     </Button>
                   </div>
                   <FormControl>
                     <div className="relative">
-                      <Input
-                        type="password"
-                        placeholder={t("auth.enterPassword")}
-                        className="pl-10 bg-background border-input/50 focus:border-primary"
-                        {...field}
-                      />
+                      <Input type="password" placeholder={t("auth.enterPassword")} className="pl-10 bg-background border-input/50 focus:border-primary" {...field} />
                       <KeyRound className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     </div>
                   </FormControl>
@@ -214,32 +180,12 @@ function LoginView({
             )}
           </CardContent>
           <CardFooter>
-            <Button
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              type="submit"
-              disabled={isLoading}
-            >
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   {t("auth.loggingIn")}
                 </>
@@ -251,22 +197,12 @@ function LoginView({
         </form>
       </Form>
     </Card>
-  )
+  );
 }
 
 // Reset Password View Component
-function ResetPasswordView({
-                             form,
-                             onSubmit,
-                             isLoading,
-                             onBack,
-                           }: {
-  form: any
-  onSubmit: (values: any) => void
-  isLoading: boolean
-  onBack: () => void
-}) {
-  const { t } = useTranslation()
+function ResetPasswordView({ form, onSubmit, isLoading, onBack }: { form: any; onSubmit: (values: any) => void; isLoading: boolean; onBack: () => void }) {
+  const { t } = useTranslation();
 
   return (
     <Card className="w-full max-w-lg border-primary/10 shadow-lg">
@@ -291,11 +227,7 @@ function ResetPasswordView({
                   <FormLabel>{t("auth.email")}</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input
-                        placeholder={t("auth.enterEmail")}
-                        className="pl-10 bg-background border-input/50 focus:border-primary"
-                        {...field}
-                      />
+                      <Input placeholder={t("auth.enterEmail")} className="pl-10 bg-background border-input/50 focus:border-primary" {...field} />
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     </div>
                   </FormControl>
@@ -310,32 +242,12 @@ function ResetPasswordView({
             )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              type="submit"
-              disabled={isLoading}
-            >
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   {t("auth.sending")}
                 </>
@@ -343,17 +255,12 @@ function ResetPasswordView({
                 t("auth.sendResetLink")
               )}
             </Button>
-            <Button
-              variant="outline"
-              className="w-full border-primary/20 text-primary hover:bg-primary/5"
-              type="button"
-              onClick={onBack}
-            >
+            <Button variant="outline" className="w-full border-primary/20 text-primary hover:bg-primary/5" type="button" onClick={onBack}>
               {t("auth.backToLogin")}
             </Button>
           </CardFooter>
         </form>
       </Form>
     </Card>
-  )
+  );
 }
