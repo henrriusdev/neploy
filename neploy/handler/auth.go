@@ -41,7 +41,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 		return &oauth2.Config{
 			ClientID:     config.Env.GithubClientID,
 			ClientSecret: config.Env.GithubClientSecret,
-			RedirectURL:  "http://neploy.live:80e81/auth/github/callback",
+			RedirectURL:  "http://neploy.live:8081/auth/github/callback",
 			Scopes:       []string{"user:email", "read:user"},
 			Endpoint:     github.Endpoint,
 		}
