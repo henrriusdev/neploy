@@ -368,7 +368,7 @@
   },
   "step": {
     "provider": {
-      "description": "Elija un proveedor para obtener su usuario y avatar de github o gitlab.",
+      "description": "Elija un proveedor para obtener su usuario y avatar de GitHub o GitLab.",
       "email": "Correo electrónico",
       "link": "Conectar con",
       "or": "O",
