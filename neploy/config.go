@@ -130,7 +130,7 @@ func NewRepositories(npy Neploy) repository.Repositories {
 	metadata := repository.NewMetadata(npy.DB)
 	role := repository.NewRole(npy.DB)
 	user := repository.NewUser(npy.DB)
-	userOauth := repository.NewUserOauth(npy.DB)
+	// userOauth removed as part of OAuth refactoring
 	userRole := repository.NewUserRole(npy.DB)
 	application := repository.NewApplication(npy.DB)
 	applicationStat := repository.NewApplicationStat(npy.DB)
@@ -153,7 +153,7 @@ func NewRepositories(npy Neploy) repository.Repositories {
 		TechStack:          techStack,
 		Trace:              trace,
 		User:               user,
-		UserOauth:          userOauth,
+		// UserOauth removed as part of OAuth refactoring
 		UserRole:           userRole,
 		UserTechStack:      userTechStack,
 		VisitorTrace:       visitorTrace,

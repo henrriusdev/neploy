@@ -36,12 +36,17 @@ export default function Onboard({email, username}: Props) {
     document.documentElement.setAttribute("data-theme", "neploy")
   }, []);
 
-  const handleProviderNext = () => {
+  const handleProviderNext = (provider = "") => {
+    setAdminData(prev => ({ ...prev, provider }));
     setStep("data");
   };
 
   const handleDataNext = (data: any) => {
-    setAdminData(data);
+    // Preserve the provider if it was set previously
+    setAdminData(prev => ({
+      ...data,
+      provider: prev?.provider || data.provider || ""
+    }));
     setStep("roles");
   };
 
@@ -74,8 +79,12 @@ export default function Onboard({email, username}: Props) {
   };
 
   const handleSubmit = async () => {
+    // Ensure provider is included in the payload
     const payload = {
-      adminUser: adminData,
+      adminUser: {
+        ...adminData,
+        provider: adminData.provider || "", // Make sure provider is always included
+      },
       roles: roles,
       metadata: {
         ...serviceData,
@@ -91,6 +100,7 @@ export default function Onboard({email, username}: Props) {
       });
       window.location.replace("/");
     } catch (error: any) {
+      console.error("Onboarding error:", error);
       toast({
         title: t("common.error"),
         description: error?.data?.message || t("onboarding.error"),
@@ -102,7 +112,7 @@ export default function Onboard({email, username}: Props) {
   const renderStep = () => {
     switch (step) {
       case "provider":
-        return <ProviderStep onNext={handleProviderNext}/>;
+        return <ProviderStep onNext={(provider) => handleProviderNext(provider)}/>;
       case "data":
         return (
           <UserDataStep
@@ -127,14 +137,14 @@ export default function Onboard({email, username}: Props) {
         );
       case "summary":
         return (
-          <Card className="w-full max-w-screen-md mx-auto">
+          <Card className="w-full max-w-full md:max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>{t("onboarding.reviewSetup")}</CardTitle>
               <CardDescription>
                 {t("onboarding.verifyInformation")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 md:space-y-6">
               <div>
                 <h3 className="font-medium text-lg">
                   {t("onboarding.administratorAccount")}
@@ -186,7 +196,7 @@ export default function Onboard({email, username}: Props) {
                 </dl>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -203,10 +213,10 @@ export default function Onboard({email, username}: Props) {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <OnboardingSidebar currentStep={step} className="w-1/4"/>
-      <div className="flex-1 p-6 flex justify-center items-center flex-col">
-        <h1 className="text-3xl font-bold mb-6 text-center">
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <OnboardingSidebar currentStep={step} className="w-full md:w-1/4 hidden md:block"/>
+      <div className="flex-1 p-4 md:p-6 flex justify-center items-center flex-col">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center">
           {t("onboarding.setupAccount")}
         </h1>
         {renderStep()}

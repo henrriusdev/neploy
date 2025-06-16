@@ -4,7 +4,7 @@ import {GitHubLogoIcon} from "@radix-ui/react-icons";
 import {useTranslation} from "react-i18next";
 
 interface Props {
-  onNext: () => void;
+  onNext: (provider?: string) => void;
   token?: string;
 }
 
@@ -15,6 +15,10 @@ export function ProviderStep({token, onNext}: Props) {
       return `/auth/${provider}?state=${token}`;
     }
     return `/auth/${provider}`;
+  };
+  
+  const handleOAuthClick = (provider: string) => {
+    window.location.replace(getOAuthUrl(provider));
   };
 
   return (
@@ -29,14 +33,14 @@ export function ProviderStep({token, onNext}: Props) {
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => window.location.replace(getOAuthUrl("github"))}>
+          onClick={() => handleOAuthClick("github")}>
           <GitHubLogoIcon className="mr-2 h-4 w-4"/>
           {t('step.provider.link')} GitHub
         </Button>
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => window.location.replace(getOAuthUrl("gitlab"))}>
+          onClick={() => handleOAuthClick("gitlab")}>
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
             <path
               fill="currentColor"
@@ -56,7 +60,7 @@ export function ProviderStep({token, onNext}: Props) {
           </div>
         </div>
 
-        <Button variant="outline" className="w-full" onClick={onNext}>
+        <Button variant="outline" className="w-full" onClick={() => onNext("email")}>
           {t('step.provider.email')}
         </Button>
       </CardContent>

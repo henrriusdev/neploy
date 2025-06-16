@@ -239,7 +239,7 @@ func (u *User) Profile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	user.Provider = provider
+	user.Provider = model.Provider(provider) // Convert string to Provider type
 
 	return u.i.Render(c.Response(), c.Request(), "Auth/Profile", inertia.Props{"userData": user, "user": userSidebar, "teamName": metadata.TeamName, "logoUrl": metadata.LogoURL})
 }

@@ -58,7 +58,7 @@
     "success": "Success!",
     "teamInformation": "Team Info",
     "provider": {
-      "title": "Choose a Dev Provider",
+      "title": "Choose a OAuth Provider",
       "description": "Choose if you want to use github, gitlab or manual input for your username and avatar"
     },
     "steps": {
