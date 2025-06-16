@@ -41,19 +41,17 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 		return &oauth2.Config{
 			ClientID:     config.Env.GithubClientID,
 			ClientSecret: config.Env.GithubClientSecret,
-			// RedirectURL:  "http://neploy.live:8081/auth/github/callback",
-			RedirectURL: "http://localhost:8081/auth/github/callback",
-			Scopes:      []string{"user:email", "read:user"},
-			Endpoint:    github.Endpoint,
+			RedirectURL:  "http://neploy.live:80e81/auth/github/callback",
+			Scopes:       []string{"user:email", "read:user"},
+			Endpoint:     github.Endpoint,
 		}
 	case model.Gitlab:
 		return &oauth2.Config{
 			ClientID:     config.Env.GitlabApplicationID,
 			ClientSecret: config.Env.GitlabSecret,
-			// RedirectURL:  "http://neploy.live:8081/auth/gitlab/callback",
-			RedirectURL: "http://localhost:8081/auth/gitlab/callback",
-			Scopes:      []string{"read_user"},
-			Endpoint:    gitlab.Endpoint,
+			RedirectURL:  "http://neploy.live:8081/auth/gitlab/callback",
+			Scopes:       []string{"read_user"},
+			Endpoint:     gitlab.Endpoint,
 		}
 	default:
 		return nil
