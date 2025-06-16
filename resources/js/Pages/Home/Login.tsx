@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -165,7 +166,7 @@ function LoginView({ form, onSubmit, isLoading, onForgotPassword }: { form: any;
                   </div>
                   <FormControl>
                     <div className="relative">
-                      <Input type="password" placeholder={t("auth.enterPassword")} className="pl-10 bg-background border-input/50 focus:border-primary" {...field} />
+                      <PasswordInput placeholder={t("auth.enterPassword")} className="pl-10 bg-background border-input/50 focus:border-primary" {...field} />
                       <KeyRound className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     </div>
                   </FormControl>

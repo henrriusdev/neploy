@@ -71,6 +71,7 @@ export default function CompleteInvite({ token, email, username, provider, error
       address: data.address || "",
       email: data.email || "",
       username: data.username || "",
+      password: data.password || "",
     };
     setUserData(formattedData);
     setStep("summary");

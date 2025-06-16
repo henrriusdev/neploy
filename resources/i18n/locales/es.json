@@ -53,8 +53,8 @@
     "name": "Nombre completo",
     "reviewSetup": "Revise los datos proporcionados",
     "roles": {
-      "title": "Role Setup",
-      "description": "Add the roles that you'll use in Neploy"
+      "title": "Configuración de roles",
+      "description": "Configure los roles de su equipo en Neploy"
     },
     "setupAccount": "¡Configure neploy!",
     "verifyInformation": "Por favor verifique su información",

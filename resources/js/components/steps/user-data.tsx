@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { DatePicker } from "@/components/forms/date-picker";
 import { withMask } from "use-mask-input";
 import { User } from "@/types/common";
@@ -150,7 +151,7 @@ export function UserDataStep({ email, username, onNext, onBack }: Props) {
                 <FormItem>
                   <FormLabel>{t("step.user.password")}</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <PasswordInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
