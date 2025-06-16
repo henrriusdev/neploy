@@ -1,15 +1,15 @@
 import * as React from "react";
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {DatePicker} from "@/components/forms/date-picker";
-import {withMask} from "use-mask-input";
-import {User} from "@/types/common";
-import {useTranslation} from "react-i18next";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/forms/date-picker";
+import { withMask } from "use-mask-input";
+import { User } from "@/types/common";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -29,8 +29,8 @@ interface Props {
   onBack: () => void;
 }
 
-export function UserDataStep({email, username, onNext, onBack}: Props) {
-  const {t} = useTranslation();
+export function UserDataStep({ email, username, onNext, onBack }: Props) {
+  const { t } = useTranslation();
   const form = useForm<User>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,26 +52,26 @@ export function UserDataStep({email, username, onNext, onBack}: Props) {
               <FormField
                 control={form.control}
                 name="firstName"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('step.user.firstName')}</FormLabel>
+                    <FormLabel>{t("step.user.firstName")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="lastName"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('step.user.lastName')}</FormLabel>
+                    <FormLabel>{t("step.user.lastName")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -80,30 +80,26 @@ export function UserDataStep({email, username, onNext, onBack}: Props) {
               <FormField
                 control={form.control}
                 name="dob"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>{t('step.user.dob')}</FormLabel>
+                    <FormLabel>{t("step.user.dob")}</FormLabel>
                     <FormControl>
-                      <DatePicker
-                        field={field}
-                        maxYear={new Date().getFullYear() - 18}
-                        minYear={new Date().getFullYear() - 90}
-                      />
+                      <DatePicker field={field} maxYear={new Date().getFullYear() - 18} minYear={new Date().getFullYear() - 90} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="phone"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>{t('step.user.phone')}</FormLabel>
+                    <FormLabel>{t("step.user.phone")}</FormLabel>
                     <FormControl>
-                      <Input {...field} ref={withMask("(9999) 999-99-99")}/>
+                      <Input {...field} ref={withMask("(9999) 999-99-99")} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -111,61 +107,61 @@ export function UserDataStep({email, username, onNext, onBack}: Props) {
             <FormField
               control={form.control}
               name="address"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('step.user.address')}</FormLabel>
+                  <FormLabel>{t("step.user.address")}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="email"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('step.user.email')}</FormLabel>
+                  <FormLabel>{t("step.user.email")}</FormLabel>
                   <FormControl>
-                    <Input {...field} readOnly={!!email}/>
+                    <Input {...field} readOnly={!!email} />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="username"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('step.user.username')}</FormLabel>
+                  <FormLabel>{t("step.user.username")}</FormLabel>
                   <FormControl>
-                    <Input {...field} readOnly={!!username}/>
+                    <Input {...field} readOnly={!!username} />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="password"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('step.user.password')}</FormLabel>
+                  <FormLabel>{t("step.user.password")}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button type="button" variant="outline" onClick={onBack}>
-              {t('actions.back')}
+              {t("actions.back")}
             </Button>
-            <Button type="submit">{t('actions.next')}</Button>
+            <Button type="submit">{t("actions.next")}</Button>
           </CardFooter>
         </form>
       </Form>

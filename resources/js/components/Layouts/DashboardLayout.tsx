@@ -1,13 +1,12 @@
 import Layout from "@/components/Layouts/Layout";
-import {Toaster} from "@/components/ui/toaster";
-import {usePage} from "@inertiajs/react";
-import {AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2,} from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
+import { ApplicationView } from "@/components/views/application-view";
+import { Reports } from "@/components/views/reports";
+import { navItems } from "@/lib/utils";
+import { usePage } from "@inertiajs/react";
 import * as React from "react";
-import {useTranslation} from "react-i18next";
-import {Applications, Config, Gateways, Home, Team} from "../views";
-import {ApplicationView} from "@/components/views/application-view";
-import {Reports} from "@/components/views/reports";
-import {navItems} from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { Applications, Config, Gateways, Home, Team } from "../views";
 
 interface DashboardLayoutProps {
   user?: {
@@ -22,22 +21,14 @@ interface DashboardLayoutProps {
   props?: any;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-                                                                  user: backendUser,
-                                                                  teamName,
-                                                                  logoUrl,
-                                                                  props,
-                                                                }) => {
-  const {url} = usePage();
-  const {t} = useTranslation();
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user: backendUser, teamName, logoUrl, props }) => {
+  const { url } = usePage();
+  const { t } = useTranslation();
 
   const user = {
     name: backendUser?.name || "",
     email: backendUser?.email || "",
-    avatar:
-      backendUser?.provider === "github"
-        ? `https://unavatar.io/github/${backendUser?.username}`
-        : `https://unavatar.io/${backendUser?.email}`,
+    avatar: backendUser?.provider === "github" ? `https://unavatar.io/github/${backendUser?.username}` : `https://unavatar.io/${backendUser?.email}`,
     roles: backendUser.roles || [],
   };
 
@@ -69,23 +60,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const navigation = navItems.map((item) => ({
     ...item,
     title: t(item.title), // Translate the title
-    isActive:
-      url === item.url ||
-      (url.startsWith(item.url) &&
-        item.url !== "/dashboard" &&
-        item.url !== "/logout"),
+    isActive: url === item.url || (url.startsWith(item.url) && item.url !== "/dashboard" && item.url !== "/logout"),
   }));
 
   return (
     <div className="min-h-screen bg-background">
-      <Layout
-        user={user}
-        teamName={teamName}
-        logoUrl={logoUrl}
-        navItems={navigation}>
+      <Layout user={user} teamName={teamName} logoUrl={logoUrl} navItems={navigation}>
         {getComponent()}
       </Layout>
-      <Toaster/>
+      <Toaster />
     </div>
   );
 };

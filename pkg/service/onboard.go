@@ -86,7 +86,7 @@ func (o *onboard) Initiate(ctx context.Context, req model.OnboardRequest) error 
 
 	req.AdminUser.Roles = []string{"Administrator"}
 
-	if err := o.userService.Create(ctx, req.AdminUser, req.OauthID); err != nil {
+	if err := o.userService.Create(ctx, req.AdminUser); err != nil {
 		logger.Error("error creating admin user: %v", err)
 		return err
 	}

@@ -41,7 +41,7 @@ func GetConfig(provider model.Provider) *oauth2.Config {
 		return &oauth2.Config{
 			ClientID:     config.Env.GithubClientID,
 			ClientSecret: config.Env.GithubClientSecret,
-			RedirectURL:  "http://neploy.live:8081/auth/github/callback",
+			RedirectURL:  "http://neploy.live:80e81/auth/github/callback",
 			Scopes:       []string{"user:email", "read:user"},
 			Endpoint:     github.Endpoint,
 		}
@@ -203,18 +203,6 @@ func (a *Auth) GithubOAuthCallback(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Failed to parse user info")
 	}
 
-	// Set oauth_id cookie
-	cookie := new(http.Cookie)
-	cookie.Name = "oauth_id"
-	cookie.Value = fmt.Sprintf("%d", user.ID)
-	cookie.Path = "/"
-	cookie.HttpOnly = true
-	cookie.Secure = true
-	cookie.SameSite = http.SameSiteLaxMode
-	cookie.MaxAge = 24 * 60 * 60
-	cookie.Domain = c.Request().Host
-	c.SetCookie(cookie)
-
 	if user.Email == "" {
 		resp, err = client.Get("https://api.github.com/user/emails")
 		if err != nil {
@@ -315,18 +303,6 @@ func (a *Auth) GitlabOAuthCallback(c echo.Context) error {
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to parse user info")
 	}
-
-	// Set oauth_id cookie
-	cookie := new(http.Cookie)
-	cookie.Name = "oauth_id"
-	cookie.Value = token.AccessToken
-	cookie.Path = "/"
-	cookie.HttpOnly = true
-	cookie.Secure = true
-	cookie.SameSite = http.SameSiteLaxMode
-	cookie.MaxAge = 24 * 60 * 60
-	cookie.Domain = c.Request().Host
-	c.SetCookie(cookie)
 
 	oauthResponse := model.OAuthResponse{
 		Username: user.Username,

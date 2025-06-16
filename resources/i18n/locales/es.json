@@ -52,7 +52,10 @@
     "error": "Hubo un error al guardar la configuración, intente nuevamente",
     "name": "Nombre completo",
     "reviewSetup": "Revise los datos proporcionados",
-    "roles": "Roles",
+    "roles": {
+      "title": "Role Setup",
+      "description": "Add the roles that you'll use in Neploy"
+    },
     "setupAccount": "¡Configure neploy!",
     "verifyInformation": "Por favor verifique su información",
     "success": "¡Éxito!",
@@ -365,11 +368,11 @@
   },
   "step": {
     "provider": {
-      "description": "Elija un proveedor para vincular su repositorio e identidad de código.",
+      "description": "Elija un proveedor para obtener su usuario y avatar de GitHub o GitLab.",
       "email": "Correo electrónico",
-      "link": "Cuenta de enlace",
+      "link": "Conectar con",
       "or": "O",
-      "title": "Proveedor de desarrollo"
+      "title": "Proveedor de OAuth"
     },
     "role": {
       "add": "Agregar rol",

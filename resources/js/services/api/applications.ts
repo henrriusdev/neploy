@@ -8,10 +8,10 @@ export const applications = baseApi.injectEndpoints({
         url: "applications",
         method: "GET",
       }),
-      providesTags: ["applications"]
+      providesTags: ["applications"],
     }),
     loadBranches: builder.query({
-      query: ({repoUrl}: {repoUrl: string}) => ({
+      query: ({ repoUrl }: { repoUrl: string }) => ({
         url: "applications/branches",
         method: "POST",
         body: { repoUrl },
@@ -36,7 +36,7 @@ export const applications = baseApi.injectEndpoints({
     uploadApplication: builder.mutation({
       query: ({ appId, file }: { appId: string; file: File }) => {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
         return {
           url: `applications/${appId}/upload`,
           method: "POST",
@@ -55,14 +55,14 @@ export const applications = baseApi.injectEndpoints({
       invalidatesTags: ["applications"],
     }),
     startApplication: builder.mutation({
-      query: ({ appId, versionId }: { appId: string, versionId: string }) => ({
+      query: ({ appId, versionId }: { appId: string; versionId: string }) => ({
         url: `applications/${appId}/start/${versionId}`,
         method: "POST",
       }),
       invalidatesTags: ["applications"],
     }),
     stopApplication: builder.mutation({
-      query: ({ appId, versionId }: { appId: string, versionId: string }) => ({
+      query: ({ appId, versionId }: { appId: string; versionId: string }) => ({
         url: `applications/${appId}/stop/${versionId}`,
         method: "POST",
       }),
@@ -74,7 +74,7 @@ export const applications = baseApi.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: ["applications"],
-    })
+    }),
   }),
 });
 
@@ -87,5 +87,5 @@ export const {
   useStartApplicationMutation,
   useStopApplicationMutation,
   useDeleteApplicationMutation,
-  useDeleteVersionMutation
+  useDeleteVersionMutation,
 } = applications;

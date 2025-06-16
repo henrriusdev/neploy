@@ -1,11 +1,11 @@
 import * as React from "react";
-import {useForm} from "react-hook-form";
-import {Form, FormControl, FormField, FormItem, FormLabel,} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {Button} from "@/components/ui/button";
-import {Checkbox} from "@/components/ui/checkbox";
-import type {Input as InputInterface} from "@/types/websocket";
+import { useForm } from "react-hook-form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { Input as InputInterface } from "@/types/websocket";
 
 interface FormInput extends InputInterface {
   label?: string;
@@ -18,12 +18,7 @@ interface DynamicFormProps {
   className?: string;
 }
 
-export function DynamicForm({
-  fields = [],
-  onSubmit,
-  submitText = "Submit",
-  className = "",
-}: DynamicFormProps) {
+export function DynamicForm({ fields = [], onSubmit, submitText = "Submit", className = "" }: DynamicFormProps) {
   // Initialize form with empty object if no fields
   const form = useForm({
     defaultValues: Array.isArray(fields)
@@ -35,9 +30,7 @@ export function DynamicForm({
   });
 
   // Sort fields by order if specified
-  const sortedFields = Array.isArray(fields)
-    ? [...fields].sort((a, b) => (a.order || 0) - (b.order || 0))
-    : [];
+  const sortedFields = Array.isArray(fields) ? [...fields].sort((a, b) => (a.order || 0) - (b.order || 0)) : [];
 
   if (!Array.isArray(fields) || fields.length === 0) {
     console.warn("DynamicForm received invalid or empty fields:", fields);
@@ -54,18 +47,10 @@ export function DynamicForm({
             name={field.name}
             render={({ field: formField }) => (
               <FormItem className="mb-4">
-                {field.label && (
-                  <FormLabel className="capitalize">
-                    {field.label}
-                  </FormLabel>
-                )}
+                {field.label && <FormLabel className="capitalize">{field.label}</FormLabel>}
                 <FormControl>
                   {field.type === "select" && field.options ? (
-                    <Select
-                      onValueChange={formField.onChange}
-                      defaultValue={formField.value}
-                      disabled={field.disabled}
-                    >
+                    <Select onValueChange={formField.onChange} defaultValue={formField.value} disabled={field.disabled}>
                       <SelectTrigger>
                         <SelectValue placeholder={field.placeholder} />
                       </SelectTrigger>
@@ -78,27 +63,11 @@ export function DynamicForm({
                       </SelectContent>
                     </Select>
                   ) : field.type === "checkbox" ? (
-                    <Checkbox
-                      checked={formField.value}
-                      onCheckedChange={formField.onChange}
-                      disabled={field.disabled}
-                    />
+                    <Checkbox checked={formField.value} onCheckedChange={formField.onChange} disabled={field.disabled} />
                   ) : field.type === "password" ? (
-                    <Input
-                      {...formField}
-                      type="password"
-                      placeholder={field.placeholder}
-                      disabled={field.disabled}
-                      readOnly={field.readOnly}
-                    />
+                    <Input {...formField} type="password" placeholder={field.placeholder} disabled={field.disabled} readOnly={field.readOnly} />
                   ) : (
-                    <Input
-                      {...formField}
-                      type="text"
-                      placeholder={field.placeholder}
-                      disabled={field.disabled}
-                      readOnly={field.readOnly}
-                    />
+                    <Input {...formField} type="text" placeholder={field.placeholder} disabled={field.disabled} readOnly={field.readOnly} />
                   )}
                 </FormControl>
               </FormItem>

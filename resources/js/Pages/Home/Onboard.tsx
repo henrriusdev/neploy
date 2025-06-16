@@ -1,11 +1,11 @@
-import {OnboardingSidebar} from "@/components/onboarding-sidebar";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
-import {useToast} from "@/hooks/use-toast";
-import {useOnboardMutation} from "@/services/api/onboard";
-import {useEffect, useState} from "react";
-import {useTranslation} from "react-i18next";
-import {ProviderStep, RolesStep, ServiceStep, UserDataStep,} from "@/components/steps";
+import { OnboardingSidebar } from "@/components/onboarding-sidebar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useOnboardMutation } from "@/services/api/onboard";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ProviderStep, RolesStep, ServiceStep, UserDataStep } from "@/components/steps";
 
 interface Props {
   email?: string;
@@ -14,14 +14,14 @@ interface Props {
 
 type Step = "provider" | "data" | "roles" | "service" | "summary";
 
-export default function Onboard({email, username}: Props) {
+export default function Onboard({ email, username }: Props) {
   const [step, setStep] = useState<Step>("provider");
   const [adminData, setAdminData] = useState<any>(null);
   const [roles, setRoles] = useState<any[]>([]);
   const [serviceData, setServiceData] = useState<any>(null);
-  const {toast} = useToast();
+  const { toast } = useToast();
   const [onboard] = useOnboardMutation();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -30,18 +30,23 @@ export default function Onboard({email, username}: Props) {
     const email = params.get("email");
 
     if (provider && username && email) {
-      setAdminData({provider, username, email});
+      setAdminData({ provider, username, email });
       setStep("data");
     }
-    document.documentElement.setAttribute("data-theme", "neploy")
+    document.documentElement.setAttribute("data-theme", "neploy");
   }, []);
 
-  const handleProviderNext = () => {
+  const handleProviderNext = (provider = "") => {
+    setAdminData((prev) => ({ ...prev, provider }));
     setStep("data");
   };
 
   const handleDataNext = (data: any) => {
-    setAdminData(data);
+    // Preserve the provider if it was set previously
+    setAdminData((prev) => ({
+      ...data,
+      provider: prev?.provider || data.provider || "",
+    }));
     setStep("roles");
   };
 
@@ -74,8 +79,12 @@ export default function Onboard({email, username}: Props) {
   };
 
   const handleSubmit = async () => {
+    // Ensure provider is included in the payload
     const payload = {
-      adminUser: adminData,
+      adminUser: {
+        ...adminData,
+        provider: adminData.provider || "", // Make sure provider is always included
+      },
       roles: roles,
       metadata: {
         ...serviceData,
@@ -84,13 +93,14 @@ export default function Onboard({email, username}: Props) {
     };
 
     try {
-      const response = await onboard({data: payload});
+      const response = await onboard({ data: payload });
       toast({
         title: t("common.success"),
         description: t("onboarding.success"),
       });
       window.location.replace("/");
     } catch (error: any) {
+      console.error("Onboarding error:", error);
       toast({
         title: t("common.error"),
         description: error?.data?.message || t("onboarding.error"),
@@ -102,56 +112,32 @@ export default function Onboard({email, username}: Props) {
   const renderStep = () => {
     switch (step) {
       case "provider":
-        return <ProviderStep onNext={handleProviderNext}/>;
+        return <ProviderStep onNext={(provider) => handleProviderNext(provider)} />;
       case "data":
-        return (
-          <UserDataStep
-            email={adminData?.email || email}
-            username={adminData?.username || username}
-            onNext={handleDataNext}
-            onBack={handleDataBack}
-          />
-        );
+        return <UserDataStep email={adminData?.email || email} username={adminData?.username || username} onNext={handleDataNext} onBack={handleDataBack} />;
       case "roles":
-        return (
-          <RolesStep
-            roles={roles}
-            setRoles={setRoles}
-            onNext={handleRolesNext}
-            onBack={handleRolesBack}
-          />
-        );
+        return <RolesStep roles={roles} setRoles={setRoles} onNext={handleRolesNext} onBack={handleRolesBack} />;
       case "service":
-        return (
-          <ServiceStep onNext={handleServiceNext} onBack={handleServiceBack}/>
-        );
+        return <ServiceStep onNext={handleServiceNext} onBack={handleServiceBack} />;
       case "summary":
         return (
-          <Card className="w-full max-w-screen-md mx-auto">
+          <Card className="w-full max-w-full md:max-w-screen-md mx-auto">
             <CardHeader>
               <CardTitle>{t("onboarding.reviewSetup")}</CardTitle>
-              <CardDescription>
-                {t("onboarding.verifyInformation")}
-              </CardDescription>
+              <CardDescription>{t("onboarding.verifyInformation")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 md:space-y-6">
               <div>
-                <h3 className="font-medium text-lg">
-                  {t("onboarding.administratorAccount")}
-                </h3>
+                <h3 className="font-medium text-lg">{t("onboarding.administratorAccount")}</h3>
                 <dl className="mt-2 space-y-1">
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      {t("onboarding.name")}
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">{t("onboarding.name")}</dt>
                     <dd>
                       {adminData.firstName} {adminData.lastName}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      {t("onboarding.email")}
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">{t("onboarding.email")}</dt>
                     <dd>{adminData.email}</dd>
                   </div>
                 </dl>
@@ -167,35 +153,24 @@ export default function Onboard({email, username}: Props) {
                 </ul>
               </div>
               <div>
-                <h3 className="font-medium text-lg">
-                  {t("onboarding.teamInformation")}
-                </h3>
+                <h3 className="font-medium text-lg">{t("onboarding.teamInformation")}</h3>
                 <dl className="mt-2 space-y-1">
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      {t("onboarding.teamSetup.teamName")}
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">{t("onboarding.teamSetup.teamName")}</dt>
                     <dd>{serviceData.teamName}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-muted-foreground">
-                      {t("language")}
-                    </dt>
+                    <dt className="text-sm text-muted-foreground">{t("language")}</dt>
                     <dd>{serviceData.language}</dd>
                   </div>
                 </dl>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSummaryBack}>
+            <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
+              <Button type="button" variant="outline" onClick={handleSummaryBack}>
                 {t("actions.back")}
               </Button>
-              <Button onClick={handleSubmit}>
-                {t("onboarding.completeSetup")}
-              </Button>
+              <Button onClick={handleSubmit}>{t("onboarding.completeSetup")}</Button>
             </CardFooter>
           </Card>
         );
@@ -203,12 +178,10 @@ export default function Onboard({email, username}: Props) {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <OnboardingSidebar currentStep={step} className="w-1/4"/>
-      <div className="flex-1 p-6 flex justify-center items-center flex-col">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          {t("onboarding.setupAccount")}
-        </h1>
+    <div className="flex flex-col md:flex-row h-full">
+      <OnboardingSidebar currentStep={step} className="w-full md:w-1/4" />
+      <div className="flex-1 p-4 md:p-6 flex justify-center items-center flex-col">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center">{t("onboarding.setupAccount")}</h1>
         {renderStep()}
       </div>
     </div>

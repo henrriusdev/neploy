@@ -8,20 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile, useTheme } from "@/hooks";
 import { cn } from "@/lib/utils";
-import {
-  Menu,
-  Key,
-  User,
-  Shield,
-  Settings,
-  BarChart,
-  Eye,
-  Code,
-  GitBranch,
-  Database,
-  AlertTriangle,
-  Lock,
-} from "lucide-react";
+import { Menu, Key, User, Shield, Settings, BarChart, Eye, Code, GitBranch, Database, AlertTriangle, Lock } from "lucide-react";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -67,22 +54,13 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
 
         // Determine icon based on heading text (simplified logic)
         let icon = "";
-        if (
-          text.toLowerCase().includes("conexión") ||
-          text.toLowerCase().includes("github")
-        ) {
+        if (text.toLowerCase().includes("conexión") || text.toLowerCase().includes("github")) {
           icon = "github";
-        } else if (
-          text.toLowerCase().includes("datos") ||
-          text.toLowerCase().includes("administrador")
-        ) {
+        } else if (text.toLowerCase().includes("datos") || text.toLowerCase().includes("administrador")) {
           icon = "user";
         } else if (text.toLowerCase().includes("roles")) {
           icon = "shield";
-        } else if (
-          text.toLowerCase().includes("metadatos") ||
-          text.toLowerCase().includes("equipo")
-        ) {
+        } else if (text.toLowerCase().includes("metadatos") || text.toLowerCase().includes("equipo")) {
           icon = "database";
         } else if (text.toLowerCase().includes("seguridad")) {
           icon = "lock";
@@ -114,7 +92,7 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       {
         rootMargin: "0px 0px -80% 0px",
         threshold: 0.1,
-      }
+      },
     );
 
     // Observe all heading elements
@@ -179,13 +157,7 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
         .replace(/\s+/g, "-")
         .replace(/[^\w-]/g, "");
 
-      return (
-        <h1
-          id={id}
-          className="scroll-mt-20 text-primary text-3xl lg:text-4xl font-bold mb-6"
-          {...props}
-        />
-      );
+      return <h1 id={id} className="scroll-mt-20 text-primary text-3xl lg:text-4xl font-bold mb-6" {...props} />;
     },
     h2: ({ node, ...props }: any) => {
       const id = props.children
@@ -198,10 +170,7 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       const icon = heading?.icon ? getIconComponent(heading.icon) : null;
 
       return (
-        <h2
-          id={id}
-          className="scroll-mt-20 text-primary/80 text-2xl font-semibold mt-8 mb-4 flex items-center"
-          {...props}>
+        <h2 id={id} className="scroll-mt-20 text-primary/80 text-2xl font-semibold mt-8 mb-4 flex items-center" {...props}>
           {icon}
           {props.children}
         </h2>
@@ -218,10 +187,7 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       const icon = heading?.icon ? getIconComponent(heading.icon) : null;
 
       return (
-        <h3
-          id={id}
-          className="scroll-mt-20 text-secondary text-xl font-medium mt-6 mb-3 flex items-center"
-          {...props}>
+        <h3 id={id} className="scroll-mt-20 text-secondary text-xl font-medium mt-6 mb-3 flex items-center" {...props}>
           {icon}
           {props.children}
         </h3>
@@ -243,20 +209,12 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       return <a className="text-blue-500 hover:underline" {...props} />;
     },
     blockquote: ({ node, ...props }: any) => {
-      return (
-        <blockquote
-          className="border-l-4 border-gray-300 pl-4 py-1 my-4 italic"
-          {...props}
-        />
-      );
+      return <blockquote className="border-l-4 border-gray-300 pl-4 py-1 my-4 italic" {...props} />;
     },
     table: ({ node, ...props }: any) => {
       return (
         <div className="overflow-x-auto my-6">
-          <table
-            className="min-w-full border-collapse border border-gray-300 dark:border-gray-700"
-            {...props}
-          />
+          <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700" {...props} />
         </div>
       );
     },
@@ -264,52 +222,25 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       return <thead className="bg-gray-100 dark:bg-card" {...props} />;
     },
     tbody: ({ node, ...props }: any) => {
-      return (
-        <tbody
-          className="divide-y divide-gray-300 dark:divide-gray-700"
-          {...props}
-        />
-      );
+      return <tbody className="divide-y divide-gray-300 dark:divide-gray-700" {...props} />;
     },
     tr: ({ node, ...props }: any) => {
-      return (
-        <tr className="hover:bg-gray-50 dark:hover:bg-gray-900" {...props} />
-      );
+      return <tr className="hover:bg-gray-50 dark:hover:bg-gray-900" {...props} />;
     },
     th: ({ node, ...props }: any) => {
-      return (
-        <th
-          className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300"
-          {...props}
-        />
-      );
+      return <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300" {...props} />;
     },
     td: ({ node, ...props }: any) => {
-      return (
-        <td
-          className="px-4 py-3 border-t border-gray-300 dark:border-gray-700"
-          {...props}
-        />
-      );
+      return <td className="px-4 py-3 border-t border-gray-300 dark:border-gray-700" {...props} />;
     },
     code: ({ node, inline, className, children, ...props }: any) => {
       const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (
-        <SyntaxHighlighter
-          style={vscDarkPlus}
-          language={match[1]}
-          PreTag="div"
-          className="rounded-md my-4"
-          {...props}>
+        <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div" className="rounded-md my-4" {...props}>
           {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
       ) : (
-        <code
-          className={cn(
-            "bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono",
-            className
-          )}
-          {...props}>
+        <code className={cn("bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono", className)} {...props}>
           {children}
         </code>
       );
@@ -321,21 +252,10 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       return <em className="italic" {...props} />;
     },
     hr: ({ node, ...props }: any) => {
-      return (
-        <hr
-          className="my-6 border-t border-gray-300 dark:border-gray-700"
-          {...props}
-        />
-      );
+      return <hr className="my-6 border-t border-gray-300 dark:border-gray-700" {...props} />;
     },
     img: ({ node, ...props }: any) => {
-      return (
-        <img
-          className="max-w-full h-auto rounded-md my-4"
-          alt={props.alt || ""}
-          {...props}
-        />
-      );
+      return <img className="max-w-full h-auto rounded-md my-4" alt={props.alt || ""} {...props} />;
     },
   };
 
@@ -352,9 +272,7 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
               className={cn(
                 "w-full justify-start px-2 text-left flex items-center",
                 heading.level === 3 && "pl-6",
-                activeId === heading.id
-                  ? "bg-cyan-500/10 text-cyan-500 font-medium"
-                  : "text-muted-foreground"
+                activeId === heading.id ? "bg-cyan-500/10 text-cyan-500 font-medium" : "text-muted-foreground",
               )}
               onClick={() => scrollToHeading(heading.id)}>
               {heading.icon && getIconComponent(heading.icon)}
@@ -372,17 +290,12 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       {isMobile && (
         <Sheet>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="fixed top-4 left-4 z-40">
+            <Button variant="outline" size="icon" className="fixed top-4 left-4 z-40">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle table of contents</span>
             </Button>
           </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="w-[280px] sm:w-[350px] bg-gray-950 text-white">
+          <SheetContent side="left" className="w-[280px] sm:w-[350px] bg-gray-950 text-white">
             <ScrollArea className="h-[calc(100vh-4rem)] py-4">
               <TableOfContents />
             </ScrollArea>
@@ -400,14 +313,9 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
       )}
 
       {/* Main content */}
-      <div
-        ref={contentRef}
-        className="flex-1 px-4 md:px-8 py-12 max-w-4xl mx-auto">
+      <div ref={contentRef} className="flex-1 px-4 md:px-8 py-12 max-w-4xl mx-auto">
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          <ReactMarkdown
-            components={components}
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}>
+          <ReactMarkdown components={components} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
             {content}
           </ReactMarkdown>
         </div>

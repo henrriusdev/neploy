@@ -1,13 +1,6 @@
-import {useCallback, useEffect} from 'react';
-import {
-  connectInteractive,
-  connectNotifications,
-  disconnect,
-  sendInteractiveMessage,
-  subscribeToInteractive,
-  subscribeToNotifications
-} from '@/services/websocket';
-import {ActionType} from '@/types/websocket';
+import { useCallback, useEffect } from "react";
+import { connectInteractive, connectNotifications, disconnect, sendInteractiveMessage, subscribeToInteractive, subscribeToNotifications } from "@/services/websocket";
+import { ActionType } from "@/types/websocket";
 
 export function useWebSocket() {
   useEffect(() => {

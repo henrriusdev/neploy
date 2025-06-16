@@ -1,16 +1,16 @@
 import * as React from "react";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {GeneralSettingsProps} from "@/types/props";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "../ui/form";
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { GeneralSettingsProps } from "@/types/props";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {useTranslation} from "react-i18next";
-import {useUpdateMetadataMutation} from "@/services/api/metadata";
-import {useToast} from "@/hooks";
+import { useTranslation } from "react-i18next";
+import { useUpdateMetadataMutation } from "@/services/api/metadata";
+import { useToast } from "@/hooks";
 
 const formSchema = z.object({
   teamName: z.string().min(1, "Team name is required"),
@@ -20,13 +20,9 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const GeneralTab: React.FC<GeneralSettingsProps> = ({
-                                                      teamName: originalTeamName,
-                                                      logoUrl: originalLogoUrl,
-                                                      language: originalLanguage,
-                                                    }) => {
-  const {t} = useTranslation();
-  const {toast} = useToast();
+const GeneralTab: React.FC<GeneralSettingsProps> = ({ teamName: originalTeamName, logoUrl: originalLogoUrl, language: originalLanguage }) => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
   const [updateMetadata] = useUpdateMetadataMutation();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -75,51 +71,39 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
               <FormField
                 control={form.control}
                 name="teamName"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem className="space-y-2">
                     <FormLabel>{t("dashboard.settings.general.teamName")}</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder={t("dashboard.settings.general.teamNamePlaceholder")}
-                        {...field}
-                      />
+                      <Input placeholder={t("dashboard.settings.general.teamNamePlaceholder")} {...field} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="logoUrl"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem className="space-y-2">
                     <FormLabel>{t("dashboard.settings.general.logoUrl")}</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder={t("dashboard.settings.general.logoUrlPlaceholder")}
-                        {...field}
-                      />
+                      <Input placeholder={t("dashboard.settings.general.logoUrlPlaceholder")} {...field} />
                     </FormControl>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="language"
-                render={({field}) => (
+                render={({ field }) => (
                   <FormItem className="space-y-2">
                     <FormLabel>{t("dashboard.settings.general.language")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue
-                            placeholder={t(
-                              "dashboard.settings.general.languagePlaceholder"
-                            )}
-                          />
+                          <SelectValue placeholder={t("dashboard.settings.general.languagePlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -130,27 +114,17 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({
                         <SelectItem value="zh">{t("languages.zh")}</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage/>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
             <div className="flex items-center justify-end gap-x-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => form.reset()}
-                disabled={form.formState.isSubmitting}>
+              <Button type="button" variant="ghost" onClick={() => form.reset()} disabled={form.formState.isSubmitting}>
                 {t("common.cancel")}
               </Button>
-              <Button
-                type="submit"
-                disabled={
-                  !form.formState.isDirty || form.formState.isSubmitting
-                }>
-                {form.formState.isSubmitting
-                  ? t("common.saving")
-                  : t("common.save")}
+              <Button type="submit" disabled={!form.formState.isDirty || form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? t("common.saving") : t("common.save")}
               </Button>
             </div>
           </form>

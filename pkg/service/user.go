@@ -20,7 +20,7 @@ import (
 )
 
 type User interface {
-	Create(ctx context.Context, user model.CreateUserRequest, oauthID string) error
+	Create(ctx context.Context, user model.CreateUserRequest) error
 	Get(ctx context.Context, id string) (model.User, error)
 	Update(ctx context.Context, user model.User) error
 	Delete(ctx context.Context, id string) error
@@ -48,7 +48,7 @@ func NewUser(repos repository.Repositories) User {
 	return &user{repos: repos, email: email.NewEmail()}
 }
 
-func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID string) error {
+func (u *user) Create(ctx context.Context, req model.CreateUserRequest) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -63,6 +63,7 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID 
 		DOB:       req.DOB,
 		Phone:     req.Phone,
 		Address:   req.Address,
+		Provider:  model.Provider(req.Provider), // Convert string to Provider type
 	}
 
 	newUser, err := u.repos.User.Create(ctx, user)
@@ -83,19 +84,6 @@ func (u *user) Create(ctx context.Context, req model.CreateUserRequest, oauthID 
 			RoleID: roleID,
 		}
 		if _, err := u.repos.UserRole.Insert(ctx, userRole); err != nil {
-			return err
-		}
-	}
-
-	// Create OAuth connection if we have an oauth_id
-	if oauthID != "" {
-		oauth := model.UserOAuth{
-			UserID:   newUser.ID,
-			OAuthID:  oauthID,
-			Provider: model.Provider(req.Provider),
-		}
-
-		if err := u.repos.UserOauth.Insert(ctx, oauth); err != nil {
 			return err
 		}
 	}
@@ -214,13 +202,13 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 }
 
 func (u *user) GetProvider(ctx context.Context, userID string) (string, error) {
-	oauth, err := u.repos.UserOauth.GetByUserID(ctx, userID)
+	user, err := u.repos.User.GetOneById(ctx, userID)
 	if err != nil {
-		logger.Error("failed to get user oauth: user_id=%s, error=%v", userID, err)
+		logger.Error("failed to get user: user_id=%s, error=%v", userID, err)
 		return "", err
 	}
 
-	return string(oauth.Provider), nil
+	return string(user.Provider), nil
 }
 
 func (u *user) InviteUser(ctx context.Context, req model.InviteUserRequest) error {

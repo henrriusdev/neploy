@@ -1,14 +1,14 @@
-import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {Textarea} from "@/components/ui/textarea";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {useForm} from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {useDropzone} from "react-dropzone";
+import { useDropzone } from "react-dropzone";
 import React from "react";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 const baseFields = {
   repoUrl: z
@@ -25,9 +25,8 @@ const baseFields = {
         }
       },
       {
-        message:
-          "Must be a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)",
-      }
+        message: "Must be a valid GitHub or GitLab repository URL (e.g., https://github.com/user/repo)",
+      },
     )
     .optional(),
   branch: z.string().optional(),
@@ -50,24 +49,14 @@ const uploadFormSchema = z.discriminatedUnion("mode", [
 interface ApplicationFormProps {
   mode?: "create-app" | "create-version";
   applicationId?: string;
-  onSubmit: (
-    values: z.infer<typeof uploadFormSchema>,
-    file: File | null
-  ) => void;
+  onSubmit: (values: z.infer<typeof uploadFormSchema>, file: File | null) => void;
   isUploading: boolean;
   branches: string[];
   isLoadingBranches: boolean;
   onRepoUrlChange: (url: string) => void;
 }
 
-export function ApplicationForm({
-                                  mode = "create-app",
-                                  onSubmit,
-                                  isUploading,
-                                  branches,
-                                  isLoadingBranches,
-                                  onRepoUrlChange,
-                                }: ApplicationFormProps) {
+export function ApplicationForm({ mode = "create-app", onSubmit, isUploading, branches, isLoadingBranches, onRepoUrlChange }: ApplicationFormProps) {
   const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
 
   const form = useForm<z.infer<typeof uploadFormSchema>>({
@@ -81,7 +70,7 @@ export function ApplicationForm({
     },
   });
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const onDrop = React.useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -90,7 +79,7 @@ export function ApplicationForm({
     }
   }, []);
 
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       "application/zip": [".zip"],
@@ -103,7 +92,7 @@ export function ApplicationForm({
   });
 
   React.useEffect(() => {
-    const subscription = form.watch((value, {name}) => {
+    const subscription = form.watch((value, { name }) => {
       if (name === "repoUrl") {
         onRepoUrlChange(value.repoUrl || "");
       }
@@ -125,29 +114,26 @@ export function ApplicationForm({
             <FormField
               control={form.control}
               name="appName"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("dashboard.applications.createNew.name")}</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder={t("dashboard.applications.createNew.namePlaceholder")}/>
+                    <Input {...field} placeholder={t("dashboard.applications.createNew.namePlaceholder")} />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
               name="description"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("dashboard.applications.createNew.description")}</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder={t("dashboard.applications.createNew.descriptionPlaceholder")}
-                      {...field}
-                    />
+                    <Textarea placeholder={t("dashboard.applications.createNew.descriptionPlaceholder")} {...field} />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -156,19 +142,14 @@ export function ApplicationForm({
         <FormField
           control={form.control}
           name="repoUrl"
-          render={({field}) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>{t("dashboard.applications.createNew.fileOrRepo")}</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="https://github.com/username/repository"
-                  {...field}
-                />
+                <Input placeholder="https://github.com/username/repository" {...field} />
               </FormControl>
-              <FormDescription>
-                {t("dashboard.applications.createNew.repoUrlDescription")}
-              </FormDescription>
-              <FormMessage/>
+              <FormDescription>{t("dashboard.applications.createNew.repoUrlDescription")}</FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -176,22 +157,13 @@ export function ApplicationForm({
           <FormField
             control={form.control}
             name="branch"
-            render={({field}) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("dashboard.applications.createNew.branch")}</FormLabel>
-                <Select
-                  disabled={isLoadingBranches}
-                  value={field.value}
-                  onValueChange={field.onChange}>
+                <Select disabled={isLoadingBranches} value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          isLoadingBranches
-                            ? t("dashboard.applications.createNew.loadingBranches")
-                            : t("dashboard.applications.createNew.branchPlaceholder")
-                        }
-                      />
+                      <SelectValue placeholder={isLoadingBranches ? t("dashboard.applications.createNew.loadingBranches") : t("dashboard.applications.createNew.branchPlaceholder")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -202,20 +174,14 @@ export function ApplicationForm({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage/>
+                <FormMessage />
               </FormItem>
             )}
           />
         )}
-        <div
-          {...getRootProps()}
-          className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary">
+        <div {...getRootProps()} className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary">
           <input {...getInputProps()} />
-          {isDragActive ? (
-            <p>{t("dashboard.applications.createNew.dropzoneActive")}</p>
-          ) : (
-            <p>{t("dashboard.applications.createNew.dropzoneInactive")}</p>
-          )}
+          {isDragActive ? <p>{t("dashboard.applications.createNew.dropzoneActive")}</p> : <p>{t("dashboard.applications.createNew.dropzoneInactive")}</p>}
         </div>
         <Button type="submit" className="w-full" disabled={isUploading}>
           {isUploading ? t("dashboard.applications.createNew.deploying") : t("dashboard.applications.createNew.deploy")}

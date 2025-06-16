@@ -1,9 +1,4 @@
-export type ActionType = 
-  | "critical"
-  | "error"
-  | "request"
-  | "response"
-  | "query";
+export type ActionType = "critical" | "error" | "request" | "response" | "query";
 
 export type InputType =
   | "text"

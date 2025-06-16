@@ -45,9 +45,4 @@ export const techStackApi = baseApi.injectEndpoints({
   }),
 });
 
-export const {
-  useGetTechStacksQuery,
-  useCreateTechStackMutation,
-  useUpdateTechStackMutation,
-  useDeleteTechStackMutation,
-} = techStackApi;
+export const { useGetTechStacksQuery, useCreateTechStackMutation, useUpdateTechStackMutation, useDeleteTechStackMutation } = techStackApi;

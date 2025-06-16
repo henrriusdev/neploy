@@ -52,13 +52,12 @@
     "error": "There was an error when committing the setup, please try again",
     "name": "Full name",
     "reviewSetup": "Review the provided data",
-    "roles": "Roles",
     "setupAccount": "Setup Neploy!",
     "verifyInformation": "Please verify your info",
     "success": "Success!",
     "teamInformation": "Team Info",
     "provider": {
-      "title": "Choose a Dev Provider",
+      "title": "Choose an OAuth Provider",
       "description": "Choose if you want to use github, gitlab or manual input for your username and avatar"
     },
     "steps": {
@@ -66,6 +65,10 @@
       "team": "Team Setup",
       "project": "Project Details",
       "summary": "Summary"
+    },
+    "roles": {
+      "title": "Role Setup",
+      "description": "Add the roles that you'll use in Neploy"
     },
     "personalInfo": {
       "title": "Personal Information",
@@ -364,7 +367,7 @@
     "provider": {
       "description": "Choose a provider to link your code repository and identity.",
       "email": "Email",
-      "link": "Link Account",
+      "link": "Link with",
       "or": "Or",
       "title": "Development Provider"
     },
@@ -393,5 +396,5 @@
   "theme": "Theme",
   "appearance": "Appearance",
   "light": "Light",
-    "dark": "Dark"
+  "dark": "Dark"
 }

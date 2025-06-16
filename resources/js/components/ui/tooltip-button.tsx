@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ButtonProps } from "./button";
 import { LucideIcon } from "lucide-react";
 import React from "react";
@@ -14,10 +9,7 @@ export interface TooltipButtonProps extends ButtonProps {
   iconSize?: number;
 }
 
-export const TooltipButton = React.forwardRef<
-  HTMLButtonElement,
-  TooltipButtonProps
->(({ tooltip, icon: Icon, iconSize = 4, ...props }, ref) => {
+export const TooltipButton = React.forwardRef<HTMLButtonElement, TooltipButtonProps>(({ tooltip, icon: Icon, iconSize = 4, ...props }, ref) => {
   return (
     <TooltipProvider>
       <Tooltip>

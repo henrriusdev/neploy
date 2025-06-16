@@ -25,7 +25,7 @@ type Repositories struct {
 	TechStack          *TechStack
 	Trace              *Trace
 	User               *User
-	UserOauth          *UserOAuth
+	// UserOauth removed as part of OAuth refactoring
 	UserRole           *UserRole
 	UserTechStack      *UserTechStack
 	VisitorTrace       *VisitorTrace

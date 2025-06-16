@@ -286,9 +286,7 @@ set not null;
 -- +goose StatementBegin
 drop table public.user_oauth cascade;
 drop table public.visitor_traces cascade;
-drop table public.visitor_info cascade;
 drop table public.application_stats cascade;
-drop table public.refresh_tokens cascade;
 drop table public.gateways cascade;
 drop table public.traces cascade;
 drop table public.applications cascade;

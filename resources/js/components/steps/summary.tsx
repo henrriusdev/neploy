@@ -1,16 +1,14 @@
 import * as React from "react";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {SummaryStepProps} from "@/types/props";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { SummaryStepProps } from "@/types/props";
 
-export function SummaryStep({data, onBack, onSubmit}: SummaryStepProps) {
+export function SummaryStep({ data, onBack, onSubmit }: SummaryStepProps) {
   return (
     <Card className="w-full max-w-screen-md mx-auto">
       <CardHeader>
         <CardTitle>Review Your Information</CardTitle>
-        <CardDescription>
-          Please verify your details before continuing
-        </CardDescription>
+        <CardDescription>Please verify your details before continuing</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -25,11 +23,7 @@ export function SummaryStep({data, onBack, onSubmit}: SummaryStepProps) {
               </div>
               <div>
                 <dt className="text-sm text-muted-foreground">Date of Birth</dt>
-                <dd>
-                  {data.dob
-                    ? new Date(data.dob).toLocaleDateString()
-                    : "Not provided"}
-                </dd>
+                <dd>{data.dob ? new Date(data.dob).toLocaleDateString() : "Not provided"}</dd>
               </div>
               <div>
                 <dt className="text-sm text-muted-foreground">Phone</dt>

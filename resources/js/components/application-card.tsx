@@ -1,19 +1,19 @@
-import {Application} from "@/types/common";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
-import {TechIcon} from "@/components/icons/tech-icon";
-import {Trash2} from "lucide-react";
-import {useTranslation} from "react-i18next";
-import {router} from "@inertiajs/react";
+import { Application } from "@/types/common";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TechIcon } from "@/components/icons/tech-icon";
+import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { router } from "@inertiajs/react";
 
 interface ApplicationCardProps {
   app: Application;
   onDelete: (id: string) => void;
 }
 
-export function ApplicationCard({app, onDelete}: ApplicationCardProps) {
-  const {t} = useTranslation();
+export function ApplicationCard({ app, onDelete }: ApplicationCardProps) {
+  const { t } = useTranslation();
 
   const getStatusBadgeColor = (status: Application["status"]) => {
     switch (status) {
@@ -50,32 +50,20 @@ export function ApplicationCard({app, onDelete}: ApplicationCardProps) {
   };
 
   return (
-    <Card className={"hover:!bg-primary hover:cursor-pointer transition-colors"}
-          onClick={() => router.visit(`/dashboard/applications/${app.id}`)}>
+    <Card className={"hover:!bg-primary hover:cursor-pointer transition-colors"} onClick={() => router.visit(`/dashboard/applications/${app.id}`)}>
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>
           <CardTitle className="text-xl">{app.appName}</CardTitle>
-          <CardDescription>
-            {app?.techStack === null ? (
-              "Auto detected"
-            ) : (
-              <TechIcon name={app.techStack.name}/>
-            )}
-          </CardDescription>
+          <CardDescription>{app?.techStack === null ? "Auto detected" : <TechIcon name={app.techStack.name} />}</CardDescription>
         </div>
-        <Badge className={`${getStatusBadgeColor(app.status)}`}>
-          {translateStatus(app.status)}
-        </Badge>
+        <Badge className={`${getStatusBadgeColor(app.status)}`}>{translateStatus(app.status)}</Badge>
       </CardHeader>
       <CardContent>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => onDelete(app.id)}>
-          <Trash2 className="h-4 w-4 mr-1"/>
+        <Button size="sm" variant="destructive" onClick={() => onDelete(app.id)}>
+          <Trash2 className="h-4 w-4 mr-1" />
           {t("dashboard.applications.delete")}
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

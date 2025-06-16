@@ -23,7 +23,7 @@ type User struct {
 	DOB       Date   `json:"dob" db:"dob"`
 	Address   string `json:"address" db:"address"`
 	Phone     string `json:"phone" db:"phone"`
-	Provider  string `json:"provider" db:"-"`
+	Provider  Provider `json:"provider" db:"provider"`
 }
 
 type Role struct {
@@ -104,12 +104,7 @@ type VisitorTrace struct {
 	VisitedTimestamp Date   `json:"visit_timestamp" db:"visit_timestamp"`
 }
 
-type UserOAuth struct {
-	BaseEntity
-	UserID   string   `json:"user_id" db:"user_id"`
-	Provider Provider `json:"provider" db:"provider"`
-	OAuthID  string   `json:"oauth_id" db:"oauth_id"`
-}
+// UserOAuth struct has been removed as part of OAuth refactoring
 
 type Metadata struct {
 	BaseEntity

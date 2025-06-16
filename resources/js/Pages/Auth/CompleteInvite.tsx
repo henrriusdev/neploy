@@ -5,18 +5,11 @@ import { ProviderStep, UserDataStep, SummaryStep } from "@/components/steps";
 import { CompleteInviteProps } from "@/types/props";
 import { User } from "@/types/common";
 import { useCompleteInviteMutation } from "@/services/api/auth";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 type Step = "provider" | "data" | "summary";
 
-export default function CompleteInvite({
-  token,
-  email,
-  username,
-  provider,
-  error,
-  status,
-}: CompleteInviteProps) {
+export default function CompleteInvite({ token, email, username, provider, error, status }: CompleteInviteProps) {
   const [step, setStep] = useState<Step>(() => {
     return provider ? "data" : "provider";
   });
@@ -92,14 +85,7 @@ export default function CompleteInvite({
   };
 
   const handleSubmit = () => {
-    if (
-      !userData.firstName ||
-      !userData.lastName ||
-      !userData.phone ||
-      !userData.address ||
-      !userData.email ||
-      !userData.username
-    ) {
+    if (!userData.firstName || !userData.lastName || !userData.phone || !userData.address || !userData.email || !userData.username) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -127,8 +113,7 @@ export default function CompleteInvite({
         window.location.replace("/");
       })
       .catch((error) => {
-        const errorMessage =
-          error.data?.error || "Failed to complete registration";
+        const errorMessage = error.data?.error || "Failed to complete registration";
         toast({
           title: "Error",
           description: errorMessage,
@@ -142,22 +127,9 @@ export default function CompleteInvite({
       case "provider":
         return <ProviderStep onNext={handleProviderNext} token={token} />;
       case "data":
-        return (
-          <UserDataStep
-            email={email}
-            username={username}
-            onNext={handleDataNext}
-            onBack={handleDataBack}
-          />
-        );
+        return <UserDataStep email={email} username={username} onNext={handleDataNext} onBack={handleDataBack} />;
       case "summary":
-        return (
-          <SummaryStep
-            data={userData}
-            onBack={handleSummaryBack}
-            onSubmit={handleSubmit}
-          />
-        );
+        return <SummaryStep data={userData} onBack={handleSummaryBack} onSubmit={handleSubmit} />;
     }
   };
 

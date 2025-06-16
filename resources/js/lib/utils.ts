@@ -1,9 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import {AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2} from "lucide-react";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { AppWindowMac, DoorOpen, Frame, PieChartIcon, Settings2 } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function sanitizeAppName(appName: string): string {

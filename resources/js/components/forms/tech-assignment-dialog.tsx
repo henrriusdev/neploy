@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import {useEffect, useState} from "react"
-import {Button} from "@/components/ui/button"
-import {Checkbox} from "@/components/ui/checkbox"
-import {Label} from "@/components/ui/label"
-import {ScrollArea} from "@/components/ui/scroll-area"
-import {DialogFooter,} from "@/components/ui/dialog"
-import {TechStack} from "@/types";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DialogFooter } from "@/components/ui/dialog";
+import { TechStack } from "@/types";
 
 interface TechAssignmentDialogProps {
-  userId: string
-  allTechStacks: TechStack[]
-  selectedTechIds: string[]
-  onSave: (userId: string, techIds: string[]) => void
+  userId: string;
+  allTechStacks: TechStack[];
+  selectedTechIds: string[];
+  onSave: (userId: string, techIds: string[]) => void;
 }
 
-export function TechAssignmentDialog({userId, allTechStacks, selectedTechIds, onSave}: TechAssignmentDialogProps) {
-  const [selectedTechs, setSelectedTechs] = useState<string[]>([])
-  const [initialSelection, setInitialSelection] = useState<string[]>([])
+export function TechAssignmentDialog({ userId, allTechStacks, selectedTechIds, onSave }: TechAssignmentDialogProps) {
+  const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
+  const [initialSelection, setInitialSelection] = useState<string[]>([]);
 
   // Initialize selected techs when dialog opens
   useEffect(() => {
-    setSelectedTechs([...selectedTechIds])
-    setInitialSelection([...selectedTechIds])
-  }, [selectedTechIds])
+    setSelectedTechs([...selectedTechIds]);
+    setInitialSelection([...selectedTechIds]);
+  }, [selectedTechIds]);
 
   // Check if there are any changes compared to initial selection
   const hasChanges = () => {
-    if (selectedTechs.length !== initialSelection.length) return true
-    return !selectedTechs.every((tech) => initialSelection.includes(tech))
-  }
+    if (selectedTechs.length !== initialSelection.length) return true;
+    return !selectedTechs.every((tech) => initialSelection.includes(tech));
+  };
 
   const handleToggleTech = (techId: string) => {
-    setSelectedTechs((prev) => (prev.includes(techId) ? prev.filter((id) => id !== techId) : [...prev, techId]))
-  }
+    setSelectedTechs((prev) => (prev.includes(techId) ? prev.filter((id) => id !== techId) : [...prev, techId]));
+  };
 
   const handleSave = () => {
-    onSave(userId, selectedTechs)
-  }
+    onSave(userId, selectedTechs);
+  };
 
   return (
     <>
@@ -45,15 +45,8 @@ export function TechAssignmentDialog({userId, allTechStacks, selectedTechIds, on
         <div className="gap-4 grid grid-cols-3 pb-4">
           {allTechStacks.map((tech) => (
             <div key={tech.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={`tech-${tech.id}`}
-                checked={selectedTechs.includes(tech.id)}
-                onCheckedChange={() => handleToggleTech(tech.id)}
-              />
-              <Label
-                htmlFor={`tech-${tech.id}`}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
+              <Checkbox id={`tech-${tech.id}`} checked={selectedTechs.includes(tech.id)} onCheckedChange={() => handleToggleTech(tech.id)} />
+              <Label htmlFor={`tech-${tech.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 {tech.name}
               </Label>
             </div>
@@ -66,5 +59,5 @@ export function TechAssignmentDialog({userId, allTechStacks, selectedTechIds, on
         </Button>
       </DialogFooter>
     </>
-  )
+  );
 }

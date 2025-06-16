@@ -112,14 +112,14 @@ export interface ApplicationDockered extends Application {
 }
 
 export interface Trace {
-  id: string
-  createdAt: string
-  updatedAt: string
-  deletedAt: any
-  userId: string
-  type: string
-  action: string
-  actionTimestamp: string
-  sqlStatement: string
-  email: string
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: any;
+  userId: string;
+  type: string;
+  action: string;
+  actionTimestamp: string;
+  sqlStatement: string;
+  email: string;
 }

@@ -6,9 +6,7 @@ const baseQuery = fetchBaseQuery({
   credentials: "include", // Important for cookies/session handling
   prepareHeaders: (headers) => {
     // Add CSRF token from meta tag if it exists
-    const token = document
-      .querySelector('meta[name="csrf-token"]')
-      ?.getAttribute("content");
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
     if (token) {
       headers.set("X-CSRF-TOKEN", token);
     }

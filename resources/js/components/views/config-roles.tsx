@@ -1,34 +1,29 @@
-import React, {useEffect, useState} from "react";
-import {Card, CardContent, CardHeader, CardTitle,} from "@/components/ui/card";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import {RoleIcon} from "@/components/icons/role-icon";
-import {Pencil, PlusCircle, Trash2, UserPlus} from "lucide-react";
-import {TooltipButton} from "@/components/ui/tooltip-button";
-import {useTranslation} from "react-i18next";
-import {DialogButton} from "../forms/dialog-button";
-import {RoleForm} from "../forms/role-form";
-import {RolesSettingsProps, RoleWithUsers} from "@/types";
-import {useToast} from "@/hooks";
-import {roleSchema} from "@/lib/validations/role";
-import {z} from "zod";
-import {
-  useCreateRoleMutation,
-  useDeleteRoleMutation,
-  useGetRolesQuery,
-  useUpdateRoleMutation,
-} from "@/services/api/role";
-import {RoleUserManagerDialog} from "@/components/forms/role-user-manager-dialog";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoleIcon } from "@/components/icons/role-icon";
+import { Pencil, PlusCircle, Trash2, UserPlus } from "lucide-react";
+import { TooltipButton } from "@/components/ui/tooltip-button";
+import { useTranslation } from "react-i18next";
+import { DialogButton } from "../forms/dialog-button";
+import { RoleForm } from "../forms/role-form";
+import { RolesSettingsProps, RoleWithUsers } from "@/types";
+import { useToast } from "@/hooks";
+import { roleSchema } from "@/lib/validations/role";
+import { z } from "zod";
+import { useCreateRoleMutation, useDeleteRoleMutation, useGetRolesQuery, useUpdateRoleMutation } from "@/services/api/role";
+import { RoleUserManagerDialog } from "@/components/forms/role-user-manager-dialog";
 
-const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
-  const {t} = useTranslation();
-  const {toast} = useToast();
+const RolesTab: React.FC<RolesSettingsProps> = ({ roles: initialRoles }) => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
   const getRoles = useGetRolesQuery();
   const [createRole] = useCreateRoleMutation();
   const [updateRole] = useUpdateRoleMutation();
   const [deleteRole] = useDeleteRoleMutation();
   const [openRoleId, setOpenRoleId] = useState<string | null>(null);
   const [roles, setRoles] = useState<RoleWithUsers[]>(initialRoles);
-  const [openManageUsersRole, setOpenManageUsersRole] = useState("")
+  const [openManageUsersRole, setOpenManageUsersRole] = useState("");
 
   const [open, setOpen] = useState(false);
 
@@ -93,7 +88,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
 
   async function del(roleId: string) {
     try {
-      await deleteRole({id: roleId}).unwrap();
+      await deleteRole({ id: roleId }).unwrap();
       toast({
         title: t("dashboard.settings.roles.deleteSuccess"),
         description: t("dashboard.settings.roles.deleteSuccessDescription"),
@@ -120,11 +115,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
             open={open}
             variant="text"
             onOpen={setOpen}>
-            <RoleForm
-              onSubmit={create}
-              onCancel={() => setOpen(false)}
-              defaultValues={null}
-            />
+            <RoleForm onSubmit={create} onCancel={() => setOpen(false)} defaultValues={null} />
           </DialogButton>
         </CardTitle>
       </CardHeader>
@@ -143,7 +134,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
             {roles.map((role) => (
               <TableRow key={role.id}>
                 <TableCell>
-                  <RoleIcon icon={role.icon} color={role.color} size={60}/>
+                  <RoleIcon icon={role.icon} color={role.color} size={60} />
                 </TableCell>
                 <TableCell>{role.name}</TableCell>
                 <TableCell>{role.description}</TableCell>
@@ -156,15 +147,8 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
                       onOpen={() => setOpenManageUsersRole(role.id)}
                       variant="tooltip"
                       description={t("dashboard.settings.roles.manageUsersDescription")}
-                      icon={UserPlus}
-                    >
-                      <RoleUserManagerDialog
-                        open={open}
-                        onOpenChange={() => setOpenManageUsersRole(null)}
-                        roleId={role.id}
-                        roleName={role.name}
-                        assignedUsers={role.users}
-                      />
+                      icon={UserPlus}>
+                      <RoleUserManagerDialog open={open} onOpenChange={() => setOpenManageUsersRole(null)} roleId={role.id} roleName={role.name} assignedUsers={role.users} />
                     </DialogButton>
                     <DialogButton
                       buttonText={t("dashboard.settings.roles.editAction")}
@@ -184,14 +168,7 @@ const RolesTab: React.FC<RolesSettingsProps> = ({roles: initialRoles}) => {
                         }}
                       />
                     </DialogButton>
-                    <TooltipButton
-                      tooltip={t("dashboard.settings.roles.deleteAction")}
-                      icon={Trash2}
-                      variant="destructive"
-                      size="icon"
-                      disabled={role.users.length > 0}
-                      onClick={() => del(role.id)}
-                    />
+                    <TooltipButton tooltip={t("dashboard.settings.roles.deleteAction")} icon={Trash2} variant="destructive" size="icon" disabled={role.users.length > 0} onClick={() => del(role.id)} />
                   </div>
                 </TableCell>
               </TableRow>
