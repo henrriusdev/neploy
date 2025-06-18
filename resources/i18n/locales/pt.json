@@ -399,10 +399,12 @@
       "firstName": "Primeiro nome",
       "lastName": "Sobrenome",
       "password": "Senha",
-      "phone": "Número
+      "phone": "Número",
+      "username": "Nome de usuário"
+    }
+  },
+  "theme": "Tema",
+  "appearance": "Aparência",
   "light": "Claro",
-  "dark": "Escuro",
-  "logo": {
-    "autoContrast": "Se o fundo for muito claro e o branco não for visível, o logotipo será exibido em escuro."
-  }
+  "dark": "Escuro"
 }

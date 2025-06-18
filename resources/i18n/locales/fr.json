@@ -406,8 +406,5 @@
   "theme": "Thème",
   "appearance": "Apparence",
   "light": "Clair",
-  "dark": "Sombre",
-  "logo": {
-    "autoContrast": "Si le fond est très clair et que le blanc n'est pas visible, le logo sera affiché en foncé."
-  }
+  "dark": "Sombre"
 }
