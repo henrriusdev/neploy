@@ -42,7 +42,12 @@
     "enterEmail": "Enter your email",
     "enterPassword": "Enter your password",
     "loggingIn": "Logging in...",
-    "logIn": "Log in"
+    "logIn": "Log in",
+    "resetPassword": "Reset Password",
+    "resetPasswordInstructions": "Enter your email address and we'll send you a link to reset your password.",
+    "sending": "Sending...",
+    "sendResetLink": "Send Reset Link",
+    "backToLogin": "Back to Login"
   },
   "onboarding": {
     "welcome": "Welcome to Neploy",

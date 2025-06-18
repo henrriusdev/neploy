@@ -29,7 +29,14 @@ export const users = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    inviteUser: builder.mutation<void, { email: string; role: string }>({
+      query: (inviteData) => ({
+        url: "/users/invite",
+        method: "POST",
+        body: inviteData,
+      }),
+    }),
   }),
 });
 
-export const { useUpdateUserTechStacksMutation, useUpdateProfileMutation, useUpdatePasswordMutation, useGetUsersQuery } = users;
+export const { useUpdateUserTechStacksMutation, useUpdateProfileMutation, useUpdatePasswordMutation, useGetUsersQuery, useInviteUserMutation } = users;

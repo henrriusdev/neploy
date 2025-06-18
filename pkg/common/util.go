@@ -16,7 +16,10 @@ func FormatDateRange(startDate, endDate time.Time) model.DateRange {
 }
 
 func AcceptedRoutesForOnboarding(path string) bool {
-	return strings.HasPrefix(path, "/build/assets/") || strings.HasPrefix(path, "/auth")
+	return strings.HasPrefix(path, "/build/assets/") ||
+		strings.HasPrefix(path, "/assets/") ||
+		strings.HasPrefix(path, "/auth") ||
+		path == "/manual"
 }
 
 func InjectTrace(ctx context.Context, trace *model.Trace) context.Context {

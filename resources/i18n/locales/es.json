@@ -42,7 +42,12 @@
     "enterEmail": "Ingrese su correo electrónico",
     "enterPassword": "Ingrese su contraseña",
     "loggingIn": "Iniciando sesión ...",
-    "logIn": "Acceso"
+    "logIn": "Acceso",
+    "resetPassword": "Restablecer contraseña",
+    "resetPasswordInstructions": "Ingrese su correo electrónico y le enviaremos un enlace para restablecer su contraseña.",
+    "sending": "Enviando...",
+    "sendResetLink": "Enviar enlace de restablecimiento",
+    "backToLogin": "Volver al inicio de sesión"
   },
   "onboarding": {
     "welcome": "Bienvenido a Neploy",
@@ -386,7 +391,7 @@
       "title": "Configuración de roles"
     },
     "user": {
-      "address": "DIRECCIÓN",
+      "address": "Dirección",
       "dob": "Fecha de nacimiento",
       "email": "Correo electrónico",
       "firstName": "Nombre de pila",
@@ -399,5 +404,8 @@
   "theme": "Tema",
   "appearance": "Apariencia",
   "light": "Claro",
-  "dark": "Oscuro"
+  "dark": "Oscuro",
+  "logo": {
+    "autoContrast": "Si el fondo es muy claro y el blanco no es visible, el logo se mostrará en oscuro."
+  }
 }

@@ -42,7 +42,12 @@
     "enterEmail": "Digite seu e -mail",
     "enterPassword": "Digite sua senha",
     "loggingIn": "Login ...",
-    "logIn": "Conecte-se"
+    "logIn": "Conecte-se",
+    "resetPassword": "Redefinir senha",
+    "resetPasswordInstructions": "Digite seu e-mail e enviaremos um link para redefinir sua senha.",
+    "sending": "Enviando...",
+    "sendResetLink": "Enviar link de redefinição",
+    "backToLogin": "Voltar para o login"
   },
   "onboarding": {
     "welcome": "Bem -vindo ao Neploy",
@@ -394,12 +399,10 @@
       "firstName": "Primeiro nome",
       "lastName": "Sobrenome",
       "password": "Senha",
-      "phone": "Número de telefone",
-      "username": "Nome de usuário"
-    }
-  },
-  "theme": "Tema",
-  "appearance": "Aparência",
+      "phone": "Número
   "light": "Claro",
-  "dark": "Escuro"
+  "dark": "Escuro",
+  "logo": {
+    "autoContrast": "Se o fundo for muito claro e o branco não for visível, o logotipo será exibido em escuro."
+  }
 }
