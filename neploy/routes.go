@@ -3,14 +3,15 @@ package neploy
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/labstack/echo/v4"
 	"neploy.dev/neploy/handler"
 	"neploy.dev/neploy/middleware"
 	neployway "neploy.dev/pkg/gateway"
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/repository/filters"
-	"net/http"
-	"strconv"
 
 	inertia "github.com/romsar/gonertia"
 )
@@ -70,6 +71,10 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	metadataRoutes(e, i, npy)
 	techStackRoutes(e, i, npy)
 	gatewayRoutes(e, i, npy)
+
+	if err := npy.Services.Application.EnsureDefaultGateways(context.Background()); err != nil {
+		logger.Error("Failed to ensure default gateways: %v", err)
+	}
 
 	gateways, _ := npy.Services.Gateway.GetAll(context.Background())
 

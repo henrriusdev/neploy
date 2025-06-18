@@ -136,6 +136,27 @@ func (v *versioning) Deploy(ctx context.Context, id string, repoURL string, bran
 	if v.hub != nil {
 		v.hub.BroadcastProgress(100, "Deployment complete!")
 	}
+
+	// --- Create Gateway if not exists ---
+	existingGateways, err := v.repos.Gateway.GetByApplicationID(ctx, app.ID)
+	if err != nil {
+		logger.Error("error checking existing gateways: %v", err)
+		return err
+	}
+	if len(existingGateways) == 0 {
+		gateway := model.Gateway{
+			Domain:        "localhost",
+			Path:          "/" + appName,
+			Port:          "80",
+			ApplicationID: app.ID,
+			Status:        "active",
+		}
+		if err := v.repos.Gateway.Insert(ctx, gateway); err != nil {
+			logger.Error("error creating gateway: %v", err)
+			return err
+		}
+		logger.Info("Gateway created for application: %s", app.AppName)
+	}
 	return nil
 }
 

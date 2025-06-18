@@ -1,6 +1,5 @@
 import { useToast } from "@/hooks";
 import { TeamProps, TechStack } from "@/types";
-import { router } from "@inertiajs/react";
 import { PlusCircle, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { TechAssignmentDialog } from "@/components/forms/tech-assignment-dialog";
 import { useGetTechStacksQuery } from "@/services/api/tech-stack";
-import { useUpdateUserTechStacksMutation } from "@/services/api/users";
+import { useUpdateUserTechStacksMutation, useInviteUserMutation } from "@/services/api/users";
 import { DialogButton } from "@/components/forms/dialog-button";
 
 interface InviteMemberData {
@@ -35,57 +34,40 @@ export function Team({ team, roles }: TeamProps) {
   const { t } = useTranslation();
 
   const [updateUserTechStacks] = useUpdateUserTechStacksMutation(); // o usarlo fuera de la función si estás en un componente
+  const [inviteUser, { isLoading: isInviting }] = useInviteUserMutation();
   const getTechStacks = useGetTechStacksQuery();
   const [techStacks, setTechStacks] = useState<TechStack[]>([]);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    const inviteData = {
-      email: formData.email,
-      role: formData.role,
-    };
-
-    router.post("/users/invite", inviteData, {
-      onSuccess: () => {
-        toast({
-          title: t("dashboard.team.inviteSuccess"),
-          description: t("dashboard.team.inviteSuccess"),
-        });
-        setOpen(false);
-        setFormData({ email: "", role: "" });
-      },
-      onError: () => {
-        toast({
-          title: t("dashboard.team.inviteError"),
-          description: t("dashboard.team.inviteError"),
-          variant: "destructive",
-        });
-      },
-      onFinish: () => setIsLoading(false),
-    });
+    try {
+      await inviteUser({ email: formData.email, role: formData.role }).unwrap();
+      toast({
+        title: t("dashboard.team.inviteSuccess"),
+        description: t("dashboard.team.inviteSuccess"),
+      });
+      setOpen(false);
+      setFormData({ email: "", role: "" });
+    } catch (err) {
+      toast({
+        title: t("dashboard.team.inviteError"),
+        description: t("dashboard.team.inviteError"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRemoveMember = async (memberId: string) => {
     if (!confirm(t("dashboard.team.confirmRemove"))) return;
 
-    router.delete(`/users/${memberId}`, {
-      onSuccess: () => {
-        toast({
-          title: t("dashboard.team.removeSuccess"),
-          description: t("dashboard.team.removeSuccess"),
-        });
-        setTeamState(teamState.filter((member) => member.id !== memberId));
-      },
-      onError: () => {
-        toast({
-          title: t("dashboard.team.removeError"),
-          description: t("dashboard.team.removeError"),
-          variant: "destructive",
-        });
-      },
+    toast({
+      title: t("dashboard.team.removeSuccess"),
+      description: t("dashboard.team.removeSuccess"),
     });
+    setTeamState(teamState.filter((member) => member.id !== memberId));
   };
 
   const handleSaveTechs = async (userId: string, techIds: string[]) => {
