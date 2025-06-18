@@ -3,8 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
-	"golang.org/x/sync/semaphore"
 	"mime/multipart"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
+
+	"golang.org/x/sync/semaphore"
+	"neploy.dev/config"
 	neploker "neploy.dev/pkg/docker"
 	"neploy.dev/pkg/filesystem"
 	neployway "neploy.dev/pkg/gateway"
@@ -13,11 +20,6 @@ import (
 	"neploy.dev/pkg/repository"
 	"neploy.dev/pkg/repository/filters"
 	"neploy.dev/pkg/websocket"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
-	"time"
 )
 
 var globalSemaphore = semaphore.NewWeighted(4)
@@ -40,6 +42,7 @@ type Application interface {
 	GetHealthy(ctx context.Context) (uint, uint, error)
 	GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error)
 	GetStats(ctx context.Context) ([]model.ApplicationStat, error)
+	EnsureDefaultGateways(ctx context.Context) error
 }
 
 type application struct {
@@ -435,4 +438,60 @@ func (a *application) GetStats(ctx context.Context) ([]model.ApplicationStat, er
 	}
 
 	return stats, nil
+}
+
+func (a *application) EnsureDefaultGateways(ctx context.Context) error {
+	apps, err := a.repos.Application.GetAll(ctx)
+	if err != nil {
+		return err
+	}
+	gateways, err := a.repos.Gateway.GetAll(ctx)
+	if err != nil {
+		return err
+	}
+	if len(gateways) > 0 {
+		return nil
+	}
+
+	for _, app := range apps {
+		appName := sanitizeAppName(app.AppName)
+		port := "80"
+
+		// Find first version folder and Dockerfile for port detection
+		appPath := filepath.Join(config.Env.UploadPath, appName)
+		entries, err := os.ReadDir(appPath)
+		if err == nil {
+			for _, entry := range entries {
+				if entry.IsDir() {
+					dockerfilePath := filepath.Join(appPath, entry.Name(), "Dockerfile")
+					if data, err := os.ReadFile(dockerfilePath); err == nil {
+						re := regexp.MustCompile(`(?i)^EXPOSE\s+(\d+)`)
+						lines := strings.Split(string(data), "\n")
+						for _, line := range lines {
+							matches := re.FindStringSubmatch(strings.TrimSpace(line))
+							if len(matches) == 2 {
+								port = matches[1]
+								break
+							}
+						}
+					}
+					break
+				}
+			}
+		}
+
+		defaultGateway := model.Gateway{
+			Domain:        "http://neploy.live",
+			Path:          "/" + appName,
+			Port:          port,
+			ApplicationID: app.ID,
+			Status:        "active",
+		}
+		if err := a.repos.Gateway.Insert(ctx, defaultGateway); err != nil {
+			logger.Error("Failed to create default gateway for app %s: %v", app.AppName, err)
+		} else {
+			logger.Info("Created default gateway for app %s", app.AppName)
+		}
+	}
+	return nil
 }
