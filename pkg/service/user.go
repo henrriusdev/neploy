@@ -454,7 +454,7 @@ func (u *user) NewPasswordLink(ctx context.Context, userEmail, language string) 
 		LogoURL:      metadata.LogoURL,
 		ResetURL:     resetURL,
 		ResetToken:   token,
-		BaseURL:      fmt.Sprintf("%s", config.Env.BaseURL),
+		BaseURL:      config.Env.BaseURL,
 		CurrentYear:  time.Now().Year(),
 		Translations: email.GetTranslations(language),
 		Language:     language,

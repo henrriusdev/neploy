@@ -6,11 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
-	"neploy.dev/pkg/repository/filters"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"neploy.dev/pkg/repository/filters"
 
 	"gopkg.in/src-d/go-git.v4"
 	gitconfig "gopkg.in/src-d/go-git.v4/config"

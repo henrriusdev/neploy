@@ -481,7 +481,7 @@ func (a *application) EnsureDefaultGateways(ctx context.Context) error {
 		}
 
 		defaultGateway := model.Gateway{
-			Domain:        "http://neploy.live",
+			Domain:        "localhost",
 			Path:          "/" + appName,
 			Port:          port,
 			ApplicationID: app.ID,
