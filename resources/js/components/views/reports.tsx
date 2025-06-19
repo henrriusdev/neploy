@@ -41,7 +41,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
 
   const groupedData = useMemo(() => {
     // If the date string includes a time, group by hour (YYYY-MM-DD HH:00)
-    const map = new Map<string, ApplicationStat & { hour: string }>();
+    const map = new Map<string, ApplicationStat & { hour: string; name: string }>();
     for (const stat of filteredData) {
       // Try to parse hour from stat.date
       let hour = stat.date;
@@ -51,14 +51,14 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
       } catch {}
       const key = `${stat.application_id || "all"}-${hour}`;
       if (!map.has(key)) {
-        map.set(key, { ...stat, hour, requests: 0, errors: 0 });
+        map.set(key, { ...stat, hour, name: hour, requests: 0, errors: 0 });
       }
       const agg = map.get(key)!;
       agg.requests += stat.requests;
       agg.errors += stat.errors;
     }
     // Sort by hour ascending
-    return Array.from(map.values()).sort((a, b) => a.hour.localeCompare(b.hour));
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [filteredData]);
 
   const toggleMetric = (key: string) => {
@@ -71,7 +71,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
   const config = Object.fromEntries(metrics.map((m) => [m.key, { label: m.label, color: m.color }]));
 
   return (
-    <Card className="pt-3">
+    <Card>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-1">
@@ -118,7 +118,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
         </div>
         {/* Responsive chart wrapper to prevent horizontal scroll */}
         <div style={{ width: "100%", overflowX: "auto" }}>
-          <div style={{ minWidth: 600 }}>
+          <div style={{ minWidth: 0 }}>
             <ChartContainer config={config}>
               {chartType === "pie" ? (
                 <PieChart>
@@ -144,7 +144,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
                 </PieChart>
               ) : (
                 <Chart data={groupedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <XAxis dataKey="hour" />
+                  <XAxis dataKey="name" />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <ChartLegend content={<ChartLegendContent />} />
