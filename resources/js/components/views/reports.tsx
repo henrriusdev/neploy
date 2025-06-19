@@ -39,26 +39,12 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
     });
   }, [stats, dateRange, appFilter]);
 
+  // Instead of grouping, just map stats to include a 'name' field for recharts
   const groupedData = useMemo(() => {
-    // If the date string includes a time, group by hour (YYYY-MM-DD HH:00)
-    const map = new Map<string, ApplicationStat & { hour: string; name: string }>();
-    for (const stat of filteredData) {
-      // Try to parse hour from stat.date
-      let hour = stat.date;
-      try {
-        const d = parseISO(stat.date);
-        hour = format(d, "yyyy-MM-dd HH:00");
-      } catch {}
-      const key = `${stat.application_id || "all"}-${hour}`;
-      if (!map.has(key)) {
-        map.set(key, { ...stat, hour, name: hour, requests: 0, errors: 0 });
-      }
-      const agg = map.get(key)!;
-      agg.requests += stat.requests;
-      agg.errors += stat.errors;
-    }
-    // Sort by hour ascending
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return filteredData.map((stat) => ({
+      ...stat,
+      name: stat.date || stat.hour || "",
+    })).sort((a, b) => a.name.localeCompare(b.name));
   }, [filteredData]);
 
   const toggleMetric = (key: string) => {
