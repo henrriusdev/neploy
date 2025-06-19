@@ -132,7 +132,7 @@ func (a *ApplicationStat) GetHourlyRequests(ctx context.Context) ([]model.Reques
 	query := goqu.
 		From("application_stats").
 		Select(
-			goqu.L("to_char(date AT TIME ZONE 'UTC', 'HH24:00')").As("hour"),
+			goqu.L("to_char(date AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:00')").As("hour"),
 			goqu.SUM("requests").As("successful"),
 			goqu.SUM("errors").As("errors"),
 		).
