@@ -96,14 +96,13 @@ func RegisterRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 				continue
 			}
 
-			port++
-
 			route := neployway.Route{
 				AppID:  gateway.ApplicationID,
 				Port:   strconv.Itoa(port),
 				Domain: gateway.Domain,
 				Path:   versionedPath,
 			}
+			port++
 
 			println("Registering default route:", route.Path, route.Port)
 
