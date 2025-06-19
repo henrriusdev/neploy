@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/forms/date-picker";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 
 interface ApplicationStat {
   application_id: string;
@@ -39,12 +39,19 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
     });
   }, [stats, dateRange, appFilter]);
 
-  // Instead of grouping, just map stats to include a 'name' field for recharts
-  const groupedData = useMemo(() => {
-    return filteredData.map((stat) => ({
-      ...stat,
-      name: stat.date || stat.hour || "",
-    })).sort((a, b) => a.name.localeCompare(b.name));
+  // Instead of grouping, just map stats to include a 'name' field for recharts, showing only the hour (HH:mm)
+  const chartData = useMemo(() => {
+    return filteredData.map((stat) => {
+      let hourLabel = stat.date;
+      try {
+        const d = parseISO(stat.date);
+        if (isValid(d)) hourLabel = format(d, "HH:mm");
+      } catch {}
+      return {
+        ...stat,
+        name: hourLabel,
+      };
+    }).sort((a, b) => a.name.localeCompare(b.name));
   }, [filteredData]);
 
   const toggleMetric = (key: string) => {
@@ -111,7 +118,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
                   <Pie
                     data={selectedMetrics.map((metric) => {
                       const m = metrics.find((m) => m.key === metric);
-                      const total = groupedData.reduce((acc, item) => acc + (item[metric as keyof ApplicationStat] as number), 0);
+                      const total = chartData.reduce((acc, item) => acc + (item[metric as keyof ApplicationStat] as number), 0);
                       return { name: m?.label, value: total, color: m?.color };
                     })}
                     dataKey="value"
@@ -129,7 +136,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
                   <ChartLegend content={<ChartLegendContent />} />
                 </PieChart>
               ) : (
-                <Chart data={groupedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <Chart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />
