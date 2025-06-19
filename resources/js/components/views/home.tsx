@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { DashboardCard } from "../dashboard-card";
 import { BaseChart } from "../base-chart";
 import { techStackColors } from "@/lib/colors";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -14,21 +14,28 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
   const [totalRequests, setTotalRequests] = useState(0);
   const [totalErrors, setTotalErrors] = useState(0);
 
-  requests = requests?.map((request) => ({
-    ...request,
-    total: request.successful + request.errors,
-    successful: request.successful - request.errors,
-    errors: request.errors ?? 0,
-  }));
+  // Map backend RequestStat (with .hour) to frontend RequestData (with .name)
+  const chartRequests = useMemo(() => {
+    if (!requests) return [];
+    return requests
+      .map((r) => ({
+        ...r,
+        name: (r as any).hour || r.name, // prefer .hour if present
+        total: r.successful + r.errors,
+        successful: r.successful - r.errors,
+        errors: r.errors ?? 0,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [requests]);
 
   useEffect(() => {
-    if (requests) {
-      const totalSuccessful = requests.reduce((acc, request) => acc + request.total, 0);
-      const totalErrors = requests.reduce((acc, request) => acc + request.errors, 0);
+    if (chartRequests) {
+      const totalSuccessful = chartRequests.reduce((acc, request) => acc + request.total, 0);
+      const totalErrors = chartRequests.reduce((acc, request) => acc + request.errors, 0);
       setTotalRequests(totalSuccessful);
       setTotalErrors(totalErrors);
     }
-  }, [requests]);
+  }, [chartRequests]);
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -120,7 +127,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
         />
         <DashboardCard
           title={t("dashboard.totalErrors")}
-          value={totalErrors}
+          value={totalErrors.toString()}
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-primary">
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -131,7 +138,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <BaseChart
           title={t("dashboard.requestsByTime")}
-          data={requests}
+          data={chartRequests}
           type="bar"
           dataKeys={["successful", "errors"]}
           colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}

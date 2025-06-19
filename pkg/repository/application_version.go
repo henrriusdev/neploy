@@ -19,8 +19,7 @@ func NewApplicationVersion(db store.Queryable) *ApplicationVersion {
 }
 
 func (a *ApplicationVersion) Insert(ctx context.Context, version model.ApplicationVersion) error {
-	_, err := a.InsertOne(ctx, version)
-
+	_, err := a.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
 	return err
 }
 

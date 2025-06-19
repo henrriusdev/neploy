@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/forms/date-picker";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { format, parseISO } from "date-fns";
 
 interface ApplicationStat {
   application_id: string;
@@ -37,6 +38,28 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
       return inRange && appMatch;
     });
   }, [stats, dateRange, appFilter]);
+
+  const groupedData = useMemo(() => {
+    // If the date string includes a time, group by hour (YYYY-MM-DD HH:00)
+    const map = new Map<string, ApplicationStat & { hour: string }>();
+    for (const stat of filteredData) {
+      // Try to parse hour from stat.date
+      let hour = stat.date;
+      try {
+        const d = parseISO(stat.date);
+        hour = format(d, "yyyy-MM-dd HH:00");
+      } catch {}
+      const key = `${stat.application_id || "all"}-${hour}`;
+      if (!map.has(key)) {
+        map.set(key, { ...stat, hour, requests: 0, errors: 0 });
+      }
+      const agg = map.get(key)!;
+      agg.requests += stat.requests;
+      agg.errors += stat.errors;
+    }
+    // Sort by hour ascending
+    return Array.from(map.values()).sort((a, b) => a.hour.localeCompare(b.hour));
+  }, [filteredData]);
 
   const toggleMetric = (key: string) => {
     setSelectedMetrics((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
@@ -93,53 +116,57 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
             ))}
           </div>
         </div>
-
-        <ChartContainer config={config}>
-          {chartType === "pie" ? (
-            <PieChart>
-              <Pie
-                data={selectedMetrics.map((metric) => {
-                  const m = metrics.find((m) => m.key === metric);
-                  const total = filteredData.reduce((acc, item) => acc + (item[metric as keyof ApplicationStat] as number), 0);
-                  return { name: m?.label, value: total, color: m?.color };
-                })}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                label>
-                {selectedMetrics.map((metric, i) => {
-                  const m = metrics.find((m) => m.key === metric);
-                  return <Cell key={`cell-${metric}`} fill={m?.color} />;
-                })}
-              </Pie>
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
-            </PieChart>
-          ) : (
-            <Chart data={filteredData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <XAxis dataKey="date" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
-              {selectedMetrics.map((metric) => {
-                const m = metrics.find((m) => m.key === metric);
-                return (
-                  <Series
-                    key={metric}
-                    type="monotone"
-                    dataKey={metric}
-                    stroke={chartType === "line" ? m?.color : undefined}
-                    fill={chartType === "bar" ? m?.color : undefined}
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                );
-              })}
-            </Chart>
-          )}
-        </ChartContainer>
+        {/* Responsive chart wrapper to prevent horizontal scroll */}
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <div style={{ minWidth: 600 }}>
+            <ChartContainer config={config}>
+              {chartType === "pie" ? (
+                <PieChart>
+                  <Pie
+                    data={selectedMetrics.map((metric) => {
+                      const m = metrics.find((m) => m.key === metric);
+                      const total = groupedData.reduce((acc, item) => acc + (item[metric as keyof ApplicationStat] as number), 0);
+                      return { name: m?.label, value: total, color: m?.color };
+                    })}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={120}
+                    label>
+                    {selectedMetrics.map((metric, i) => {
+                      const m = metrics.find((m) => m.key === metric);
+                      return <Cell key={`cell-${metric}`} fill={m?.color} />;
+                    })}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                </PieChart>
+              ) : (
+                <Chart data={groupedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <XAxis dataKey="hour" />
+                  <YAxis />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  {selectedMetrics.map((metric) => {
+                    const m = metrics.find((m) => m.key === metric);
+                    return (
+                      <Series
+                        key={metric}
+                        type="monotone"
+                        dataKey={metric}
+                        stroke={chartType === "line" ? m?.color : undefined}
+                        fill={chartType === "bar" ? m?.color : undefined}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    );
+                  })}
+                </Chart>
+              )}
+            </ChartContainer>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

@@ -290,52 +290,60 @@ func (v *versioning) resolveVersionTag(ctx context.Context, app model.Applicatio
 			Description:   app.Description,
 			Status:        "Created",
 		}
-
-		if err := v.repos.ApplicationVersion.Insert(ctx, version); err != nil {
-			logger.Error("error inserting application version: %v", err)
-			return "", err
+		// Use atomic upsert to avoid race condition
+		_, upsertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
+		if upsertErr != nil {
+			if v.hub != nil {
+				v.hub.BroadcastProgress(0, "Version already exists. Please enter a new version tag.")
+			}
+			return v.promptForNewVersionTag(ctx, app, suggestedTag)
 		}
-		return suggestedTag, nil
 	}
 
-	if v.hub == nil || v.hub.GetInteractiveClient() == nil {
-		return "", fmt.Errorf("version tag %s already exists", suggestedTag)
-	}
-
-	// Interactuar con el usuario vía WebSocket
-	resp := v.hub.BroadcastInteractive(websocket.ActionMessage{
-		Type:    "critical",
-		Action:  "version_conflict",
-		Title:   "Version already exists",
-		Message: fmt.Sprintf("A version with tag %s already exists. Please enter a new version.", suggestedTag),
-		Inputs: []websocket.Input{
-			{
-				Name:        "versionTag",
-				Type:        "text",
-				Placeholder: "e.g. v2.0.0",
-				Value:       suggestedTag,
-				Required:    true,
-			},
-		},
-	})
-
-	if resp == nil || resp.Data["versionTag"] == "" {
-		return "", fmt.Errorf("no response for version conflict")
-	}
-
-	version := model.ApplicationVersion{
-		ApplicationID: app.ID,
-		VersionTag:    resp.Data["versionTag"].(string),
-		Description:   app.Description,
-		Status:        "Created",
-	}
-
-	if err := v.repos.ApplicationVersion.Insert(ctx, version); err != nil {
-		logger.Error("error inserting application version: %v", err)
+	persisted, err := v.repos.ApplicationVersion.GetOne(ctx, filters.IsSelectFilter("application_id", app.ID), filters.IsSelectFilter("version_tag", suggestedTag))
+	if err != nil {
 		return "", err
 	}
+	return persisted.VersionTag, nil
+}
 
-	return resp.Data["versionTag"].(string), nil
+// promptForNewVersionTag interactively asks the user for a new version tag via websocket and retries the insert
+func (v *versioning) promptForNewVersionTag(ctx context.Context, app model.Application, lastTag string) (string, error) {
+	if v.hub == nil {
+		return "", errors.New("websocket hub not available for interactive version conflict resolution")
+	}
+	for {
+		msg := websocket.NewActionMessage(
+			"request",
+			"Version already exists",
+			fmt.Sprintf("A version with tag %s already exists. Please enter a new version.", lastTag),
+			[]websocket.Input{
+				websocket.NewTextInput("versionTag", "e.g. v2.0.0"),
+			},
+		)
+		msg.Action = "version_conflict"
+		msg.Inputs[0].Value = lastTag
+		resp := v.hub.BroadcastInteractive(msg)
+		if resp == nil || resp.Data["versionTag"] == "" {
+			return "", fmt.Errorf("no response for version conflict")
+		}
+		newTag := resp.Data["versionTag"].(string)
+		version := model.ApplicationVersion{
+			ApplicationID: app.ID,
+			VersionTag:    newTag,
+			Description:   app.Description,
+			Status:        "Created",
+		}
+		_, upsertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
+		if upsertErr == nil {
+			persisted, err := v.repos.ApplicationVersion.GetOne(ctx, filters.IsSelectFilter("application_id", app.ID), filters.IsSelectFilter("version_tag", newTag))
+			if err != nil {
+				return "", err
+			}
+			return persisted.VersionTag, nil
+		}
+		lastTag = newTag // loop again if still duplicate
+	}
 }
 
 func getLatestGitTag(repoURL string) (string, error) {

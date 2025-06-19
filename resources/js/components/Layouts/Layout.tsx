@@ -114,7 +114,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
         </Sidebar>
         <main className="flex-1 !w-full flex flex-col min-h-0">
           <div className="flex flex-col min-h-0 flex-1">
-            <div className="flex items-center justify-start gap-x-4 mb-4 py-3 pl-3">
+            <div className="flex items-center justify-start gap-x-4 py-3 pl-3">
               <SidebarTrigger />
               {teamName && <span className="text-base lg:text-xl font-semibold">{teamName} API Gateway</span>}
             </div>
