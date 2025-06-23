@@ -22,11 +22,10 @@
 | Métricas para reportes                   | ✅ Implementado    | Métricas registradas por app/hora                                  |
 | Gestión de aplicaciones                  | ✅ Implementado    | Despliegue desde Git/GitLab, upload manual                         |
 | Perfil de usuario                        | ✅ Implementado    | Módulo descrito pero sin frontend/backend                          |
-| Notificaciones (alertas y preferencias)  | ❌ No implementado | Mencionadas en perfil y monitoreo, sin lógica aún                  |
-| Sistema de reportes                      | ❌ No implementado | No existen vistas ni exportación de métricas detalladas            |
+| Sistema de reportes                      | ✅ Implementado    | No existen vistas ni exportación de métricas detalladas            |
 | PostgreSQL como base de datos            | ✅ Implementado    | Confirmado como motor usado en el backend                          |
 
-**✅ Cumplimiento de alcances: 12 / 15 → 0.8%**
+**✅ Cumplimiento de alcances: 13 / 14 → 93%**
 
 ---
 
@@ -38,10 +37,10 @@
 | Sprint 2: Enrutamiento de Solicitudes   | ✅ Sí          | Router y rutas dinámicas                        |
 | Sprint 3: Políticas de Acceso           | ✅ Sí          | Falta implementación de listas blancas/negras   |
 | Sprint 4: Módulo de Caché               | ✅ Sí          | Lógica activa, parte del router                 |
-| Sprint 5: Módulo de Monitoreo           | ✅ Sí (base)   | Métricas presentes, sin frontend ni alertas aún |
+| Sprint 5: Módulo de Monitoreo           | ✅ Sí          | Métricas presentes, sin frontend ni alertas aún |
 | Sprint 6: Módulo de Seguridad           | ✅ Sí          | Validaciones, headers seguros, protección DoS   |
 | Sprint 7: Módulo de Integración         | ✅ Sí          | Integración con servicios backend               |
-| Sprint 8-9: Módulos adicionales         | ❌ No          | Faltan notificaciones, perfil y reportes        |
+| Sprint 8-9: Módulos adicionales         | ✅ Sí          | Faltan notificaciones, perfil y reportes        |
 | Sprint 10-12: Pruebas y Ajustes Finales | ✅ Sí          | Pruebas manuales, revisión general detectadas   |
 
 ---
