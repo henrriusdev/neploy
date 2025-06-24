@@ -38,51 +38,63 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
   }, [chartRequests]);
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="md:col-span-2 lg:col-span-4">
+    <div className="flex-1 space-y-4 p-2 sm:p-4 md:p-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        {/* Recent activity */}
+        <Card className="md:col-span-2 lg:col-span-4 w-full">
           <CardHeader>
             <CardTitle>{t("dashboard.recentActivity.title")}</CardTitle>
             <CardDescription>{t("dashboard.recentActivity.description")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableHead>{t("dashboard.settings.trace.date")}</TableHead>
-                <TableHead>{t("dashboard.settings.trace.user")}</TableHead>
-                <TableHead>{t("dashboard.settings.trace.action")}</TableHead>
-              </TableHeader>
-              <TableBody>
-                {traces?.map((trace) => (
-                  <TableRow key={trace.id}>
-                    <TableHead>{trace.actionTimestamp}</TableHead>
-                    <TableHead>{trace.email}</TableHead>
-                    <TableHead>{trace.action}</TableHead>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="w-full overflow-x-auto">
+              <Table className="text-xs md:text-sm">
+                <TableHeader className="hidden sm:table-header-group">
+                  <TableHead>{t("dashboard.settings.trace.date")}</TableHead>
+                  <TableHead>{t("dashboard.settings.trace.user")}</TableHead>
+                  <TableHead>{t("dashboard.settings.trace.action")}</TableHead>
+                </TableHeader>
+                <TableBody>
+                  {traces?.map((trace) => (
+                    <TableRow key={trace.id} className="block sm:table-row border-b border-muted-foreground/10 sm:border-0 mb-2 sm:mb-0">
+                      <TableHead className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
+                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.date")}: </span>{trace.actionTimestamp}
+                      </TableHead>
+                      <TableHead className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
+                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.user")}: </span>{trace.email}
+                      </TableHead>
+                      <TableHead className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
+                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.action")}: </span>{trace.action}
+                      </TableHead>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2 lg:col-span-3">
+        {/* Resources */}
+        <Card className="md:col-span-2 lg:col-span-3 w-full">
           <CardHeader>
             <CardTitle>{t("dashboard.resources.title")}</CardTitle>
             <CardDescription>{t("dashboard.resources.description")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full justify-start" onClick={() => window.open("/manual", "_blank")}>
-              {t("dashboard.resources.documentation")}
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => window.open("https://deepwiki.com/henrriusdev/neploy", "_blank")}>
-              {t("dashboard.resources.apiReference")}
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => window.open("https://github.com/henrriusdev", "_blank")}>
-              {t("dashboard.resources.guides")}
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => window.open("https://github.com/henrriusdev/neploy/issues", "_blank")}>
-              Repo
-            </Button>
+          <CardContent className="space-y-2 p-2 sm:p-4">
+            <div className="flex flex-col gap-2 w-full">
+              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("/manual", "_blank")}> 
+                {t("dashboard.resources.documentation")}
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://deepwiki.com/henrriusdev/neploy", "_blank")}> 
+                {t("dashboard.resources.apiReference")}
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://github.com/henrriusdev", "_blank")}> 
+                {t("dashboard.resources.guides")}
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://github.com/henrriusdev/neploy/issues", "_blank")}> 
+                Repo
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

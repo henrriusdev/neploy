@@ -64,7 +64,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user: backendU
   }));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <Layout user={user} teamName={teamName} logoUrl={logoUrl} navItems={navigation}>
         {getComponent()}
       </Layout>

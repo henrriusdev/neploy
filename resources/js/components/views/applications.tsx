@@ -311,7 +311,7 @@ export function Applications() {
   }, [refreshApplications]);
 
   return (
-    <div className="space-y-6 p-3">
+    <div className="space-y-6 p-2 sm:p-3 w-full max-w-full">
       {/* Stats Section */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -341,11 +341,11 @@ export function Applications() {
       </div>
 
       {/* Actions Bar */}
-      <div className="flex justify-between items-center px-3 py-1">
-        <h1 className="font-bold text-3xl">{t("dashboard.applications.title")}</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 px-3 py-1">
+        <h1 className="font-bold text-2xl sm:text-3xl truncate w-full sm:w-auto">{t("dashboard.applications.title")}</h1>
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t("dashboard.applications.create")}
             </Button>

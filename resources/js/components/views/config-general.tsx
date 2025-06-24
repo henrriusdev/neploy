@@ -61,13 +61,13 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({ teamName: originalTeamName
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-2 sm:p-4">
         <CardTitle>{t("dashboard.settings.general.title")}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-2 sm:p-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid gap-4 grid-cols-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="teamName"
@@ -119,11 +119,11 @@ const GeneralTab: React.FC<GeneralSettingsProps> = ({ teamName: originalTeamName
                 )}
               />
             </div>
-            <div className="flex items-center justify-end gap-x-4">
-              <Button type="button" variant="ghost" onClick={() => form.reset()} disabled={form.formState.isSubmitting}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-x-4">
+              <Button type="button" variant="ghost" onClick={() => form.reset()} disabled={form.formState.isSubmitting} className="w-full sm:w-auto">
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={!form.formState.isDirty || form.formState.isSubmitting}>
+              <Button type="submit" disabled={!form.formState.isDirty || form.formState.isSubmitting} className="w-full sm:w-auto">
                 {form.formState.isSubmitting ? t("common.saving") : t("common.save")}
               </Button>
             </div>

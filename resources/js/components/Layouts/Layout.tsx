@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { useEffect } from "react";
 
 import { LanguageSelector } from "@/components/forms";
@@ -35,25 +35,27 @@ interface SidebarLayoutProps {
 }
 
 export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, logoUrl, teamName, children }) => {
-  const { theme, isDark, applyTheme } = useTheme(); // <- aquí usamos applyTheme directamente
+  const { theme, isDark, applyTheme } = useTheme();
 
   useEffect(() => {
     applyTheme(theme, isDark);
   }, [theme, isDark]);
+
   const { t } = useTranslation();
 
   return (
     <SidebarProvider>
-      <div className="flex max-h-dvh w-full">
+      <div className="flex min-h-screen w-full flex-col md:flex-row">
         <Sidebar collapsible="icon">
           <SidebarHeader className="flex items-center justify-center">
             <img
-              src={logoUrl}
+              src={logoUrl || "/placeholder.svg"}
               alt={teamName}
               className="h-full w-auto transition-all duration-300 ease-in-out
                    group-data-[collapsible=icon]:w-10/12 group-data-[collapsible=icon]:h-full
                    group-data-[state=expanded]:w-10/12 group-data-[state=expanded]:mx-auto"
             />
+            <SidebarTrigger className="absolute top-2 left-3 block md:hidden p-1" />
           </SidebarHeader>
           <SidebarContent className="px-2">
             <SidebarMenu>
@@ -81,7 +83,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton size="lg" variant="outline" className="w-full justify-start gap-2 !bg-transparent hover:text-foreground">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start text-left">
@@ -112,15 +114,22 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <main className="flex-1 !w-full flex flex-col min-h-0">
-          <div className="flex flex-col min-h-0 flex-1">
-            <div className="flex items-center justify-start gap-x-4 py-3 pl-3">
+
+        {/* Main content area with proper sticky header */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Sticky Header */}
+          <header className="sticky top-0 z-50 min-h-[56px] w-[99%] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
+            <div className="flex items-center justify-start gap-x-1 py-3 pl-1 min-w-0">
               <SidebarTrigger />
-              {teamName && <span className="text-base lg:text-xl font-semibold">{teamName} API Gateway</span>}
+              {teamName && <h1 className="text-base lg:text-xl font-semibold truncate">{teamName} API Gateway</h1>}
             </div>
-            <div className="px-4 py-2 overflow-auto flex-1">{children}</div>
-          </div>
-        </main>
+          </header>
+
+          {/* Single scrollable main content */}
+          <main className="flex-1 overflow-auto">
+            <div className="w-full max-w-full overflow-x-auto">{children}</div>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   );

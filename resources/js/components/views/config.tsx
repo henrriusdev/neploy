@@ -14,7 +14,7 @@ export const Config = ({ teamName, logoUrl, language, roles = [], techStacks = [
       <h1 className="text-2xl font-bold mb-6">System Configuration</h1>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full md:grid-cols-2 lg:grid-cols-4 h-fit">
           <TabsTrigger value="general">
             <Settings className="h-4 w-4 mr-2" />
             {t("dashboard.settings.general.title")}

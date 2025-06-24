@@ -33,6 +33,15 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
           </Button>
         );
       },
+      // truncate or wrap text in the cell
+      cell: ({ row }) => {
+        const email = row.getValue("email");
+        return (
+          <div className="max-w-xs overflow-hidden text-ellipsis break-all">
+            {email}
+          </div>
+        );
+      }
     },
     {
       accessorKey: "action",
@@ -44,10 +53,26 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
           </Button>
         );
       },
+      cell: ({ row }) => {
+        const action = row.getValue("action");
+        return (
+          <div className="max-w-xs overflow-hidden text-ellipsis break-all">
+            {action}
+          </div>
+        );
+      }
     },
     {
       accessorKey: "sqlStatement",
-      header: t("dashboard.settings.trace.query"),
+      header: "SQL",
+      cell: ({ row }) => {
+        const sqlStatement = row.getValue("sqlStatement");
+        return (
+          <div className="max-w-xs overflow-hidden break-all">
+            {sqlStatement}
+          </div>
+        );
+      },
     },
   ];
 
@@ -75,8 +100,8 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
     });
 
     return (
-      <div>
-        <div className="flex items-center py-4">
+      <div className="w-full overflow-x-auto md:min-w-[600px]">
+        <div className="flex items-center py-2 md:py-4">
           <Input
             placeholder="Filter queries..."
             value={(table.getColumn("sqlStatement")?.getFilterValue() as string) ?? ""}
@@ -84,7 +109,7 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
             className="max-w-sm"
           />
         </div>
-        <div className="rounded-md border">
+        <div className="rounded-md border min-w-[600px]">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -114,10 +139,10 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-end p-4">
-          <div className="flex items-center space-x-6 lg:space-x-8">
+        <div className="flex items-center justify-end p-1 md:p-2 lg:p-4">
+          <div className="flex items-center space-x-2 md:space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium">Rows per page</p>
+              <p className="text-sm font-medium hidden sm:block">Rows per page</p>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => {
@@ -163,16 +188,14 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
   }
 
   return (
-    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex justify-between items-center">{t("dashboard.settings.trace.title")}</CardTitle>
+          <CardTitle className="flex justify-between items-center text-lg">{t("dashboard.settings.trace.title")}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 max-w-full overflow-x-auto">
           <DataTable columns={columns} data={traces} />
         </CardContent>
       </Card>
-    </div>
   );
 };
 

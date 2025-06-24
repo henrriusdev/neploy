@@ -56,6 +56,4 @@ export interface CreateRoleRequest {
 
 export interface GatewayConfigRequest {
   defaultVersioning: string;
-  defaultVersion: string;
-  loadBalancer: boolean;
 }

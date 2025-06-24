@@ -100,10 +100,10 @@ export function Team({ team, roles }: TeamProps) {
   }, [getTechStacks.data]);
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-4 px-2 sm:py-6 sm:px-6 w-full max-w-full">
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <div>
               <CardTitle>{t("dashboard.team.title")}</CardTitle>
               <CardDescription>{t("dashboard.team.description")}</CardDescription>
@@ -144,49 +144,32 @@ export function Team({ team, roles }: TeamProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("dashboard.team.member")}</TableHead>
-                <TableHead>{t("dashboard.team.role")}</TableHead>
-                <TableHead>{t("dashboard.team.status")}</TableHead>
-                <TableHead className="text-right">{t("dashboard.team.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <div className="w-full">
+            {/* Mobile: stacked cards, Desktop: table */}
+            <div className="block sm:hidden space-y-4">
               {teamState.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center space-x-4">
-                      <Avatar>
-                        <AvatarImage
-                          src={`https://unavatar.io/${member.provider === "github" ? `${member.provider}/${member.username}` : member.email}`}
-                          alt={member.firstName + " " + member.lastName}
-                        />
-                        <AvatarFallback>
-                          {member.firstName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{member.firstName + " " + member.lastName}</div>
-                        <div className="text-sm text-muted-foreground">{member.email}</div>
-                      </div>
+                <div key={member.id} className="rounded-lg border p-4 bg-card flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage
+                        src={`https://unavatar.io/${member.provider === "github" ? `${member.provider}/${member.username}` : member.email}`}
+                        alt={member.firstName + " " + member.lastName}
+                      />
+                      <AvatarFallback>
+                        {member.firstName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-bold">{t("dashboard.team.member")}: <span className="font-normal">{member.firstName + " " + member.lastName}</span></div>
+                      <div className="text-xs text-muted-foreground">{member.email}</div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    {member.roles.map((role) => (
-                      <Badge key={role.name} variant="default" style={{ backgroundColor: role.color }}>
-                        {role.name}
-                      </Badge>
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs">Active</span>
-                  </TableCell>
-                  <TableCell className="text-right">
+                  </div>
+                  <div><span className="font-bold">{t("dashboard.team.role")}: </span>{member.roles.map((role) => (<Badge key={role.name} variant="default" style={{ backgroundColor: role.color }}>{role.name}</Badge>))}</div>
+                  <div><span className="font-bold">{t("dashboard.team.status")}: </span><span className="text-xs">Active</span></div>
+                  <div className="flex gap-2 mt-2">
                     <DialogButton
                       buttonText="Editar pila de tecnologías"
                       description="Edita la pila de tecnologías del miembro"
@@ -197,14 +180,77 @@ export function Team({ team, roles }: TeamProps) {
                       variant="tooltip">
                       <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
                     </DialogButton>
-                    <Button variant="destructive" size="icon" className="ml-3" onClick={() => handleRemoveMember(member.id)}>
+                    <Button variant="destructive" size="icon" onClick={() => handleRemoveMember(member.id)}>
                       <Trash className="h-4 w-4 text-destructive-foreground" />
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+            <div className="hidden sm:block w-full overflow-x-auto">
+              <Table className="min-w-[600px] text-xs md:text-sm w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("dashboard.team.member")}</TableHead>
+                    <TableHead>{t("dashboard.team.role")}</TableHead>
+                    <TableHead>{t("dashboard.team.status")}</TableHead>
+                    <TableHead className="text-right">{t("dashboard.team.actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamState.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage
+                              src={`https://unavatar.io/${member.provider === "github" ? `${member.provider}/${member.username}` : member.email}`}
+                              alt={member.firstName + " " + member.lastName}
+                            />
+                            <AvatarFallback>
+                              {member.firstName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{member.firstName + " " + member.lastName}</div>
+                            <div className="text-sm text-muted-foreground">{member.email}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {member.roles.map((role) => (
+                          <Badge key={role.name} variant="default" style={{ backgroundColor: role.color }}>
+                            {role.name}
+                          </Badge>
+                        ))}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs">Active</span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DialogButton
+                          buttonText="Editar pila de tecnologías"
+                          description="Edita la pila de tecnologías del miembro"
+                          title="Editar pila de tecnologías"
+                          open={openTechs}
+                          onOpen={setOpenTechs}
+                          icon={PlusCircle}
+                          variant="tooltip">
+                          <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
+                        </DialogButton>
+                        <Button variant="destructive" size="icon" className="ml-3" onClick={() => handleRemoveMember(member.id)}>
+                          <Trash className="h-4 w-4 text-destructive-foreground" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
