@@ -57,15 +57,15 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
                 <TableBody>
                   {traces?.map((trace) => (
                     <TableRow key={trace.id} className="block sm:table-row border-b border-muted-foreground/10 sm:border-0 mb-2 sm:mb-0">
-                      <TableHead className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
+                      <TableCell className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
                         <span className="sm:hidden font-bold">{t("dashboard.settings.trace.date")}: </span>{trace.actionTimestamp}
-                      </TableHead>
-                      <TableHead className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
+                      </TableCell>
+                      <TableCell className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
                         <span className="sm:hidden font-bold">{t("dashboard.settings.trace.user")}: </span>{trace.email}
-                      </TableHead>
-                      <TableHead className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
+                      </TableCell>
+                      <TableCell className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
                         <span className="sm:hidden font-bold">{t("dashboard.settings.trace.action")}: </span>{trace.action}
-                      </TableHead>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
