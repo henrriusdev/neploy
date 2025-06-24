@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"neploy.dev/config"
@@ -9,7 +11,6 @@ import (
 	"neploy.dev/pkg/logger"
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
-	"net/http"
 )
 
 func OnboardingMiddleware(service service.Onboard) echo.MiddlewareFunc {
@@ -72,7 +73,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			// Validate JWT token
 			claims, valid, err := service.ValidateJWT(cookie.Value)
 			if err != nil || !valid {
-				return c.Redirect(http.StatusSeeOther, "/we")
+				return c.Redirect(http.StatusSeeOther, "/")
 			}
 
 			// Store claims in context
