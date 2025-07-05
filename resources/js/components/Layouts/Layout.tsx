@@ -74,36 +74,6 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
               <SidebarMenuItem>
                 <ThemeSwitcher className="w-full p-2" />
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => {
-                    // Save current theme
-                    const currentTheme = localStorage.getItem('theme') || 'system';
-                    const currentDark = localStorage.getItem('dark') === 'true';
-                    
-                    // Switch to light theme for printing
-                    applyTheme('neploy', false); // Using 'neploy' as the light theme
-                    
-                    // Trigger print
-                    setTimeout(() => {
-                      window.print();
-                      
-                      // Restore original theme after printing
-                      setTimeout(() => {
-                        applyTheme(currentTheme as Theme, currentDark);
-                      }, 500);
-                    }, 300);
-                  }}
-                  className="w-full flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                    <rect x="6" y="14" width="12" height="8"></rect>
-                  </svg>
-                  <span>{t("print")}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>

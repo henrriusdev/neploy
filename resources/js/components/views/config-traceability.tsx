@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Trace, TracesSettingsProps } from "@/types";
 import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
-import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Printer } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Theme, useTheme } from "@/hooks";
 
 const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
   const { t } = useTranslation();
+  const { applyTheme } = useTheme();
+  const [isPrinting, setIsPrinting] = useState(false);
   const columns: ColumnDef<Trace>[] = [
     {
       accessorKey: "actionTimestamp",
@@ -35,7 +38,7 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
       },
       // truncate or wrap text in the cell
       cell: ({ row }) => {
-        const email = row.getValue("email");
+        const email = row.getValue("email") as string;
         return (
           <div className="max-w-xs overflow-hidden text-ellipsis break-all">
             {email}
@@ -54,7 +57,7 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
         );
       },
       cell: ({ row }) => {
-        const action = row.getValue("action");
+        const action = row.getValue("action") as string;
         return (
           <div className="max-w-xs overflow-hidden text-ellipsis break-all">
             {action}
@@ -66,7 +69,7 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
       accessorKey: "sqlStatement",
       header: "SQL",
       cell: ({ row }) => {
-        const sqlStatement = row.getValue("sqlStatement");
+        const sqlStatement = row.getValue("sqlStatement") as string;
         return (
           <div className="max-w-xs overflow-hidden break-all">
             {sqlStatement}
@@ -84,38 +87,86 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
   function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    
+    // Use different row models based on printing state
+    const rowModelOptions = isPrinting
+      ? {
+          getCoreRowModel: getCoreRowModel(),
+          getSortedRowModel: getSortedRowModel(),
+        }
+      : {
+          getCoreRowModel: getCoreRowModel(),
+          getPaginationRowModel: getPaginationRowModel(),
+          getSortedRowModel: getSortedRowModel(),
+          getFilteredRowModel: getFilteredRowModel(),
+        };
+    
     const table = useReactTable({
       data,
       columns,
-      getCoreRowModel: getCoreRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
+      ...rowModelOptions,
       onSortingChange: setSorting,
-      getSortedRowModel: getSortedRowModel(),
       onColumnFiltersChange: setColumnFilters,
-      getFilteredRowModel: getFilteredRowModel(),
       state: {
         sorting,
-        columnFilters,
+        columnFilters: isPrinting ? [] : columnFilters,
       },
     });
 
     return (
-      <div className="w-full overflow-x-auto md:min-w-[600px]">
-        <div className="flex items-center py-2 md:py-4">
+      <div className="w-full overflow-x-auto md:min-w-[600px] print:w-full">
+        <div className="flex items-center justify-between py-2 md:py-4 print:hidden">
           <Input
             placeholder="Filter queries..."
             value={(table.getColumn("sqlStatement")?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn("sqlStatement")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
+          <Button
+            onClick={() => {
+              // Set printing mode to true to show all rows
+              setIsPrinting(true);
+              
+              // Save current theme
+              const currentTheme = localStorage.getItem("theme") || "system";
+              const currentDark = localStorage.getItem("darkMode") === "true";
+
+              // Switch to light theme for printing
+              applyTheme("neploy", false);
+
+              // Trigger print
+              setTimeout(() => {
+                window.print();
+
+                // Restore original theme and pagination after printing
+                setTimeout(() => {
+                  setIsPrinting(false);
+                  applyTheme(currentTheme as Theme, currentDark);
+                }, 500);
+              }, 300);
+            }}
+            className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            <span>Imprimir</span>
+          </Button>
         </div>
-        <div className="rounded-md border min-w-[600px]">
-          <Table>
-            <TableHeader>
+        <div className="rounded-md border min-w-[600px] print:border-0 print:rounded-none print:w-full">
+          <Table className="print:border-collapse print:w-full">
+            <TableHeader className="print:border-b print:border-gray-200">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className="print:border-0">
                   {headerGroup.headers.map((header) => {
-                    return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>;
+                    return <TableHead key={header.id} className="print:p-1 print:font-bold print:text-black print:bg-white">
+                      {isPrinting ? 
+                        (typeof header.column.columnDef.header === 'string' ? 
+                          header.column.columnDef.header : 
+                          header.column.id === 'actionTimestamp' ? t("dashboard.settings.trace.date") :
+                          header.column.id === 'email' ? t("dashboard.settings.trace.user") :
+                          header.column.id === 'action' ? t("dashboard.settings.trace.action") : 'SQL'
+                        ) : 
+                        (header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext()))
+                      }
+                    </TableHead>;
                   })}
                 </TableRow>
               ))}
@@ -123,9 +174,9 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="print:border-b print:border-gray-100">
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell key={cell.id} className="print:p-1 print:text-black">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -139,7 +190,7 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-end p-1 md:p-2 lg:p-4">
+        <div className="flex items-center justify-end p-1 md:p-2 lg:p-4 print:hidden">
           <div className="flex items-center space-x-2 md:space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">
               <p className="text-sm font-medium hidden sm:block">Rows per page</p>
@@ -188,11 +239,11 @@ const TraceabilityTab = ({ traces }: TracesSettingsProps) => {
   }
 
   return (
-      <Card>
-        <CardHeader>
+      <Card className="print:shadow-none print:border-none print:bg-white print:w-full print:m-0">
+        <CardHeader className="pb-0 print:hidden">
           <CardTitle className="flex justify-between items-center text-lg">{t("dashboard.settings.trace.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 max-w-full overflow-x-auto">
+        <CardContent className="p-4 max-w-full overflow-x-auto print:p-0 print:m-0">
           <DataTable columns={columns} data={traces} />
         </CardContent>
       </Card>
