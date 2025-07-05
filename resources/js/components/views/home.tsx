@@ -7,10 +7,12 @@ import { BaseChart } from "../base-chart";
 import { techStackColors } from "@/lib/colors";
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Theme, useTheme } from "@/hooks";
 
 export function Home({ requests, techStack, visitors, health = "4/10", traces }: DashboardProps) {
   const { t } = useTranslation();
+  const { applyTheme } = useTheme();
   const [totalRequests, setTotalRequests] = useState(0);
   const [totalErrors, setTotalErrors] = useState(0);
 
@@ -39,9 +41,46 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
 
   return (
     <div className="flex-1 space-y-4 p-2 sm:p-4 md:p-8">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <Button
+        onClick={() => {
+          // Save current theme
+          const currentTheme = localStorage.getItem("theme") || "system";
+          const currentDark = localStorage.getItem("darkMode") === "true";
+
+          // Switch to light theme for printing
+          applyTheme("neploy", false); // Using 'neploy' as the light theme
+
+          // Trigger print
+          setTimeout(() => {
+            window.print();
+
+            // Restore original theme after printing
+            setTimeout(() => {
+              applyTheme(currentTheme as Theme, currentDark);
+            }, 500);
+          }, 300);
+        }}
+        className="w-fit flex items-center gap-2 absolute top-[80px] right-[30px]">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mr-2 h-4 w-4">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        <span>Imprimir</span>
+      </Button>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 print:grid-cols-1">
         {/* Recent activity */}
-        <Card className="md:col-span-2 lg:col-span-4 w-full">
+        <Card className="md:col-span-2 lg:col-span-4 w-full print:hidden">
           <CardHeader>
             <CardTitle>{t("dashboard.recentActivity.title")}</CardTitle>
             <CardDescription>{t("dashboard.recentActivity.description")}</CardDescription>
@@ -50,21 +89,26 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
             <div className="w-full overflow-x-auto">
               <Table className="text-xs md:text-sm">
                 <TableHeader className="hidden sm:table-header-group">
-                  <TableHead>{t("dashboard.settings.trace.date")}</TableHead>
-                  <TableHead>{t("dashboard.settings.trace.user")}</TableHead>
-                  <TableHead>{t("dashboard.settings.trace.action")}</TableHead>
+                  <TableRow>
+                    <TableHead>{t("dashboard.settings.trace.date")}</TableHead>
+                    <TableHead>{t("dashboard.settings.trace.user")}</TableHead>
+                    <TableHead>{t("dashboard.settings.trace.action")}</TableHead>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {traces?.map((trace) => (
                     <TableRow key={trace.id} className="block sm:table-row border-b border-muted-foreground/10 sm:border-0 mb-2 sm:mb-0">
                       <TableCell className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
-                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.date")}: </span>{trace.actionTimestamp}
+                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.date")}: </span>
+                        {trace.actionTimestamp}
                       </TableCell>
                       <TableCell className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
-                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.user")}: </span>{trace.email}
+                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.user")}: </span>
+                        {trace.email}
                       </TableCell>
                       <TableCell className="block sm:table-cell font-semibold sm:font-normal py-1 sm:py-0">
-                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.action")}: </span>{trace.action}
+                        <span className="sm:hidden font-bold">{t("dashboard.settings.trace.action")}: </span>
+                        {trace.action}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -75,23 +119,29 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
         </Card>
 
         {/* Resources */}
-        <Card className="md:col-span-2 lg:col-span-3 w-full">
+        <Card className="md:col-span-2 lg:col-span-3 w-full print:hidden">
           <CardHeader>
             <CardTitle>{t("dashboard.resources.title")}</CardTitle>
             <CardDescription>{t("dashboard.resources.description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 p-2 sm:p-4">
             <div className="flex flex-col gap-2 w-full">
-              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("/manual", "_blank")}> 
+              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("/manual", "_blank")}>
                 {t("dashboard.resources.documentation")}
               </Button>
-              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://deepwiki.com/henrriusdev/neploy", "_blank")}> 
+              <Button
+                variant="outline"
+                className="w-full justify-start text-xs md:text-base whitespace-normal break-words"
+                onClick={() => window.open("https://deepwiki.com/henrriusdev/neploy", "_blank")}>
                 {t("dashboard.resources.apiReference")}
               </Button>
-              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://github.com/henrriusdev", "_blank")}> 
+              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://github.com/henrriusdev", "_blank")}>
                 {t("dashboard.resources.guides")}
               </Button>
-              <Button variant="outline" className="w-full justify-start text-xs md:text-base whitespace-normal break-words" onClick={() => window.open("https://github.com/henrriusdev/neploy/issues", "_blank")}> 
+              <Button
+                variant="outline"
+                className="w-full justify-start text-xs md:text-base whitespace-normal break-words"
+                onClick={() => window.open("https://github.com/henrriusdev/neploy/issues", "_blank")}>
                 Repo
               </Button>
             </div>
@@ -99,7 +149,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4 print:hidden">
         <DashboardCard
           title={t("dashboard.healthApps")}
           value={health}
@@ -148,22 +198,53 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
         />
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <BaseChart
-          title={t("dashboard.requestsByTime")}
-          data={chartRequests}
-          type="bar"
-          dataKeys={["successful", "errors"]}
-          colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
-          className="col-span-full"
-        />
+        {chartRequests && chartRequests.length > 0 ? (
+          <BaseChart
+            title={t("dashboard.requestsByTime")}
+            data={chartRequests}
+            type="bar"
+            dataKeys={["successful", "errors"]}
+            colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
+            className="col-span-full print:w-full print:mb-8"
+          />
+        ) : requests ? (
+          <Card className="col-span-full flex items-center justify-center h-[300px]">
+            <p className="text-muted-foreground">{t("dashboard.noApps") || "No apps"}</p>
+          </Card>
+        ) : (
+          <Skeleton className="col-span-full h-[300px] print:w-full print:mb-8" />
+        )}
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {techStack?.length > 0 ? (
-          <BaseChart title={t("dashboard.techStacksMostUsed")} data={techStack} type="pie" dataKeys={["value"]} colors={techStackColors} className="col-span-3 lg:col-span-3" />
+        {techStack ? (
+          techStack.length > 0 ? (
+            <BaseChart title={t("dashboard.techStacksMostUsed")} data={techStack} type="pie" dataKeys={["value"]} colors={techStackColors} className="col-span-3 lg:col-span-3 print:w-full print:mb-8" />
+          ) : (
+            <Card className="col-span-3 lg:col-span-3 flex items-center justify-center h-[300px]">
+              <p className="text-muted-foreground">{t("dashboard.noApps") || "No apps"}</p>
+            </Card>
+          )
         ) : (
-          <Skeleton className="col-span-3 lg:col-span-3 h-[300px]" />
+          <Skeleton className="col-span-3 lg:col-span-3 h-[300px] print:w-full print:mb-8" />
         )}
-        <BaseChart title={t("dashboard.visitorCountByTime")} data={visitors} type="line" dataKeys={["value"]} colors={["var(--primary)"]} className="col-span-3 lg:col-span-4 border-none" />
+        {visitors ? (
+          visitors.length > 0 ? (
+            <BaseChart
+              title={t("dashboard.visitorCountByTime")}
+              data={visitors}
+              type="line"
+              dataKeys={["value"]}
+              colors={["var(--primary)"]}
+              className="col-span-3 lg:col-span-4 border-none print:w-full print:mb-8"
+            />
+          ) : (
+            <Card className="col-span-3 lg:col-span-4 flex items-center justify-center h-[300px]">
+              <p className="text-muted-foreground">{t("dashboard.noApps") || "No apps"}</p>
+            </Card>
+          )
+        ) : (
+          <Skeleton className="col-span-3 lg:col-span-4 h-[300px] print:w-full print:mb-8" />
+        )}
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
 "use client";
 
 import type * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { LanguageSelector } from "@/components/forms";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useTheme } from "@/hooks";
+import { useTheme, Theme } from "@/hooks";
 import { Link } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
 
@@ -46,7 +46,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full flex-col md:flex-row">
-        <Sidebar collapsible="icon">
+        <Sidebar collapsible="icon" className="print:hidden">
           <SidebarHeader className="flex items-center justify-center">
             <img
               src={logoUrl || "/placeholder.svg"}
@@ -118,7 +118,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
         {/* Main content area with proper sticky header */}
         <div className="flex-1 flex flex-col min-h-0">
           {/* Sticky Header */}
-          <header className="sticky top-0 z-50 min-h-[56px] w-[99%] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
+          <header className="sticky top-0 z-50 min-h-[56px] w-[99%] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0 print:hidden">
             <div className="flex items-center justify-start gap-x-1 py-3 pl-1 min-w-0">
               <SidebarTrigger />
               {teamName && <h1 className="text-base lg:text-xl font-semibold truncate">{teamName} API Gateway</h1>}
@@ -126,8 +126,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
           </header>
 
           {/* Single scrollable main content */}
-          <main className="flex-1 overflow-auto">
-            <div className="w-full max-w-full overflow-x-auto">{children}</div>
+          <main className="flex-1 overflow-auto print:overflow-visible">
+            <div className="w-full max-w-full overflow-x-auto print:overflow-visible">{children}</div>
           </main>
         </div>
       </div>
