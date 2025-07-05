@@ -64,9 +64,9 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
   const config = Object.fromEntries(metrics.map((m) => [m.key, { label: m.label, color: m.color }]));
 
   return (
-    <Card>
+    <Card className="print:shadow-none print:border-none">
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 print:hidden">
           <div className="space-y-1">
             <Label>Aplicación</Label>
             <Select onValueChange={setAppFilter} value={appFilter}>
@@ -110,11 +110,11 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
           </div>
         </div>
         {/* Responsive chart wrapper to prevent horizontal scroll */}
-        <div style={{ width: "100%", overflowX: "auto" }}>
-          <div style={{ minWidth: 0 }}>
-            <ChartContainer config={config}>
+        <div style={{ width: "100%", overflowX: "auto" }} className="print:mt-0">
+          <div style={{ minWidth: 0 }} className="print:w-full">
+            <ChartContainer config={config} className="print:w-full print:max-w-full">
               {chartType === "pie" ? (
-                <PieChart>
+                <PieChart className="print:w-full print:max-w-full">
                   <Pie
                     data={selectedMetrics.map((metric) => {
                       const m = metrics.find((m) => m.key === metric);
@@ -136,7 +136,7 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
                   <ChartLegend content={<ChartLegendContent />} />
                 </PieChart>
               ) : (
-                <Chart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <Chart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} className="print:w-full print:max-w-full">
                   <XAxis dataKey="name" />
                   <YAxis />
                   <ChartTooltip content={<ChartTooltipContent />} />

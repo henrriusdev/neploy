@@ -1,14 +1,14 @@
 "use client";
 
 import type * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { LanguageSelector } from "@/components/forms";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useTheme } from "@/hooks";
+import { useTheme, Theme } from "@/hooks";
 import { Link } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
 
@@ -46,7 +46,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full flex-col md:flex-row">
-        <Sidebar collapsible="icon">
+        <Sidebar collapsible="icon" className="print:hidden">
           <SidebarHeader className="flex items-center justify-center">
             <img
               src={logoUrl || "/placeholder.svg"}
@@ -73,6 +73,36 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
                 ))}
               <SidebarMenuItem>
                 <ThemeSwitcher className="w-full p-2" />
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => {
+                    // Save current theme
+                    const currentTheme = localStorage.getItem('theme') || 'system';
+                    const currentDark = localStorage.getItem('dark') === 'true';
+                    
+                    // Switch to light theme for printing
+                    applyTheme('neploy', false); // Using 'neploy' as the light theme
+                    
+                    // Trigger print
+                    setTimeout(() => {
+                      window.print();
+                      
+                      // Restore original theme after printing
+                      setTimeout(() => {
+                        applyTheme(currentTheme as Theme, currentDark);
+                      }, 500);
+                    }, 300);
+                  }}
+                  className="w-full flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  <span>{t("print")}</span>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
@@ -118,7 +148,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
         {/* Main content area with proper sticky header */}
         <div className="flex-1 flex flex-col min-h-0">
           {/* Sticky Header */}
-          <header className="sticky top-0 z-50 min-h-[56px] w-[99%] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
+          <header className="sticky top-0 z-50 min-h-[56px] w-[99%] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0 print:hidden">
             <div className="flex items-center justify-start gap-x-1 py-3 pl-1 min-w-0">
               <SidebarTrigger />
               {teamName && <h1 className="text-base lg:text-xl font-semibold truncate">{teamName} API Gateway</h1>}
@@ -126,8 +156,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
           </header>
 
           {/* Single scrollable main content */}
-          <main className="flex-1 overflow-auto">
-            <div className="w-full max-w-full overflow-x-auto">{children}</div>
+          <main className="flex-1 overflow-auto print:overflow-visible">
+            <div className="w-full max-w-full overflow-x-auto print:overflow-visible">{children}</div>
           </main>
         </div>
       </div>

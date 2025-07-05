@@ -39,7 +39,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
 
   return (
     <div className="flex-1 space-y-4 p-2 sm:p-4 md:p-8">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 print:hidden">
         {/* Recent activity */}
         <Card className="md:col-span-2 lg:col-span-4 w-full">
           <CardHeader>
@@ -99,7 +99,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4 print:hidden">
         <DashboardCard
           title={t("dashboard.healthApps")}
           value={health}
@@ -154,16 +154,16 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
           type="bar"
           dataKeys={["successful", "errors"]}
           colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
-          className="col-span-full"
+          className="col-span-full print:w-full print:mb-8"
         />
       </div>
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {techStack?.length > 0 ? (
-          <BaseChart title={t("dashboard.techStacksMostUsed")} data={techStack} type="pie" dataKeys={["value"]} colors={techStackColors} className="col-span-3 lg:col-span-3" />
+          <BaseChart title={t("dashboard.techStacksMostUsed")} data={techStack} type="pie" dataKeys={["value"]} colors={techStackColors} className="col-span-3 lg:col-span-3 print:w-full print:mb-8" />
         ) : (
-          <Skeleton className="col-span-3 lg:col-span-3 h-[300px]" />
+          <Skeleton className="col-span-3 lg:col-span-3 h-[300px] print:w-full print:mb-8" />
         )}
-        <BaseChart title={t("dashboard.visitorCountByTime")} data={visitors} type="line" dataKeys={["value"]} colors={["var(--primary)"]} className="col-span-3 lg:col-span-4 border-none" />
+        <BaseChart title={t("dashboard.visitorCountByTime")} data={visitors} type="line" dataKeys={["value"]} colors={["var(--primary)"]} className="col-span-3 lg:col-span-4 border-none print:w-full print:mb-8" />
       </div>
     </div>
   );
