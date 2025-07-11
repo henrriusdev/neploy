@@ -258,7 +258,6 @@ func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullAp
 			break
 		}
 	}
-	role = role
 
 	var fullApps []model.FullApplication
 

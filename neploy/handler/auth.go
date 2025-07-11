@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	neployware "neploy.dev/neploy/middleware"
@@ -20,6 +21,54 @@ import (
 	"neploy.dev/pkg/model"
 	"neploy.dev/pkg/service"
 )
+
+// checkRateLimit moved to use model package structures
+
+// checkRateLimit implements a simple rate limiting mechanism
+func checkRateLimit(ip string) bool {
+	model.LoginAttemptsMutex.Lock()
+	defer model.LoginAttemptsMutex.Unlock()
+	
+	now := time.Now()
+	
+	// Clean up old entries periodically
+	if now.Second()%30 == 0 { // Clean every ~30 seconds
+		for ip, attempt := range model.LoginAttempts {
+			if now.Sub(attempt.LastTry) > 30*time.Minute {
+				delete(model.LoginAttempts, ip)
+			}
+		}
+	}
+	
+	attempt, exists := model.LoginAttempts[ip]
+	if !exists {
+		model.LoginAttempts[ip] = &model.LoginAttempt{Attempts: 1, LastTry: now}
+		return true
+	}
+	
+	// Check if IP is locked out
+	if !attempt.LockUntil.IsZero() && now.Before(attempt.LockUntil) {
+		return false
+	}
+	
+	// Reset attempts if outside rate window
+	if now.Sub(attempt.LastTry) > model.RateWindow {
+		attempt.Attempts = 0
+		attempt.LockUntil = time.Time{}
+	}
+	
+	// Increment attempt counter
+	attempt.Attempts++
+	attempt.LastTry = now
+	
+	// Lock out IP if too many attempts
+	if attempt.Attempts > model.MaxLoginAttempts {
+		attempt.LockUntil = now.Add(model.LockoutDuration)
+		return false
+	}
+	
+	return true
+}
 
 type Auth struct {
 	user     service.User
@@ -83,30 +132,65 @@ func (a *Auth) RegisterRoutes(r *echo.Group) {
 // @Failure 400 {object} map[string]interface{}
 // @Router /login [post]
 func (a *Auth) Login(c echo.Context) error {
+	// Get client IP for rate limiting
+	clientIP := c.RealIP()
+	
+	// Simple in-memory rate limiting (should be replaced with a proper rate limiter in production)
+	if !checkRateLimit(clientIP) {
+		return c.JSON(http.StatusTooManyRequests, map[string]interface{}{
+			"error": "Too many login attempts, please try again later",
+		})
+	}
+	
 	var req model.LoginRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Invalid request",
+			"error": "Invalid request format",
+			"details": err.Error(),
 		})
 	}
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	// Validate and authenticate user
-	res, err := a.user.Login(c.Request().Context(), req)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"error": "Invalid credentials",
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "Validation failed",
+			"details": err.Error(),
 		})
 	}
 
+	// Sanitize inputs to prevent injection attacks
+	req.Email = strings.TrimSpace(req.Email)
+	
+	// Validate and authenticate user
+	res, err := a.user.Login(c.Request().Context(), req)
+	if err != nil {
+		// Log failed login attempts
+		logger.Warn("Failed login attempt for email: %s from IP: %s", req.Email, clientIP)
+		
+		// Use a generic error message to prevent user enumeration
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error": "Invalid email or password",
+		})
+	}
+
+	// Log successful login
+	logger.Info("Successful login for user: %s from IP: %s", req.Email, clientIP)
+	
+	// Set secure cookie
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
 	cookie.Value = res.Token
-	cookie.HttpOnly = true
+	cookie.HttpOnly = true // Prevents JavaScript access
 	cookie.Path = "/"
+	cookie.Secure = config.Env.Env != "local" // Require HTTPS in non-local environments
+	cookie.SameSite = http.SameSiteStrictMode // Prevent CSRF
+	
+	// Set cookie expiration based on environment
+	if config.Env.Env == "local" || config.Env.Env == "development" {
+		cookie.MaxAge = 86400 // 24 hours for development
+	} else {
+		cookie.MaxAge = 3600 // 1 hour for production
+	}
+	
 	c.SetCookie(cookie)
 
 	return c.JSON(http.StatusOK, res)

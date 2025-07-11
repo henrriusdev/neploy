@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -90,3 +91,21 @@ func (d Date) Value() (driver.Value, error) {
 
 	return d.Time, nil
 }
+
+// LoginAttempt tracks login attempts for rate limiting
+type LoginAttempt struct {
+	Attempts  int
+	LastTry   time.Time
+	LockUntil time.Time
+}
+
+// Rate limiting configuration
+var (
+	// In-memory store for rate limiting
+	LoginAttempts      = make(map[string]*LoginAttempt)
+	LoginAttemptsMutex sync.RWMutex
+	// Rate limiting configuration
+	MaxLoginAttempts   = 5
+	RateWindow         = 5 * time.Minute
+	LockoutDuration    = 15 * time.Minute
+)

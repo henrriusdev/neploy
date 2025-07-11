@@ -23,6 +23,40 @@
     "zh": "Chinese",
     "fr": "French"
   },
+  "invite": {
+    "expired": {
+      "title": "Invitation Expired",
+      "description": "This invitation has expired. Please request a new one."
+    },
+    "accepted": {
+      "title": "Already Accepted",
+      "description": "This invitation has already been accepted."
+    },
+    "invalid": {
+      "title": "Invalid Invitation",
+      "description": "This invitation is invalid or has been revoked."
+    },
+    "validation": {
+      "requiredFields": "Please fill in all required fields"
+    },
+    "success": {
+      "accountCreated": "Your account has been created successfully!"
+    },
+    "error": {
+      "registrationFailed": "Failed to complete registration"
+    },
+    "completeProfile": {
+      "title": "Complete Your Profile",
+      "description": "Tell us more about yourself"
+    },
+    "reviewInformation": {
+      "title": "Review Your Information",
+      "description": "Please verify your details before continuing",
+      "personalInfo": "Personal Information",
+      "accountInfo": "Account Information",
+      "completeRegistration": "Complete Registration"
+    }
+  },
   "auth": {
     "login": "Login",
     "logout": "Logout",
@@ -358,6 +392,9 @@
     "invalidEmail": "Invalid email address",
     "invalidPassword": "Password must be at least 8 characters",
     "invalidCredentials": "Invalid email or password",
+    "tooManyAttempts": "Too many login attempts. Please try again later",
+    "validationFailed": "Please check your input and try again",
+    "accountLocked": "Your account has been temporarily locked for security reasons",
     "serverError": "An error occurred. Please try again later"
   },
   "sidebar": {

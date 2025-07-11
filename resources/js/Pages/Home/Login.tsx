@@ -70,11 +70,28 @@ export default function AuthViews({ logoUrl, name, language = "en" }: { logoUrl:
       router.visit("/dashboard");
     } catch (error: any) {
       console.log(error);
-      if (error.data?.message) {
-        loginForm.setError("root", { message: error.data.message });
+      
+      // Handle specific error cases
+      if (error.status === 429) {
+        // Rate limiting error
+        loginForm.setError("root", { 
+          message: error.data?.error || t("errors.tooManyAttempts") 
+        });
       } else if (error.status === 401) {
-        loginForm.setError("root", { message: t("errors.invalidCredentials") });
+        // Authentication error - use the server's message if available
+        loginForm.setError("root", { 
+          message: error.data?.error || t("errors.invalidCredentials")
+        });
+      } else if (error.status === 400) {
+        // Validation error
+        loginForm.setError("root", { 
+          message: error.data?.error || error.data?.details || t("errors.validationFailed")
+        });
+      } else if (error.data?.error) {
+        // Generic error with message from server
+        loginForm.setError("root", { message: error.data.error });
       } else {
+        // Fallback error
         loginForm.setError("root", { message: t("errors.serverError") });
       }
     } finally {

@@ -23,6 +23,40 @@
     "zh": "Chino",
     "fr": "Francés"
   },
+  "invite": {
+    "expired": {
+      "title": "Invitación Expirada",
+      "description": "Esta invitación ha expirado. Por favor solicite una nueva."
+    },
+    "accepted": {
+      "title": "Ya Aceptada",
+      "description": "Esta invitación ya ha sido aceptada."
+    },
+    "invalid": {
+      "title": "Invitación Inválida",
+      "description": "Esta invitación es inválida o ha sido revocada."
+    },
+    "validation": {
+      "requiredFields": "Por favor complete todos los campos requeridos"
+    },
+    "success": {
+      "accountCreated": "¡Su cuenta ha sido creada exitosamente!"
+    },
+    "error": {
+      "registrationFailed": "Error al completar el registro"
+    },
+    "completeProfile": {
+      "title": "Complete Su Perfil",
+      "description": "Cuéntenos más sobre usted"
+    },
+    "reviewInformation": {
+      "title": "Revise Su Información",
+      "description": "Por favor verifique sus datos antes de continuar",
+      "personalInfo": "Información Personal",
+      "accountInfo": "Información de la Cuenta",
+      "completeRegistration": "Completar Registro"
+    }
+  },
   "auth": {
     "login": "Acceso",
     "logout": "Cierre de sesión",
@@ -361,7 +395,10 @@
     "invalidEmail": "Dirección de correo electrónico no válida",
     "invalidPassword": "La contraseña debe ser al menos 8 caracteres",
     "invalidCredentials": "Correo electrónico o contraseña no válidos",
-    "serverError": "Ocurrió un error. "
+    "tooManyAttempts": "Demasiados intentos de inicio de sesión. Por favor, inténtelo de nuevo más tarde",
+    "validationFailed": "Por favor, compruebe su entrada e inténtelo de nuevo",
+    "accountLocked": "Su cuenta ha sido bloqueada temporalmente por razones de seguridad",
+    "serverError": "Ocurrió un error. Por favor, inténtelo de nuevo más tarde"
   },
   "sidebar": {
     "dashboard": "Panel",

@@ -6,6 +6,7 @@ import { CompleteInviteProps } from "@/types/props";
 import { User } from "@/types/common";
 import { useCompleteInviteMutation } from "@/services/api/auth";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type Step = "provider" | "data" | "summary";
 
@@ -25,6 +26,7 @@ export default function CompleteInvite({ token, email, username, provider, error
   });
   const { toast } = useToast();
   const { theme, isDark, applyTheme } = useTheme();
+  const { t, i18n } = useTranslation();
   const [completeInvite] = useCompleteInviteMutation();
 
   useEffect(() => {
@@ -34,24 +36,24 @@ export default function CompleteInvite({ token, email, username, provider, error
   useEffect(() => {
     if (status === "expired") {
       toast({
-        title: "Invitation Expired",
-        description: "This invitation has expired. Please request a new one.",
+        title: t("invite.expired.title"),
+        description: t("invite.expired.description"),
         variant: "destructive",
       });
     } else if (status === "accepted") {
       toast({
-        title: "Already Accepted",
-        description: "This invitation has already been accepted.",
+        title: t("invite.accepted.title"),
+        description: t("invite.accepted.description"),
         variant: "destructive",
       });
     } else if (status === "invalid") {
       toast({
-        title: "Invalid Invitation",
-        description: error || "This invitation is invalid or has been revoked.",
+        title: t("invite.invalid.title"),
+        description: error || t("invite.invalid.description"),
         variant: "destructive",
       });
     }
-  }, [status, error]);
+  }, [status, error, t]);
 
   if (status !== "valid") {
     router.visit("/login");
@@ -88,8 +90,8 @@ export default function CompleteInvite({ token, email, username, provider, error
   const handleSubmit = () => {
     if (!userData.firstName || !userData.lastName || !userData.phone || !userData.address || !userData.email || !userData.username) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: t("common.error"),
+        description: t("invite.validation.requiredFields"),
       });
       return;
     }
@@ -108,15 +110,15 @@ export default function CompleteInvite({ token, email, username, provider, error
       .unwrap()
       .then(() => {
         toast({
-          title: "Success",
-          description: "Your account has been created successfully!",
+          title: t("common.success"),
+          description: t("invite.success.accountCreated"),
         });
         window.location.replace("/");
       })
       .catch((error) => {
-        const errorMessage = error.data?.error || "Failed to complete registration";
+        const errorMessage = error.data?.error || t("invite.error.registrationFailed");
         toast({
-          title: "Error",
+          title: t("common.error"),
           description: errorMessage,
           variant: "destructive",
         });

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SummaryStepProps } from "@/types/props";
+import { useTranslation } from "react-i18next";
 
 export function SummaryStep({ data, onBack, onSubmit }: SummaryStepProps) {
   return (

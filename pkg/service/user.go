@@ -190,10 +190,19 @@ func (u *user) Login(ctx context.Context, req model.LoginRequest) (model.LoginRe
 		return model.LoginResponse{}, err
 	}
 
+	// Critical security fix: Verify password before generating token
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil {
+		return model.LoginResponse{}, errors.New("invalid credentials")
+	}
+
 	t, err := u.generateToken(ctx, user)
 	if err != nil {
 		return model.LoginResponse{}, err
 	}
+
+	// Don't return the password hash in the response
+	user.Password = ""
 
 	return model.LoginResponse{
 		Token: t,
