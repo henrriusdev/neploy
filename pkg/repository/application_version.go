@@ -72,3 +72,32 @@ func (a *ApplicationVersion) ExistsByName(ctx context.Context, name, tag string)
 	common.AttachSQLToTrace(ctx, q)
 	return row.ID != "", err
 }
+
+// GetLatestVersionByName retrieves the most recently created version for an app by its path name
+func (a *ApplicationVersion) GetLatestVersionByName(ctx context.Context, name string) (string, error) {
+	query := a.baseQuery("v").
+		Select(goqu.I("v.version_tag")).
+		LeftJoin(
+			goqu.T("gateways").As("g"),
+			goqu.On(goqu.I("g.application_id").Eq(goqu.I("v.application_id"))),
+		).
+		Where(goqu.I("g.path").Eq("/" + name)).
+		Where(goqu.I("v.deleted_at").IsNull()).
+		Order(goqu.I("v.created_at").Desc()).
+		Limit(1)
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		logger.Error("error building latest version query: %v", err)
+		return "", err
+	}
+
+	var versionTag string
+	if err := a.Store.GetContext(ctx, &versionTag, q, args...); err != nil {
+		logger.Error("error getting latest version for app %s: %v", name, err)
+		return "", err
+	}
+
+	common.AttachSQLToTrace(ctx, q)
+	return versionTag, nil
+}

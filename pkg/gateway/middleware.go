@@ -153,6 +153,7 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			pathSegments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 			var resolvedVersion string
+			var appName string
 
 			if slices.Contains(pathSegments, ".well-known") {
 				w.Header().Set("Content-Type", "application/json")
@@ -160,21 +161,55 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 				return
 			}
 
+			// Handle different path patterns
 			if config.DefaultVersioningType == model.VersioningTypeHeader {
+				// Header-based versioning
 				resolvedVersion = r.Header.Get("X-API-Version")
-				url := pathSegments[0]
-				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, url)
+				if len(pathSegments) > 0 {
+					appName = pathSegments[0]
+				}
+				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, appName)
 			} else {
-				if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {
-					resolvedVersion = pathSegments[0]
+				// Path-based versioning
+				if len(pathSegments) > 0 {
+					if strings.HasPrefix(pathSegments[0], "v") {
+						// Pattern: /vX/app-name
+						resolvedVersion = pathSegments[0]
+						if len(pathSegments) > 1 {
+							appName = pathSegments[1]
+						}
+					} else {
+						// Pattern: /app-name (no version specified)
+						appName = pathSegments[0]
+						
+						// Get the latest version for this app
+						latestVersion, err := appVersionRepo.GetLatestVersionByName(r.Context(), appName)
+						if err != nil {
+							log.Printf("ERROR: Failed to get latest version for app %s: %v", appName, err)
+							http.Error(w, "Application version not found", http.StatusNotFound)
+							return
+						}
+						
+						if latestVersion == "" {
+							log.Printf("ERROR: No versions found for app %s", appName)
+							http.Error(w, "No versions found for this application", http.StatusNotFound)
+							return
+						}
+						
+						resolvedVersion = latestVersion
+						
+						// Rewrite the URL path to include the version
+						newPath := fmt.Sprintf("/%s/%s%s", resolvedVersion, appName, r.URL.Path[len("/"+appName):])
+						r.URL.Path = newPath
+					}
 				}
 			}
 
-			// Validar si la versión existe para la app actual
-			if len(pathSegments) > 1 {
-				appName := pathSegments[1] // se asume /vX/app-name
+			// Validate if the version exists for the current app
+			if appName != "" && resolvedVersion != "" {
 				exists, err := appVersionRepo.ExistsByName(r.Context(), appName, resolvedVersion)
 				if err != nil || !exists {
+					log.Printf("ERROR: Version %s not found for app %s", resolvedVersion, appName)
 					http.Error(w, "API version not found", http.StatusNotFound)
 					return
 				}
