@@ -250,9 +250,15 @@ func (u *user) InviteUser(ctx context.Context, req model.InviteUserRequest) erro
 
 	// Send invitation email
 	inviteLink := fmt.Sprintf("%s/users/invite/%s", config.Env.BaseURL, token)
-	if err := u.email.SendInvitation(ctx, req.Email, teamName, req.Role, inviteLink); err != nil {
+
+	language, err := u.repos.Metadata.GetLanguage(ctx)
+	if err != nil {
+		logger.Error("failed to get language: error=%v", err)
+		return err
+	}
+	if err := u.email.SendInvitation(ctx, req.Email, teamName, req.Role, inviteLink, language); err != nil {
 		// Log the error but don't fail the invitation creation
-		logger.Error("failed to send invitation email: email=%s, role=%s, error=%v", req.Email, req.Role, err)
+		logger.Error("failed to send invitation email: email=%s, role=%s, language=%s, error=%v", req.Email, req.Role, language, err)
 		return err
 	}
 

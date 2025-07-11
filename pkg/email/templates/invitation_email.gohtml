@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="{{ .Language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Translations.Title }}</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #1e2a47;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: white;
+            margin: 0 auto 20px;
+            padding: 10px;
+        }
+        .content {
+            padding: 30px;
+            line-height: 1.6;
+        }
+        .button {
+            display: inline-block;
+            background-color: #0070f3;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #0051a8;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .language-selector {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+        }
+        .language-selector a {
+            margin: 0 10px;
+            color: #1e2a47;
+            text-decoration: none;
+        }
+        .language-selector a:hover {
+            text-decoration: underline;
+        }
+        .team-info {
+            background-color: #f8f8f8;
+            border-left: 4px solid #0070f3;
+            padding: 10px 15px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <img src="{{ .LogoURL }}" alt="{{ .CompanyName }}" style="width: 100%; height: auto;">
+        </div>
+        <h1>{{ .Translations.HeaderText }}</h1>
+    </div>
+
+    <div class="content">
+        <p>{{ .Translations.Greeting }} {{ .RecipientName }},</p>
+
+        <p>{{ .Translations.MainText }} <strong>{{ .TeamName }}</strong> {{ .Translations.AsRole }} <strong>{{ .Role }}</strong>.</p>
+
+        <div style="text-align: center;">
+            <a href="{{ .InviteLink }}" class="button">{{ .Translations.ButtonText }}</a>
+        </div>
+
+        <p>{{ .Translations.LinkInstructions }}</p>
+        <p style="word-break: break-all; font-size: 14px; color: #666;">
+            <a href="{{ .InviteLink }}">{{ .InviteLink }}</a>
+        </p>
+
+        <div class="team-info">
+            <p>{{ .Translations.SecurityNote }}</p>
+        </div>
+
+        <p>{{ .Translations.ClosingText }}</p>
+        <p>{{ .Translations.TeamSignature }}</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; {{ .CurrentYear }} {{ .CompanyName }}. {{ .Translations.RightsText }}</p>
+        <p>{{ .Translations.AddressText }}</p>
+    </div>
+</div>
+</body>
+</html>
