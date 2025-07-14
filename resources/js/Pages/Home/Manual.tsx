@@ -111,10 +111,24 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
   const scrollToHeading = (id: string) => {
     const element = headingRefs.current[id];
     if (element) {
-      window.scrollTo({
-        top: element.offsetTop - 100,
-        behavior: "smooth",
-      });
+      // Set active ID immediately for better visual feedback
+      setActiveId(id);
+      
+      // Close mobile sidebar if it's open
+      if (isMobile) {
+        const sheetCloseButton = document.querySelector('[data-radix-collection-item]');
+        if (sheetCloseButton && sheetCloseButton instanceof HTMLElement) {
+          sheetCloseButton.click();
+        }
+      }
+      
+      // Scroll with a slight delay to ensure UI updates first
+      setTimeout(() => {
+        window.scrollTo({
+          top: element.offsetTop - 80, // Reduced offset for better positioning
+          behavior: "smooth",
+        });
+      }, 100);
     }
   };
 
@@ -262,11 +276,11 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
   // Table of Contents component
   const TableOfContents = () => (
     <div className="w-full">
-      <ThemeSwitcher className="mb-4 w-10/12 px-3" />
-      <h3 className="mb-4 text-lg font-semibold">Table of Contents</h3>
-      <ul className="space-y-1">
+      <ThemeSwitcher className="mb-4 w-full px-3" />
+      <h3 className="mb-4 text-lg font-semibold px-2">Table of Contents</h3>
+      <ul className="space-y-1 w-full">
         {headings.map((heading) => (
-          <li key={heading.id}>
+          <li key={heading.id} className="w-full">
             <Button
               variant="ghost"
               className={cn(
@@ -276,7 +290,7 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
               )}
               onClick={() => scrollToHeading(heading.id)}>
               {heading.icon && getIconComponent(heading.icon)}
-              <span>{heading.text}</span>
+              <span className="truncate">{heading.text}</span>
             </Button>
           </li>
         ))}
@@ -295,8 +309,8 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
               <span className="sr-only">Toggle table of contents</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] sm:w-[350px] bg-gray-950 text-white">
-            <ScrollArea className="h-[calc(100vh-4rem)] py-4">
+          <SheetContent side="left" className="w-[280px] sm:w-[350px] p-0 bg-gray-950 text-white">
+            <ScrollArea className="h-[calc(100vh-4rem)] py-4 px-2 w-full">
               <TableOfContents />
             </ScrollArea>
           </SheetContent>
@@ -305,8 +319,8 @@ export default function MarkdownManual({ content }: MarkdownManualProps) {
 
       {/* Desktop sidebar */}
       {!isMobile && (
-        <div className="hidden md:block w-64 lg:w-72 shrink-0 h-screen sticky top-0 border-r border-border bg-gray-950 text-white">
-          <ScrollArea className="h-screen py-8 px-4">
+        <div className="hidden md:block w-64 lg:w-80 shrink-0 h-screen sticky top-0 border-r border-border bg-gray-950 text-white">
+          <ScrollArea className="h-screen py-8 px-2">
             <TableOfContents />
           </ScrollArea>
         </div>
