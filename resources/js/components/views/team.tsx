@@ -21,7 +21,7 @@ interface InviteMemberData {
   role: string;
 }
 
-export function Team({ team, roles }: TeamProps) {
+export function Team({ team, roles, user }: TeamProps) {
   const [open, setOpen] = useState(false);
   const [openTechs, setOpenTechs] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +37,9 @@ export function Team({ team, roles }: TeamProps) {
   const [inviteUser, { isLoading: isInviting }] = useInviteUserMutation();
   const getTechStacks = useGetTechStacksQuery();
   const [techStacks, setTechStacks] = useState<TechStack[]>([]);
+
+  // Check if current user is admin
+  const isAdmin = user?.roles?.includes("administrator");
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,16 +173,18 @@ export function Team({ team, roles }: TeamProps) {
                   <div><span className="font-bold">{t("dashboard.team.role")}: </span>{member.roles.map((role) => (<Badge key={role.name} variant="default" style={{ backgroundColor: role.color }}>{role.name}</Badge>))}</div>
                   <div><span className="font-bold">{t("dashboard.team.status")}: </span><span className="text-xs">Active</span></div>
                   <div className="flex gap-2 mt-2">
-                    <DialogButton
-                      buttonText="Editar pila de tecnologías"
-                      description="Edita la pila de tecnologías del miembro"
-                      title="Editar pila de tecnologías"
-                      open={openTechs}
-                      onOpen={setOpenTechs}
-                      icon={PlusCircle}
-                      variant="tooltip">
-                      <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
-                    </DialogButton>
+                    {isAdmin && (
+                      <DialogButton
+                        buttonText="Editar pila de tecnologías"
+                        description="Edita la pila de tecnologías del miembro"
+                        title="Editar pila de tecnologías"
+                        open={openTechs}
+                        onOpen={setOpenTechs}
+                        icon={PlusCircle}
+                        variant="tooltip">
+                        <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
+                      </DialogButton>
+                    )}
                     <Button variant="destructive" size="icon" onClick={() => handleRemoveMember(member.id)}>
                       <Trash className="h-4 w-4 text-destructive-foreground" />
                     </Button>
@@ -231,16 +236,18 @@ export function Team({ team, roles }: TeamProps) {
                         <span className="text-xs">Active</span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DialogButton
-                          buttonText="Editar pila de tecnologías"
-                          description="Edita la pila de tecnologías del miembro"
-                          title="Editar pila de tecnologías"
-                          open={openTechs}
-                          onOpen={setOpenTechs}
-                          icon={PlusCircle}
-                          variant="tooltip">
-                          <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
-                        </DialogButton>
+                        {isAdmin && (
+                          <DialogButton
+                            buttonText="Editar pila de tecnologías"
+                            description="Edita la pila de tecnologías del miembro"
+                            title="Editar pila de tecnologías"
+                            open={openTechs}
+                            onOpen={setOpenTechs}
+                            icon={PlusCircle}
+                            variant="tooltip">
+                            <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
+                          </DialogButton>
+                        )}
                         <Button variant="destructive" size="icon" className="ml-3" onClick={() => handleRemoveMember(member.id)}>
                           <Trash className="h-4 w-4 text-destructive-foreground" />
                         </Button>
