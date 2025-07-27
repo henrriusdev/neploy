@@ -396,10 +396,6 @@ func (d *Dashboard) ReportStats(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	if !slices.Contains(claims.RolesLower, "administrator") {
-		return c.Redirect(http.StatusSeeOther, "/dashboard")
-	}
-
 	metadata, err := d.services.Metadata.Get(c.Request().Context())
 	if err != nil {
 		logger.Error("error getting metadata: %v", err)
