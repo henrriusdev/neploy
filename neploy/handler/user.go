@@ -29,7 +29,6 @@ func (u *User) RegisterRoutes(r *echo.Group) {
 	r.GET("/profile", u.Profile)
 	r.PUT("/profile/update", u.UpdateProfile)
 	r.PUT("/profile/update-password", u.UpdatePassword)
-	r.PUT("/update-techstacks", u.SelectTechStacks)
 }
 
 // InviteUser godoc
