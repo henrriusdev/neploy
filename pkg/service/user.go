@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -461,7 +462,25 @@ func (u *user) NewPasswordLink(ctx context.Context, userEmail, language string) 
 	}
 
 	// 3. Preparar los datos del email
-	resetURL := fmt.Sprintf("%s:%s/password/change?token=%s", config.Env.BaseURL, config.Env.Port, token)
+	// Parse the base URL to handle it properly
+	baseURL, err := url.Parse(config.Env.BaseURL)
+	if err != nil {
+		logger.Error("error parsing base URL %v", err)
+		return "", err
+	}
+
+	// If the base URL doesn't have a port, add the configured port
+	if baseURL.Port() == "" {
+		baseURL.Host = baseURL.Host + ":" + config.Env.Port
+	}
+
+	// Set the path and query parameters
+	baseURL.Path = "/password/change"
+	query := baseURL.Query()
+	query.Set("token", token)
+	baseURL.RawQuery = query.Encode()
+
+	resetURL := baseURL.String()
 
 	emailData := email.PasswordResetData{
 		UserName:     user.FirstName,
