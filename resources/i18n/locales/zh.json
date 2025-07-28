@@ -210,6 +210,33 @@
         "list": "列表视图"
       }
     },
+    "application": {
+      "overview": "概述",
+      "createdAt": "创建时间",
+      "updatedAt": "更新时间",
+      "description": "描述",
+      "metrics": "指标",
+      "cpuUsage": "CPU使用率",
+      "memoryUsage": "内存使用率",
+      "uptime": "运行时间",
+      "requestsPerMin": "请求数/分钟",
+      "apiVersions": "API版本",
+      "newVersion": "新版本",
+      "createNewVersion": "创建新版本",
+      "status": {
+        "running": "运行中",
+        "active": "活跃"
+      },
+      "table": {
+        "version": "版本",
+        "description": "描述",
+        "path": "路径",
+        "status": "状态",
+        "createdAt": "创建时间",
+        "actions": "操作"
+      },
+      "noVersionsFound": "未找到版本。"
+    },
     "gateways": {
       "title": "网关",
       "description": "管理您的应用程序网关"

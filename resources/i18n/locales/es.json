@@ -242,6 +242,33 @@
         "list": "Vista de lista"
       }
     },
+    "application": {
+      "overview": "Resumen",
+      "createdAt": "Creado el",
+      "updatedAt": "Actualizado el",
+      "description": "Descripción",
+      "metrics": "Métricas",
+      "cpuUsage": "Uso de CPU",
+      "memoryUsage": "Uso de memoria",
+      "uptime": "Tiempo de actividad",
+      "requestsPerMin": "Solicitudes/min",
+      "apiVersions": "Versiones de API",
+      "newVersion": "Nueva versión",
+      "createNewVersion": "Crear nueva versión",
+      "status": {
+        "running": "Ejecutándose",
+        "active": "Activo"
+      },
+      "table": {
+        "version": "Versión",
+        "description": "Descripción",
+        "path": "Ruta",
+        "status": "Estado",
+        "createdAt": "Creado el",
+        "actions": "Acciones"
+      },
+      "noVersionsFound": "No se encontraron versiones."
+    },
     "gateways": {
       "title": "Puerta de enlace",
       "description": "Administre las puertas de enlace de su aplicación",

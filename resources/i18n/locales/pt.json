@@ -210,6 +210,33 @@
         "list": "Visualização da lista"
       }
     },
+    "application": {
+      "overview": "Visão geral",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "description": "Descrição",
+      "metrics": "Métricas",
+      "cpuUsage": "Uso de CPU",
+      "memoryUsage": "Uso de memória",
+      "uptime": "Tempo de atividade",
+      "requestsPerMin": "Solicitações/min",
+      "apiVersions": "Versões da API",
+      "newVersion": "Nova versão",
+      "createNewVersion": "Criar nova versão",
+      "status": {
+        "running": "Executando",
+        "active": "Ativo"
+      },
+      "table": {
+        "version": "Versão",
+        "description": "Descrição",
+        "path": "Caminho",
+        "status": "Status",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      },
+      "noVersionsFound": "Nenhuma versão encontrada."
+    },
     "gateways": {
       "title": "API Gateways",
       "description": "Gerencie seus gateways de aplicativo",

@@ -274,7 +274,7 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
           <h1 className="text-2xl font-bold ">{application.appName}</h1>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">
-              Running
+              {t("dashboard.application.status.running")}
             </Badge>
             <span className="text-sm text-muted-foreground">ID: {application.id}</span>
           </div>
@@ -285,21 +285,21 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
         {/* Overview Section */}
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle>Overview</CardTitle>
+            <CardTitle>{t("dashboard.application.overview")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Created At</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.application.createdAt")}</p>
                 <p className="text-sm font-medium">{application.createdAt}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Updated At</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.application.updatedAt")}</p>
                 <p className="text-sm font-medium">{application.updatedAt}</p>
               </div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Description</p>
+              <p className="text-sm text-muted-foreground">{t("dashboard.application.description")}</p>
               <p className="text-sm">{application.description}</p>
             </div>
           </CardContent>
@@ -308,30 +308,30 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
         {/* Metrics Section */}
         <Card className=" border-border/50">
           <CardHeader>
-            <CardTitle>Metrics</CardTitle>
+            <CardTitle>{t("dashboard.application.metrics")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm">CPU Usage</span>
+                <span className="text-sm">{t("dashboard.application.cpuUsage")}</span>
                 <span className="text-sm font-medium">{application.cpuUsage.toFixed(2)}%</span>
               </div>
               <Progress value={application.cpuUsage} className="h-2" />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm">Memory Usage</span>
+                <span className="text-sm">{t("dashboard.application.memoryUsage")}</span>
                 <span className="text-sm font-medium">{application.memoryUsage.toFixed(2)}%</span>
               </div>
               <Progress value={application.memoryUsage} className="h-2" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Uptime</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.application.uptime")}</p>
                 <p className="text-sm font-medium">{application.uptime}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Requests/min</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.application.requestsPerMin")}</p>
                 <p className="text-sm font-medium">{application.requestsPerMin}</p>
               </div>
             </div>
@@ -342,17 +342,17 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
         <Card className="md:col-span-2  border-border/50">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>API Versions</CardTitle>
+              <CardTitle>{t("dashboard.application.apiVersions")}</CardTitle>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
-                    New Version
+                    {t("dashboard.application.newVersion")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Create New Version</DialogTitle>
+                    <DialogTitle>{t("dashboard.application.createNewVersion")}</DialogTitle>
                   </DialogHeader>
                   <ApplicationForm
                     mode="create-version"
@@ -370,12 +370,12 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Version</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Path</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created At</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("dashboard.application.table.version")}</TableHead>
+                  <TableHead>{t("dashboard.application.table.description")}</TableHead>
+                  <TableHead>{t("dashboard.application.table.path")}</TableHead>
+                  <TableHead>{t("dashboard.application.table.status")}</TableHead>
+                  <TableHead>{t("dashboard.application.table.createdAt")}</TableHead>
+                  <TableHead className="text-right">{t("dashboard.application.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -424,7 +424,7 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      No versions found.
+                      {t("dashboard.application.noVersionsFound")}
                     </TableCell>
                   </TableRow>
                 )}
