@@ -16,6 +16,8 @@ import { useLoginMutation, usePasswordLinkMutation } from "@/services/api/auth";
 import { useTheme } from "@/hooks";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 // Login form schema
 const loginFormSchema = z.object({
@@ -35,6 +37,7 @@ export default function AuthViews({ logoUrl, name, language = "en" }: { logoUrl:
   const [login] = useLoginMutation();
   const [passwordLink] = usePasswordLinkMutation();
   const { theme, isDark, applyTheme } = useTheme();
+  const { toast } = useToast();
 
   // Set the initial language
   useEffect(() => {
@@ -106,7 +109,10 @@ export default function AuthViews({ logoUrl, name, language = "en" }: { logoUrl:
       await passwordLink({ email: values.email, language }).unwrap();
       // Show success message
       resetPasswordForm.reset();
-      alert(`Password reset link sent to ${values.email}`);
+      toast({
+        title: "Password reset link sent",
+        description: `A password reset link has been sent to ${values.email}`,
+      });
 
       // Return to login view
       setView("login");
@@ -132,6 +138,7 @@ export default function AuthViews({ logoUrl, name, language = "en" }: { logoUrl:
           )}
         </div>
       </div>
+      <Toaster />
     </>
   );
 }

@@ -9,6 +9,7 @@ interface CommonProps {
     email: string;
     username: string;
     provider: string;
+    roles: string[];
   };
   teamName: string;
   logoUrl: string;
