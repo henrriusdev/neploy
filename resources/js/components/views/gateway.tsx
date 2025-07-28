@@ -11,8 +11,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSaveGatewayConfigMutation } from "@/services/api/gateways";
 import { useToast } from "@/hooks";
 
-export function Gateways({ gateways, config }: GatewayProps) {
+export function Gateways({ gateways, config, user }: GatewayProps) {
   const { t } = useTranslation();
+  const isAdministrator = user.roles.includes("administrator");
   const formSchema = z.object({
     defaultVersioning: z.enum(["header", "uri"], { required_error: "You need to select a default versioning type." }),
   });
@@ -57,16 +58,21 @@ export function Gateways({ gateways, config }: GatewayProps) {
                     <FormItem>
                       <FormLabel>{t("dashboard.gateways.defaultVersioning")}</FormLabel>
                       <FormControl>
-                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                        <RadioGroup 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value} 
+                          className="flex flex-col space-y-1"
+                          disabled={!isAdministrator}
+                        >
                           <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl>
-                              <RadioGroupItem value="header" />
+                              <RadioGroupItem value="header" disabled={!isAdministrator} />
                             </FormControl>
                             <FormLabel className="font-normal">{t("dashboard.gateways.defaultVersioningHeader")}</FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl>
-                              <RadioGroupItem value="uri" />
+                              <RadioGroupItem value="uri" disabled={!isAdministrator} />
                             </FormControl>
                             <FormLabel className="font-normal">{t("dashboard.gateways.defaultVersioningURI")}</FormLabel>
                           </FormItem>
@@ -77,12 +83,16 @@ export function Gateways({ gateways, config }: GatewayProps) {
                   )}
                 />
                 <div className="col-span-full flex justify-end items-center gap-x-2">
-                  <Button type="button" variant="ghost">
-                    {t("actions.cancel")}
-                  </Button>
-                  <Button type="submit" variant="default">
-                    {t("actions.save")}
-                  </Button>
+                  {isAdministrator && (
+                    <>
+                      <Button type="button" variant="ghost">
+                        {t("actions.cancel")}
+                      </Button>
+                      <Button type="submit" variant="default">
+                        {t("actions.save")}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </form>
             </Form>
