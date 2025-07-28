@@ -257,8 +257,24 @@ func (u *user) InviteUser(ctx context.Context, req model.InviteUserRequest) erro
 		return err
 	}
 
-	// Send invitation email
-	inviteLink := fmt.Sprintf("%s/users/invite/%s", config.Env.BaseURL, token)
+	// Send invitation email - build URL consistently
+	baseURL := strings.TrimSuffix(config.Env.BaseURL, "/")
+	var inviteLink string
+	
+	// Check if BaseURL already includes the port
+	if strings.HasPrefix(baseURL, "http") {
+		// BaseURL includes protocol, check if it has port
+		if !strings.Contains(strings.Split(baseURL, "://")[1], ":") {
+			// No port in BaseURL, add it
+			inviteLink = fmt.Sprintf("%s:%s/users/invite/%s", baseURL, config.Env.Port, token)
+		} else {
+			// Port already included
+			inviteLink = fmt.Sprintf("%s/users/invite/%s", baseURL, token)
+		}
+	} else {
+		// BaseURL doesn't include protocol, add both
+		inviteLink = fmt.Sprintf("http://%s:%s/users/invite/%s", baseURL, config.Env.Port, token)
+	}
 
 	language, err := u.repos.Metadata.GetLanguage(ctx)
 	if err != nil {
@@ -461,7 +477,24 @@ func (u *user) NewPasswordLink(ctx context.Context, userEmail, language string) 
 	}
 
 	// 3. Preparar los datos del email
-	resetURL := fmt.Sprintf("%s:%s/password/change?token=%s", config.Env.BaseURL, config.Env.Port, token)
+	// Build the reset URL consistently - ensure proper format
+	baseURL := strings.TrimSuffix(config.Env.BaseURL, "/")
+	var resetURL string
+	
+	// Check if BaseURL already includes the port
+	if strings.HasPrefix(baseURL, "http") {
+		// BaseURL includes protocol, check if it has port
+		if !strings.Contains(strings.Split(baseURL, "://")[1], ":") {
+			// No port in BaseURL, add it
+			resetURL = fmt.Sprintf("%s:%s/password/change?token=%s", baseURL, config.Env.Port, token)
+		} else {
+			// Port already included
+			resetURL = fmt.Sprintf("%s/password/change?token=%s", baseURL, token)
+		}
+	} else {
+		// BaseURL doesn't include protocol, add both
+		resetURL = fmt.Sprintf("http://%s:%s/password/change?token=%s", baseURL, config.Env.Port, token)
+	}
 
 	emailData := email.PasswordResetData{
 		UserName:     user.FirstName,
