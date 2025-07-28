@@ -3,6 +3,7 @@ package handler
 import (
 	"neploy.dev/pkg/logger"
 	"net/http"
+	"slices"
 
 	"github.com/labstack/echo/v4"
 	inertia "github.com/romsar/gonertia"
@@ -191,6 +192,16 @@ func (h *Gateway) CheckHealth(c echo.Context) error {
 // @Failure 500 {string} string
 // @Router /gateways/config [post]
 func (h *Gateway) SaveConfig(c echo.Context) error {
+	// Check user roles - only administrators and settings users can save gateway config
+	claims, ok := c.Get("claims").(model.JWTClaims)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	if !slices.Contains(claims.RolesLower, "administrator") {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied: insufficient privileges to modify gateway configuration")
+	}
+
 	var req model.GatewayConfigRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
