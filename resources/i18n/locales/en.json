@@ -247,6 +247,33 @@
         "list": "List View"
       }
     },
+    "application": {
+      "overview": "Overview",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "description": "Description",
+      "metrics": "Metrics",
+      "cpuUsage": "CPU Usage",
+      "memoryUsage": "Memory Usage",
+      "uptime": "Uptime",
+      "requestsPerMin": "Requests/min",
+      "apiVersions": "API Versions",
+      "newVersion": "New Version",
+      "createNewVersion": "Create New Version",
+      "status": {
+        "running": "Running",
+        "active": "Active"
+      },
+      "table": {
+        "version": "Version",
+        "description": "Description",
+        "path": "Path",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "noVersionsFound": "No versions found."
+    },
     "gateways": {
       "title": "Gateways",
       "description": "Manage your application gateways",

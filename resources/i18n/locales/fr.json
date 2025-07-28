@@ -210,6 +210,33 @@
         "list": "Affichage de la liste"
       }
     },
+    "application": {
+      "overview": "Aperçu",
+      "createdAt": "Créé le",
+      "updatedAt": "Mis à jour le",
+      "description": "Description",
+      "metrics": "Métriques",
+      "cpuUsage": "Utilisation du CPU",
+      "memoryUsage": "Utilisation de la mémoire",
+      "uptime": "Temps de disponibilité",
+      "requestsPerMin": "Requêtes/min",
+      "apiVersions": "Versions de l'API",
+      "newVersion": "Nouvelle version",
+      "createNewVersion": "Créer une nouvelle version",
+      "status": {
+        "running": "En cours d'exécution",
+        "active": "Actif"
+      },
+      "table": {
+        "version": "Version",
+        "description": "Description",
+        "path": "Chemin",
+        "status": "Statut",
+        "createdAt": "Créé le",
+        "actions": "Actions"
+      },
+      "noVersionsFound": "Aucune version trouvée."
+    },
     "gateways": {
       "title": "Passerelles",
       "description": "Gérez vos passerelles d'application",
