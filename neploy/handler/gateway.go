@@ -198,7 +198,7 @@ func (h *Gateway) SaveConfig(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	if !slices.Contains(claims.RolesLower, "administrator") && !slices.Contains(claims.RolesLower, "settings") {
+	if !slices.Contains(claims.RolesLower, "administrator") {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied: insufficient privileges to modify gateway configuration")
 	}
 
