@@ -33,12 +33,7 @@ func dashboardRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 
 func userRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {
 	user := handler.NewUser(npy.Services.User, npy.Services.Metadata, i)
-	userGroup := e.Group("/users", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace))
-	user.RegisterRoutes(userGroup)
-	
-	// Admin-only routes
-	adminUserGroup := e.Group("/users", middleware.JWTMiddleware(), middleware.AdminOnlyMiddleware(), middleware.TraceMiddleware(npy.Services.Trace))
-	adminUserGroup.PUT("/update-techstacks", user.SelectTechStacks)
+	user.RegisterRoutes(e.Group("/users", middleware.JWTMiddleware(), middleware.TraceMiddleware(npy.Services.Trace)))
 }
 
 func applicationRoutes(e *echo.Echo, i *inertia.Inertia, npy Neploy) {

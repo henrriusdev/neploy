@@ -143,33 +143,3 @@ func ResetTokenMiddleware() echo.MiddlewareFunc {
 		}
 	}
 }
-
-// AdminOnlyMiddleware checks if the user has administrator privileges
-func AdminOnlyMiddleware() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			// Get claims from context (should be set by JWTMiddleware)
-			claims, ok := c.Get("claims").(model.JWTClaims)
-			if !ok {
-				logger.Error("error getting claims from context")
-				return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-			}
-
-			// Check if user has Administrator role
-			hasAdminRole := false
-			for _, role := range claims.Roles {
-				if role == "Administrator" {
-					hasAdminRole = true
-					break
-				}
-			}
-
-			if !hasAdminRole {
-				logger.Error("user %s attempted to access admin-only resource without Administrator role", claims.Email)
-				return echo.NewHTTPError(http.StatusForbidden, "Access denied: Administrator role required")
-			}
-
-			return next(c)
-		}
-	}
-}
