@@ -61,6 +61,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, lo
             <SidebarMenu>
               {navItems
                 .filter((item) => item.url !== "/dashboard/settings" || user.roles.includes("administrator") || user.roles.includes("settings"))
+                .filter((item) => item.url !== "/dashboard/report" || user.roles.includes("administrator"))
                 .map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={item.isActive}>

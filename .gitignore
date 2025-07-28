@@ -5,3 +5,5 @@
 /.idea
 /.env
 /uploads
+neploy/app
+.yarn/install-state.gz
