@@ -11,6 +11,9 @@ import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartToo
 import { format, parseISO, isValid } from "date-fns";
 import { Button } from "../ui/button";
 import { Theme, useTheme } from "@/hooks";
+import { BaseChart } from "../base-chart";
+import { techStackColors } from "@/lib/colors";
+import { RequestData, StackData, VisitorData } from "@/types/props";
 
 interface ApplicationStat {
   application_id: string;
@@ -25,7 +28,12 @@ const metrics = [
   { key: "errors", label: "Errors", color: "#ff7300" },
 ];
 
-export function Reports({ stats }: { stats: ApplicationStat[] }) {
+export function Reports({ stats, requests, techStack, visitors }: { 
+  stats: ApplicationStat[];
+  requests?: RequestData[];
+  techStack?: StackData[];
+  visitors?: VisitorData[];
+}) {
   const { applyTheme } = useTheme();
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["requests"]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -213,6 +221,73 @@ export function Reports({ stats }: { stats: ApplicationStat[] }) {
               )
             ) : (
               <Skeleton className="h-[300px] w-full" />
+            )}
+          </div>
+        </div>
+        
+        {/* Dashboard Charts - Requests by Time */}
+        <div className="mt-8 print:mt-4">
+          {requests && requests.length > 0 ? (
+            <BaseChart
+              title="Requests by Time"
+              data={requests.map((r) => ({ ...r, total: r.successful + r.errors }))}
+              type="bar"
+              dataKeys={["successful", "errors"]}
+              colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
+              className="print:w-full print:mb-8"
+            />
+          ) : requests ? (
+            <Card className="flex items-center justify-center h-[300px]">
+              <p className="text-muted-foreground">No request data</p>
+            </Card>
+          ) : (
+            <Skeleton className="h-[300px] w-full print:w-full print:mb-8" />
+          )}
+        </div>
+
+        {/* Dashboard Charts - Tech Stack and Visitors */}
+        <div className="mt-4 grid gap-4 md:grid-cols-2 print:grid-cols-1">
+          {/* Tech Stack Chart */}
+          <div>
+            {techStack ? (
+              techStack.length > 0 ? (
+                <BaseChart 
+                  title="Tech Stack Most Used" 
+                  data={techStack} 
+                  type="pie" 
+                  dataKeys={["value"]} 
+                  colors={techStackColors} 
+                  className="print:w-full print:mb-8" 
+                />
+              ) : (
+                <Card className="flex items-center justify-center h-[300px]">
+                  <p className="text-muted-foreground">No tech stack data</p>
+                </Card>
+              )
+            ) : (
+              <Skeleton className="h-[300px] w-full print:w-full print:mb-8" />
+            )}
+          </div>
+
+          {/* Visitors Chart */}
+          <div>
+            {visitors ? (
+              visitors.length > 0 ? (
+                <BaseChart
+                  title="Visitor Count by Time"
+                  data={visitors}
+                  type="line"
+                  dataKeys={["value"]}
+                  colors={["var(--primary)"]}
+                  className="border-none print:w-full print:mb-8"
+                />
+              ) : (
+                <Card className="flex items-center justify-center h-[300px]">
+                  <p className="text-muted-foreground">No visitor data</p>
+                </Card>
+              )
+            ) : (
+              <Skeleton className="h-[300px] w-full print:w-full print:mb-8" />
             )}
           </div>
         </div>
