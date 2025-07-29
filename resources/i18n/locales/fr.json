@@ -137,6 +137,7 @@
     "techStacksMostUsed": "Piles technologiques les plus utilisées par les applications",
     "visitorCountByTime": "Le compte des visiteurs par temps",
     "visitors": "Visiteurs",
+    "value": "Valeur",
     "applications": {
       "title": "Applications",
       "create": "Créer une application",
