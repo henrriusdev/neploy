@@ -69,6 +69,22 @@ export function Reports({ stats, requests, techStack, visitors }: {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [filteredData]);
 
+  // Filter visitors data by date range
+  const filteredVisitors = useMemo(() => {
+    if (!visitors) return [];
+    return visitors.filter((visitor) => {
+      if (!dateRange?.from && !dateRange?.to) return true;
+      try {
+        const date = parseISO(visitor.name);
+        if (!isValid(date)) return true; // If can't parse date, include it
+        const inRange = (!dateRange?.from || date >= dateRange.from) && (!dateRange?.to || date <= dateRange.to);
+        return inRange;
+      } catch {
+        return true; // If error parsing, include it
+      }
+    });
+  }, [visitors, dateRange]);
+
   const toggleMetric = (key: string) => {
     setSelectedMetrics((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   };
@@ -271,11 +287,11 @@ export function Reports({ stats, requests, techStack, visitors }: {
 
           {/* Visitors Chart */}
           <div>
-            {visitors ? (
-              visitors.length > 0 ? (
+            {filteredVisitors ? (
+              filteredVisitors.length > 0 ? (
                 <BaseChart
                   title="Visitor Count by Time"
-                  data={visitors}
+                  data={filteredVisitors}
                   type="line"
                   dataKeys={["value"]}
                   colors={["var(--primary)"]}
