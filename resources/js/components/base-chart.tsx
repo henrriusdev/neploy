@@ -1,6 +1,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 interface BaseChartProps {
   title: string;
@@ -12,7 +14,22 @@ interface BaseChartProps {
   config?: Record<string, { label: string; color: string }>;
 }
 
-export function BaseChart({ title, data, type, dataKeys, colors, className }: BaseChartProps) {
+export function BaseChart({ title, data, type, dataKeys, colors, className, config }: BaseChartProps) {
+  const chartConfig = React.useMemo(() => {
+    const baseConfig = config || {};
+    
+    // Ensure each dataKey has a config entry
+    return dataKeys.reduce((acc, key, index) => {
+      if (!acc[key]) {
+        acc[key] = {
+          label: key,
+          color: colors[index % colors.length]
+        };
+      }
+      return acc;
+    }, {...baseConfig});
+  }, [config, dataKeys, colors]);
+
   const renderChart = () => {
     switch (type) {
       case "bar":
@@ -21,7 +38,8 @@ export function BaseChart({ title, data, type, dataKeys, colors, className }: Ba
             <BarChart data={data}>
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
               {dataKeys.map((key, index) => (
                 <Bar key={key} dataKey={key} fill={colors[index]} stackId="a" />
               ))}
@@ -35,9 +53,17 @@ export function BaseChart({ title, data, type, dataKeys, colors, className }: Ba
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
               {dataKeys.map((key, index) => (
-                <Line key={key} type="monotone" dataKey={key} stroke={colors[index].startsWith("var") ? `hsl(${colors[index]})` : colors[index]} strokeWidth={2} />
+                <Line 
+                  key={key} 
+                  type="monotone" 
+                  dataKey={key} 
+                  stroke={colors[index].startsWith("var") ? `hsl(${colors[index]})` : colors[index]} 
+                  strokeWidth={2}
+                  dot={false}
+                />
               ))}
             </LineChart>
           </ResponsiveContainer>
@@ -46,9 +72,18 @@ export function BaseChart({ title, data, type, dataKeys, colors, className }: Ba
         return (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Tooltip />
-              <Legend />
-              <Pie data={data} cx="50%" cy="50%" labelLine={true} outerRadius={80} dataKey={dataKeys[0]} nameKey="name">
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Pie 
+                data={data} 
+                cx="50%" 
+                cy="50%" 
+                labelLine={true} 
+                outerRadius={80} 
+                dataKey={dataKeys[0]} 
+                nameKey="name"
+                label
+              >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                 ))}
@@ -63,10 +98,16 @@ export function BaseChart({ title, data, type, dataKeys, colors, className }: Ba
 
   return (
     <Card className={`bg-card ${className}`}>
-      <CardHeader>
-        <CardTitle className="text-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>{renderChart()}</CardContent>
+      {title && (
+        <CardHeader>
+          <CardTitle className="text-foreground">{title}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          {renderChart()}
+        </ChartContainer>
+      </CardContent>
     </Card>
   );
 }

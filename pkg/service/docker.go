@@ -85,7 +85,7 @@ func (d *docker) CreateAndStartContainer(ctx context.Context, app model.Applicat
 		Status:        "active",
 		ApplicationID: app.ID,
 	}
-	if _, err := d.repos.Gateway.UpsertOneDoUpdate(ctx, gateway, "name"); err != nil {
+	if _, err := d.repos.Gateway.UpsertOneDoUpdate(ctx, gateway, "path"); err != nil {
 		logger.Error("error creating gateway: %v", err)
 	}
 
