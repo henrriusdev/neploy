@@ -137,6 +137,7 @@
     "techStacksMostUsed": "技术堆栈应用最常使用",
     "visitorCountByTime": "乘坐访客数量",
     "visitors": "访客",
+    "apps": "应用",
     "applications": {
       "title": "申请",
       "create": "创建应用程序",
