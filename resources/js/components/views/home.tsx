@@ -230,7 +230,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
               colors={techStackColors} 
               className="col-span-3 lg:col-span-3 print:w-full print:mb-8" 
               config={{
-                value: { label: t("dashboard.value"), color: techStackColors[0] }
+                value: { label: t("dashboard.apps"), color: techStackColors[0] }
               }}
             />
           ) : (
