@@ -278,33 +278,56 @@ func (v *versioning) DeleteVersion(ctx context.Context, appID string, versionID 
 }
 
 func (v *versioning) resolveVersionTag(ctx context.Context, app model.Application, suggestedTag string) (string, error) {
-	exists, err := v.repos.ApplicationVersion.Exists(ctx, app.ID, suggestedTag)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	// First, try to get the existing version atomically
+	existingVersion, err := v.repos.ApplicationVersion.GetOne(ctx, 
+		filters.IsSelectFilter("application_id", app.ID), 
+		filters.IsSelectFilter("version_tag", suggestedTag))
+	
+	// If version exists, return it
+	if err == nil {
+		return existingVersion.VersionTag, nil
+	}
+	
+	// If it's not a "not found" error, return the error
+	if !errors.Is(err, sql.ErrNoRows) {
 		return "", err
 	}
 
-	if !exists {
-		version := model.ApplicationVersion{
-			ApplicationID: app.ID,
-			VersionTag:    suggestedTag,
-			Description:   app.Description,
-			Status:        "Created",
-		}
-		// Use atomic upsert to avoid race condition
-		_, upsertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
-		if upsertErr != nil {
-			if v.hub != nil {
-				v.hub.BroadcastProgress(0, "Version already exists. Please enter a new version tag.")
-			}
-			return v.promptForNewVersionTag(ctx, app, suggestedTag)
+	// Version doesn't exist, try to create it
+	version := model.ApplicationVersion{
+		ApplicationID: app.ID,
+		VersionTag:    suggestedTag,
+		Description:   app.Description,
+		Status:        "Created",
+	}
+	
+	// Try to insert the new version
+	insertedVersion, insertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
+	
+	// If insertion succeeded, return the inserted version
+	if insertErr == nil && insertedVersion.ID != "" {
+		return insertedVersion.VersionTag, nil
+	}
+	
+	// If we get sql.ErrNoRows, it means the upsert did nothing due to conflict
+	// Try to get the existing version that was created by another concurrent request
+	if insertErr == sql.ErrNoRows || insertedVersion.ID == "" {
+		existingVersion, getErr := v.repos.ApplicationVersion.GetOne(ctx, 
+			filters.IsSelectFilter("application_id", app.ID), 
+			filters.IsSelectFilter("version_tag", suggestedTag))
+		if getErr == nil {
+			return existingVersion.VersionTag, nil
 		}
 	}
-
-	persisted, err := v.repos.ApplicationVersion.GetOne(ctx, filters.IsSelectFilter("application_id", app.ID), filters.IsSelectFilter("version_tag", suggestedTag))
-	if err != nil {
-		return "", err
+	
+	// If we still can't find/create the version, prompt for a new tag
+	if v.hub != nil {
+		v.hub.BroadcastProgress(0, "Version conflict detected. Please enter a new version tag.")
+		return v.promptForNewVersionTag(ctx, app, suggestedTag)
 	}
-	return persisted.VersionTag, nil
+	
+	// If no websocket hub available, return an error
+	return "", fmt.Errorf("version conflict: version %s already exists for application %s", suggestedTag, app.ID)
 }
 
 // promptForNewVersionTag interactively asks the user for a new version tag via websocket and retries the insert
@@ -328,21 +351,36 @@ func (v *versioning) promptForNewVersionTag(ctx context.Context, app model.Appli
 			return "", fmt.Errorf("no response for version conflict")
 		}
 		newTag := resp.Data["versionTag"].(string)
+		
+		// Use the same atomic logic as resolveVersionTag
 		version := model.ApplicationVersion{
 			ApplicationID: app.ID,
 			VersionTag:    newTag,
 			Description:   app.Description,
 			Status:        "Created",
 		}
-		_, upsertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
-		if upsertErr == nil {
-			persisted, err := v.repos.ApplicationVersion.GetOne(ctx, filters.IsSelectFilter("application_id", app.ID), filters.IsSelectFilter("version_tag", newTag))
-			if err != nil {
-				return "", err
-			}
-			return persisted.VersionTag, nil
+		
+		// Try to insert the new version
+		insertedVersion, insertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
+		
+		// If insertion succeeded, return the inserted version
+		if insertErr == nil && insertedVersion.ID != "" {
+			return insertedVersion.VersionTag, nil
 		}
-		lastTag = newTag // loop again if still duplicate
+		
+		// If we get sql.ErrNoRows or empty ID, it means conflict - try again with another tag
+		if insertErr == sql.ErrNoRows || insertedVersion.ID == "" {
+			lastTag = newTag // loop again if still duplicate
+			continue
+		}
+		
+		// If there's a different error, return it
+		if insertErr != nil {
+			return "", insertErr
+		}
+		
+		// Shouldn't reach here, but just in case
+		return insertedVersion.VersionTag, nil
 	}
 }
 

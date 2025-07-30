@@ -206,6 +206,10 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
             dataKeys={["successful", "errors"]}
             colors={["hsl(var(--primary))", "hsl(var(--destructive))"]}
             className="col-span-full print:w-full print:mb-8"
+            config={{
+              successful: { label: t("dashboard.successful"), color: "hsl(var(--primary))" },
+              errors: { label: t("dashboard.errors"), color: "hsl(var(--destructive))" }
+            }}
           />
         ) : requests ? (
           <Card className="col-span-full flex items-center justify-center h-[300px]">
@@ -218,7 +222,17 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
       <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {techStack ? (
           techStack.length > 0 ? (
-            <BaseChart title={t("dashboard.techStacksMostUsed")} data={techStack} type="pie" dataKeys={["value"]} colors={techStackColors} className="col-span-3 lg:col-span-3 print:w-full print:mb-8" />
+            <BaseChart 
+              title={t("dashboard.techStacksMostUsed")} 
+              data={techStack} 
+              type="pie" 
+              dataKeys={["value"]} 
+              colors={techStackColors} 
+              className="col-span-3 lg:col-span-3 print:w-full print:mb-8" 
+              config={{
+                value: { label: t("dashboard.apps"), color: techStackColors[0] }
+              }}
+            />
           ) : (
             <Card className="col-span-3 lg:col-span-3 flex items-center justify-center h-[300px]">
               <p className="text-muted-foreground">{t("dashboard.noApps") || "No apps"}</p>
@@ -236,6 +250,9 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
               dataKeys={["value"]}
               colors={["var(--primary)"]}
               className="col-span-3 lg:col-span-4 border-none print:w-full print:mb-8"
+              config={{
+                value: { label: t("dashboard.visitors"), color: "var(--primary)" }
+              }}
             />
           ) : (
             <Card className="col-span-3 lg:col-span-4 flex items-center justify-center h-[300px]">
