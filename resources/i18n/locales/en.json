@@ -271,9 +271,15 @@
         "path": "Path",
         "status": "Status",
         "createdAt": "Created At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "logs": "Logs"
       },
-      "noVersionsFound": "No versions found."
+      "noVersionsFound": "No versions found.",
+      "loadingLogs": "Loading logs...",
+      "errorLogs": "Error loading logs.",
+      "noLogs": "No logs found.",
+      "showLogs": "Show logs",
+      "hideLogs": "Hide logs"
     },
     "gateways": {
       "title": "Gateways",

@@ -15,6 +15,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
   const { applyTheme } = useTheme();
   const [totalRequests, setTotalRequests] = useState(0);
   const [totalErrors, setTotalErrors] = useState(0);
+  const [totalVisitors, setTotalVisitors] = useState(0);
 
   // Map backend RequestStat (with .hour) to frontend RequestData (with .name)
   const chartRequests = useMemo(() => {
@@ -30,12 +31,25 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [requests]);
 
+  const chartVisitors = useMemo(() => {
+    if (!visitors) return [];
+    return visitors
+      .map((r) => ({
+        ...r,
+        name: (r as any).hour || r.name, // prefer .hour if present
+        total: r.value,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [visitors]);
+
   useEffect(() => {
     if (chartRequests) {
       const totalSuccessful = chartRequests.reduce((acc, request) => acc + request.total, 0);
       const totalErrors = chartRequests.reduce((acc, request) => acc + request.errors, 0);
+      const totalVisitors = chartRequests.reduce((acc, visitors) => acc + visitors.total, 0);
       setTotalRequests(totalSuccessful);
       setTotalErrors(totalErrors);
+      setTotalVisitors(totalVisitors);
     }
   }, [chartRequests]);
 
@@ -170,7 +184,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
         />
         <DashboardCard
           title={t("dashboard.totalVisitors")}
-          value="573,281"
+          value={totalVisitors.toString()}
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"

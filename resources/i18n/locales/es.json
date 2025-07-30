@@ -266,9 +266,15 @@
         "path": "Ruta",
         "status": "Estado",
         "createdAt": "Creado el",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "logs": "Logs"
       },
-      "noVersionsFound": "No se encontraron versiones."
+      "noVersionsFound": "No se encontraron versiones.",
+      "loadingLogs": "Cargando logs...",
+      "errorLogs": "Error al cargar los logs.",
+      "noLogs": "No se encontraron logs.",
+      "showLogs": "Mostrar logs",
+      "hideLogs": "Ocultar logs"
     },
     "gateways": {
       "title": "Puerta de enlace",

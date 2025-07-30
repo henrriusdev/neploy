@@ -35,6 +35,7 @@ func (a *Application) RegisterRoutes(r *echo.Group) {
 	r.POST("/:id/stop/:versionID", a.Stop)
 	r.DELETE("/:id/versions/:versionID", a.DeleteVersion)
 	r.POST("/branches", a.GetRepoBranches)
+	r.GET("/:id/versions/:versionID/logs", a.GetVersionLogs)
 }
 
 // Create godoc
@@ -329,4 +330,26 @@ func (a *Application) DeleteVersion(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+// GetVersionLogs godoc
+// @Summary Get logs for a specific application version
+// @Description Get logs for a specific application version (from Docker)
+// @Tags Application
+// @Accept json
+// @Produce json
+// @Param id path string true "Application ID"
+// @Param versionID path string true "Version ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /applications/{id}/versions/{versionID}/logs [get]
+func (a *Application) GetVersionLogs(c echo.Context) error {
+	appID := c.Param("id")
+	versionID := c.Param("versionID")
+	logs, err := a.service.GetVersionLogs(c.Request().Context(), appID, versionID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{"logs": logs})
 }

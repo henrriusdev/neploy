@@ -43,6 +43,7 @@ type Application interface {
 	GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error)
 	GetStats(ctx context.Context) ([]model.ApplicationStat, error)
 	EnsureDefaultGateways(ctx context.Context) error
+	GetVersionLogs(ctx context.Context, appID, versionID string) ([]string, error)
 }
 
 type application struct {
@@ -493,4 +494,8 @@ func (a *application) EnsureDefaultGateways(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (a *application) GetVersionLogs(ctx context.Context, appID, versionID string) ([]string, error) {
+	return a.versioningService.GetVersionLogs(ctx, appID, versionID)
 }

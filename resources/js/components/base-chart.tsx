@@ -9,32 +9,32 @@ interface BaseChartProps {
   data: any[];
   type: "bar" | "line" | "pie";
   dataKeys: string[];
+  labelKey?: string; // Optional, used for pie charts to specify the label
   colors: string[];
   className?: string;
   config?: Record<string, { label: string; color: string }>;
 }
 
-export function BaseChart({ title, data, type, dataKeys, colors, className, config }: BaseChartProps) {
+export function BaseChart({ title, data, type, dataKeys, colors, className, config, labelKey }: BaseChartProps) {
   const chartConfig = React.useMemo(() => {
     const baseConfig = config || {};
-    
-    // Ensure each dataKey has a config entry
+    // Use labelKey for pie chart labels, otherwise fallback to key
     return dataKeys.reduce((acc, key, index) => {
       if (!acc[key]) {
         acc[key] = {
-          label: key,
+          label: labelKey && type === "pie" ? labelKey : key,
           color: colors[index % colors.length]
         };
       }
       return acc;
-    }, {...baseConfig});
-  }, [config, dataKeys, colors]);
+    }, { ...baseConfig });
+  }, [config, dataKeys, colors, labelKey, type]);
 
   const renderChart = () => {
     switch (type) {
       case "bar":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height="55%">
             <BarChart data={data}>
               <XAxis dataKey="name" />
               <YAxis />
@@ -72,17 +72,19 @@ export function BaseChart({ title, data, type, dataKeys, colors, className, conf
         return (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+              <ChartLegend formatter={(value) => {
+                // Find the entry in data with value as name
+                const entry = data.find((d) => d.name === value);
+                return entry ? entry.name : value;
+              }} />
               <Pie 
                 data={data} 
                 cx="50%" 
                 cy="50%" 
-                labelLine={true} 
                 outerRadius={80} 
                 dataKey={dataKeys[0]} 
-                nameKey="name"
-                label
+                label={({ name }) => name}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />

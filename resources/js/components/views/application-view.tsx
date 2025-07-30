@@ -16,12 +16,13 @@ import {
   useStartApplicationMutation,
   useStopApplicationMutation,
   useUploadApplicationMutation,
+  useGetVersionLogsQuery,
 } from "@/services/api/applications";
 import { ActionMessage, ActionResponse, ApplicationProps, ProgressMessage } from "@/types";
 import type { Input as InputInterface } from "@/types/websocket";
 import { router } from "@inertiajs/react";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { CirclePlay, Pause, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, CirclePlay, FileText, Pause, Plus, Trash2 } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -79,6 +80,7 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
   const [startApplication] = useStartApplicationMutation();
   const [stopApplication] = useStopApplicationMutation();
   const { data: branchesData, isFetching: isLoadingBranches, error: branchesError } = useLoadBranchesQuery({ repoUrl: currentRepoUrl }, { skip: !currentRepoUrl });
+  const [expandedLogVersion, setExpandedLogVersion] = useState<string | null>(null);
 
   useEffect(() => {
     application.versions && setVersions(application.versions);
@@ -266,6 +268,10 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
     }
   };
 
+  // Example usage for logs (add this where you render versions):
+  // const { data: logsData, isLoading: logsLoading } = useGetVersionLogsQuery({ appId: application.id, versionId: version.id });
+  // Show logsData?.logs as needed (e.g. in a modal, expandable section, etc.)
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header Section */}
@@ -339,7 +345,7 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
         </Card>
 
         {/* API Versions Section */}
-        <Card className="md:col-span-2  border-border/50">
+        <Card className="md:col-span-2 border-border/50">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{t("dashboard.application.apiVersions")}</CardTitle>
@@ -375,55 +381,89 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
                   <TableHead>{t("dashboard.application.table.path")}</TableHead>
                   <TableHead>{t("dashboard.application.table.status")}</TableHead>
                   <TableHead>{t("dashboard.application.table.createdAt")}</TableHead>
+                  <TableHead>{t("dashboard.application.table.logs") || "Logs"}</TableHead>
                   <TableHead className="text-right">{t("dashboard.application.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {versions?.length ? (
-                  versions.map((version, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-mono">{version.versionTag}</TableCell>
-                      <TableCell>{version.description}</TableCell>
-                      <TableCell>
-                        <a target="_blank" href={`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}>{`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}</a>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {version.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{new Date(version.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-blue-400 hover:bg-blue-400/10"
-                          onClick={() => handleVersionAction(application.id, version.id, "start")}
-                          disabled={version.status === "active"}>
-                          <CirclePlay className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-yellow-400 hover:bg-yellow-400/10"
-                          onClick={() => handleVersionAction(application.id, version.id, "stop")}
-                          disabled={version.status !== "active"}>
-                          <Pause className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-400 hover:bg-red-400/10"
-                          onClick={() => handleDeleteVersion(application.id, version.id)}
-                          disabled={version.status === "Running"}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  versions.map((version, i) => {
+                    const isExpanded = expandedLogVersion === version.id;
+                    const { data: logsData, isLoading: logsLoading, isError: logsError } = useGetVersionLogsQuery({ appId: application.id, versionId: version.id }, { skip: !isExpanded });
+                    return (
+                      <>
+                        <TableRow key={i}>
+                          <TableCell className="font-mono">{version.versionTag}</TableCell>
+                          <TableCell>{version.description}</TableCell>
+                          <TableCell>
+                            <a target="_blank" href={`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}>{`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}</a>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {version.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(version.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-sky-500 hover:bg-sky-500/10"
+                              onClick={() => setExpandedLogVersion(isExpanded ? null : version.id)}
+                              aria-label={isExpanded ? t("dashboard.application.hideLogs") : t("dashboard.application.showLogs")}
+                            >
+                              <FileText className="h-4 w-4" />
+                              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-blue-400 hover:bg-blue-400/10"
+                              onClick={() => handleVersionAction(application.id, version.id, "start")}
+                              disabled={version.status === "active"}>
+                              <CirclePlay className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-yellow-400 hover:bg-yellow-400/10"
+                              onClick={() => handleVersionAction(application.id, version.id, "stop")}
+                              disabled={version.status !== "active"}>
+                              <Pause className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-400 hover:bg-red-400/10"
+                              onClick={() => handleDeleteVersion(application.id, version.id)}
+                              disabled={version.status === "Running"}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow>
+                            <TableCell colSpan={7} className="bg-muted/40 p-0">
+                              <div className="max-h-64 overflow-auto text-xs font-mono p-4">
+                                {logsLoading && <div>{t("dashboard.application.loadingLogs") || "Loading logs..."}</div>}
+                                {logsError && <div className="text-red-500">{t("dashboard.application.errorLogs") || "Error loading logs."}</div>}
+                                {logsData && logsData.logs && logsData.logs.length > 0 ? (
+                                  <pre className="whitespace-pre-wrap break-words">{logsData.logs.join("\n")}</pre>
+                                ) : !logsLoading && !logsError ? (
+                                  <div className="text-muted-foreground">{t("dashboard.application.noLogs") || "No logs found."}</div>
+                                ) : null}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    );
+                  })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
                       {t("dashboard.application.noVersionsFound")}
                     </TableCell>
                   </TableRow>

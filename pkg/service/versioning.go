@@ -29,6 +29,7 @@ type Versioning interface {
 	Deploy(ctx context.Context, id string, repoURL string, branch string) error
 	Upload(ctx context.Context, id string, file *multipart.FileHeader) (string, error)
 	DeleteVersion(ctx context.Context, appID string, versionID string) error
+	GetVersionLogs(ctx context.Context, appID, versionID string) ([]string, error)
 }
 
 type versioning struct {
@@ -277,17 +278,40 @@ func (v *versioning) DeleteVersion(ctx context.Context, appID string, versionID 
 	return v.repos.ApplicationVersion.Delete(ctx, versionID)
 }
 
+// GetVersionLogs returns logs for a given app/version
+func (v *versioning) GetVersionLogs(ctx context.Context, appID, versionID string) ([]string, error) {
+	app, err := v.repos.Application.GetByID(ctx, appID)
+	if err != nil {
+		logger.Error("error getting app: %v", err)
+		return nil, err
+	}
+
+	version, err := v.repos.ApplicationVersion.GetOneById(ctx, versionID)
+	if err != nil {
+		logger.Error("error getting version: %v", err)
+		return nil, err
+	}
+
+	containerID, err := v.docker.GetContainerID(ctx, getContainerName(app.AppName, version.VersionTag))
+	if err != nil || containerID == "" {
+		logger.Error("error getting container id: %v", err)
+		return nil, fmt.Errorf("container not found")
+	}
+
+	return v.docker.GetLogs(ctx, containerID, false)
+}
+
 func (v *versioning) resolveVersionTag(ctx context.Context, app model.Application, suggestedTag string) (string, error) {
 	// First, try to get the existing version atomically
-	existingVersion, err := v.repos.ApplicationVersion.GetOne(ctx, 
-		filters.IsSelectFilter("application_id", app.ID), 
+	existingVersion, err := v.repos.ApplicationVersion.GetOne(ctx,
+		filters.IsSelectFilter("application_id", app.ID),
 		filters.IsSelectFilter("version_tag", suggestedTag))
-	
+
 	// If version exists, return it
 	if err == nil {
 		return existingVersion.VersionTag, nil
 	}
-	
+
 	// If it's not a "not found" error, return the error
 	if !errors.Is(err, sql.ErrNoRows) {
 		return "", err
@@ -300,32 +324,32 @@ func (v *versioning) resolveVersionTag(ctx context.Context, app model.Applicatio
 		Description:   app.Description,
 		Status:        "Created",
 	}
-	
+
 	// Try to insert the new version
 	insertedVersion, insertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
-	
+
 	// If insertion succeeded, return the inserted version
 	if insertErr == nil && insertedVersion.ID != "" {
 		return insertedVersion.VersionTag, nil
 	}
-	
+
 	// If we get sql.ErrNoRows, it means the upsert did nothing due to conflict
 	// Try to get the existing version that was created by another concurrent request
 	if insertErr == sql.ErrNoRows || insertedVersion.ID == "" {
-		existingVersion, getErr := v.repos.ApplicationVersion.GetOne(ctx, 
-			filters.IsSelectFilter("application_id", app.ID), 
+		existingVersion, getErr := v.repos.ApplicationVersion.GetOne(ctx,
+			filters.IsSelectFilter("application_id", app.ID),
 			filters.IsSelectFilter("version_tag", suggestedTag))
 		if getErr == nil {
 			return existingVersion.VersionTag, nil
 		}
 	}
-	
+
 	// If we still can't find/create the version, prompt for a new tag
 	if v.hub != nil {
 		v.hub.BroadcastProgress(0, "Version conflict detected. Please enter a new version tag.")
 		return v.promptForNewVersionTag(ctx, app, suggestedTag)
 	}
-	
+
 	// If no websocket hub available, return an error
 	return "", fmt.Errorf("version conflict: version %s already exists for application %s", suggestedTag, app.ID)
 }
@@ -351,7 +375,7 @@ func (v *versioning) promptForNewVersionTag(ctx context.Context, app model.Appli
 			return "", fmt.Errorf("no response for version conflict")
 		}
 		newTag := resp.Data["versionTag"].(string)
-		
+
 		// Use the same atomic logic as resolveVersionTag
 		version := model.ApplicationVersion{
 			ApplicationID: app.ID,
@@ -359,26 +383,26 @@ func (v *versioning) promptForNewVersionTag(ctx context.Context, app model.Appli
 			Description:   app.Description,
 			Status:        "Created",
 		}
-		
+
 		// Try to insert the new version
 		insertedVersion, insertErr := v.repos.ApplicationVersion.UpsertOneDoNothing(ctx, version, "application_id", "version_tag")
-		
+
 		// If insertion succeeded, return the inserted version
 		if insertErr == nil && insertedVersion.ID != "" {
 			return insertedVersion.VersionTag, nil
 		}
-		
+
 		// If we get sql.ErrNoRows or empty ID, it means conflict - try again with another tag
 		if insertErr == sql.ErrNoRows || insertedVersion.ID == "" {
 			lastTag = newTag // loop again if still duplicate
 			continue
 		}
-		
+
 		// If there's a different error, return it
 		if insertErr != nil {
 			return "", insertErr
 		}
-		
+
 		// Shouldn't reach here, but just in case
 		return insertedVersion.VersionTag, nil
 	}

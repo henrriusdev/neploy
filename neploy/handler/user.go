@@ -289,7 +289,6 @@ func (u *User) SelectTechStacks(c echo.Context) error {
 		logger.Error("error binding request: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
 	if err := c.Validate(req); err != nil {
 		logger.Error("error validating request: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

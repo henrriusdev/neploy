@@ -234,9 +234,26 @@
         "path": "Chemin",
         "status": "Statut",
         "createdAt": "Créé le",
-        "actions": "Actions"
+        "actions": "Actions",
+        "logs": "Journaux"
       },
-      "noVersionsFound": "Aucune version trouvée."
+      "noVersionsFound": "Aucune version trouvée.",
+      "logs": {
+        "title": "Journaux",
+        "description": "Surveillez les activités de votre application",
+        "download": "Télécharger les journaux",
+        "viewInConsole": "Voir dans la console",
+        "error": "Erreur lors de la récupération des journaux.",
+        "empty": "Aucun journal trouvé.",
+        "filter": "Filtrer les journaux",
+        "clearFilter": "Effacer le filtre",
+        "refresh": "Rafraîchir",
+        "loadingLogs": "Chargement des logs...",
+        "errorLogs": "Erreur lors du chargement des logs.",
+        "noLogs": "Aucun log trouvé.",
+        "showLogs": "Afficher les logs",
+        "hideLogs": "Masquer les logs"
+      }
     },
     "gateways": {
       "title": "Passerelles",

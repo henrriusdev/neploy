@@ -9,7 +9,7 @@ import {
 } from "@/services/api/applications";
 import { ActionMessage, ActionResponse, Input, ProgressMessage } from "@/types";
 import { PlusCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import {MouseEvent, useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { ApplicationCard } from "../application-card";
@@ -126,7 +126,9 @@ export function Applications() {
   const [uploadApplication] = useUploadApplicationMutation();
   const [deleteApplication] = useDeleteApplicationMutation();
 
-  const handleApplicationAction = async (appId: string) => {
+  const handleApplicationAction = async (e: MouseEvent<HTMLButtonElement>, appId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
     try {
       await deleteApplication({ appId });
 
@@ -361,7 +363,7 @@ export function Applications() {
       </div>
 
       <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
-        {applications?.map((app) => <ApplicationCard key={app.id} app={app} onDelete={() => handleApplicationAction(app.id)} />)}
+        {applications?.map((app) => <ApplicationCard key={app.id} app={app} onDelete={(e) => handleApplicationAction(e, app.id)} />)}
       </div>
 
       <Dialog open={actionDialog.show} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, show: false })}>

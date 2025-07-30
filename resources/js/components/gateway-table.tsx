@@ -11,7 +11,6 @@ export function GatewayTable({ gateways }: GatewayTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>{t("dashboard.gateways.routePath")}</TableHead>
-            <TableHead>{t("dashboard.gateways.url")}</TableHead>
             <TableHead>{t("dashboard.gateways.application")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -19,7 +18,6 @@ export function GatewayTable({ gateways }: GatewayTableProps) {
           {gateways.map((gateway) => (
             <TableRow key={gateway.id}>
               <TableCell>{gateway.path}</TableCell>
-              <TableCell className="font-mono text-sm">{gateway.backendUrl}</TableCell>
               <TableCell>
                 <Link href={`/dashboard/applications/${gateway.applicationId}`} className="text-primary hover:underline">
                   {gateway.application.appName}

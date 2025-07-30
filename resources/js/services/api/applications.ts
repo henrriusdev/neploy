@@ -75,6 +75,12 @@ export const applications = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["applications"],
     }),
+    getVersionLogs: builder.query<{ logs: string[] }, { appId: string; versionId: string }>({
+      query: ({ appId, versionId }) => ({
+        url: `applications/${appId}/versions/${versionId}/logs`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -88,4 +94,5 @@ export const {
   useStopApplicationMutation,
   useDeleteApplicationMutation,
   useDeleteVersionMutation,
+  useGetVersionLogsQuery,
 } = applications;

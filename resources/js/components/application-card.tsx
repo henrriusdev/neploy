@@ -6,10 +6,11 @@ import { TechIcon } from "@/components/icons/tech-icon";
 import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { router } from "@inertiajs/react";
+import {MouseEvent} from "react";
 
 interface ApplicationCardProps {
   app: Application;
-  onDelete: (id: string) => void;
+  onDelete: (e: MouseEvent<HTMLButtonElement>, id: string) => void;
 }
 
 export function ApplicationCard({ app, onDelete }: ApplicationCardProps) {
@@ -59,7 +60,7 @@ export function ApplicationCard({ app, onDelete }: ApplicationCardProps) {
         <Badge className={`${getStatusBadgeColor(app.status)}`}>{translateStatus(app.status)}</Badge>
       </CardHeader>
       <CardContent>
-        <Button size="sm" variant="destructive" onClick={() => onDelete(app.id)}>
+        <Button size="sm" variant="destructive" onClick={(e) => onDelete(e,app.id)}>
           <Trash2 className="h-4 w-4 mr-1" />
           {t("dashboard.applications.delete")}
         </Button>

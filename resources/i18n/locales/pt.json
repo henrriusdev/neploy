@@ -234,9 +234,15 @@
         "path": "Caminho",
         "status": "Status",
         "createdAt": "Criado em",
-        "actions": "Ações"
+        "actions": "Ações",
+        "logs": "Logs"
       },
-      "noVersionsFound": "Nenhuma versão encontrada."
+      "noVersionsFound": "Nenhuma versão encontrada.",
+      "loadingLogs": "Carregando logs...",
+      "errorLogs": "Erro ao carregar os logs.",
+      "noLogs": "Nenhum log encontrado.",
+      "showLogs": "Mostrar logs",
+      "hideLogs": "Ocultar logs"
     },
     "gateways": {
       "title": "API Gateways",

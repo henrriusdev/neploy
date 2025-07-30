@@ -234,9 +234,22 @@
         "path": "路径",
         "status": "状态",
         "createdAt": "创建时间",
-        "actions": "操作"
+        "actions": "操作",
+        "logs": "日志"
       },
-      "noVersionsFound": "未找到版本。"
+      "noVersionsFound": "未找到版本。",
+      "logs": {
+        "title": "日志",
+        "description": "查看应用程序日志",
+        "download": "下载日志",
+        "upload": "上传日志",
+        "clear": "清除日志",
+        "loadingLogs": "正在加载日志...",
+        "errorLogs": "加载日志时出错。",
+        "noLogs": "未找到日志。",
+        "showLogs": "显示日志",
+        "hideLogs": "隐藏日志"
+      }
     },
     "gateways": {
       "title": "网关",
