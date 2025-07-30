@@ -426,10 +426,31 @@ func (d *Dashboard) ReportStats(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	requestData, err := d.services.Application.GetHourlyRequests(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting requests: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	techStats, err := d.services.TechStack.GetUsage(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting tech stats: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	visitors, err := d.services.Visitor.GetAllTraces(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting traces: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return d.i.Render(c.Response(), c.Request(), "Dashboard/Index", inertia.Props{
-		"user":     user,
-		"teamName": metadata.TeamName,
-		"logoUrl":  metadata.LogoURL,
-		"stats":    stats,
+		"user":      user,
+		"teamName":  metadata.TeamName,
+		"logoUrl":   metadata.LogoURL,
+		"stats":     stats,
+		"requests":  requestData,
+		"techStack": techStats,
+		"visitors":  visitors,
 	})
 }

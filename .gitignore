@@ -6,5 +6,6 @@
 /.env
 /uploads
 neploy/app
+neploy/main
 .yarn/install-state.gz
 neploy-test
