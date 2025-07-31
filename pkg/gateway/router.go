@@ -141,6 +141,7 @@ func (r *Router) RemoveRoute(routeKey string) {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	println(req.URL.Path)
 	config, err := r.conf.Get(req.Context())
 	if err != nil {
 		log.Printf("ERROR: Failed to get gateway config: %v", err)
