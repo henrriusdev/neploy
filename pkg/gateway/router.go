@@ -86,6 +86,12 @@ func (r *Router) AddRoute(route Route) error {
 		originalDirector(req)
 		req.Host = req.URL.Host
 
+		// Store the original path before modifying it
+		if req.Header == nil {
+			req.Header = make(http.Header)
+		}
+		req.Header.Set("X-Original-Path", req.URL.Path)
+
 		if route.Path != "" {
 			versionPrefix := req.Header.Get("Resolved-Version")
 			basePath := "/" + versionPrefix + route.Path
@@ -184,8 +190,14 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) matchesRoute(req *http.Request, route Route) bool {
+	// Use the original path stored in the header if available
+	path := req.URL.Path
+	if originalPath := req.Header.Get("X-Original-Path"); originalPath != "" {
+		path = originalPath
+	}
+
 	if route.Path != "" {
-		return strings.HasPrefix(req.URL.Path, route.Path)
+		return strings.HasPrefix(path, route.Path)
 	}
 	return true
 }
