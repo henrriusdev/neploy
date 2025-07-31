@@ -161,38 +161,28 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 				return
 			}
 
-			// Ensure we have a version
 			if resolvedVersion == "" {
-				resolvedVersion = "v1.0.0" // Use a sensible default if none specified
+				resolvedVersion = "v1.0.0"
 			}
 
 			if config.DefaultVersioningType == model.VersioningTypeHeader {
-				// For header-based versioning
 				headerVersion := r.Header.Get("X-API-Version")
 				if headerVersion != "" {
 					resolvedVersion = headerVersion
 				}
 				url := pathSegments[0]
-				// Save the original path before modifying it
 				if r.Header == nil {
 					r.Header = make(http.Header)
 				}
 				r.Header.Set("X-Original-Path", r.URL.Path)
 				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, url)
 			} else {
-				// For path-based versioning
 				if len(pathSegments) > 0 && strings.HasPrefix(pathSegments[0], "v") {
 					resolvedVersion = pathSegments[0]
 				}
 			}
-			// Only check version for API endpoints
 			if len(pathSegments) > 1 {
-				// Validar si la versión existe para la app actual (solo para no-assets)
-				appName := pathSegments[1] // se asume /vX/app-name
-				println("App name:", appName)
-				println("Resolved version:", resolvedVersion)
-
-				// Only validate version for non-static assets
+				appName := pathSegments[1]
 				exists, err := appVersionRepo.ExistsByName(r.Context(), appName, resolvedVersion)
 				if err != nil || !exists {
 					http.Error(w, "API version not found", http.StatusNotFound)

@@ -110,14 +110,13 @@ func (r *Router) AddRoute(route Route) error {
 			versionPrefix := req.Header.Get("Resolved-Version")
 			basePath := "/" + versionPrefix + route.Path
 
-			// Special handling for static assets
+			// Special handling for static assets and paths with multiple slashes
 			if isStaticAsset && strings.HasPrefix(originalPath, "/v") {
-				// For versioned static assets, extract the asset path
-				parts := strings.SplitN(originalPath, "/", 4) // /v1.0.0/appname/assets/...
-				if len(parts) >= 4 {
-					// Keep just the asset part (everything after appname)
-					assetPath := "/" + parts[3]
-					println("Static asset path:", assetPath)
+				// For versioned static assets, preserve the full path after the app name
+				parts := strings.Split(originalPath, "/")
+				if len(parts) >= 3 {
+					// Skip version and app name, keep everything else
+					assetPath := "/" + strings.Join(parts[3:], "/")
 					req.URL.Path = assetPath
 					return
 				}
