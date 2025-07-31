@@ -179,6 +179,8 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 			// Validar si la versión existe para la app actual
 			if len(pathSegments) > 1 {
 				appName := pathSegments[1] // se asume /vX/app-name
+				println("App name:", appName)
+				println("Resolved version:", resolvedVersion)
 				exists, err := appVersionRepo.ExistsByName(r.Context(), appName, resolvedVersion)
 				if err != nil || !exists {
 					http.Error(w, "API version not found", http.StatusNotFound)
