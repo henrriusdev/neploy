@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -84,59 +83,36 @@ func (r *Router) AddRoute(route Route) error {
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
-		// Save the original path before any modifications
-		originalPath := req.URL.Path
-		log.Printf("DEBUG: Director original path: %s", originalPath)
-
 		originalDirector(req)
 		req.Host = req.URL.Host
 
-		// Check if this is a static asset request
-		isStaticAsset := strings.Contains(originalPath, "/assets/") ||
-			strings.HasSuffix(originalPath, ".css") ||
-			strings.HasSuffix(originalPath, ".js") ||
-			strings.HasSuffix(originalPath, ".png") ||
-			strings.HasSuffix(originalPath, ".jpg") ||
-			strings.HasSuffix(originalPath, ".jpeg") ||
-			strings.HasSuffix(originalPath, ".svg") ||
-			strings.HasSuffix(originalPath, ".ico")
+		// Store the original path before modifying it
+		if req.Header == nil {
+			req.Header = make(http.Header)
+		}
+		req.Header.Set("X-Original-Path", req.URL.Path)
 
 		if route.Path != "" {
 			versionPrefix := req.Header.Get("Resolved-Version")
 			basePath := "/" + versionPrefix + route.Path
 
-			// For static assets, we need special handling
-			if isStaticAsset && strings.HasPrefix(originalPath, "/"+versionPrefix) {
-				// For versioned static assets, keep the asset path intact
-				// Extract the asset path after the version prefix
-				parts := strings.SplitN(originalPath, "/", 3)
-				if len(parts) >= 3 {
-					assetPath := "/" + parts[2]
-					log.Printf("DEBUG: Static asset path: %s", assetPath)
-					req.URL.Path = assetPath
-				}
-			} else {
-				// Normal path handling for non-static assets
-				trimmed := strings.TrimPrefix(req.URL.Path, basePath)
+			trimmed := strings.TrimPrefix(req.URL.Path, basePath)
 
-				// Fallback si no coincide completamente
-				if trimmed == req.URL.Path {
-					trimmed = strings.TrimPrefix(req.URL.Path, route.Path)
-				}
-
-				if trimmed == "" {
-					trimmed = "/" // fallback para evitar path vacío
-				}
-
-				// Asegurar que comienza con /
-				if !strings.HasPrefix(trimmed, "/") {
-					trimmed = "/" + trimmed
-				}
-
-				req.URL.Path = trimmed
+			// Fallback si no coincide completamente
+			if trimmed == req.URL.Path {
+				trimmed = strings.TrimPrefix(req.URL.Path, route.Path)
 			}
 
-			log.Printf("DEBUG: Final URL path after director: %s", req.URL.Path)
+			if trimmed == "" {
+				trimmed = "/" // fallback para evitar path vacío
+			}
+
+			// Asegurar que comienza con /
+			if !strings.HasPrefix(trimmed, "/") {
+				trimmed = "/" + trimmed
+			}
+
+			req.URL.Path = trimmed
 		}
 	}
 
@@ -210,62 +186,16 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) matchesRoute(req *http.Request, route Route) bool {
-	// Get the original path from context
+	// Use the original path stored in the header if available
 	path := req.URL.Path
-	if originalPath, ok := req.Context().Value("originalPath").(string); ok && originalPath != "" {
+	if originalPath := req.Header.Get("X-Original-Path"); originalPath != "" {
 		path = originalPath
 	}
 
-	// Also check if this is a versioned path that needs special handling
-	if strings.HasPrefix(path, "/v") && len(path) > 2 && (path[2] >= '0' && path[2] <= '9') {
-		log.Printf("DEBUG: Detected versioned path: %s", path)
-	}
-
-	matches := false
 	if route.Path != "" {
-		// Check if the route path is a prefix of the request path
-		matches = strings.HasPrefix(path, route.Path)
-
-		// Special handling for versioned paths
-		if !matches && strings.HasPrefix(path, "/v") {
-			// Try to extract version and check if the rest matches
-			parts := strings.SplitN(path, "/", 3)
-			if len(parts) >= 3 {
-				versionPart := parts[1] // e.g. "v1.0.0"
-				restPath := "/" + parts[2]
-				log.Printf("DEBUG: Checking versioned path: version=%s, rest=%s against route=%s",
-					versionPart, restPath, route.Path)
-
-				// Check if the route path matches after removing version
-				if strings.HasPrefix(restPath, route.Path) {
-					matches = true
-				}
-
-				// Special handling for static assets (css, js, images, etc.)
-				if !matches && (strings.Contains(path, "/assets/") ||
-					strings.HasSuffix(path, ".css") ||
-					strings.HasSuffix(path, ".js") ||
-					strings.HasSuffix(path, ".png") ||
-					strings.HasSuffix(path, ".jpg") ||
-					strings.HasSuffix(path, ".jpeg") ||
-					strings.HasSuffix(path, ".svg") ||
-					strings.HasSuffix(path, ".ico")) {
-
-					// For static assets, check if the app name in the path matches the route's app
-					appName := ExtractAppName(path)
-					if appName != "" && appName == ExtractAppName(route.Path) {
-						log.Printf("DEBUG: Matched static asset for app %s: %s", appName, path)
-						matches = true
-					}
-				}
-			}
-		}
-	} else {
-		matches = true
+		return strings.HasPrefix(path, route.Path)
 	}
-
-	log.Printf("DEBUG: Route match result for path %s and route %s: %v", path, route.Path, matches)
-	return matches
+	return true
 }
 
 func ValidateRoute(route Route) error {
