@@ -148,6 +148,10 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		r.mu.RLock()
 		defer r.mu.RUnlock()
 
+		if strings.Contains(req.URL.Path, "//v") {
+			req.URL.Path = strings.ReplaceAll(req.URL.Path, "//v", "/v")
+		}
+
 		for routeKey, proxy := range r.routes {
 			route := r.routeInfo[routeKey]
 			if r.matchesRoute(req, route) {
