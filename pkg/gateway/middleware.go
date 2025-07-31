@@ -152,6 +152,7 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			pathSegments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+			println("Path segments:", pathSegments)
 			var resolvedVersion string
 
 			if slices.Contains(pathSegments, ".well-known") {
@@ -163,6 +164,11 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 			if config.DefaultVersioningType == model.VersioningTypeHeader {
 				resolvedVersion = r.Header.Get("X-API-Version")
 				url := pathSegments[0]
+				// Save the original path before modifying it
+				if r.Header == nil {
+					r.Header = make(http.Header)
+				}
+				r.Header.Set("X-Original-Path", r.URL.Path)
 				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, url)
 			} else {
 				if len(pathSegments) > 1 && strings.HasPrefix(pathSegments[0], "v") {

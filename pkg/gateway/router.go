@@ -141,7 +141,7 @@ func (r *Router) RemoveRoute(routeKey string) {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	println(req.URL.Path)
+	println("Initial path in ServeHTTP:", req.URL.Path)
 	config, err := r.conf.Get(req.Context())
 	if err != nil {
 		log.Printf("ERROR: Failed to get gateway config: %v", err)
@@ -152,6 +152,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	resolver := VersionRoutingMiddleware(config, r.version)
 	resolver(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		println("Path after VersionRoutingMiddleware:", req.URL.Path)
 		r.mu.RLock()
 		defer r.mu.RUnlock()
 
@@ -189,12 +190,16 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (r *Router) matchesRoute(req *http.Request, route Route) bool {
 	// Use the original path stored in the header if available
 	path := req.URL.Path
+	println("Path in matchesRoute before header check:", path)
 	if originalPath := req.Header.Get("X-Original-Path"); originalPath != "" {
 		path = originalPath
+		println("Using original path from header:", path)
 	}
 
 	if route.Path != "" {
-		return strings.HasPrefix(path, route.Path)
+		matches := strings.HasPrefix(path, route.Path)
+		println("Route path:", route.Path, "Request path:", path, "Matches:", matches)
+		return matches
 	}
 	return true
 }
