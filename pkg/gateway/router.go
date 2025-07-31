@@ -91,27 +91,52 @@ func (r *Router) AddRoute(route Route) error {
 		originalDirector(req)
 		req.Host = req.URL.Host
 
+		// Check if this is a static asset request
+		isStaticAsset := strings.Contains(originalPath, "/assets/") || 
+			strings.HasSuffix(originalPath, ".css") || 
+			strings.HasSuffix(originalPath, ".js") || 
+			strings.HasSuffix(originalPath, ".png") || 
+			strings.HasSuffix(originalPath, ".jpg") || 
+			strings.HasSuffix(originalPath, ".jpeg") || 
+			strings.HasSuffix(originalPath, ".svg") || 
+			strings.HasSuffix(originalPath, ".ico")
+
 		if route.Path != "" {
 			versionPrefix := req.Header.Get("Resolved-Version")
 			basePath := "/" + versionPrefix + route.Path
+			
+			// For static assets, we need special handling
+			if isStaticAsset && strings.HasPrefix(originalPath, "/"+versionPrefix) {
+				// For versioned static assets, keep the asset path intact
+				// Extract the asset path after the version prefix
+				parts := strings.SplitN(originalPath, "/", 3)
+				if len(parts) >= 3 {
+					assetPath := "/" + parts[2]
+					log.Printf("DEBUG: Static asset path: %s", assetPath)
+					req.URL.Path = assetPath
+				}
+			} else {
+				// Normal path handling for non-static assets
+				trimmed := strings.TrimPrefix(req.URL.Path, basePath)
 
-			trimmed := strings.TrimPrefix(req.URL.Path, basePath)
+				// Fallback si no coincide completamente
+				if trimmed == req.URL.Path {
+					trimmed = strings.TrimPrefix(req.URL.Path, route.Path)
+				}
 
-			// Fallback si no coincide completamente
-			if trimmed == req.URL.Path {
-				trimmed = strings.TrimPrefix(req.URL.Path, route.Path)
+				if trimmed == "" {
+					trimmed = "/" // fallback para evitar path vacío
+				}
+
+				// Asegurar que comienza con /
+				if !strings.HasPrefix(trimmed, "/") {
+					trimmed = "/" + trimmed
+				}
+
+				req.URL.Path = trimmed
 			}
-
-			if trimmed == "" {
-				trimmed = "/" // fallback para evitar path vacío
-			}
-
-			// Asegurar que comienza con /
-			if !strings.HasPrefix(trimmed, "/") {
-				trimmed = "/" + trimmed
-			}
-
-			req.URL.Path = trimmed
+			
+			log.Printf("DEBUG: Final URL path after director: %s", req.URL.Path)
 		}
 	}
 
@@ -243,6 +268,24 @@ func (r *Router) matchesRoute(req *http.Request, route Route) bool {
 				if strings.HasPrefix(restPath, route.Path) {
 					matches = true
 				}
+				
+				// Special handling for static assets (css, js, images, etc.)
+				if !matches && (strings.Contains(path, "/assets/") || 
+					strings.HasSuffix(path, ".css") || 
+					strings.HasSuffix(path, ".js") || 
+					strings.HasSuffix(path, ".png") || 
+					strings.HasSuffix(path, ".jpg") || 
+					strings.HasSuffix(path, ".jpeg") || 
+					strings.HasSuffix(path, ".svg") || 
+					strings.HasSuffix(path, ".ico")) {
+					
+					// For static assets, check if the app name in the path matches the route's app
+					appName := ExtractAppName(path)
+					if appName != "" && appName == ExtractAppName(route.Path) {
+						log.Printf("DEBUG: Matched static asset for app %s: %s", appName, path)
+						matches = true
+					}
+				}
 			}
 		}
 	} else {
@@ -265,3 +308,5 @@ func ValidateRoute(route Route) error {
 	}
 	return nil
 }
+
+
