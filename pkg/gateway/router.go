@@ -85,8 +85,7 @@ func (r *Router) AddRoute(route Route) error {
 	proxy.Director = func(req *http.Request) {
 		// Save the original path before any modifications
 		originalPath := req.URL.Path
-		println("Original path in director:", originalPath)
-		
+
 		originalDirector(req)
 		req.Host = req.URL.Host
 
@@ -97,25 +96,22 @@ func (r *Router) AddRoute(route Route) error {
 		req.Header.Set("X-Original-Path", originalPath)
 
 		// Check if this is a static asset request
-		isStaticAsset := strings.Contains(originalPath, "/assets/") || 
-			strings.HasSuffix(originalPath, ".css") || 
-			strings.HasSuffix(originalPath, ".js") || 
-			strings.HasSuffix(originalPath, ".png") || 
-			strings.HasSuffix(originalPath, ".jpg") || 
-			strings.HasSuffix(originalPath, ".jpeg") || 
-			strings.HasSuffix(originalPath, ".svg") || 
+		isStaticAsset := strings.Contains(originalPath, "/assets/") ||
+			strings.HasSuffix(originalPath, ".css") ||
+			strings.HasSuffix(originalPath, ".js") ||
+			strings.HasSuffix(originalPath, ".png") ||
+			strings.HasSuffix(originalPath, ".jpg") ||
+			strings.HasSuffix(originalPath, ".jpeg") ||
+			strings.HasSuffix(originalPath, ".svg") ||
 			strings.HasSuffix(originalPath, ".ico")
 
 		if route.Path != "" {
 			versionPrefix := req.Header.Get("Resolved-Version")
 			basePath := "/" + versionPrefix + route.Path
 
-			// Special handling for static assets and paths with multiple slashes
 			if isStaticAsset && strings.HasPrefix(originalPath, "/v") {
-				// For versioned static assets, preserve the full path after the app name
 				parts := strings.Split(originalPath, "/")
 				if len(parts) >= 3 {
-					// Skip version and app name, keep everything else
 					assetPath := "/" + strings.Join(parts[3:], "/")
 					req.URL.Path = assetPath
 					return
@@ -139,7 +135,6 @@ func (r *Router) AddRoute(route Route) error {
 				trimmed = "/" + trimmed
 			}
 
-			println("Final path after processing:", trimmed)
 			req.URL.Path = trimmed
 		}
 	}
@@ -169,7 +164,6 @@ func (r *Router) RemoveRoute(routeKey string) {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	println("Initial path in ServeHTTP:", req.URL.Path)
 	config, err := r.conf.Get(req.Context())
 	if err != nil {
 		log.Printf("ERROR: Failed to get gateway config: %v", err)
@@ -180,7 +174,6 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	resolver := VersionRoutingMiddleware(config, r.version)
 	resolver(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		println("Path after VersionRoutingMiddleware:", req.URL.Path)
 		r.mu.RLock()
 		defer r.mu.RUnlock()
 
@@ -218,16 +211,13 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (r *Router) matchesRoute(req *http.Request, route Route) bool {
 	// Use the original path stored in the header if available
 	path := req.URL.Path
-	println("Path in matchesRoute before header check:", path)
 	if originalPath := req.Header.Get("X-Original-Path"); originalPath != "" {
 		path = originalPath
-		println("Using original path from header:", path)
 	}
 
 	if route.Path != "" {
 		// Standard path matching
 		matches := strings.HasPrefix(path, route.Path)
-		println("Route path:", route.Path, "Request path:", path, "Matches:", matches)
 		return matches
 	}
 	return true
