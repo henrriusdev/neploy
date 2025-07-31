@@ -83,19 +83,47 @@ func (r *Router) AddRoute(route Route) error {
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	originalDirector := proxy.Director
 	proxy.Director = func(req *http.Request) {
+		// Save the original path before any modifications
+		originalPath := req.URL.Path
+		println("Original path in director:", originalPath)
+		
 		originalDirector(req)
 		req.Host = req.URL.Host
 
-		// Store the original path before modifying it
+		// Store the original path in header
 		if req.Header == nil {
 			req.Header = make(http.Header)
 		}
-		req.Header.Set("X-Original-Path", req.URL.Path)
+		req.Header.Set("X-Original-Path", originalPath)
+
+		// Check if this is a static asset request
+		isStaticAsset := strings.Contains(originalPath, "/assets/") || 
+			strings.HasSuffix(originalPath, ".css") || 
+			strings.HasSuffix(originalPath, ".js") || 
+			strings.HasSuffix(originalPath, ".png") || 
+			strings.HasSuffix(originalPath, ".jpg") || 
+			strings.HasSuffix(originalPath, ".jpeg") || 
+			strings.HasSuffix(originalPath, ".svg") || 
+			strings.HasSuffix(originalPath, ".ico")
 
 		if route.Path != "" {
 			versionPrefix := req.Header.Get("Resolved-Version")
 			basePath := "/" + versionPrefix + route.Path
 
+			// Special handling for static assets
+			if isStaticAsset && strings.HasPrefix(originalPath, "/v") {
+				// For versioned static assets, extract the asset path
+				parts := strings.SplitN(originalPath, "/", 4) // /v1.0.0/appname/assets/...
+				if len(parts) >= 4 {
+					// Keep just the asset part (everything after appname)
+					assetPath := "/" + parts[3]
+					println("Static asset path:", assetPath)
+					req.URL.Path = assetPath
+					return
+				}
+			}
+
+			// Standard path handling for non-static assets
 			trimmed := strings.TrimPrefix(req.URL.Path, basePath)
 
 			// Fallback si no coincide completamente
@@ -112,6 +140,7 @@ func (r *Router) AddRoute(route Route) error {
 				trimmed = "/" + trimmed
 			}
 
+			println("Final path after processing:", trimmed)
 			req.URL.Path = trimmed
 		}
 	}
@@ -197,6 +226,7 @@ func (r *Router) matchesRoute(req *http.Request, route Route) bool {
 	}
 
 	if route.Path != "" {
+		// Standard path matching
 		matches := strings.HasPrefix(path, route.Path)
 		println("Route path:", route.Path, "Request path:", path, "Matches:", matches)
 		return matches

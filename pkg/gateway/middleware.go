@@ -152,7 +152,7 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			pathSegments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-			println("Path segments:", pathSegments)
+			println("Path:", r.URL.Path)
 			var resolvedVersion string
 
 			if slices.Contains(pathSegments, ".well-known") {
