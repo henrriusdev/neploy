@@ -68,6 +68,7 @@ export interface TeamMember {
   firstName: string;
   lastName: string;
   provider: string;
+  phone: string;
   roles: Roles[];
   techStacks: TechStack[];
 }

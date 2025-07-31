@@ -28,7 +28,6 @@ const RolesTab: React.FC<RolesSettingsProps> = ({ roles: initialRoles }) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    console.log(getRoles.currentData, getRoles.data);
     if (getRoles.currentData) {
       setRoles(getRoles.currentData);
     }

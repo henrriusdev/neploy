@@ -168,7 +168,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
               day_hidden: "invisible",
             }}
           />
-          {maxYear >= new Date().getFullYear() && (
+          {maxYear > new Date().getFullYear() && (
             <div className="flex items-center justify-between p-3 border-t">
               <Button variant="ghost" onClick={() => handleDateSelect(new Date())}>
                 Today

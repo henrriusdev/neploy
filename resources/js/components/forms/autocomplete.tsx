@@ -107,7 +107,11 @@ export const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(
             value={inputValue}
             onValueChange={isLoading ? undefined : setInputValue}
             onBlur={handleBlur}
-            onFocus={() => setOpen(true)}
+            onFocus={() => {
+              if (inputValue !== "") {
+                setOpen(true);
+              }
+            }}
             placeholder={placeholder}
             disabled={disabled}
             className={className}

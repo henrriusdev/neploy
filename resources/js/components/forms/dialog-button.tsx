@@ -8,12 +8,13 @@ export const DialogButton = React.forwardRef<HTMLButtonElement, DialogButtonProp
   <Dialog
     open={open}
     onOpenChange={onOpenChange || onOpen} // Support both for backward compatibility
+    key={title}
   >
     <DialogTrigger asChild>
       {variant === "tooltip" ? (
         <TooltipButton ref={ref} tooltip={buttonText} icon={Icon} variant="ghost" size="icon" />
       ) : (
-        <Button ref={ref} variant="default" className={"flex items-center gap-2 " + className}>
+        <Button variant="default" className={"flex items-center gap-2 " + className}>
           {buttonText} {Icon && <Icon className="h-4 w-4" />}
         </Button>
       )}

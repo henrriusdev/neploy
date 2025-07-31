@@ -27,6 +27,7 @@ type TeamMemberResponse struct {
 	LastName   string      `json:"lastName"`
 	Provider   string      `json:"provider"`
 	Roles      []Role      `json:"roles"`
+	Phone      string      `json:"phone"`
 	TechStacks []TechStack `json:"techStacks"`
 }
 

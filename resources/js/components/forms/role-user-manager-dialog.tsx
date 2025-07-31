@@ -184,8 +184,8 @@ export function RoleUserManagerDialog({ open, onOpenChange, roleId, roleName, as
 
                         return (
                           <div key={user.email} className="flex items-center space-x-2">
-                            <Checkbox id={`user-${user.email}`} checked={selectedUserIds.has(user.email)} onCheckedChange={() => toggleUserSelection(user.email)} disabled={isAssigned} />
-                            <label htmlFor={`user-${user.email}`} className="flex flex-1 cursor-pointer items-center justify-between text-sm">
+                            <Checkbox id={`user-${user.id}`} checked={selectedUserIds.has(user.id)} onCheckedChange={() => toggleUserSelection(user.id)} disabled={isAssigned} />
+                            <label htmlFor={`user-${user.id}`} className="flex flex-1 cursor-pointer items-center justify-between text-sm">
                               <div>
                                 <div className="font-medium">{user.email}</div>
                                 {user.firstName && (
@@ -235,8 +235,8 @@ export function RoleUserManagerDialog({ open, onOpenChange, roleId, roleName, as
                     )
                     .map((user) => (
                       <div key={user.email} className="flex items-center space-x-2">
-                        <Checkbox id={`remove-user-${user.email}`} checked={usersToRemove.has(user.email)} onCheckedChange={() => toggleUserRemoval(user.email)} />
-                        <label htmlFor={`remove-user-${user.email}`} className="flex flex-1 cursor-pointer text-sm">
+                        <Checkbox id={`remove-user-${user.id}`} checked={usersToRemove.has(user.id)} onCheckedChange={() => toggleUserRemoval(user.id)} />
+                        <label htmlFor={`remove-user-${user.id}`} className="flex flex-1 cursor-pointer text-sm">
                           <div>
                             <div className="font-medium">{user.email}</div>
                             {user.firstName && (

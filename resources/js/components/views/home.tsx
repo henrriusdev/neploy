@@ -74,7 +74,7 @@ export function Home({ requests, techStack, visitors, health = "4/10", traces }:
             }, 500);
           }, 300);
         }}
-        className="w-fit flex items-center gap-2 absolute top-[80px] right-[30px]">
+        className="w-fit flex items-center gap-2 absolute top-[80px] right-[30px] print:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"

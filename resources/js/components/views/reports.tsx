@@ -1,5 +1,5 @@
 import {useMemo, useState} from "react";
-import {Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, XAxis, YAxis} from "recharts";
+import {Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Skeleton} from "@/components/ui/skeleton";
@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from "@/components/ui/chart";
-import {format, parseISO, isValid} from "date-fns";
+import {format, parseISO, isValid, addDays} from "date-fns";
 import {Button} from "../ui/button";
 import {Theme, useTheme} from "@/hooks";
 import {BaseChart} from "../base-chart";
@@ -39,9 +39,10 @@ export function Reports({stats, requests, techStack, visitors}: {
   const {t} = useTranslation();
   const {applyTheme} = useTheme();
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["requests"]);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange>({from: addDays(new Date(), -7), to: new Date()});
   const [appFilter, setAppFilter] = useState<string>("all");
   const [chartType, setChartType] = useState<"line" | "bar">("line");
+  const [visitorChartType, setVisitorChartType] = useState<"line" | "bar">("line");
   console.log(techStack)
 
   const apps = useMemo(() => (stats ? Array.from(new Map(stats.map((s) => [s.application_id, {
@@ -59,22 +60,33 @@ export function Reports({stats, requests, techStack, visitors}: {
     });
   }, [stats, dateRange, appFilter]);
 
-  // Instead of grouping, just map stats to include a 'name' field for recharts, showing only the hour (HH:mm)
+  // Map stats to include a proper formatted date for recharts
   const chartData = useMemo(() => {
     return filteredData
       .map((stat) => {
-        let hourLabel = stat.date;
+        let dateLabel = stat.date;
         try {
           const d = parseISO(stat.date);
-          if (isValid(d)) hourLabel = format(d, "HH:mm");
-        } catch {
+          if (isValid(d)) {
+            // Show only date in YYYY-MM-DD format
+            dateLabel = format(d, "yyyy-MM-dd");
+          }
+        } catch (e) {
+          console.error("Date parsing error:", e);
         }
         return {
           ...stat,
-          name: hourLabel,
+          name: dateLabel,
         };
       })
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => {
+        // Sort by the original date for chronological order
+        try {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        } catch {
+          return a.name.localeCompare(b.name);
+        }
+      });
   }, [filteredData]);
 
   // Filter visitors data by date range
@@ -111,7 +123,7 @@ export function Reports({stats, requests, techStack, visitors}: {
   return (
     <Card className="print:shadow-none print:border-none print:bg-white print:p-1">
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-8 gap-4 print:hidden">
+        <div className="grid grid-cols-1 md:grid-cols-8 gap-4"> {/* Removed print:hidden to show filters when printing */}
           <div className="space-y-1 md:col-span-2">
             <Label>Aplicación</Label>
             <Select onValueChange={setAppFilter} value={appFilter}>
@@ -130,7 +142,17 @@ export function Reports({stats, requests, techStack, visitors}: {
           </div>
           <div className="space-y-1 md:col-span-2">
             <Label>Rango de fechas</Label>
-            <DatePicker isRangePicker maxYear={new Date().getFullYear()} date={dateRange} onDateChange={setDateRange}/>
+            <DatePicker 
+              isRangePicker 
+              maxYear={new Date().getFullYear()} 
+              date={dateRange} 
+              onDateChange={(date) => {
+                if ('from' in date || date === undefined) {
+                  setDateRange(date as DateRange | undefined);
+                }
+              }}
+              className="w-full"
+            />
           </div>
           <div className="space-y-1 md:col-span-2">
             <Label>Tipo de gráfico</Label>
@@ -162,7 +184,7 @@ export function Reports({stats, requests, techStack, visitors}: {
                 // Switch to light theme for printing
                 applyTheme("neploy", false); // Using 'neploy' as the light theme
 
-                // Trigger print
+                // Trigger print - filters are now visible for printing
                 setTimeout(() => {
                   window.print();
 
@@ -195,14 +217,23 @@ export function Reports({stats, requests, techStack, visitors}: {
         {/* Responsive chart wrapper to prevent horizontal scroll */}
         <h2
           className="font-semibold leading-none tracking-tight text-foreground mt-4">{t("dashboard.requestsByTime")}</h2>
-        <div style={{width: "100%", overflowX: "auto"}} className="print:mt-0 py-2 print:p-0">
+        <div style={{width: "100%", overflowX: "auto"}} className="mt-4 py-2 print:p-0">
           <div style={{minWidth: 0}} className="print:w-full">
             {stats ? (
               chartData.length > 0 ? (
-                <ChartContainer config={config} className="print:w-full print:max-w-full">
-                  <Chart data={chartData} margin={{top: 20, right: 30, left: 20, bottom: 5}}
-                         className="print:w-full print:max-w-full">
-                    <XAxis dataKey="name"/>
+                <ChartContainer config={config} className="w-[99%] h-[500px] print:w-full print:max-w-full">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <Chart 
+                      data={chartData} 
+                      margin={{top: 20, right: 30, left: 20, bottom: 60}} 
+                      className="w-full h-[300px] print:w-full print:max-w-full">
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={70} 
+                      interval={0} 
+                      tick={{fontSize: 10}}/>
                     <YAxis/>
                     <ChartTooltip content={<ChartTooltipContent/>}/>
                     <ChartLegend content={<ChartLegendContent/>}/>
@@ -221,10 +252,12 @@ export function Reports({stats, requests, techStack, visitors}: {
                         />
                       );
                     })}
-                  </Chart>
+                    </Chart>
+                  </ResponsiveContainer>
                 </ChartContainer>
               ) : (
-                <div className="flex items-center justify-center h-[300px]">
+                <div className="flex items-center justify-center h-[300px] bg-white">
+                  <p className="text-muted-foreground">{t("dashboard.noData")}</p>
                 </div>
               )
             ) : (
@@ -233,44 +266,48 @@ export function Reports({stats, requests, techStack, visitors}: {
           </div>
         </div>
 
-        {/* Dashboard Charts - Tech Stack and Visitors */}
-        <div className="mt-4 grid gap-4 md:grid-cols-2 print:grid-cols-1">
-          {/* Tech Stack Chart */}
-          <div>
-            {techStack ? (
-              techStack.length > 0 ? (
-                <BaseChart
-                  title={t("dashboard.techStacksMostUsed")}
-                  data={techStack}
-                  type="pie"
-                  dataKeys={["value"]}
-                  labelKey="name"
-                  colors={techStackColors}
-                  className="print:w-full print:mb-8"
-                />
-              ) : (
-                <Card className="flex items-center justify-center h-[300px]">
-                </Card>
-              )
-            ) : (
-              <Skeleton className="h-[300px] w-full print:w-full print:mb-8"/>
-            )}
-          </div>
+        {/* Dashboard Charts - Only Visitors (removed pie chart as requested) */}
+        <div className="mt-4 grid gap-4 print:grid-cols-1">
 
-          {/* Visitors Chart */}
-          <div>
+          {/* Visitors Chart - Full width now with chart type selector */}
+          <div className="md:col-span-2">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-semibold leading-none tracking-tight text-foreground">{t("dashboard.visitorCountByTime")}</h2>
+            </div>
             {filteredVisitors ? (
               filteredVisitors.length > 0 ? (
-                <BaseChart
-                  title={t("dashboard.visitorCountByTime")}
-                  data={filteredVisitors}
-                  type="line"
-                  dataKeys={["value"]}
-                  colors={["var(--primary)"]}
-                  className="border-none print:w-full print:mb-8"
-                />
+                <ChartContainer config={{value: {label: t("dashboard.visitors"), color: "var(--primary)"}}} className="w-[99%] h-[500px] print:w-full print:max-w-full">
+                  <ResponsiveContainer width="100%" height={300}>
+                  <Chart 
+                      data={filteredVisitors} 
+                      margin={{top: 20, right: 30, left: 20, bottom: 60}} 
+                      className="w-full h-[300px] print:w-full print:max-w-full">
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={70} 
+                      interval={0} 
+                      tick={{fontSize: 10}}/>
+                    <YAxis/>
+                    <ChartTooltip content={<ChartTooltipContent/>}/>
+                    <ChartLegend content={<ChartLegendContent/>}/>
+                        <Series
+                          key="value"
+                          type="monotone"
+                          dataKey="value"
+                          stroke={chartType === "line" ? "#8884d8" : undefined}
+                          fill={chartType === "bar" ? "#8884d8" : undefined}
+                          stackId={chartType === "bar" ? "a" : undefined}
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                    </Chart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               ) : (
-                <Card className="flex items-center justify-center h-[300px]">
+                <Card className="flex items-center justify-center h-[300px] bg-white">
+                  <p className="text-muted-foreground">{t("dashboard.noData")}</p>
                 </Card>
               )
             ) : (

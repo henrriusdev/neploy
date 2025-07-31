@@ -108,10 +108,10 @@ export function Team({ team, roles, user }: TeamProps) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <div>
-              <CardTitle>{t("dashboard.team.title")}</CardTitle>
+              <CardTitle className="text-lg font-semibold">{t("dashboard.team.title")}</CardTitle>
               <CardDescription>{t("dashboard.team.description")}</CardDescription>
             </div>
-            <DialogButton
+            {isAdmin && <DialogButton
               open={open}
               onOpen={setOpen}
               buttonText={t("dashboard.team.inviteMember")}
@@ -143,7 +143,7 @@ export function Team({ team, roles, user }: TeamProps) {
                   {isLoading ? t("dashboard.team.inviting") : t("dashboard.team.invite")}
                 </Button>
               </form>
-            </DialogButton>
+            </DialogButton>}
           </div>
         </CardHeader>
         <CardContent>
@@ -166,12 +166,24 @@ export function Team({ team, roles, user }: TeamProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-bold">{t("dashboard.team.member")}: <span className="font-normal">{member.firstName + " " + member.lastName}</span></div>
+                      <div className="font-bold">
+                        {t("dashboard.team.member")}: <span className="font-normal">{member.firstName + " " + member.lastName}</span>
+                      </div>
                       <div className="text-xs text-muted-foreground">{member.email}</div>
                     </div>
                   </div>
-                  <div><span className="font-bold">{t("dashboard.team.role")}: </span>{member.roles.map((role) => (<Badge key={role.name} variant="default" style={{ backgroundColor: role.color }}>{role.name}</Badge>))}</div>
-                  <div><span className="font-bold">{t("dashboard.team.status")}: </span><span className="text-xs">Active</span></div>
+                  <div>
+                    <span className="font-bold">{t("dashboard.team.role")}: </span>
+                    {member.roles.map((role) => (
+                      <Badge key={role.name} variant="default" style={{ backgroundColor: role.color }}>
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div>
+                    <span className="font-bold">{t("dashboard.team.status")}: </span>
+                    <span className="text-xs">Active</span>
+                  </div>
                   <div className="flex gap-2 mt-2">
                     {isAdmin && (
                       <DialogButton
@@ -198,8 +210,8 @@ export function Team({ team, roles, user }: TeamProps) {
                   <TableRow>
                     <TableHead>{t("dashboard.team.member")}</TableHead>
                     <TableHead>{t("dashboard.team.role")}</TableHead>
-                    <TableHead>{t("dashboard.team.status")}</TableHead>
-                    <TableHead className="text-right">{t("dashboard.team.actions")}</TableHead>
+                    <TableHead>Móvil</TableHead>
+                    {isAdmin && <TableHead className="text-right">{t("dashboard.team.actions")}</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -233,24 +245,28 @@ export function Team({ team, roles, user }: TeamProps) {
                         ))}
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs">Active</span>
+                        <span className="text-xs">
+                          {member.phone}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right">
                         {isAdmin && (
-                          <DialogButton
-                            buttonText="Editar pila de tecnologías"
-                            description="Edita la pila de tecnologías del miembro"
-                            title="Editar pila de tecnologías"
-                            open={openTechs}
-                            onOpen={setOpenTechs}
-                            icon={PlusCircle}
-                            variant="tooltip">
-                            <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
-                          </DialogButton>
+                          <>
+                            <DialogButton
+                              buttonText="Editar pila de tecnologías"
+                              description="Edita la pila de tecnologías del miembro"
+                              title="Editar pila de tecnologías"
+                              open={openTechs}
+                              onOpen={setOpenTechs}
+                              icon={PlusCircle}
+                              variant="tooltip">
+                              <TechAssignmentDialog userId={member.id} allTechStacks={techStacks} selectedTechIds={member.techStacks?.map((t) => t.id) ?? []} onSave={handleSaveTechs} />
+                            </DialogButton>
+                            <Button variant="destructive" size="icon" className="ml-3" onClick={() => handleRemoveMember(member.id)}>
+                              <Trash className="h-4 w-4 text-destructive-foreground" />
+                            </Button>
+                          </>
                         )}
-                        <Button variant="destructive" size="icon" className="ml-3" onClick={() => handleRemoveMember(member.id)}>
-                          <Trash className="h-4 w-4 text-destructive-foreground" />
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

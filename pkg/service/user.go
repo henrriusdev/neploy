@@ -172,6 +172,7 @@ func (u *user) List(ctx context.Context, limit, offset uint) ([]model.TeamMember
 			LastName:   user.LastName,
 			Provider:   provider,
 			Roles:      roles,
+			Phone:      user.Phone,
 			TechStacks: techStacks,
 		}
 
