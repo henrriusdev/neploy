@@ -91,9 +91,9 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
             </Button>
           )}
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-background" align="start">
-          <div className="w-[350px] p-3 space-y-3 flex items-center justify-between">
-            <div className="flex space-x-1">
+        <PopoverContent className="w-auto p-0" align="start">
+          <div className="min-w-[320px] p-3">
+            <div className="flex items-center justify-center gap-2 mb-3">
               <Select
                 value={month instanceof Date && !isNaN(month.getTime()) ? format(month, "MMMM") : ""}
                 onValueChange={(value) => {
@@ -101,7 +101,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
                     setMonth(new Date(month.getFullYear(), parseInt(value), 1));
                   }
                 }}>
-                <SelectTrigger className="w-[160px] text-white">
+                <SelectTrigger className="w-[140px]">
                   <SelectValue>{month instanceof Date && !isNaN(month.getTime()) ? format(month, "MMMM") : ""}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -119,7 +119,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
                     setMonth(new Date(parseInt(value), month.getMonth(), 1));
                   }
                 }}>
-                <SelectTrigger className="w-[160px] text-white">
+                <SelectTrigger className="w-[100px]">
                   <SelectValue>{month?.getFullYear().toString() ?? new Date(maxYear, 1, 1).getFullYear().toString()}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -135,65 +135,103 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
               </Select>
             </div>
           </div>
-          <Calendar
-            mode={isRange ? "range" : "single"}
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            month={month}
-            onMonthChange={setMonth}
-            numberOfMonths={1}
-            fromYear={minYear}
-            toYear={maxYear}
-            className="p-3"
-            classNames={{
-              months: "space-y-4",
-              month: "space-y-4",
-              caption: "flex justify-center pt-1 relative items-center",
-              caption_label: "text-sm font-medium text-white",
-              nav: "space-x-1 flex items-center text-white",
-              nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white",
-              nav_button_previous: "absolute left-1 text-white",
-              nav_button_next: "absolute right-1 text-white",
-              table: "!w-full border-collapse space-y-1",
-              head_row: "flex !justify-center !w-full",
-              head_cell: "text-white rounded-md w-10 font-normal text-[0.8rem]",
-              row: "flex !w-full !justify-center mt-2",
-              cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-              day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 text-white",
-              day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-              day_today: "bg-secondary text-accent-foreground",
-              day_outside: "text-muted-foreground opacity-50",
-              day_disabled: "text-muted-foreground opacity-50",
-              day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-              day_hidden: "invisible",
-            }}
-          />
+          {isRange ? (
+            <Calendar
+              mode="range"
+              selected={selectedDate as DateRange}
+              onSelect={handleDateSelect}
+              month={month}
+              onMonthChange={setMonth}
+              numberOfMonths={1}
+              fromYear={minYear}
+              toYear={maxYear}
+              className="px-3 pb-3"
+              classNames={{
+                months: "space-y-4",
+                month: "space-y-4",
+                caption: "flex justify-center pt-1 relative items-center",
+                caption_label: "text-sm font-medium",
+                nav: "space-x-1 flex items-center",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-md transition-colors",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex justify-center w-full",
+                head_cell: "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem]",
+                row: "flex w-full justify-center mt-2",
+                cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                day_today: "bg-accent text-accent-foreground font-semibold",
+                day_outside: "text-muted-foreground opacity-50",
+                day_disabled: "text-muted-foreground opacity-50",
+                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                day_hidden: "invisible",
+              }}
+            />
+          ) : (
+            <Calendar
+              mode="single"
+              selected={selectedDate as Date}
+              onSelect={handleDateSelect}
+              month={month}
+              onMonthChange={setMonth}
+              numberOfMonths={1}
+              fromYear={minYear}
+              toYear={maxYear}
+              className="px-3 pb-3"
+              classNames={{
+                months: "space-y-4",
+                month: "space-y-4",
+                caption: "flex justify-center pt-1 relative items-center",
+                caption_label: "text-sm font-medium",
+                nav: "space-x-1 flex items-center",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-md transition-colors",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex justify-center w-full",
+                head_cell: "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem]",
+                row: "flex w-full justify-center mt-2",
+                cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                day_today: "bg-accent text-accent-foreground font-semibold",
+                day_outside: "text-muted-foreground opacity-50",
+                day_disabled: "text-muted-foreground opacity-50",
+                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                day_hidden: "invisible",
+              }}
+            />
+          )}
           {maxYear > new Date().getFullYear() && (
-            <div className="flex items-center justify-between p-3 border-t">
-              <Button variant="ghost" onClick={() => handleDateSelect(new Date())}>
+            <div className="flex items-center justify-between p-3 border-t border-border">
+              <Button variant="ghost" size="sm" onClick={() => handleDateSelect(new Date())}>
                 Today
               </Button>
               {isRange && (
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button
                     variant="ghost"
+                    size="sm"
                     onClick={() =>
                       handleDateSelect({
                         from: new Date(),
                         to: addDays(new Date(), 7),
                       })
                     }>
-                    Next 7 days
+                    7 days
                   </Button>
                   <Button
                     variant="ghost"
+                    size="sm"
                     onClick={() =>
                       handleDateSelect({
                         from: new Date(),
                         to: addDays(new Date(), 30),
                       })
                     }>
-                    Next 30 days
+                    30 days
                   </Button>
                 </div>
               )}

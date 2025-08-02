@@ -181,7 +181,15 @@ export function ApplicationForm({ mode = "create-app", onSubmit, isUploading, br
         )}
         <div {...getRootProps()} className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary">
           <input {...getInputProps()} />
-          {isDragActive ? <p>{t("dashboard.applications.createNew.dropzoneActive")}</p> : <p>{t("dashboard.applications.createNew.dropzoneInactive")}</p>}
+          {isDragActive ? (
+            <p>{t("dashboard.applications.createNew.dropzoneActive")}</p>
+          ) : uploadedFile ? (
+            <div>
+              <p className="font-medium text-primary">{uploadedFile.name}</p>
+            </div>
+          ) : (
+            <p>{t("dashboard.applications.createNew.dropzoneInactive")}</p>
+          )}
         </div>
         <Button type="submit" className="w-full" disabled={isUploading}>
           {isUploading ? t("dashboard.applications.createNew.deploying") : t("dashboard.applications.createNew.deploy")}

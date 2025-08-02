@@ -121,11 +121,13 @@ func (a *application) ensureContainerRunning(ctx context.Context, app model.Appl
 	defer globalSemaphore.Release(1)
 
 	containerName := getContainerName(app.AppName, version.VersionTag)
+	println("ensureContainerRunning", containerName)
 	status, err := a.docker.GetContainerStatus(ctx, containerName)
 	if err != nil {
 		logger.Error("error getting container status: %v", err)
 		return err
 	}
+	println("ensureContainerRunning", status)
 	if status == "Not created" {
 		dockerfilePath := filepath.Join(version.StorageLocation, "Dockerfile")
 		port, err := a.dockerService.ConfigurePort(dockerfilePath, false)
@@ -234,12 +236,18 @@ func (a *application) Get(ctx context.Context, id string) (model.ApplicationDock
 }
 
 func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullApplication, error) {
+	// Get all applications
 	apps, err := a.repos.Application.GetAll(ctx)
 	if err != nil {
 		logger.Error("error getting applications: %v", err)
 		return nil, err
 	}
 
+	if len(apps) == 0 {
+		return []model.FullApplication{}, nil
+	}
+
+	// Get user permissions
 	techStacks, err := a.repos.UserTechStack.GetByUserID(ctx, userId)
 	if err != nil {
 		logger.Error("error getting user tech stacks %v", err)
@@ -252,53 +260,79 @@ func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullAp
 		return nil, err
 	}
 
-	role := model.Role{}
+	// Check if user is admin
+	isAdmin := false
 	for _, r := range roles {
 		if r.Role != nil && r.Role.Name == "Administrator" {
-			role = *r.Role
+			isAdmin = true
 			break
 		}
 	}
 
-	var fullApps []model.FullApplication
+	// Create maps for user's tech stacks for O(1) lookup
+	userTechStackMap := make(map[string]bool)
+	for _, ut := range techStacks {
+		userTechStackMap[ut.TechStackID] = true
+	}
+
+	// Filter applications based on tech stack permissions
+	var filteredApps []model.Application
+	var appIDs []string
+	var techStackIDs []string
+	techStackIDSet := make(map[string]bool)
 
 	for _, app := range apps {
 		if app.TechStackID == nil {
 			continue
 		}
 
-		hasTechStack := true
-		for _, ut := range techStacks {
-			if *app.TechStackID == ut.TechStackID || role.ID != "" {
-				hasTechStack = true
-				break
-			}
-			hasTechStack = false
-		}
-
-		if !hasTechStack {
+		// Check if user has access to this tech stack
+		if !isAdmin && !userTechStackMap[*app.TechStackID] {
 			continue
 		}
 
+		filteredApps = append(filteredApps, app)
+		appIDs = append(appIDs, app.ID)
+		if !techStackIDSet[*app.TechStackID] {
+			techStackIDs = append(techStackIDs, *app.TechStackID)
+			techStackIDSet[*app.TechStackID] = true
+		}
+	}
+
+	if len(filteredApps) == 0 {
+		return []model.FullApplication{}, nil
+	}
+
+	// Build final results
+	var fullApps []model.FullApplication
+
+	for _, app := range filteredApps {
+		if app.TechStackID == nil {
+			continue
+		}
+
+		// Get application stats
 		stats, err := a.repos.ApplicationStat.GetByApplicationID(ctx, app.ID)
 		if err != nil {
 			logger.Error("error getting application stat: %v", err)
 			return nil, err
 		}
 
-		var tech model.TechStack
-		tech, err = a.repos.TechStack.GetByID(ctx, *app.TechStackID)
+		// Get tech stack
+		techStack, err := a.repos.TechStack.GetByID(ctx, *app.TechStackID)
 		if err != nil {
 			logger.Error("error getting tech stack: %v", err)
 			return nil, err
 		}
 
+		// Get versions
 		versions, err := a.repos.ApplicationVersion.GetAll(ctx, filters.IsSelectFilter("application_id", app.ID))
 		if err != nil {
 			logger.Error("error getting application versions: %v", err)
 			return nil, err
 		}
 
+		// Start container ensuring in background (truly async, don't wait)
 		for _, version := range versions {
 			v := version
 			go func() {
@@ -308,12 +342,15 @@ func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullAp
 			}()
 		}
 
-		// Usar el status de la primera versión activa, si hay
+		// Get status from first active version (limit Docker API calls)
 		appStatus := "unknown"
 		for _, v := range versions {
 			if v.Status != "paused" && v.Status != "inactive" {
 				containerName := getContainerName(app.AppName, v.VersionTag)
-				status, err := a.docker.GetContainerStatus(ctx, containerName)
+				// Use a timeout context for Docker calls to prevent hanging
+				statusCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+				status, err := a.docker.GetContainerStatus(statusCtx, containerName)
+				cancel()
 				if err == nil {
 					appStatus = status
 					break
@@ -323,7 +360,7 @@ func (a *application) GetAll(ctx context.Context, userId string) ([]model.FullAp
 
 		fullApps = append(fullApps, model.FullApplication{
 			Application: app,
-			TechStack:   tech,
+			TechStack:   techStack,
 			Stats:       stats,
 			Status:      appStatus,
 		})

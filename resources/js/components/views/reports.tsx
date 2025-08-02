@@ -30,8 +30,7 @@ interface ApplicationStat {
   name?: string;
 }
 
-export function Reports({stats, requests, techStack, visitors}: {
-  stats: ApplicationStat[];
+export function Reports({requests, techStack, visitors}: {
   requests?: RequestData[];
   techStack?: StackData[];
   visitors?: VisitorData[];
@@ -51,38 +50,40 @@ export function Reports({stats, requests, techStack, visitors}: {
   }])).values()) : []), [stats]);
 
   const filteredData = useMemo(() => {
-    if (!stats) return [];
-    return stats.filter((stat) => {
-      const date = new Date(stat.date);
+    if (!requests) return [];
+    return requests.filter((request) => {
+      const date = new Date(request.name); // RequestStat uses 'name' field for the hour
       const inRange = (!dateRange?.from || date >= dateRange.from) && (!dateRange?.to || date <= dateRange.to);
-      const appMatch = appFilter === "all" || stat.application_id === appFilter;
-      return inRange && appMatch;
+      // Note: RequestStat doesn't have application_id, so we'll show all for now
+      return inRange;
     });
-  }, [stats, dateRange, appFilter]);
+  }, [requests, dateRange]);
 
-  // Map stats to include a proper formatted date for recharts
+  // Map requests to include a proper formatted date for recharts
   const chartData = useMemo(() => {
     return filteredData
-      .map((stat) => {
-        let dateLabel = stat.date;
+      .map((request) => {
+        let dateLabel = request.name; // RequestStat already has the hour in 'name' field
         try {
-          const d = parseISO(stat.date);
+          const d = parseISO(request.name);
           if (isValid(d)) {
-            // Show only date in YYYY-MM-DD format
-            dateLabel = format(d, "yyyy-MM-dd");
+            // Show date and time to keep entries unique
+            dateLabel = format(d, "yyyy-MM-dd HH:mm");
           }
         } catch (e) {
           console.error("Date parsing error:", e);
         }
         return {
-          ...stat,
+          ...request,
           name: dateLabel,
+          requests: request.successful, // Map successful to requests for consistency
+          errors: request.errors,
         };
       })
       .sort((a, b) => {
         // Sort by the original date for chronological order
         try {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
+          return new Date(a.name).getTime() - new Date(b.name).getTime();
         } catch {
           return a.name.localeCompare(b.name);
         }
@@ -174,7 +175,7 @@ export function Reports({stats, requests, techStack, visitors}: {
               </Label>
             ))}
           </div>
-          {stats && stats.length > 0 && (
+          {requests && requests.length > 0 && (
             <Button
               onClick={() => {
                 // Save current theme
@@ -219,7 +220,7 @@ export function Reports({stats, requests, techStack, visitors}: {
           className="font-semibold leading-none tracking-tight text-foreground mt-4">{t("dashboard.requestsByTime")}</h2>
         <div style={{width: "100%", overflowX: "auto"}} className="mt-4 py-2 print:p-0">
           <div style={{minWidth: 0}} className="print:w-full">
-            {stats ? (
+            {requests ? (
               chartData.length > 0 ? (
                 <ChartContainer config={config} className="w-[99%] h-[500px] print:w-full print:max-w-full">
                   <ResponsiveContainer width="100%" height={300}>

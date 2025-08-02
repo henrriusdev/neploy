@@ -184,7 +184,6 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
         description: t(`applications.actions.${action}Success`),
       });
 
-      router.reload({ only: ["application"] });
     } catch (error: any) {
       toast({
         title: t("common.error"),
@@ -201,7 +200,6 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
         title: "Success",
         description: "Version deleted successfully",
       });
-      router.reload({ only: ["application"] });
     } catch (error) {
       console.error(error);
     }
@@ -379,7 +377,6 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
                   <TableHead>{t("dashboard.application.table.version")}</TableHead>
                   <TableHead>{t("dashboard.application.table.description")}</TableHead>
                   <TableHead>{t("dashboard.application.table.path")}</TableHead>
-                  <TableHead>{t("dashboard.application.table.status")}</TableHead>
                   <TableHead>{t("dashboard.application.table.createdAt")}</TableHead>
                   <TableHead>{t("dashboard.application.table.logs") || "Logs"}</TableHead>
                   <TableHead className="text-right">{t("dashboard.application.table.actions")}</TableHead>
@@ -397,11 +394,6 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
                           <TableCell>{version.description}</TableCell>
                           <TableCell>
                             <a target="_blank" href={`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}>{`/${version.versionTag}/${sanitizeAppName(application.appName)}/`}</a>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs capitalize">
-                              {version.status}
-                            </Badge>
                           </TableCell>
                           <TableCell>{new Date(version.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell>

@@ -160,28 +160,48 @@ func VersionRoutingMiddleware(config model.GatewayConfig, appVersionRepo *reposi
 				return
 			}
 
-			if resolvedVersion == "" {
-				resolvedVersion = "v1.0.0"
-			}
-
-			if config.DefaultVersioningType == model.VersioningTypeHeader {
+			// First check if version is in the path
+			if len(pathSegments) > 0 && strings.HasPrefix(pathSegments[0], "v") {
+				resolvedVersion = pathSegments[0]
+			} else if config.DefaultVersioningType == model.VersioningTypeHeader {
+				// Then check if version is in the header
 				headerVersion := r.Header.Get("X-API-Version")
 				if headerVersion != "" {
 					resolvedVersion = headerVersion
 				}
-				url := pathSegments[0]
-				if r.Header == nil {
-					r.Header = make(http.Header)
-				}
-				r.Header.Set("X-Original-Path", r.URL.Path)
-				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, url)
-			} else {
-				if len(pathSegments) > 0 && strings.HasPrefix(pathSegments[0], "v") {
-					resolvedVersion = pathSegments[0]
+			}
+
+			// If no version found yet, try to get the latest version
+			if resolvedVersion == "" {
+				appName := ExtractAppName(r.URL.Path)
+				if appName != "" {
+					latestVersion, err := appVersionRepo.GetLatestVersionByName(r.Context(), appName)
+					if err == nil && latestVersion != "" {
+						resolvedVersion = latestVersion
+					} else {
+						resolvedVersion = "v1.0.0"
+					}
+				} else {
+					resolvedVersion = "v1.0.0"
 				}
 			}
-			if len(pathSegments) > 1 {
-				appName := pathSegments[1]
+
+			// Set the resolved version in the header
+			if r.Header == nil {
+				r.Header = make(http.Header)
+			}
+			r.Header.Set("Resolved-Version", resolvedVersion)
+			r.Header.Set("X-Original-Path", r.URL.Path)
+
+			// For header-based versioning, modify the URL path
+			if config.DefaultVersioningType == model.VersioningTypeHeader && len(pathSegments) > 0 {
+				url := pathSegments[0]
+				r.URL.Path = fmt.Sprintf("/%s/%s/", resolvedVersion, url)
+			}
+
+			// Validate that the version exists for the app
+			appName := ExtractAppName(r.URL.Path)
+			if appName != "" {
 				exists, err := appVersionRepo.ExistsByName(r.Context(), appName, resolvedVersion)
 				if err != nil || !exists {
 					http.Error(w, "API version not found", http.StatusNotFound)

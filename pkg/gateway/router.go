@@ -28,17 +28,22 @@ type Router struct {
 	version           *repository.ApplicationVersion
 	conf              *repository.GatewayConfig
 	vtrace            *repository.VisitorTrace
+	// Track user sessions to app context for asset requests
+	userAppContext    map[string]string // maps IP -> current app
+	contextMu         sync.RWMutex
 }
 
 func NewRouter(appStatRepo *repository.ApplicationStat, version *repository.ApplicationVersion, conf *repository.GatewayConfig, vtrace *repository.VisitorTrace) *Router {
 	router := &Router{
-		routes:    make(map[string]*httputil.ReverseProxy),
-		routeInfo: make(map[string]Route),
-		metrics:   make(map[string]*MetricsCollector),
-		mu:        sync.RWMutex{},
-		version:   version,
-		conf:      conf,
-		vtrace:    vtrace,
+		routes:         make(map[string]*httputil.ReverseProxy),
+		routeInfo:      make(map[string]Route),
+		metrics:        make(map[string]*MetricsCollector),
+		mu:             sync.RWMutex{},
+		version:        version,
+		conf:           conf,
+		vtrace:         vtrace,
+		userAppContext: make(map[string]string),
+		contextMu:      sync.RWMutex{},
 	}
 
 	// Create metrics aggregator without a specific collector
@@ -215,9 +220,78 @@ func (r *Router) matchesRoute(req *http.Request, route Route) bool {
 		path = originalPath
 	}
 
+	// Extract user IP for context tracking
+	userIP := req.RemoteAddr
+	if forwarded := req.Header.Get("X-Forwarded-For"); forwarded != "" {
+		userIP = strings.Split(forwarded, ",")[0]
+	}
+
+	// Handle asset requests without version prefix
+	if isAssetRequest(path) && !strings.HasPrefix(path, "/v") {
+		log.Printf("DEBUG: Asset request detected - path: %s, route.Path: %s, route.AppID: %s", path, route.Path, route.AppID)
+		
+		// Try to get app context from user's previous requests
+		contextApp := r.getUserAppContext(userIP)
+		log.Printf("DEBUG: User %s context app: %s", userIP, contextApp)
+		
+		if contextApp != "" {
+			// Check if this route belongs to the user's current app context
+			appName := ExtractAppName(route.Path)
+			log.Printf("DEBUG: Extracted app name from route.Path '%s': '%s'", route.Path, appName)
+			
+			if appName == "" {
+				// If we can't extract from path, try using a mapping or default logic
+				// For now, let's assume the contextApp matches any route if it's the only one
+				log.Printf("DEBUG: No app name extracted, allowing asset request")
+				return true
+			}
+			if appName == contextApp {
+				log.Printf("DEBUG: App name matches context, allowing asset request")
+				return true
+			}
+		}
+		
+		// Fallback: check referrer header
+		if referrer := req.Header.Get("Referer"); referrer != "" {
+			log.Printf("DEBUG: Checking referrer: %s", referrer)
+			if referrerURL, err := url.Parse(referrer); err == nil {
+				referrerApp := ExtractAppName(referrerURL.Path)
+				appName := ExtractAppName(route.Path)
+				log.Printf("DEBUG: Referrer app: %s, Route app: %s", referrerApp, appName)
+				
+				if referrerApp != "" && (appName == referrerApp || appName == "") {
+					// Update user context with the referrer app
+					if referrerApp != "" {
+						r.setUserAppContext(userIP, referrerApp)
+					}
+					log.Printf("DEBUG: Referrer matches, allowing asset request")
+					return true
+				}
+			}
+		}
+		
+		// Last resort: if this is the only route or first route, allow it
+		// This helps with initial asset loading
+		if len(r.routes) == 1 {
+			log.Printf("DEBUG: Only one route available, allowing asset request")
+			return true
+		}
+		
+		log.Printf("DEBUG: Asset request denied for path: %s", path)
+	}
+
 	if route.Path != "" {
 		// Standard path matching
 		matches := strings.HasPrefix(path, route.Path)
+		
+		// Track user app context for non-asset requests
+		if matches && !isAssetRequest(path) {
+			appName := ExtractAppName(route.Path)
+			if appName != "" {
+				r.setUserAppContext(userIP, appName)
+			}
+		}
+		
 		return matches
 	}
 	return true
@@ -234,4 +308,32 @@ func ValidateRoute(route Route) error {
 		return fmt.Errorf("domain is required")
 	}
 	return nil
+}
+
+// setUserAppContext tracks which app a user is currently viewing
+func (r *Router) setUserAppContext(userIP, appName string) {
+	r.contextMu.Lock()
+	defer r.contextMu.Unlock()
+	r.userAppContext[userIP] = appName
+}
+
+// getUserAppContext retrieves the current app for a user
+func (r *Router) getUserAppContext(userIP string) string {
+	r.contextMu.RLock()
+	defer r.contextMu.RUnlock()
+	return r.userAppContext[userIP]
+}
+
+// isAssetRequest checks if the request is for a static asset
+func isAssetRequest(path string) bool {
+	return strings.Contains(path, "/assets/") ||
+		strings.HasSuffix(path, ".css") ||
+		strings.HasSuffix(path, ".js") ||
+		strings.HasSuffix(path, ".png") ||
+		strings.HasSuffix(path, ".jpg") ||
+		strings.HasSuffix(path, ".jpeg") ||
+		strings.HasSuffix(path, ".svg") ||
+		strings.HasSuffix(path, ".ico") ||
+		strings.HasSuffix(path, ".webp") ||
+		strings.HasSuffix(path, ".gif")
 }

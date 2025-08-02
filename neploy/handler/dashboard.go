@@ -420,12 +420,6 @@ func (d *Dashboard) ReportStats(c echo.Context) error {
 		Provider: provider,
 	}
 
-	stats, err := d.services.Application.GetStats(c.Request().Context())
-	if err != nil {
-		logger.Error("error getting stats: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
 	requestData, err := d.services.Application.GetHourlyRequests(c.Request().Context())
 	if err != nil {
 		logger.Error("error getting requests: %v", err)
@@ -448,7 +442,6 @@ func (d *Dashboard) ReportStats(c echo.Context) error {
 		"user":      user,
 		"teamName":  metadata.TeamName,
 		"logoUrl":   metadata.LogoURL,
-		"stats":     stats,
 		"requests":  requestData,
 		"techStack": techStats,
 		"visitors":  visitors,

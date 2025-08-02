@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"errors"
+
 	"neploy.dev/pkg/common"
 
 	"github.com/doug-martin/goqu/v9"
@@ -20,6 +22,10 @@ func NewGateway(db store.Queryable) *Gateway {
 }
 
 func (g *Gateway) Insert(ctx context.Context, gateway model.Gateway) error {
+	if _, err := g.GetByPath(ctx, gateway.Path); err == nil {
+		return errors.New("path already exists")
+	}
+
 	query := g.BaseQueryInsert().Rows(gateway)
 	q, args, err := query.ToSQL()
 	if err != nil {

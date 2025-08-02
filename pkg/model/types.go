@@ -66,7 +66,7 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 }
 
 func (d Date) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.Time.Format("2006-01-02"))
+	return json.Marshal(d.Time.Format(time.RFC3339))
 }
 
 func (d *Date) Scan(value interface{}) error {

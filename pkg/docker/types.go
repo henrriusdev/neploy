@@ -17,14 +17,15 @@ type DockerfileTemplate struct {
 
 var defaultTemplates = map[string]DockerfileTemplate{
 	"Node": {
-		BaseImage: "node:18-alpine",
+		BaseImage: "node:22-alpine",
 		WorkDir:   "/app",
 		Dependencies: []string{
 			"COPY package*.json ./",
-			"RUN npm install",
+			"RUN npm install --include=dev",
+			"RUN npm install -g serve",
 		},
 		BuildCmd: "npm run build",
-		StartCmd: []string{"npm", "start"},
+		StartCmd: []string{"serve", "-s", "dist", "-l", "3000"},
 		Port:     "3000",
 		EnvVars: map[string]string{
 			"NODE_ENV": "production",

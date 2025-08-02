@@ -36,7 +36,8 @@ interface SidebarLayoutProps {
 
 export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ navItems, user, logoUrl, teamName, children }) => {
   const { theme, isDark, applyTheme } = useTheme();
-
+  if (!logoUrl.includes("http://"))
+    logoUrl = "http://"+logoUrl.replace("http:/", "")
   useEffect(() => {
     applyTheme(theme, isDark);
   }, [theme, isDark]);

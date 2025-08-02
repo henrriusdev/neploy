@@ -30,6 +30,10 @@ export default defineConfig({
     hmr: {
       host: "localhost",
     },
+    watch: {
+      // Ignore any file events under uploads/**
+      ignored: ['**/uploads/**'],
+    },
   },
   resolve: {
     alias: {

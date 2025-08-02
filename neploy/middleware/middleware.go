@@ -28,7 +28,7 @@ func OnboardingMiddleware(service service.Onboard) echo.MiddlewareFunc {
 			}
 
 			// Check if onboarding is completed
-			isDone, err := service.Done(c.Request().Context())
+			isDone, err := service.Done(context.Background())
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 					"error": "Failed to check onboarding status",
@@ -99,7 +99,7 @@ func TraceMiddleware(traceService service.Trace) echo.MiddlewareFunc {
 			}
 
 			// Inyectar en contexto
-			ctx := common.InjectTrace(c.Request().Context(), trace)
+			ctx := common.InjectTrace(context.Background(), trace)
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			err := next(c)

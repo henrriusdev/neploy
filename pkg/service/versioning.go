@@ -188,17 +188,23 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 		return "", err
 	}
 
-	// Crear directorio final
+	// Create final directory path
 	versionPath := filepath.Join(config.Env.UploadPath, sanitizeAppName(app.AppName), versionTag)
 	if err := os.MkdirAll(filepath.Dir(versionPath), os.ModePerm); err != nil {
 		logger.Error("error creating version directory: %v", err)
 		return "", err
 	}
 
-	// Mover carpeta descomprimida al destino final
-	if err := os.Rename(unzippedPath, versionPath); err != nil {
-		logger.Error("error moving unzipped directory: %v", err)
+	// Copy files from unzipped directory to final destination
+	if err := filesystem.CopyDir(unzippedPath, versionPath); err != nil {
+		logger.Error("error copying files to version directory: %v", err)
 		return "", err
+	}
+
+	// Clean up the temporary unzipped directory
+	if err := os.RemoveAll(unzippedPath); err != nil {
+		logger.Error("error cleaning up temporary directory: %v", err)
+		// Non-fatal error, continue
 	}
 
 	techStack, err := filesystem.DetectStack(versionPath)
@@ -223,6 +229,9 @@ func (v *versioning) Upload(ctx context.Context, id string, file *multipart.File
 
 	dockerStatus := filesystem.HasDockerfile(versionPath, v.hub.GetNotificationClient())
 	if !dockerStatus.Exists {
+		if techStack == "React" {
+			techStack = "Node"
+		}
 		tmpl, ok := neploker.GetDefaultTemplate(techStack)
 		if !ok {
 			logger.Error("no default template for tech stack: %s", techStack)
