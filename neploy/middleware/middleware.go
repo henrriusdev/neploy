@@ -34,6 +34,7 @@ func OnboardingMiddleware(service service.Onboard) echo.MiddlewareFunc {
 					"error": "Failed to check onboarding status",
 				})
 			}
+			println(isDone)
 
 			// If onboarding is not done, handle the redirect
 			if !isDone {

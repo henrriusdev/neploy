@@ -26,14 +26,19 @@ func NewOnboard(userService User, roleService Role, metadataService Metadata) On
 }
 
 func (o *onboard) Done(ctx context.Context) (bool, error) {
-	users, err := o.userService.List(ctx, 1, 0)
+	users, err := o.userService.List(ctx, 100, 0)
 	if err != nil {
 		logger.Error("error getting users: %v", err)
 		return false, err
 	}
+	println(len(users))
 
 	switch len(users) {
 	default:
+		if len(users) > 1 {
+			return true, nil
+		}
+
 		return false, nil
 	case 1:
 		userRoles, err := o.roleService.GetUserRoles(ctx, users[0].ID)
