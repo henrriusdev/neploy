@@ -75,9 +75,10 @@ type ApplicationDockered struct {
 }
 
 type RequestStat struct {
-	Hour       string `db:"hour" json:"name"`
-	Successful int    `db:"successful" json:"successful"`
-	Errors     int    `db:"errors" json:"errors"`
+	Hour          string `db:"hour" json:"name"`
+	Successful    int    `db:"successful" json:"successful"`
+	Errors        int    `db:"errors" json:"errors"`
+	ApplicationID string `db:"application_id" json:"application_id"`
 }
 
 type TechStat struct {
@@ -86,6 +87,7 @@ type TechStat struct {
 }
 
 type VisitorStat struct {
-	Value uint `json:"value" db:"amount"`
-	Date  Date `json:"name" db:"date"`
+	Value         uint   `json:"value" db:"amount"`
+	Date          Date   `json:"name" db:"date"`
+	ApplicationID string `json:"application_id" db:"application_id"`
 }

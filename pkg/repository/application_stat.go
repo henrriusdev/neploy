@@ -130,13 +130,15 @@ func (a *ApplicationStat) GetAll(ctx context.Context) ([]model.ApplicationStat, 
 
 func (a *ApplicationStat) GetHourlyRequests(ctx context.Context) ([]model.RequestStat, error) {
 	query := goqu.
-		From("application_stats").
-		Select(
-			goqu.L("to_char(date AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:00')").As("hour"),
-			goqu.SUM("requests").As("successful"),
-			goqu.SUM("errors").As("errors"),
-		).
-		GroupBy(goqu.L("hour")).
+		From("application_stats")
+
+	query = query.Select(
+		goqu.L("to_char(date AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:00')").As("hour"),
+		goqu.SUM("requests").As("successful"),
+		goqu.SUM("errors").As("errors"),
+		goqu.C("application_id").As("application_id"),
+	).
+		GroupBy(goqu.L("hour"), goqu.C("application_id")).
 		Order(goqu.L("hour").Asc()).
 		Limit(24)
 

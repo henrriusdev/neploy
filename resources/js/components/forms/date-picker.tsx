@@ -46,8 +46,6 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
 
   const handleDateSelect = (newDate: Date | DateRange | undefined) => {
     setSelectedDate(newDate);
-
-    console.log(newDate);
     if (newDate instanceof Date) {
       setMonth(newDate);
     } else if (newDate && "from" in newDate && newDate.from instanceof Date) {
@@ -63,11 +61,31 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(({ classNa
 
   const formatDate = (date: Date | DateRange | undefined) => {
     if (!date) return "Pick a date";
-    if (date instanceof Date) return format(date, "yyyy-MM-dd");
-    if (date.from) {
-      if (date.to) return `${format(date.from, "yyyy-MM-dd")} - ${format(date.to, "yyyy-MM-dd")}`;
-      return `${format(date.from, "yyyy-MM-dd")} - `;
+    
+    if (date instanceof Date) {
+      // Check if date is valid before formatting
+      return !isNaN(date.getTime()) ? format(date, "yyyy-MM-dd") : "Invalid date";
     }
+    
+    if (date.from) {
+      const fromValid = date.from instanceof Date && !isNaN(date.from.getTime());
+      const toValid = date.to instanceof Date && !isNaN(date.to.getTime());
+      
+      if (date.to) {
+        if (fromValid && toValid) {
+          return `${format(date.from, "yyyy-MM-dd")} - ${format(date.to, "yyyy-MM-dd")}`;
+        } else if (fromValid) {
+          return `${format(date.from, "yyyy-MM-dd")} - Invalid date`;
+        } else if (toValid) {
+          return `Invalid date - ${format(date.to, "yyyy-MM-dd")}`;
+        } else {
+          return "Invalid date range";
+        }
+      }
+      
+      return fromValid ? `${format(date.from, "yyyy-MM-dd")} - ` : "Invalid date - ";
+    }
+    
     return "Pick a date range";
   };
 

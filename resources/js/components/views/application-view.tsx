@@ -113,9 +113,7 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
     });
 
     const unsubInteractive = onInteractive((message: ActionMessage) => {
-      console.log("Received interactive message:", message);
       if (!message?.inputs || !Array.isArray(message.inputs)) {
-        console.error("Invalid message inputs:", message.inputs);
         return;
       }
 
@@ -138,7 +136,6 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
               : undefined,
         })),
         onSubmit: (data) => {
-          console.log("Submitting form data:", data);
           const response: ActionResponse = {
             type: message.type,
             action: message.action,
@@ -147,7 +144,6 @@ export const ApplicationView: FC<ApplicationProps> = ({ application }) => {
               action: message.action,
             },
           };
-          console.log("Sending response:", response);
           sendMessage(response.type, response.action, response.data);
           setActionDialog((prev) => ({ ...prev, show: false }));
 

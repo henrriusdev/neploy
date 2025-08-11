@@ -102,7 +102,6 @@ export function ApplicationForm({ mode = "create-app", onSubmit, isUploading, br
   }, [form, onRepoUrlChange]);
 
   const handleSubmit = (values: z.infer<typeof uploadFormSchema>) => {
-    console.log(values);
     onSubmit(values, uploadedFile);
   };
 

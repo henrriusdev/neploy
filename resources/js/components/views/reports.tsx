@@ -1,6 +1,6 @@
 import {useMemo, useState} from "react";
-import {Bar, BarChart, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
+import {Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis} from "recharts";
+import {Card, CardContent} from "@/components/ui/card";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Skeleton} from "@/components/ui/skeleton";
 import {Label} from "@/components/ui/label";
@@ -14,12 +14,10 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from "@/components/ui/chart";
-import {format, parseISO, isValid, addDays} from "date-fns";
+import {addDays, format, isValid, parseISO} from "date-fns";
 import {Button} from "../ui/button";
 import {Theme, useTheme} from "@/hooks";
-import {BaseChart} from "../base-chart";
-import {techStackColors} from "@/lib/colors";
-import {RequestData, StackData, VisitorData} from "@/types/props";
+import {RequestData, VisitorData} from "@/types/props";
 import {useTranslation} from "react-i18next";
 
 interface ApplicationStat {
@@ -30,9 +28,9 @@ interface ApplicationStat {
   name?: string;
 }
 
-export function Reports({requests, techStack, visitors}: {
+export function Reports({stats, requests, visitors}: {
+  stats: ApplicationStat[];
   requests?: RequestData[];
-  techStack?: StackData[];
   visitors?: VisitorData[];
 }) {
   const {t} = useTranslation();
@@ -41,8 +39,6 @@ export function Reports({requests, techStack, visitors}: {
   const [dateRange, setDateRange] = useState<DateRange>({from: addDays(new Date(), -7), to: new Date()});
   const [appFilter, setAppFilter] = useState<string>("all");
   const [chartType, setChartType] = useState<"line" | "bar">("line");
-  const [visitorChartType, setVisitorChartType] = useState<"line" | "bar">("line");
-  console.log(techStack)
 
   const apps = useMemo(() => (stats ? Array.from(new Map(stats.map((s) => [s.application_id, {
     id: s.application_id,
@@ -54,10 +50,11 @@ export function Reports({requests, techStack, visitors}: {
     return requests.filter((request) => {
       const date = new Date(request.name); // RequestStat uses 'name' field for the hour
       const inRange = (!dateRange?.from || date >= dateRange.from) && (!dateRange?.to || date <= dateRange.to);
-      // Note: RequestStat doesn't have application_id, so we'll show all for now
-      return inRange;
+      // Filter by application if not set to "all"
+      const appFilterMatch = appFilter === "all" || request.application_id === appFilter;
+      return inRange && appFilterMatch;
     });
-  }, [requests, dateRange]);
+  }, [requests, dateRange, appFilter]);
 
   // Map requests to include a proper formatted date for recharts
   const chartData = useMemo(() => {
@@ -94,17 +91,25 @@ export function Reports({requests, techStack, visitors}: {
   const filteredVisitors = useMemo(() => {
     if (!visitors) return [];
     return visitors.filter((visitor) => {
-      if (!dateRange?.from && !dateRange?.to) return true;
-      try {
-        const date = parseISO(visitor.name);
-        if (!isValid(date)) return true; // If can't parse date, include it
-        const inRange = (!dateRange?.from || date >= dateRange.from) && (!dateRange?.to || date <= dateRange.to);
-        return inRange;
-      } catch {
-        return true; // If error parsing, include it
+      // Date range filtering
+      let inRange = true;
+      if (dateRange?.from || dateRange?.to) {
+        try {
+          const date = parseISO(visitor.name);
+          if (isValid(date)) {
+            inRange = (!dateRange?.from || date >= dateRange.from) && (!dateRange?.to || date <= dateRange.to);
+          }
+        } catch {
+          // If error parsing, include it
+        }
       }
+      
+      // Application filtering
+      const appFilterMatch = appFilter === "all" || visitor.application_id === appFilter;
+      
+      return inRange && appFilterMatch;
     });
-  }, [visitors, dateRange]);
+  }, [visitors, dateRange, appFilter]);
 
   const toggleMetric = (key: string) => {
     setSelectedMetrics((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));

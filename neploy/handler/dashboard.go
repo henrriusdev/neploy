@@ -400,6 +400,12 @@ func (d *Dashboard) ReportStats(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	}
 
+	stats, err := d.services.Application.GetStats(c.Request().Context())
+	if err != nil {
+		logger.Error("error getting stats: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	metadata, err := d.services.Metadata.Get(c.Request().Context())
 	if err != nil {
 		logger.Error("error getting metadata: %v", err)
@@ -442,6 +448,7 @@ func (d *Dashboard) ReportStats(c echo.Context) error {
 		"user":      user,
 		"teamName":  metadata.TeamName,
 		"logoUrl":   metadata.LogoURL,
+		"stats":     stats,
 		"requests":  requestData,
 		"techStack": techStats,
 		"visitors":  visitors,

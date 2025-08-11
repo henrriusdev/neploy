@@ -15,8 +15,9 @@ import { DatePicker } from "@/components/forms/date-picker";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { withMask } from "use-mask-input";
-import { parse } from "date-fns";
+import {format, parse} from "date-fns";
 import { useUpdatePasswordMutation, useUpdateProfileMutation } from "@/services/api/users";
+import {useToast} from "@/hooks";
 
 const profileFormSchema = z.object({
   email: z.string().email({
@@ -60,11 +61,27 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 export function UserProfile({ user }: { user: User }) {
   const { t } = useTranslation();
+  const {toast} = useToast();
+  user = {
+    ...user,
+    dob: format(new Date(user.dob), "yyyy-MM-dd"),
+  };
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       ...user,
-      dob: parse(user.dob, "yyyy-MM-dd", new Date()),
+      dob: (() => {
+        try {
+          // Try to parse the date string
+          const parsedDate = parse(user.dob, "yyyy-MM-dd", new Date());
+          // Check if the parsed date is valid
+          return !isNaN(parsedDate.getTime()) ? parsedDate : new Date();
+        } catch (error) {
+          // If parsing fails, return current date as fallback
+          console.warn("Failed to parse date of birth:", error);
+          return new Date();
+        }
+      })(),
     },
   });
 
@@ -86,7 +103,10 @@ export function UserProfile({ user }: { user: User }) {
         ...data,
         dob: data.dob.toISOString(),
       }).unwrap();
-      console.log("Perfil actualizado exitosamente");
+      toast({
+        title: "Perfil actualizado!",
+        description: "Tu perfil ha sido actualizado exitosamente.",
+      });
     } catch (error) {
       console.error("Error al actualizar perfil:", error);
     }
@@ -95,7 +115,10 @@ export function UserProfile({ user }: { user: User }) {
   async function onPasswordSubmit(data: PasswordFormValues) {
     try {
       await updatePassword(data).unwrap();
-      console.log("Contraseña actualizada exitosamente");
+      toast({
+        title: "Contraseña actualizada!",
+        description: "Tu contraseña ha sido actualizada exitosamente.",
+      });
     } catch (error) {
       console.error("Error al actualizar contraseña:", error);
     }
@@ -108,6 +131,7 @@ export function UserProfile({ user }: { user: User }) {
     return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   };
 
+  console.log(user);
   return (
     <div className="space-y-8 p-6">
       <div>
@@ -214,21 +238,21 @@ export function UserProfile({ user }: { user: User }) {
                   )}
                 />
 
-                <FormField
-                  control={profileForm.control}
-                  name="notifications"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Notifications</FormLabel>
-                        <FormDescription>Receive system notifications and alerts.</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                {/*<FormField*/}
+                {/*  control={profileForm.control}*/}
+                {/*  name="notifications"*/}
+                {/*  render={({ field }) => (*/}
+                {/*    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">*/}
+                {/*      <div className="space-y-0.5">*/}
+                {/*        <FormLabel className="text-base">Notifications</FormLabel>*/}
+                {/*        <FormDescription>Receive system notifications and alerts.</FormDescription>*/}
+                {/*      </div>*/}
+                {/*      <FormControl>*/}
+                {/*        <Switch checked={field.value} onCheckedChange={field.onChange} />*/}
+                {/*      </FormControl>*/}
+                {/*    </FormItem>*/}
+                {/*  )}*/}
+                {/*/>*/}
                 <CardFooter className="px-0 pb-0">
                   <Button type="submit">Save Changes</Button>
                 </CardFooter>

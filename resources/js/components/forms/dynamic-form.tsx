@@ -33,7 +33,6 @@ export function DynamicForm({ fields = [], onSubmit, submitText = "Submit", clas
   const sortedFields = Array.isArray(fields) ? [...fields].sort((a, b) => (a.order || 0) - (b.order || 0)) : [];
 
   if (!Array.isArray(fields) || fields.length === 0) {
-    console.warn("DynamicForm received invalid or empty fields:", fields);
     return null;
   }
 

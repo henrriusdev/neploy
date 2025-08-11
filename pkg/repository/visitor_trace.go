@@ -152,11 +152,14 @@ func (v *VisitorTrace) Create(ctx context.Context, visitorTrace model.VisitorTra
 }
 
 func (v *VisitorTrace) GetTraces(ctx context.Context) ([]model.VisitorStat, error) {
-	query := v.baseQuery().Select(
+	query := v.baseQuery()
+
+	query = query.Select(
 		goqu.COUNT(goqu.DISTINCT(goqu.C("id"))).As("amount"),
 		goqu.L("DATE(visit_timestamp)").As("date"),
+		goqu.C("application_id").As("application_id"),
 	).
-		GroupBy(goqu.L("DATE(visit_timestamp)")).
+		GroupBy(goqu.L("DATE(visit_timestamp)"), goqu.C("application_id")).
 		Order(goqu.L("DATE(visit_timestamp)").Asc()).
 		Limit(1000)
 

@@ -121,13 +121,11 @@ func (a *application) ensureContainerRunning(ctx context.Context, app model.Appl
 	defer globalSemaphore.Release(1)
 
 	containerName := getContainerName(app.AppName, version.VersionTag)
-	println("ensureContainerRunning", containerName)
 	status, err := a.docker.GetContainerStatus(ctx, containerName)
 	if err != nil {
 		logger.Error("error getting container status: %v", err)
 		return err
 	}
-	println("ensureContainerRunning", status)
 	if status == "Not created" {
 		dockerfilePath := filepath.Join(version.StorageLocation, "Dockerfile")
 		port, err := a.dockerService.ConfigurePort(dockerfilePath, false)
